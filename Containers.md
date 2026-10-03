@@ -27,21 +27,14 @@ Control: VMs give more control over the whole environment. Containers are static
 6. **USER (User IDs):** Maps UID/GID inside the container to different UIDs on the host (e.g., container root UID 0 maps to unprivileged host UID 10001).
 7. **CGROUP (Control Group):** Isolates cgroup root hierarchy visibility.
 
-### **3. What are Linux cgroups (Control Groups) and what is the difference between cgroups v1 and cgroups v2?**
-**Answer:** cgroups enforce resource allocation and limits (CPU, memory, disk I/O, PIDs) for process groups.
-- **cgroups v1:** Had separate, uncoordinated resource hierarchies for each controller (cpu, memory, blkio). Memory controller could not track buffered writeback I/O.
-- **cgroups v2 (Modern Standard):** Unified single-hierarchy architecture, unified page cache and memory pressure tracking, robust out-of-memory (OOM) handling, and rootless container resource delegation.
+### **3. What is the Open Container Initiative (OCI)?**
+**Answer:** The OCI is an open governance structure, run under the Linux Foundation, that creates open industry standards for container formats and runtimes.
 
-### **4. Explain the Container Runtime Hierarchy (High-Level vs Low-Level Runtimes).**
-**Answer:**
-- **High-Level Runtimes (CRI Runtimes):** Manage container lifecycle, pull images from registries, unpack filesystems, and configure networks (e.g., **containerd**, **CRI-O**).
-- **Low-Level Runtimes (OCI Runtimes):** Interact directly with the Linux kernel to create namespaces, set up cgroups, and spawn the container process (e.g., **runc**, **crun**, **youki**).
+The three specifications:
 
-### **5. What is the Open Container Initiative (OCI)?**
-**Answer:** An open governance project under the Linux Foundation that establishes standardized specifications:
-1. **Image Spec:** Defines the archive format, manifest JSON, and layer serialization for container images.
-2. **Runtime Spec:** Defines the configuration (`config.json`) and lifecycle operations (`create`, `start`, `kill`, `delete`) for running containers.
-3. **Distribution Spec:** Defines the standard HTTP API for pushing and pulling images from OCI registries.
+Runtime Specification (runtime-spec): describes how to run a "filesystem bundle" that has been unpacked on disk.
+Image Specification (image-spec): defines the format of a container image.
+Distribution Specification (distribution-spec): defines how images are distributed through registries.
 
 ### **6. What is `runc`?**
 **Answer:** The reference implementation of the OCI runtime specification. It is a lightweight CLI wrapper written in Go that configures Linux kernel namespaces and cgroups to execute a container process and then exits.
