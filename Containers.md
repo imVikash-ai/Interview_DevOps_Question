@@ -9,13 +9,10 @@ A Virtual Machine is a digital copy of a physical machine. It runs its own full 
 
 Key differences:
 
-Virtualization: Containers virtualize the OS. VMs virtualize the physical hardware.
-
-Size: Containers are lightweight, measured in MBs, because they package only what one application needs. VMs are heavy, measured in GBs, because each includes a full OS.
-
-Speed and scaling: Containers are quick to build, change and scale, and they suit microservices. VMs are slower to rebuild and costlier to scale.
-
-Control: VMs give more control over the whole environment. Containers are static and portable, so they move easily between on-premises and cloud.
+**Virtualization:**: Containers virtualize the OS. VMs virtualize the physical hardware.
+**Size:**: Containers are lightweight, measured in MBs, because they package only what one application needs. VMs are heavy, measured in GBs, because each includes a full OS.
+**Speed and scaling:**: Containers are quick to build, change and scale, and they suit microservices. VMs are slower to rebuild and costlier to scale.
+**Control:**: VMs give more control over the whole environment. Containers are static and portable, so they move easily between on-premises and cloud.
 
 ### **2. Explain the 7 Linux Namespaces that provide container isolation.**
 **Answer:**
