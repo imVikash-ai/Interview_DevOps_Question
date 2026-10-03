@@ -32,9 +32,9 @@ Control: VMs give more control over the whole environment. Containers are static
 
 The three specifications:
 
-Runtime Specification (runtime-spec): describes how to run a "filesystem bundle" that has been unpacked on disk.
-Image Specification (image-spec): defines the format of a container image.
-Distribution Specification (distribution-spec): defines how images are distributed through registries.
+- **Runtime Specification (runtime-spec):** describes how to run a "filesystem bundle" that has been unpacked on disk.
+- **Image Specification (image-spec):** defines the format of a container image.
+- **Distribution Specification (distribution-spec):** defines how images are distributed through registries.
 
 ### **6. What is `runc`?**
 **Answer:** The reference implementation of the OCI runtime specification. It is a lightweight CLI wrapper written in Go that configures Linux kernel namespaces and cgroups to execute a container process and then exits.
