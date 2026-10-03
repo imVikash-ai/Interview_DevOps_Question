@@ -1,13 +1,18 @@
 # **Containers & Kubernetes - DevOps Interview Questions (250 Questions)**
 
-Welcome to the **Containers & Kubernetes** master collection containing **250 comprehensive interview questions and detailed answers** covering Docker, containerd, CRI-O, Kubernetes Core & Control Plane Architecture, Advanced Networking (Gateway API, Cilium/eBPF), Autoscaling (Karpenter, KEDA), Helm, Pod Security Standards, and in-depth Production Troubleshooting.
-
 ---
 
-## 🟢 **Part 1: Docker, OCI & Container Runtimes (Questions 1–60)**
-
 ### **1. What is a Container and how does it fundamentally differ from a Virtual Machine?**
-**Answer:** A container is an isolated Linux process running on a shared host OS kernel, utilizing Linux Namespaces (for isolation) and cgroups (for resource limitation). A Virtual Machine runs a complete guest operating system on top of a hypervisor layer (Type 1 or Type 2), requiring dedicated virtual hardware, gigabytes of RAM, and minutes to boot. Containers share the host kernel, start in milliseconds, and consume minimal system resources.
+**Answer:** A container is a software package that bundles an application's code with its libraries and dependencies, so the same code runs consistently on any machine. It virtualizes the operating system, and a container engine (such as Docker) manages it.
+
+A Virtual Machine is a digital copy of a physical machine. It runs its own full guest OS on top of a host, with a hypervisor sharing the hardware between VMs.
+
+Key differences:
+
+Virtualization: Containers virtualize the OS. VMs virtualize the physical hardware.
+Size: Containers are lightweight, measured in MBs, because they package only what one application needs. VMs are heavy, measured in GBs, because each includes a full OS.
+Speed and scaling: Containers are quick to build, change and scale, and they suit microservices. VMs are slower to rebuild and costlier to scale.
+Control: VMs give more control over the whole environment. Containers are static and portable, so they move easily between on-premises and cloud.
 
 ### **2. Explain the 7 Linux Namespaces that provide container isolation.**
 **Answer:**
