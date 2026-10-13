@@ -77,7 +77,7 @@ Traditional container images include a full OS, often more than what is needed t
 ### **11. What is Rootless Docker / Rootless Podman?**
 **Answer:** **Rootless Docker** and **Rootless Podman** are containerization technologies that allow you to install, run, and manage containers without requiring root or administrator privileges on the host system. This represents a significant shift from traditional container setups, where the runtime engine must run with elevated `sudo` or `root permissions`.
 
-### **18. Why is running containers with `--privileged` dangerous?**
+### **12. Why is running containers with `--privileged` dangerous?**
 **Answer:** Running containers with the `--privileged` flag is dangerous because it effectively breaks container isolation and grants processes inside the container full root-level access to the underlying host system.
 
 **Key Security Risks:**
@@ -86,11 +86,10 @@ Traditional container images include a full OS, often more than what is needed t
 - **Direct Container Escape:** A compromised process can mount the host's root filesystem (such as `/dev/sda1` into `/host`), read sensitive files like `/etc/shadow`, overwrite SSH keys (`authorized_keys`), or spawn a `chroot` shell directly into the host operating system.
 - **Host Hardware & Device Access:** It exposes all host hardware devices under `/dev` and lifts device cgroup limitations.
 
-### **19. What is a Zombie Process (Defunct Process) in containers?**
-**Answer:** A child process that has completed execution but remains in the process table because its parent process did not read its exit status (`wait()` syscall). If PID 1 inside the container does not reap orphaned child processes, the PID table exhausts, crashing the host.
-
-### **20. What is `tini` / `dumb-init`?**
-**Answer:** Lightweight init systems designed to run as PID 1 inside containers to properly forward Unix signals (`SIGTERM`) to child processes and reap zombie processes.
+### **13. What is a Zombie Process (Defunct Process) in containers?**
+**Answer:** A zombie process (also known as a defunct process) is a child process that has completed its execution but still has an entry in the operating system's process table.
+- It is called a "zombie" because it is technically dead—it consumes no CPU or memory—but it remains in the system as a placeholder because its parent process has not yet executed the `wait()` or `waitpid()` system call to read its exit status.
+- While zombie processes occur on any Linux system, they are uniquely problematic inside containers (like Docker or Kubernetes) due to the architecture of containerized environments.
 
 ### **21. What is Docker BuildKit?**
 **Answer:** The modern container build engine in Docker providing concurrent multi-stage builds, remote cache export/import, secret mounting without committing secrets to layers (`RUN --mount=type=secret`), and SSH forwarding.
