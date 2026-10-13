@@ -33,29 +33,23 @@ The three specifications:
 - **Image Specification (image-spec):** defines the format of a container image.
 - **Distribution Specification (distribution-spec):** defines how images are distributed through registries.
 
-### **7. What is `containerd` and what is `containerd-shim`?**
+### **4. What is `containerd` and what is `containerd-shim`?**
 **Answer:** `containerd` is an industry-standard core container runtime managing image transfer, storage, and execution. The `containerd-shim` is a lightweight daemon that sits between containerd and `runc`. It stays alive to maintain open standard I/O (stdin/stdout/stderr) streams and exit codes without keeping the main containerd daemon attached, enabling daemon restarts with zero container downtime.
 
-### **8. What is CRI-O?**
-**Answer:** A lightweight, purpose-built Kubernetes Container Runtime Interface (CRI) runtime developed specifically for Kubernetes, running OCI-compliant containers directly without any Docker or third-party overhead.
-
-### **9. What are Sandboxed Container Runtimes (e.g., gVisor, Kata Containers)?**
-**Answer:**
-- **gVisor (`runsc`):** An application kernel written in Go that runs in userspace, intercepting and implementing Linux system calls to provide a strong security boundary between the container and host kernel.
-- **Kata Containers:** Runs each container inside its own lightweight hardware-isolated microVM (using QEMU or Cloud Hypervisor) with its own guest kernel.
-
-### **10. What is an Overlay Filesystem (Overlay2)?**
+### **5. What is an Overlay Filesystem (Overlay2)?**
 **Answer:** A union mount filesystem that combines multiple directory layers into a single unified view:
 - **LowerDir (Read-Only):** The immutable image layers.
 - **UpperDir (Read-Write):** The ephemeral container layer where modifications are made.
 - **WorkDir:** Internal scratch space used for atomic copy-up operations.
 - **MergedDir:** The unified filesystem presented to the container.
 
-### **11. What is Copy-on-Write (CoW) in Docker?**
-**Answer:** A strategy where files in underlying read-only image layers are shared across all containers. When a container attempts to modify a file, the storage driver copies the file from the lower layer up to the upper read-write layer before modifying it, saving storage and memory.
+### **6. What is Copy-on-Write (CoW) in Docker?**
+**Answer:** Copy-on-write is a strategy of sharing and copying files for maximum efficiency. If a file or directory exists in a lower layer within the image, and another layer (including the writable layer) needs read access to it, it just uses the existing file. The first time another layer needs to modify the file (when building the image or running the container), the file is copied into that layer and modified. This minimizes I/O and the size of each of the subsequent layers. These advantages are explained in more depth below.
 
-### **12. What is a Multi-Stage Dockerfile and why is it mandatory for production?**
-**Answer:** A Dockerfile containing multiple `FROM` instructions. The first stage contains heavy compilers, SDKs, and build tools; subsequent stages copy *only* the compiled binary into a minimal runtime base image (e.g., Distroless or Alpine), reducing image size from 1GB to $< 30\text{MB}$ and eliminating build-time security vulnerabilities.
+### **7. What is a Multi-Stage Dockerfile and why is it mandatory for production?**
+**Answer:** A Multi-Stage Dockerfile is a optimization pattern that uses multiple `FROM` instructions within a single Dockerfile. Each `FROM` statement initiates a fresh, isolated build stage. This allows you to use a heavy base image with all your compilers, package managers, and development dependencies in an early stage (the "builder" phase), and then selectively copy only the final compiled artifacts into a lightweight, minimal runtime image (the "production" phase), completely leaving behind the build-time bloat.
+
+
 
 ### **13. What are Distroless Images (Google)?**
 **Answer:** Container base images containing *only* the application binary and its direct runtime dependencies. They contain **zero package managers, zero shells (`/bin/sh`, `/bin/bash`), and zero OS utilities**, drastically reducing attack surfaces and CVE counts.
