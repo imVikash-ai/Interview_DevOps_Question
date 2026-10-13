@@ -106,7 +106,8 @@ Traditional container images include a full OS, often more than what is needed t
 **Answer:** **Multi-architecture building** with `docker buildx` is an advanced Docker feature that allows you to create a single container image that can run on multiple processor architectures (such as x86_64, ARM64, and ARMv7) without modifying your source code.
 
 ### **23. What is an OCI Image Manifest and Manifest List?**
-**Answer:** /n **OCI Image Manifest:**
+**Answer:** 
+  **OCI Image Manifest:**
 - **Definition:** A single metadata file (`application/vnd.oci.image.manifest.v1+json`) that describes one specific container image.
 - **Content:**
   - A reference to a config blob (which contains environment variables, entrypoints, and build history).
