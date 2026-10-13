@@ -87,12 +87,20 @@ Traditional container images include a full OS, often more than what is needed t
 - **Host Hardware & Device Access:** It exposes all host hardware devices under `/dev` and lifts device cgroup limitations.
 
 ### **13. What is a Zombie Process (Defunct Process) in containers?**
-**Answer:** A zombie process (also known as a defunct process) is a child process that has completed its execution but still has an entry in the operating system's process table.
+**Answer:** 
+- A **zombie process** (also known as a **defunct process**) is a child process that has completed its execution but still has an entry in the operating system's process table.
 - It is called a "zombie" because it is technically dead—it consumes no CPU or memory—but it remains in the system as a placeholder because its parent process has not yet executed the `wait()` or `waitpid()` system call to read its exit status.
-- While zombie processes occur on any Linux system, they are uniquely problematic inside containers (like Docker or Kubernetes) due to the architecture of containerized environments.
+- While zombie processes occur on any Linux system, they are uniquely problematic inside **containers** (like Docker or Kubernetes) due to the architecture of containerized environments.
 
-### **21. What is Docker BuildKit?**
-**Answer:** The modern container build engine in Docker providing concurrent multi-stage builds, remote cache export/import, secret mounting without committing secrets to layers (`RUN --mount=type=secret`), and SSH forwarding.
+### **14. What is Docker BuildKit?**
+**Answer:** **BuildKit** is the builder backend used by Docker. BuildKit provides improved functionality and improves your builds' performance over the legacy builder used in earlier versions of Docker. It also introduces support for handling more complex scenarios:
+- Detect and skip executing unused build stages
+- Parallelize building independent build stages
+- Incrementally transfer only the changed files in your build context between builds
+- Detect and skip transferring unused files in your build context
+- Use Dockerfile frontend implementations with many additional features
+- Avoid side effects with rest of the API (intermediate images and containers)
+- Prioritize your build cache for automatic pruning
 
 ### **22. What is Multi-Architecture Building (`docker buildx`)?**
 **Answer:** Using QEMU emulation and binfmt_misc to compile and package container images for multiple CPU architectures (`linux/amd64`, `linux/arm64`, `linux/riscv64`) into a single multi-arch manifest list.
