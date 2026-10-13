@@ -49,10 +49,19 @@ The three specifications:
 ### **7. What is a Multi-Stage Dockerfile and why is it mandatory for production?**
 **Answer:** A Multi-Stage Dockerfile is a optimization pattern that uses multiple `FROM` instructions within a single Dockerfile. Each `FROM` statement initiates a fresh, isolated build stage. This allows you to use a heavy base image with all your compilers, package managers, and development dependencies in an early stage (the "builder" phase), and then selectively copy only the final compiled artifacts into a lightweight, minimal runtime image (the "production" phase), completely leaving behind the build-time bloat.
 
-
-
-### **13. What are Distroless Images (Google)?**
+### **8. What are Distroless Images (Google)?**
 **Answer:** Container base images containing *only* the application binary and its direct runtime dependencies. They contain **zero package managers, zero shells (`/bin/sh`, `/bin/bash`), and zero OS utilities**, drastically reducing attack surfaces and CVE counts.
+Traditional container images include a full OS, often more than what is needed to run an application. In contrast, minimal or distroless images include only:
+
+- The application binary
+- Its runtime dependencies (e.g., libc, Java, Python)
+- Any explicitly required configuration or metadata
+
+**They typically exclude:**
+- OS tools (e.g., `ls`, `ps`, `cat`)
+- Shells (e.g., `sh`, `bash`)
+- Package managers (e.g., `apt`, `apk`)
+- Debugging utilities (e.g., `curl`, `wget`, `strace`)
 
 ### **14. What is the difference between `CMD` and `ENTRYPOINT` in a Dockerfile?**
 **Answer:**
