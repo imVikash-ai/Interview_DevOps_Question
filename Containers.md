@@ -1,4 +1,4 @@
-# **Containers & Kubernetes - DevOps Interview Questions (250 Questions)**
+# **Containers & Kubernetes - DevOps Interview Questions**
 
 ---
 
@@ -32,9 +32,6 @@ The three specifications:
 - **Runtime Specification (runtime-spec):** describes how to run a "filesystem bundle" that has been unpacked on disk.
 - **Image Specification (image-spec):** defines the format of a container image.
 - **Distribution Specification (distribution-spec):** defines how images are distributed through registries.
-
-### **6. What is `runc`?**
-**Answer:** The reference implementation of the OCI runtime specification. It is a lightweight CLI wrapper written in Go that configures Linux kernel namespaces and cgroups to execute a container process and then exits.
 
 ### **7. What is `containerd` and what is `containerd-shim`?**
 **Answer:** `containerd` is an industry-standard core container runtime managing image transfer, storage, and execution. The `containerd-shim` is a lightweight daemon that sits between containerd and `runc`. It stays alive to maintain open standard I/O (stdin/stdout/stderr) streams and exit codes without keeping the main containerd daemon attached, enabling daemon restarts with zero container downtime.
