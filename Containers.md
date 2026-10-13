@@ -63,15 +63,16 @@ Traditional container images include a full OS, often more than what is needed t
 - Package managers (e.g., `apt`, `apk`)
 - Debugging utilities (e.g., `curl`, `wget`, `strace`)
 
-### **14. What is the difference between `CMD` and `ENTRYPOINT` in a Dockerfile?**
+### **9. What is the difference between `CMD` and `ENTRYPOINT` in a Dockerfile?**
 **Answer:**
-- **`ENTRYPOINT`:** Defines the core executable binary that will always run when the container starts.
-- **`CMD`:** Provides default arguments passed to the `ENTRYPOINT`. `CMD` can be easily overridden via CLI arguments (`docker run image arg1`), whereas `ENTRYPOINT` requires `--entrypoint`.
+- **`ENTRYPOINT`:** `ENTRYPOINT` sets a fixed executable that always runs and cannot be easily overridden. Any arguments passed via `docker run` are appended to it as parameters.
+- **`CMD`:** `CMD` sets a default command or parameters that can be completely replaced if you pass any arguments at the end of the `docker run` command.
 
 ### **15. Explain `CMD ["node", "server.js"]` (Exec Form) vs `CMD node server.js` (Shell Form).**
 **Answer:**
-- **Exec Form (JSON Array):** Spawns the binary directly as **PID 1**. Receives Unix signals (`SIGTERM`, `SIGINT`) properly for graceful shutdown.
-- **Shell Form:** Wraps the command in `/bin/sh -c`. The shell becomes PID 1 and typically swallows `SIGTERM`, preventing the application from draining connections and causing abrupt kills (`SIGKILL`).
+- **Exec Form (JSON Array):** Exec form, `CMD ["node", "server.js"]`, runs Node.js directly without an intermediate shell, giving more predictable argument handling and more direct signal delivery.
+- **Shell Form:** Shell form, `CMD node server.js`, runs through a shell, which supports shell features such as variable expansion and command chaining but can complicate signal handling.
+- For most production application containers, I prefer exec form so the application can receive termination signals directly and shut down gracefully.
 
 ### **16. What is Rootless Docker / Rootless Podman?**
 **Answer:** Running the container daemon and container processes inside an unprivileged user namespace without host `root` privileges. If a container breakout exploit occurs, the attacker gains only unprivileged user permissions on the host OS.
