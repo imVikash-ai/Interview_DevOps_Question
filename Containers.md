@@ -102,12 +102,17 @@ Traditional container images include a full OS, often more than what is needed t
 - Avoid side effects with rest of the API (intermediate images and containers)
 - Prioritize your build cache for automatic pruning
 
-### **22. What is Multi-Architecture Building (`docker buildx`)?**
-**Answer:** Using QEMU emulation and binfmt_misc to compile and package container images for multiple CPU architectures (`linux/amd64`, `linux/arm64`, `linux/riscv64`) into a single multi-arch manifest list.
+### **15. What is Multi-Architecture Building (`docker buildx`)?**
+**Answer:** **Multi-architecture building** with `docker buildx` is an advanced Docker feature that allows you to create a single container image that can run on multiple processor architectures (such as x86_64, ARM64, and ARMv7) without modifying your source code.
 
 ### **23. What is an OCI Image Manifest and Manifest List?**
 **Answer:**
-- **Manifest:** A JSON document specifying the config hash, media types, and layer digests that compose an image.
+- **OCI Image Manifest:**
+- **Definition:** A single metadata file (`application/vnd.oci.image.manifest.v1+json`) that describes one specific container image.
+- **Content:**
+- - A reference to a config blob (which contains environment variables, entrypoints, and build history).
+- - An ordered list of filesystem layers (stored as compressed tarball blobs) that build the container's root filesystem.
+- **Key Goal:** Enables content-addressable storage by hashing the image components with SHA-256 to generate a unique digital fingerprint (digest).
 - **Manifest List (Index):** A higher-level JSON document mapping different CPU architectures/OS combinations to their specific image manifests under a single unified tag.
 
 ### **24. Compare Docker Bridge vs Host vs None Network Modes.**
