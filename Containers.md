@@ -107,11 +107,11 @@ Traditional container images include a full OS, often more than what is needed t
 
 ### **23. What is an OCI Image Manifest and Manifest List?**
 **Answer:**
-- **OCI Image Manifest:**
+**OCI Image Manifest:**
 - **Definition:** A single metadata file (`application/vnd.oci.image.manifest.v1+json`) that describes one specific container image.
 - **Content:**
-- - A reference to a config blob (which contains environment variables, entrypoints, and build history).
-- - An ordered list of filesystem layers (stored as compressed tarball blobs) that build the container's root filesystem.
+  - A reference to a config blob (which contains environment variables, entrypoints, and build history).
+  - An ordered list of filesystem layers (stored as compressed tarball blobs) that build the container's root filesystem.
 - **Key Goal:** Enables content-addressable storage by hashing the image components with SHA-256 to generate a unique digital fingerprint (digest).
 - **Manifest List (Index):** A higher-level JSON document mapping different CPU architectures/OS combinations to their specific image manifests under a single unified tag.
 
