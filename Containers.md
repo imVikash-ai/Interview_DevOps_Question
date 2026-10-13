@@ -107,7 +107,8 @@ Traditional container images include a full OS, often more than what is needed t
 
 ### **23. What is an OCI Image Manifest and Manifest List?**
 **Answer:** 
-  **OCI Image Manifest:**
+
+**OCI Image Manifest:**
 - **Definition:** A single metadata file (`application/vnd.oci.image.manifest.v1+json`) that describes one specific container image.
 - **Content:**
   - A reference to a config blob (which contains environment variables, entrypoints, and build history).
