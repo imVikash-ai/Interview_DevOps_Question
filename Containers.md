@@ -68,20 +68,23 @@ Traditional container images include a full OS, often more than what is needed t
 - **`ENTRYPOINT`:** `ENTRYPOINT` sets a fixed executable that always runs and cannot be easily overridden. Any arguments passed via `docker run` are appended to it as parameters.
 - **`CMD`:** `CMD` sets a default command or parameters that can be completely replaced if you pass any arguments at the end of the `docker run` command.
 
-### **15. Explain `CMD ["node", "server.js"]` (Exec Form) vs `CMD node server.js` (Shell Form).**
+### **10. Explain `CMD ["node", "server.js"]` (Exec Form) vs `CMD node server.js` (Shell Form).**
 **Answer:**
 - **Exec Form (JSON Array):** Exec form, `CMD ["node", "server.js"]`, runs Node.js directly without an intermediate shell, giving more predictable argument handling and more direct signal delivery.
 - **Shell Form:** Shell form, `CMD node server.js`, runs through a shell, which supports shell features such as variable expansion and command chaining but can complicate signal handling.
 - For most production application containers, I prefer exec form so the application can receive termination signals directly and shut down gracefully.
 
-### **16. What is Rootless Docker / Rootless Podman?**
-**Answer:** Running the container daemon and container processes inside an unprivileged user namespace without host `root` privileges. If a container breakout exploit occurs, the attacker gains only unprivileged user permissions on the host OS.
-
-### **17. What are Docker Capabilities (`CAP_SYS_ADMIN`, `CAP_NET_ADMIN`)?**
-**Answer:** Fine-grained privileges breaking down the monolithic power of Linux root. By default, Docker drops dangerous capabilities; DevOps engineers should drop all capabilities (`--cap-drop=ALL`) and explicitly add only what is strictly required (`--cap-add=NET_BIND_SERVICE`).
+### **11. What is Rootless Docker / Rootless Podman?**
+**Answer:** **Rootless Docker** and **Rootless Podman** are containerization technologies that allow you to install, run, and manage containers without requiring root or administrator privileges on the host system. This represents a significant shift from traditional container setups, where the runtime engine must run with elevated `sudo` or `root permissions`.
 
 ### **18. Why is running containers with `--privileged` dangerous?**
-**Answer:** `--privileged` grants the container access to all host devices, disables AppArmor/SELinux security profiles, and gives the container full host root capabilities, making container escapes trivial.
+**Answer:** Running containers with the `--privileged` flag is dangerous because it effectively breaks container isolation and grants processes inside the container full root-level access to the underlying host system.
+
+**Key Security Risks:**
+- **Full Linux Capabilities:** It grants the container all default Linux capabilities, including `SYS_ADMIN`, allowing deep kernel-level manipulations and administrative control.
+- **Disabling Security Profiles:** It disables or bypasses important security mechanisms like AppArmor, SELinux confinement, and custom seccomp system call filters.
+- **Direct Container Escape:** A compromised process can mount the host's root filesystem (such as `/dev/sda1` into `/host`), read sensitive files like `/etc/shadow`, overwrite SSH keys (`authorized_keys`), or spawn a `chroot` shell directly into the host operating system.
+- **Host Hardware & Device Access:** It exposes all host hardware devices under `/dev` and lifts device cgroup limitations.
 
 ### **19. What is a Zombie Process (Defunct Process) in containers?**
 **Answer:** A child process that has completed execution but remains in the process table because its parent process did not read its exit status (`wait()` syscall). If PID 1 inside the container does not reap orphaned child processes, the PID table exhausts, crashing the host.
