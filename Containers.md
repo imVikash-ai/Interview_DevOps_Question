@@ -440,18 +440,29 @@ Key Features of CronJobs:
 - **Scoping:** Kubernetes objects such as pods, services, deployments, and replica sets are scoped to a Namespace. This means that objects within a Namespace are uniquely identified by their names, allowing for better organization and management.
 - **Environment Segregation:** Namespaces can be used to segregate environments such as development, staging, and production within the same Kubernetes cluster. This helps in maintaining consistency and isolation between different stages of the application lifecycle.
 
-### **75. What is a ConfigMap vs a Secret?**
+### **46. What is a ConfigMap vs a Secret?**
 **Answer:**
 - **ConfigMap:** Stores non-confidential configuration data in key-value pairs mounted as environment variables or volume files.
 - **Secret:** Stores sensitive data (passwords, tokens, keys) encoded in base64. Stored encrypted at rest in `etcd` when KMS encryption is enabled.
 
-### **76. What is a PersistentVolume (PV) vs PersistentVolumeClaim (PVC)?**
-**Answer:**
-- **PV:** A storage resource provisioned in the cluster (e.g., AWS EBS volume) by an administrator or StorageClass.
-- **PVC:** A request for storage by a user specifying size and access modes (`ReadWriteOnce`, `ReadOnlyMany`, `ReadWriteMany`).
+**Key Differences at a Glance**
 
-### **77. What is Dynamic Volume Provisioning (StorageClass)?**
-**Answer:** A mechanism where Kubernetes automatically provisions underlying cloud storage volumes (e.g., creates an AWS gp3 volume via CSI) on-demand when a developer creates a PVC referencing a `StorageClass`.
+| **Feature**               | **ConfigMap**                                                | **Secret**                                                                                                     |
+| ------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| **Data Type**             | Non-sensitive data (e.g., port numbers, feature flags, URLs) | Sensitive data (e.g., passwords, API keys, private keys, TLS certs)                                            |
+| **Storage Format**        | Stored in plain text                                         | Stored with Base64 encoding (not true encryption on its own, though encryption at rest can be enabled in etcd) |
+| **Access Control (RBAC)** | Can be broadly shared via standard role permissions          | Restricted by default; treated with higher sensitivity in RBAC rules to prevent privilege escalation           |
+| **Size Limit**            | Maximum of 1 MiB                                             | Maximum of 1 MiB                                                                                               |
+| **Injection Methods**     | Environment variables or mounted volume files                | Environment variables or mounted volume files                                                                  |
+
+### **47. What is a PersistentVolume (PV) vs PersistentVolumeClaim (PVC)?**
+**Answer:**
+- **Persistent Volumes:** In Kubernetes, **Persistent Volumes (PVs)** are storage resources provisioned by administrators to provide persistent storage for applications running in pods. These volumes exist independently of the pod lifecycle and can be dynamically provisioned or statically defined.
+- **Persistent Volume Claims:** **Persistent Volume Claims (PVCs)**, on the other hand, are requests made by applications for storage resources. PVCs abstract away the details of the underlying storage implementation, allowing developers to request storage based on their requirements without needing to know the specifics of how it’s provisioned.
+
+
+### **48. What is Dynamic Volume Provisioning (StorageClass)?**
+**Answer:** Dynamic volume provisioning in Kubernetes enables on-the-fly creation of storage volumes without manual intervention. When a Pod requests storage, Kubernetes provisions a volume dynamically using the underlying storage infrastructure, such as AWS EBS, GCP Persistent Disk, or local storage.
 
 ### **78. Explain Kubernetes Storage Access Modes.**
 **Answer:**
