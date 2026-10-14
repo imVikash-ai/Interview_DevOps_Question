@@ -116,12 +116,12 @@ Traditional container images include a full OS, often more than what is needed t
 - **Key Goal:** Enables content-addressable storage by hashing the image components with SHA-256 to generate a unique digital fingerprint (digest).
 
 
-**OCI Image Manifest List (Image Index)** A higher-level JSON document mapping different CPU architectures/OS combinations to their specific image manifests under a single unified tag.
+**OCI Image Manifest List (Image Index)** 
 - **Definition:** A higher-level index file (`application/vnd.oci.image.index.v1+json` or similar) that points to a collection of individual image manifests.
 - **Content:** A list of references to different image manifests, each tagged with specific platform criteria like os (e.g., Linux, Windows) and `architecture` (e.g., `amd64`, `arm64`).
 - **Key Goal:** Enables multi-architecture support. When a user runs `docker pull` or `podman pull` on a multi-arch tag, the container runtime inspects the manifest list, matches the host machine's OS and CPU architecture, and downloads the correct underlying image manifest and layers.
 
-### **24. Compare Docker Bridge vs Host vs None Network Modes.**
+### **17. Compare Docker Bridge vs Host vs None Network Modes.**
 **Answer:**
 - **Bridge (Default):** Creates a private virtual Ethernet bridge (`docker0`) on the host; containers get private IPs and communicate via NAT/port forwarding.
 - **Host:** Container shares the host network namespace directly with zero network isolation (no port mapping needed, maximum throughput).
