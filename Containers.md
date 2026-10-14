@@ -530,16 +530,26 @@ A role on its own grants no access. A **binding** maps the role's permissions to
 - **Behavior:** It lifts all namespace boundaries. It grants permissions across **all namespaces** in the cluster, as well as to any cluster-scoped resources defined in the role.
 - **Flexibility:** A `ClusterRoleBinding` **can only reference a `ClusterRole`**. It cannot reference a standard `Role`. 
 
-### **81. What is an Admission Controller?**
-**Answer:** Plugins that intercept API Server requests after authentication and authorization, but *before* the object is persisted to `etcd`.
-- **Mutating Admission Controllers:** Modify objects (e.g., injecting sidecars).
-- **Validating Admission Controllers:** Enforce security policies and accept or reject objects (e.g., Kyverno, OPA).
-
-### **82. Explain the difference between Liveness, Readiness, and Startup Probes.**
+### **51. Explain the difference between Liveness, Readiness, and Startup Probes.**
 **Answer:**
-- **Startup Probe:** Validates if legacy slow-booting applications have started. Disables liveness and readiness checks until it passes.
-- **Liveness Probe:** Checks if the application process is running and healthy. If it fails, `kubelet` restarts the container.
-- **Readiness Probe:** Checks if the container is ready to accept incoming network traffic. If it fails, the Pod's IP is removed from Service endpoints.
+**1. Startup Probe**
+
+- **Purpose:** Checks if the application inside the container has successfully started up. 
+- **Behavior:** When configured, it disables **Liveness** and **Readiness** probes until it passes. This gives slow applications ample time to load heavy configurations, warm up caches, or run database migrations without being killed prematurely.
+- **Failure Handling:** If it fails to pass within its designated timeframe, the `kubelet` kills the container and triggers its restart policy. Once it succeeds **once**, it shuts off for the lifespan of the container, and the other probes take over. 
+
+**2. Liveness Probe**
+
+- **Purpose:** Determines if the container is currently alive and functioning. 
+- **Behavior:** It runs periodically throughout the entire lifecycle of the container. It is designed to catch scenarios where the application is technically "running" (the process hasn't crashed) but is completely unresponsive or deadlocked.
+- **Failure Handling:** If it fails, Kubernetes assumes the application is unrecoverable, **destroys the container, and spins up a new one**. 
+- *Best Practice Note:* Never point a liveness probe to external dependencies (like an external database). If the database goes down, your liveness probe will fail, causing Kubernetes to restart an otherwise healthy container unnecessarily, which can trigger a cascading cluster failure. 
+
+**3. Readiness Probe**
+
+- **Purpose:** Determines if the container is ready to accept user requests and traffic. 
+- **Behavior:** Like the liveness probe, it runs continuously. However, an application might be alive (passing its liveness check) but temporarily unable to serve traffic—such as when it is experiencing an intense volume of background tasks, or losing connection to a mandatory backend database. 
+- **Failure Handling:** **It does not restart the container**. Instead, Kubernetes simply strips the Pod from the load balancer / Service endpoints. Traffic will bypass this Pod until the readiness probe passes again. 
 
 ### **83. What are Init Containers?**
 **Answer:** Specialized containers that run and complete sequentially *before* primary application containers start. Used for blocking tasks (waiting for database availability, running migrations).
