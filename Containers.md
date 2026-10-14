@@ -132,7 +132,7 @@ Both **Docker Swarm** and **Kubernetes (K8s)** are **open-source container orche
 
 **The core distinction:** Docker Swarm focuses on simplicity and ease of use, making it suitable for smaller setups, while Kubernetes focuses on extensibility and control, making it a popular choice for large, complex enterprise environments.
 
-** At-a-Glance Comparison**
+### At-a-Glance Comparison
 
 | Feature | Docker Swarm | Kubernetes (K8s) |
 |---|---|---|
@@ -157,14 +157,21 @@ Both **Docker Swarm** and **Kubernetes (K8s)** are **open-source container orche
 - **Best for:** Large-scale distributed applications, multi-tenant environments, and organizations requiring high automation, custom routing rules, or rigid compliance.
 - **The Catch:** It comes with high operational overhead. Managing bare Kubernetes requires dedicated platform engineering resources, though cloud-managed services (like AWS EKS or Google GKE) help offset the infrastructure headache.
 
-### **26. What is a Container Healthcheck (`HEALTHCHECK`)?**
-**Answer:** An instruction in a Dockerfile defining a command (e.g., `curl -f http://localhost:8080/healthz || exit 1`) run periodically by the container engine to determine if the internal application process is healthy.
+### **19. What is a Container Healthcheck (`HEALTHCHECK`)?**
+**Answer:** A **Container Healthcheck (HEALTHCHECK)** is a configuration instruction used in containerization (most notably in **Docker**) to tell the container runtime how to test whether the container is still working correctly.
 
 ### **27. What is Docker Volume vs Bind Mount vs tmpfs?**
 **Answer:**
-- **Volume:** Managed by Docker on the host storage (`/var/lib/docker/volumes/`), isolated from the host filesystem.
-- **Bind Mount:** Mounts any arbitrary file or directory from the host OS into the container.
-- **tmpfs Mount:** Mounts temporary storage directly in host memory (RAM), never written to disk.
+**Direct Comparison**
+
+| **Feature**              | **Docker Volume**                                                            | **Bind Mount**                                                               | **tmpfs Mount**                                                          |
+| ------------------------ | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| **Storage Location**     | **Host filesystem** (Docker-managed area, e.g., `/var/lib/docker/volumes/`)  | **Anywhere on the host** filesystem                                          | **Host memory (RAM)** only; never written to disk                        |
+| **Lifecycle Management** | **Managed by Docker**. Persists after container deletion.                    | **Managed by the user**. You manage paths, permissions, and cleanup.         | **Tied to the container**. Automatically wiped when the container stops. |
+| **Portability**          | **High**. Independent of the host OS file structure.                         | **Low**. Relies on specific host paths, which can break across OS platforms. | **Medium** (Exclusive to Linux hosts).                                   |
+| **Performance**          | **Excellent** (native speed on Linux; highly optimized).                     | Can suffer from **I/O overhead** on macOS/Windows due to VM layers.          | **Fastest** read/write speeds because it operates in RAM.                |
+| **Best Used For**        | Databases, production data persistence, and sharing data between containers. | Local development (live code reloads) and sharing host configurations.       | Sensitive credentials, API keys, or high-speed cache/session state.      |
+
 
 ### **28. What is Docker Compose?**
 **Answer:** A tool for defining and running multi-container Docker applications using a declarative YAML configuration file (`docker-compose.yml`).
