@@ -292,13 +292,13 @@ When you run any Docker command (like `docker run` or `docker ps`), the **Docker
 ### **35. What are the core components of the Kubernetes Master / Control Plane?**
 **Answer:**
 **Kube-api-server → (For all communications)**
-- This api-server interacts directly with the user (i.e we apply .yml or .json manifest to kube-api-server)
-- This kube-api-server is meant to scale automatically as per load.
-- Kube-api-server is the front end of the control plane.
+- This api-server interacts directly with the user (i.e we apply `.yml` or `.json` manifest to kube-api-server)
+- This `kube-api-server` is meant to scale automatically as per load.
+- `Kube-api-server` is the front end of the control plane.
 
 **etcd**
 - Stores metadata and status of the cluster.
-- etcd is a consistent and high-available store (key-value-store)
+- `etcd` is a consistent and high-available store (key-value-store)
 - Source of touch for cluster state (info about the state of the cluster)
 
 **etcd has the following features**
@@ -316,15 +316,31 @@ When you run any Docker command (like `docker run` or `docker ps`), the **Docker
 **Controller-Manager**
 - Make sure the actual state of the cluster matches the desired state.
 - Two possible choices for controller manager
-- - If K8s is on the cloud, then it will be a cloud controller manager.
-- - If K8s is on non-cloud, then it will be kube-controller-manager.
+  - If K8s is on the cloud, then it will be a cloud controller manager.
+  - If K8s is on non-cloud, then it will be kube-controller-manager.
 
 
-### **62. What are the core components of a Kubernetes Worker Node?**
+### **36. What are the core components of a Kubernetes Worker Node?**
 **Answer:**
-1. **`kubelet`:** The node agent that communicates with the API server, watches PodSpecs assigned to the node, and commands the CRI runtime to start containers.
-2. **`kube-proxy`:** Manages network routing and iptables/IPVS packet filtering rules on each node to implement Kubernetes `Service` abstractions.
-3. **Container Runtime (CRI):** The runtime (containerd/CRI-O) executing container processes.
+1. **`kubelet`:** 
+- The agent running on the node.
+- Listens to Kubernetes master (eg- Pod creation request).
+- Use port 10255.
+- Send success/Fail reports to master.
+
+2. **`kube-proxy`:** 
+- Assign IP to each pod.
+- It is required to assign IP addresses to Pods (dynamic)
+- Kube-proxy runs on each node & this makes sure that each pod will
+get its unique IP Address.
+- These 3 components collectively consist of ‘node’.
+
+3. **Container Runtime (CRI):** 
+- Works with kubelet
+- Pulling images
+- Start/Stop Containers
+- Exposing containers on ports specified in the manifest.
+
 
 ### **63. Explain `etcd` internals and how it maintains data consistency.**
 **Answer:** `etcd` is an append-only distributed key-value store implementing the **Raft consensus algorithm**. It requires an odd number of nodes (3 or 5) to form a quorum ($\lfloor N/2 \rfloor + 1$). It writes updates to a Write-Ahead Log (WAL) before committing to memory, providing linearizable reads and strict serializability.
