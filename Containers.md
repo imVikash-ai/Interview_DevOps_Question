@@ -260,15 +260,30 @@ When you run `docker system prune`, it safely targets only **unreferenced or sto
 
 *Note: By default, it **will not** delete volumes to prevent accidental data loss.* 
 
-### **52. What is a Docker Plugin?**
+### **31. What is a Docker Plugin?**
 **Answer:** A **Docker Plugin** is an out-of-process extension that adds specialized capabilities to the Docker Engine. They allow developers and system administrators to integrate third-party technologies directly into core Docker operations without altering the underlying Docker source code.
 
-### **53. What is `iptables` in Docker?**
+### **32. What is `iptables` in Docker?**
 **Answer:** In **Docker**, `iptables` is a Linux kernel utility that the Docker Engine uses automatically to manage container networking, traffic routing, and security isolation.
 When you create networks, run containers, or publish ports, Docker dynamically writes `iptables` rules behind the scenes to make everything work transparently
 
-### **54. What is Docker daemon (`dockerd`)?**
-**Answer:** The persistent background process that manages Docker objects (images, containers, networks, volumes) and listens for Docker REST API requests.
+### **33. What is Docker daemon (`dockerd`)?**
+**Answer:** The **Docker daemon (`dockerd`)** is **the persistent background service that acts as the core engine of Docker**. It is responsible for building, running, and managing Docker objects like containers, images, networks, and storage volumes.
+
+**How it Works**
+
+Docker uses a client-server architecture. The Docker CLI (`docker`) acts as the client (frontend), while the Docker daemon (`dockerd`) acts as the server (backend).
+
+1. **The Request:** You type a command in your terminal, such as `docker run nginx`.
+2. **The API Call:** The Docker client translates your command into a **REST API call** and sends it to the Docker daemon over a local UNIX socket or a network connection.
+3. **Execution:** The daemon receives the request, pulls the required image from a registry (like **Docker Hub** if it isn't available locally), and coordinates with low-level runtimes (like `containerd` and `runc`) to execute the container.
+
+**Key Responsibilities of `dockerd`**
+
+- **Container Lifecycle:** Handles the creation, starting, stopping, monitoring, and deletion of containers.
+- **Image Management:** Manages local container blueprints and interacts with remote registries to pull or push images.
+- **Resource Allocation:** Sets up isolated file systems, environments, storage volumes, and network routing for individual containers.
+- **System Configuration:** Reads configurations from a centralized JSON file (`/etc/docker/daemon.json` on Linux) to customize runtimes, storage drivers, and log settings.
 
 ### **55. What is a Container Image Digest?**
 **Answer:** An immutable, content-addressable SHA256 cryptographic hash of the image manifest (e.g., `image@sha256:abcd...`), guaranteeing identical image bits regardless of mutable tag changes.
