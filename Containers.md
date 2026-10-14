@@ -430,14 +430,15 @@ Key Features of CronJobs:
 
   - A controller uses Ingress Rules to handle traffic to and from outside the cluster.
 
-### **73. What is Kubernetes Gateway API?**
-**Answer:** The modern successor to Ingress providing role-oriented resource separation:
-- `GatewayClass` (Cluster Operator defines infrastructure).
-- `Gateway` (Platform Engineer configures listeners, ports, TLS).
-- `HTTPRoute` / `GRPCRoute` (Developer defines routing paths and traffic splitting).
+### **45. Explain Kubernetes Namespaces and their isolation boundaries.**
+**Answer:** Namespaces in Kubernetes provide a way to logically divide cluster resources into virtual clusters. They offer a scope for Kubernetes objects, allowing multiple virtual clusters to coexist within the same physical cluster. This segregation helps in organizing and managing applications and resources efficiently.
 
-### **74. Explain Kubernetes Namespaces and their isolation boundaries.**
-**Answer:** Virtual clusters within a physical cluster providing logical scoping for object names, RBAC policies, and ResourceQuotas. Namespaces do **not** provide network isolation by default (requires NetworkPolicies).
+#### Purpose and Functionality:
+- **Isolation:** Namespaces enable teams to create isolated environments within a Kubernetes cluster. Each Namespace acts as a virtual cluster, providing a segregated space for deploying and managing resources.
+- **Resource Quotas:** By assigning resource quotas to Namespaces, administrators can control and limit the amount of CPU, memory, and other resources consumed by the workloads within that Namespace.
+- **Access Control:** Namespaces facilitate role-based access control (RBAC), allowing administrators to define fine-grained access policies for different teams or users. This ensures that each team has access only to the resources within their designated Namespace.
+- **Scoping:** Kubernetes objects such as pods, services, deployments, and replica sets are scoped to a Namespace. This means that objects within a Namespace are uniquely identified by their names, allowing for better organization and management.
+- **Environment Segregation:** Namespaces can be used to segregate environments such as development, staging, and production within the same Kubernetes cluster. This helps in maintaining consistency and isolation between different stages of the application lifecycle.
 
 ### **75. What is a ConfigMap vs a Secret?**
 **Answer:**
