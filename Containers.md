@@ -565,8 +565,33 @@ A role on its own grants no access. A **binding** maps the role's permissions to
 
 ### **88. What is Node Affinity and Anti-Affinity?**
 **Answer:**
-- **Node Affinity:** Constrains which nodes a Pod can schedule on based on node labels (`requiredDuringScheduling...` or `preferredDuringScheduling...`).
-- **Pod Anti-Affinity:** Prevents multiple replicas of the same service from scheduling on the same node or AZ to ensure high availability.
+Node affinity and anti-affinity are **advanced scheduling features in Kubernetes that control where Pods are placed across worker nodes based on labels**. They act as an expressive, powerful alternative to the basic `nodeSelector` field. 
+
+**Node Affinity (Attraction)**
+
+Node affinity **attracts** Pods to specific nodes or groups of nodes that carry matching labels (such as hardware types, SSD storage, or GPU availability). 
+
+It comes in two primary types:
+
+- **`requiredDuringSchedulingIgnoredDuringExecution` (Hard Rule):** The scheduler cannot place the Pod unless the node matches the rule. If no matching node is available, the Pod stays in a `Pending` state. 
+- **`preferredDuringSchedulingIgnoredDuringExecution` (Soft Rule):** The scheduler tries to find a node that matches the preference. If no match is found, it will still schedule the Pod on a non-matching node. You can assign weights (1–100) to prioritize certain preferences over others.
+
+Supported operators for matching label expressions include `In`, `NotIn`, `Exists`, `DoesNotExist`, `Gt`, and `Lt`.
+
+**Node Anti-Affinity (Repulsion)**
+
+Node anti-affinity **repels** Pods, instructing the scheduler to avoid placing Pods on nodes that possess specific labels. 
+
+- **Purpose:** It prevents workloads from crowding onto the same physical machines or fault domains, enforcing high availability, redundancy, and workload isolation. 
+- **Behavior:** Just like affinity, it supports both *required* (hard) and *preferred* (soft) enforcement modes. *(Note: In Kubernetes terminology, strict node-level separation is also commonly handled via **Pod Anti-Affinity** or **Taints and Tolerations**, which prevent specific Pods from sharing a node).*
+
+**Key Differences from `nodeSelector`**
+
+| **Feature**     | **`nodeSelector`**       | **Node Affinity / Anti-Affinity**                    |
+| --------------- | ------------------------ | ---------------------------------------------------- |
+| **Logic**       | Rigid `AND` logic only   | Expressive operators (`In`, `NotIn`, `Exists`, etc.) |
+| **Rules**       | Hard requirements only   | Both hard (`required`) and soft (`preferred`) rules  |
+| **Flexibility** | Basic key-value matching | Multiple terms combined with `OR`, weighted scoring  |
 
 ### **89. What are Taints and Tolerations?**
 **Answer:**
