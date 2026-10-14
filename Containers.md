@@ -341,21 +341,23 @@ get its unique IP Address.
 - Start/Stop Containers
 - Exposing containers on ports specified in the manifest.
 
+### **37. What is a Kubernetes Pod?**
+**Answer:** All containers in Kubernetes are contained within Pods. The simplest component of the Kubernetes architecture is a pod. You may think of them as your container's equivalent of a wrapper. Each pod receives a unique IP address that it can use to communicate with other pods in the cluster.
+Pods typically only contain one container, however, if several containers are required to share resources, they may do so. A Pod's multiple containers can connect with one another over localhost if there are multiple containers in it.
+Since Kubernetes pods are "mortal," they can be generated and deleted as needed by the application. For instance, the backend of a web application may experience a spike in CPU utilization. Eight new Pods would be formed if the cluster scaled up the number of backend Pods from two to ten as a result of this circumstance. The Pods may scale back to two after the traffic dies down, in which case eight pods would be destroyed.
 
-### **63. Explain `etcd` internals and how it maintains data consistency.**
-**Answer:** `etcd` is an append-only distributed key-value store implementing the **Raft consensus algorithm**. It requires an odd number of nodes (3 or 5) to form a quorum ($\lfloor N/2 \rfloor + 1$). It writes updates to a Write-Ahead Log (WAL) before committing to memory, providing linearizable reads and strict serializability.
 
-### **64. What is a Kubernetes Pod?**
-**Answer:** The smallest deployable computing unit in Kubernetes. A Pod encapsulates one or more co-located containers that share the exact same Network namespace (IP address and port space), IPC namespace, and shared storage volumes.
+### **38. What is the Pause Container (`infra` container)?**
+**Answer:** A **Pause Container** (also known as an **infra container** or **sandbox container**) is a tiny, hidden helper container that Kubernetes automatically starts first in every Pod.
+It does not run any application code. Instead, it acts as the parent sandbox that holds and manages shared Linux namespaces (such as Network, IPC, and optionally PID) for all other application containers inside the same Pod.
 
-### **65. What is the Pause Container (`infra` container)?**
-**Answer:** A minimal container running an infinite sleep loop spawned first in every Pod. It establishes and holds the shared Network, IPC, and UTS namespaces. Application containers join the pause container's namespaces (`--net=container:pause`), allowing containers in the pod to communicate over `localhost`.
-
-### **66. What is a Kubernetes Deployment vs ReplicaSet vs Pod?**
+### **39. What is a Kubernetes Deployment vs ReplicaSet vs Pod?**
 **Answer:**
-- **Pod:** The running instance of containers.
-- **ReplicaSet:** Ensures a specified number of identical Pod replicas are running at any given time.
-- **Deployment:** A higher-level controller managing declarative rolling updates, rollbacks, and version history for ReplicaSets.
+- **Pod:** A Pod represents a single instance of your application. It can contain one or more containers that work together, sharing the same network and storage. Most commonly, you’ll have one container per Pod.
+- **ReplicaSet:** A ReplicaSet solves the reliability problem by maintaining a specified number of Pod replicas at all times. If you want 3 instances of your web server running, a ReplicaSet will ensure exactly 3 Pods exist, creating new ones if any fail.
+- **Deployment:** Deployments sit above ReplicaSets and provide the features you need for production applications: rolling updates, rollbacks, and scaling. When you create a Deployment, it automatically creates and manages a ReplicaSet for you.
+
+**In practice, you’ll typically work with Deployments and let Kubernetes handle the underlying ReplicaSets and Pods automatically.**
 
 ### **67. What is a StatefulSet and how does it differ from a Deployment?**
 **Answer:** StatefulSet manages stateful applications requiring:
