@@ -189,30 +189,32 @@ It is common to confuse Dockerfiles with Docker Compose files, but they serve en
 | **Syntax**       | Imperative steps (`FROM`, `RUN`, `COPY`, `CMD`). | Declarative configuration (`services`, `ports`, `volumes`). |
 
 
-** How the Workflow Operates**
+**How the Workflow Operates**
 
 1. **Write the Configuration:** You create a `compose.yaml` file defining your services. You can either pull pre-built images from Docker Hub or tell Compose to build them locally from a `Dockerfile`. 
 2. **Launch the Stack:** Run `docker compose up -d`. Compose intelligently analyzes the file, pulls/builds the images, spins up the networks, maps host ports, and launches the containers in the correct order using dependency rules (like `depends_on`).
 3. **Iterate Effeciently:** If you change a configuration or update a codebase, running `docker compose up` again will only recreate the specific containers that were modified rather than rebuilding the entire stack from scratch.
 4. **Clean Up:** Run `docker compose down` to stop the containers and cleanly wipe the temporary networks, returning your host machine to its original state. 
 
-### **29. What is Kaniko?**
+### **22. What is Kaniko?**
 **Answer:** An open-source tool developed by Google that builds container images from a Dockerfile inside a Kubernetes pod or container without requiring a Docker daemon or privileged root access.
 
-### **30. What is Buildah vs Podman vs Skopeo?**
-**Answer:**
-- **Buildah:** Specializes in building OCI container images without a daemon.
-- **Podman:** A daemonless container engine for running and managing OCI containers, pods, and images.
-- **Skopeo:** A CLI utility for inspecting, copying, and signing container images directly between remote registries without downloading them locally.
-
-### **31. How do you pass secrets to Docker builds without exposing them in image history?**
+### **23. How do you pass secrets to Docker builds without exposing them in image history?**
 **Answer:** Use BuildKit secret mounts: `RUN --mount=type=secret,id=mysecret cat /run/secrets/mysecret`. Secrets are mounted into memory during build time and are never stored in any image layer.
 
-### **32. What is Image Layer Caching in Docker?**
-**Answer:** Docker caches the result of each Dockerfile instruction. If an instruction and its preceding steps are unchanged, Docker reuses the cached layer. Instructions that change frequently (e.g., `COPY . .`) must be placed at the bottom of the Dockerfile.
+### **24. What is Image Layer Caching in Docker?**
+**Answer:** **Docker Image Layer Caching** is a mechanism that speeds up Docker image build times by reusing unchanged image layers from previous builds instead of recreating them from scratch.
+When you run a build, Docker checks its cache for each instruction in your `Dockerfile`. If it finds a match, it achieves a cache hit and instantly skips that step. If it doesn't, it triggers a cache miss and rebuilds that layer and all subsequent layers.
 
 ### **33. What is `.dockerignore` and why is it critical?**
-**Answer:** A file that excludes files and directories (`node_modules`, `.git`, `.env`, build logs) from being sent to the Docker daemon as part of the build context, drastically speeding up builds and preventing secret leaks.
+**Answer:** A `.dockerignore` file is a plain-text configuration file placed in the root of a project's build context. It tells the Docker CLI which files and directories to exclude when packing up the project and sending it to the Docker daemon. It works similarly to a `.gitignore` file, though with distinct path-matching rules.
+
+### Why It Is Critical
+
+- **Speeds Up Build Times:** When you run `docker build`, the Docker CLI packs every file in your directory into a tar archive and sends it to the daemon as the build context. Excluding heavy, non-essential directories—like `node_modules` or local data dumps—prevents hundreds of megabytes of unnecessary data from transferring on every single build.
+- **Prevents Permanent Security Leaks:** Files copied into a Docker image leave permanent traces in the image's history layers. If you accidentally copy a `.env` file, database password, or private SSH key into a build—even if you delete it in a later `Dockerfile` step—anyone who downloads or inspects the image can recover those credentials.
+- **Avoids Unnecessary Rebuilds:** Noisy files that change constantly (such as `.git` history folders or local log files) can invalidate Docker's layer cache. Excluding them ensures Docker only rebuilds your image when actual application code changes.
+- **Reduces Image Size:** Keeping out test suites, markdown documentation, and local build artifacts keeps your final container footprint lean, which accelerates container pull times and deployments across servers.
 
 ### **34. What is Container Storage Interface (CSI)?**
 **Answer:** An industry-standard interface specification that allows third-party storage providers (AWS EBS, Ceph, NetApp) to write plugins for block and file storage systems in Kubernetes without modifying core Kubernetes code.
