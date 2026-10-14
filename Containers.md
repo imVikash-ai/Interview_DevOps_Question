@@ -464,12 +464,35 @@ Key Features of CronJobs:
 ### **48. What is Dynamic Volume Provisioning (StorageClass)?**
 **Answer:** Dynamic volume provisioning in Kubernetes enables on-the-fly creation of storage volumes without manual intervention. When a Pod requests storage, Kubernetes provisions a volume dynamically using the underlying storage infrastructure, such as AWS EBS, GCP Persistent Disk, or local storage.
 
-### **78. Explain Kubernetes Storage Access Modes.**
+### **49. Explain Kubernetes Storage Access Modes.**
 **Answer:**
-- **RWO (ReadWriteOnce):** Volume can be mounted as read-write by a single worker node.
-- **ROX (ReadOnlyMany):** Volume can be mounted as read-only by multiple worker nodes simultaneously.
-- **RWX (ReadWriteMany):** Volume can be mounted as read-write by many worker nodes concurrently (e.g., AWS EFS, NFS).
-- **RWOP (ReadWriteOncePod):** Volume can be mounted as read-write by a single Pod instance only.
+**Kubernetes Storage Access Modes** define the read and write patterns allowed when mounting a `PersistentVolume` (PV) through a `PersistentVolumeClaim` (PVC). They act as a contract between your workload and the underlying storage provider, determining how many nodes or pods can concurrently access a volume.
+
+Kubernetes supports **four main access modes**:
+
+**1. ReadWriteOnce (RWO)**
+
+- **Definition:** The volume can be mounted with read and write permissions, but by **only a single cluster node** at a time. 
+- **Behavior:** Multiple pods running on that *same* node can read from and write to the volume simultaneously. However, pods scheduled on different nodes cannot attach to it. 
+- **Typical Use Case:** Block storage systems (e.g., AWS EBS, Google Cloud Persistent Disk) and production databases or queues that require a single writer to avoid split-brain data corruption.
+
+**2. ReadWriteOncePod (RWOP)**
+
+- **Definition:** The volume can be mounted with read and write permissions by **exactly one pod cluster-wide**.
+- **Behavior:** Unlike RWO (which restricts at the node level), RWOP strictly enforces single-writer access at the pod level. Even if another pod is on the same node, it will be barred from attaching to this volume. 
+- **Typical Use Case:** High-safety stateful workloads where data protection demands an absolute single-writer layout, protecting against concurrent writes during overlapping pod reschedules or rolling updates.
+
+**3. ReadOnlyMany (ROX)**
+
+- **Definition:** The volume can be mounted as **read-only simultaneously by many nodes**. 
+- **Behavior:** Multiple pods across different nodes can read the data at the same time, but no workload can modify or write data back to the volume. 
+- **Typical Use Case:** Distributing static assets, configuration assets, machine learning models, or application binaries to scaling microservices.
+
+**4. ReadWriteMany (RWX)**
+
+- **Definition:** The volume can be mounted as **read-write concurrently by many nodes**.
+- **Behavior:** Pods on any node across the cluster can read and write to the exact same storage asset at the same time.
+- **Typical Use Case:** Shared file storage architectures, content management systems (like WordPress sharing a media library directory), or big data processing workflows. 
 
 ### **79. What is a Kubernetes ServiceAccount (SA)?**
 **Answer:** An identity assigned to Pods to authenticate against the Kubernetes API Server. Tokens are mounted automatically at `/var/run/secrets/kubernetes.io/serviceaccount/token`.
