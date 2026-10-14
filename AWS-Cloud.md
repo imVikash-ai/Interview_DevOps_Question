@@ -1,4 +1,4 @@
-# **Cloud Computing & Architecture - DevOps Interview Questions 
+## Cloud Computing & Architecture - DevOps Interview Questions 
 ---
 
 ### **1. What is Cloud Computing and what are the three primary service models (IaaS, PaaS, SaaS)?**
