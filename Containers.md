@@ -362,10 +362,17 @@ It does not run any application code. Instead, it acts as the parent sandbox tha
 **In practice, you’ll typically work with Deployments and let Kubernetes handle the underlying ReplicaSets and Pods automatically.**
 
 ### **67. What is a StatefulSet and how does it differ from a Deployment?**
-**Answer:** StatefulSet manages stateful applications requiring:
-1. Stable, unique network identifiers (`pod-0`, `pod-1`).
-2. Ordered, sequential deployment and rolling updates.
-3. Dedicated, persistent volume bindings via `volumeClaimTemplates` that persist across pod rescheduling.
+**Answer:** A **StatefulSet** is a Kubernetes workload API object used to manage stateful applications (such as databases or distributed message queues) that require persistent storage and unique, stable network identities.
+
+**Key Differences: StatefulSet vs. Deployment**
+
+| **Feature**                   | **Deployment**                                          | **StatefulSet**                                                                                      |
+| ----------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Primary Use Case**          | Stateless applications (e.g., web servers, REST APIs)   | Stateful applications (e.g., MySQL, Kafka, Redis)                                                    |
+| **Pod Identity**              | Anonymous and interchangeable (random hash suffixes)    | Unique, sticky, and predictable (ordinal indexes like `web-0`, `web-1`)                              |
+| **Network Identity**          | Shares a common service endpoint; no unique per-pod DNS | Uses Headless Services to give each pod a unique DNS hostname (`$(pod-name).$(service-name)`)        |
+| **Storage**                   | Typically ephemeral or shared across pods               | Dedicated **PersistentVolumeClaim (PVC)** mapped individually to each pod via `volumeClaimTemplates` |
+| **Scaling & Lifecycle Order** | Created, scaled, and deleted in parallel (any order)    | Created, scaled, and deleted strictly **sequentially** in order of their ordinal index               |
 
 ### **68. What is a DaemonSet?**
 **Answer:** Ensures that all (or selected) worker nodes run exactly one copy of a specific Pod. Used for node-level agents (Cilium CNI, Fluent Bit log shippers, Prometheus `node_exporter`).
