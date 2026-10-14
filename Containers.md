@@ -593,25 +593,44 @@ Node anti-affinity **repels** Pods, instructing the scheduler to avoid placing P
 | **Rules**       | Hard requirements only   | Both hard (`required`) and soft (`preferred`) rules  |
 | **Flexibility** | Basic key-value matching | Multiple terms combined with `OR`, weighted scoring  |
 
-### **89. What are Taints and Tolerations?**
-**Answer:**
-- **Taint:** Applied to a **Node** to repel Pods (`key=value:NoSchedule`, `NoExecute`).
-- **Toleration:** Applied to a **Pod** allowing it to schedule on matching tainted nodes (e.g., scheduling GPU workloads on dedicated GPU nodes).
+### **55. What is a Horizontal Pod Autoscaler (HPA)?**
+**Answer:** A **Horizontal Pod Autoscaler (HPA)** is a Kubernetes component that automatically updates workload resources—such as a Deployment or StatefulSet—to increase or decrease the number of pod replicas based on demand metrics.
 
-### **90. What is Topology Spread Constraints?**
-**Answer:** Rules that control how Pods are evenly spread across failure domains (Availability Zones, racks, nodes) based on label selectors (`maxSkew: 1`).
+**How It Works**
 
-### **91. What is the Kubelet Eviction Manager?**
-**Answer:** A proactive subsystem in kubelet that monitors node memory, disk, and PID usage. When thresholds are breached (`memory.available < 100Mi`), it evicts lower-priority pods to prevent node failure.
+- **Metric Monitoring:** The HPA controller queries metrics (like CPU utilization, memory usage, custom metrics, or external APIs) at regular intervals via the metrics server.
+- **Automatic Scaling:** If observed resource usage exceeds your target threshold, HPA scales *out* by adding more pod replicas. If usage drops below the threshold, it scales *in* by removing excess pods down to a configured minimum.
+- **Control Loop & Stability:** It uses a control loop with a default tolerance and stabilization windows to prevent rapid, unnecessary scaling changes (known as "flapping").
 
-### **92. What is PriorityClass and Preemption?**
-**Answer:** Defines the relative importance of Pods (`value: 1000000`). If a high-priority Pod cannot schedule due to lack of resources, the scheduler preempts (evicts) lower-priority pods to free up capacity.
+**Key Benefits**
 
-### **93. What is a Horizontal Pod Autoscaler (HPA)?**
-**Answer:** A control loop that automatically adjusts the number of Pod replicas in a Deployment based on observed CPU/memory utilization or custom external metrics.
+- **Cost Efficiency:** Automatically scales down during low-traffic periods to save cluster resources.
+- **High Availability:** Automatically scales up during traffic spikes to maintain application performance and responsiveness.
+- **No Manual Intervention:** Replaces manual `kubectl scale` commands with automated tracking.
 
-### **94. What is a Vertical Pod Autoscaler (VPA)?**
-**Answer:** A controller that automatically recommends or updates CPU and memory resource requests/limits based on historical runtime analysis.
+### **56. What is a Vertical Pod Autoscaler (VPA)?**
+**Answer:** A **Vertical Pod Autoscaler (VPA)** is a Kubernetes tool that automatically adjusts the CPU and memory resource requests and limits of containers inside a pod based on their actual historical usage.
+
+**How VPA Works**
+
+- **Right-Sizing:** Instead of using static guesses, the VPA observes real-world consumption (such as CPU throttling or memory spikes) and resizes the pod to prevent Out-Of-Memory (OOM) errors or wasted resources.
+- **VPA vs. HPA:** While a **Horizontal Pod Autoscaler (HPA)** scales an application *out* by adding more pod replicas, a VPA scales an application *up or down* by changing the compute resources assigned to existing pods.
+
+**Main Components**
+
+A standard VPA deployment relies on three core parts:
+
+- **Recommender:** Monitors historical resource usage and computes ideal CPU and memory targets.
+- **Updater:** Checks whether running pods match the recommendations and evicts pods that need updating.
+- **Admission Controller:** Intercepts pod creation requests and injects the proper resource values into new pods.
+
+**Operation Modes**
+
+VPA can be configured to run in different modes depending on automation needs:
+
+- **Off:** Generates and records resource recommendations without applying changes.
+- **Initial:** Assigns resource requests only when a pod is first created.
+- **Recreate / Auto:** Automatically updates pod specs and applies new resource values (typically by evicting and recreating the pod, or resizing in-place on supported versions).
 
 ### **95. What is KEDA (Kubernetes Event-driven Autoscaling)?**
 **Answer:** An autoscaler that scales Kubernetes workloads from 0 to hundreds based on external event sources (Kafka consumer lag, AWS SQS queues, RabbitMQ, Prometheus metrics).
