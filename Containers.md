@@ -343,7 +343,9 @@ get its unique IP Address.
 
 ### **37. What is a Kubernetes Pod?**
 **Answer:** All containers in Kubernetes are contained within Pods. The simplest component of the Kubernetes architecture is a pod. You may think of them as your container's equivalent of a wrapper. Each pod receives a unique IP address that it can use to communicate with other pods in the cluster.
+
 Pods typically only contain one container, however, if several containers are required to share resources, they may do so. A Pod's multiple containers can connect with one another over localhost if there are multiple containers in it.
+
 Since Kubernetes pods are "mortal," they can be generated and deleted as needed by the application. For instance, the backend of a web application may experience a spike in CPU utilization. Eight new Pods would be formed if the cluster scaled up the number of backend Pods from two to ten as a result of this circumstance. The Pods may scale back to two after the traffic dies down, in which case eight pods would be destroyed.
 
 
