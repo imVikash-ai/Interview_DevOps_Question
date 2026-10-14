@@ -316,8 +316,8 @@ When you run any Docker command (like `docker run` or `docker ps`), the **Docker
 **Controller-Manager**
 - Make sure the actual state of the cluster matches the desired state.
 - Two possible choices for controller manager
-1. If K8s is on the cloud, then it will be a cloud controller manager.
-2. If K8s is on non-cloud, then it will be kube-controller-manager.
+- - If K8s is on the cloud, then it will be a cloud controller manager.
+- - If K8s is on non-cloud, then it will be kube-controller-manager.
 
 
 ### **62. What are the core components of a Kubernetes Worker Node?**
