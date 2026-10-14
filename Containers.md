@@ -361,7 +361,7 @@ It does not run any application code. Instead, it acts as the parent sandbox tha
 
 **In practice, you’ll typically work with Deployments and let Kubernetes handle the underlying ReplicaSets and Pods automatically.**
 
-### **67. What is a StatefulSet and how does it differ from a Deployment?**
+### **40. What is a StatefulSet and how does it differ from a Deployment?**
 **Answer:** A **StatefulSet** is a Kubernetes workload API object used to manage stateful applications (such as databases or distributed message queues) that require persistent storage and unique, stable network identities.
 
 **Key Differences: StatefulSet vs. Deployment**
@@ -374,13 +374,27 @@ It does not run any application code. Instead, it acts as the parent sandbox tha
 | **Storage**                   | Typically ephemeral or shared across pods               | Dedicated **PersistentVolumeClaim (PVC)** mapped individually to each pod via `volumeClaimTemplates` |
 | **Scaling & Lifecycle Order** | Created, scaled, and deleted in parallel (any order)    | Created, scaled, and deleted strictly **sequentially** in order of their ordinal index               |
 
-### **68. What is a DaemonSet?**
-**Answer:** Ensures that all (or selected) worker nodes run exactly one copy of a specific Pod. Used for node-level agents (Cilium CNI, Fluent Bit log shippers, Prometheus `node_exporter`).
+### **41. What is a DaemonSet?**
+**Answer:** A Kubernetes DaemonSet is a resource that ensures a specific pod runs on every node in a Kubernetes cluster or on a subset of nodes that meet certain conditions.
 
-### **69. What is a Kubernetes Job vs CronJob?**
+DaemonSets are mainly used for background services that must be present on each node, such as:
+- Log collectors
+- Monitoring agents
+- Security or networking components
+
+### **42. What is a Kubernetes Job vs CronJob?**
 **Answer:**
-- **Job:** Spawns one or more pods and ensures a specified number of them terminate successfully (run-to-completion batch tasks).
-- **CronJob:** Schedules and executes `Job` objects periodically based on a standard cron expression.
+- **Kubernetes Job:** A Kubernetes Job is used to create one or more pods that perform a specific task and then terminate. Jobs are ideal for tasks that need to be run to completion, such as batch processing, data migration, or any task that needs to be executed once.
+
+Key Features of Jobs:
+- **Task Completion:** A Job ensures that a specified number of pods successfully terminate.
+- **Pod Restart Policy:** If a pod fails, the Job controller can create new pods to replace the failed ones until the task is completed.
+
+- **Kubernetes CronJob:** A Kubernetes CronJob is a specialized type of Job that runs on a schedule. CronJobs are useful for tasks that need to be performed periodically, such as backups, report generation, or system maintenance.
+
+Key Features of CronJobs:
+- **Scheduled Execution:** CronJobs run at specified times, defined using Cron syntax.
+- **Time-based Triggers:** You can schedule tasks to run daily, weekly, monthly, etc.
 
 ### **70. Explain Kubernetes Service Types (ClusterIP, NodePort, LoadBalancer, ExternalName).**
 **Answer:**
