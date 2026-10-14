@@ -261,10 +261,11 @@ When you run `docker system prune`, it safely targets only **unreferenced or sto
 *Note: By default, it **will not** delete volumes to prevent accidental data loss.* 
 
 ### **52. What is a Docker Plugin?**
-**Answer:** An out-of-process extension that adds capabilities to the Docker daemon (custom network drivers, volume drivers, logging drivers).
+**Answer:** A **Docker Plugin** is an out-of-process extension that adds specialized capabilities to the Docker Engine. They allow developers and system administrators to integrate third-party technologies directly into core Docker operations without altering the underlying Docker source code.
 
 ### **53. What is `iptables` in Docker?**
-**Answer:** The Linux firewall utility Docker configures to route packets between physical interfaces and virtual bridge interfaces (`docker0`), performing Network Address Translation (NAT).
+**Answer:** In **Docker**, `iptables` is a Linux kernel utility that the Docker Engine uses automatically to manage container networking, traffic routing, and security isolation.
+When you create networks, run containers, or publish ports, Docker dynamically writes `iptables` rules behind the scenes to make everything work transparently
 
 ### **54. What is Docker daemon (`dockerd`)?**
 **Answer:** The persistent background process that manages Docker objects (images, containers, networks, volumes) and listens for Docker REST API requests.
