@@ -632,54 +632,19 @@ VPA can be configured to run in different modes depending on automation needs:
 - **Initial:** Assigns resource requests only when a pod is first created.
 - **Recreate / Auto:** Automatically updates pod specs and applies new resource values (typically by evicting and recreating the pod, or resizing in-place on supported versions).
 
-### **95. What is KEDA (Kubernetes Event-driven Autoscaling)?**
-**Answer:** An autoscaler that scales Kubernetes workloads from 0 to hundreds based on external event sources (Kafka consumer lag, AWS SQS queues, RabbitMQ, Prometheus metrics).
+### **57. What is Helm and what are Helm Hooks?**
+**Answer:** **Helm** is a package manager for Kubernetes. It simplifies the process of defining, installing, upgrading, and managing applications on a Kubernetes cluster.
 
-### **96. What is Karpenter?**
-**Answer:** An open-source, high-performance node autoscaler developed by AWS that bypasses native Auto Scaling Groups, provisioning right-sized EC2 instances directly via EC2 Fleet API in seconds.
+**Helm Hooks** are mechanism triggers that allow developers to intervene or execute specific actions at strategic points during an application's release lifecycle.
 
-### **97. What is Karpenter Node Consolidation?**
-**Answer:** An automated feature where Karpenter continuously evaluates cluster compute waste, drains pods from underutilized nodes, and replaces them with cheaper, right-sized single instances.
+Normally, when you deploy a chart, Helm applies all the manifests to your cluster simultaneously. Hooks alter this behavior by letting you trigger specific Kubernetes resources (most commonly Jobs or Pods) before or after critical lifecycle events.
 
-### **98. What is Cluster Autoscaler (CA)?**
-**Answer:** A traditional autoscaler that adds or removes worker nodes by modifying the desired capacity of underlying cloud Auto Scaling Groups (ASGs) when Pods enter `Pending` state.
+**Common Use Cases**
 
-### **99. What is CoreDNS in Kubernetes?**
-**Answer:** The internal DNS server running as a cluster service that resolves internal service names (`my-svc.my-ns.svc.cluster.local`) and external domains for Pods.
-
-### **100. What is NodeLocal DNSCache?**
-**Answer:** A DaemonSet that runs a local DNS caching agent on each worker node, reducing CoreDNS network queries, UDP packet drops, and glibc `ndots:5` latency storms.
-
-### **101. What is the Kubernetes Endpoints vs EndpointSlice API?**
-**Answer:**
-- **Endpoints:** A monolithic object tracking all pod IPs backing a service; updating 1 pod in a 5,000-pod service rewritten the entire object, overloading etcd.
-- **EndpointSlice:** Splits backing pod endpoints into scalable chunks of 100 endpoints each, vastly improving cluster scalability.
-
-### **102. What is `kube-proxy` IPVS mode vs iptables mode?**
-**Answer:**
-- **iptables:** Linear sequential rule evaluation ($O(N)$). As services reach thousands, packet processing latency degrades significantly.
-- **IPVS (IP Virtual Server):** Linux kernel hash table lookup ($O(1)$). Provides consistent sub-millisecond throughput regardless of service scale.
-
-### **103. What is Cilium eBPF CNI?**
-**Answer:** A next-generation CNI plugin that replaces `kube-proxy` and iptables with eBPF programs loaded directly into Linux kernel socket layers, providing $O(1)$ routing, Layer 7 visibility, and transparent encryption.
-
-### **104. What is a Kubernetes NetworkPolicy?**
-**Answer:** A declarative firewall resource that controls traffic flow between Pods at Layer 3 and Layer 4 using label selectors.
-
-### **105. What is a Default-Deny NetworkPolicy?**
-**Answer:** A policy selecting all pods in a namespace with empty ingress/egress rules, blocking all incoming and outgoing network traffic until explicitly whitelisted.
-
-### **106. What is Pod Security Admission (PSA)?**
-**Answer:** The built-in replacement for legacy PodSecurityPolicies (PSP) that enforces three security profiles (**Privileged**, **Baseline**, **Restricted**) via namespace labels.
-
-### **107. What is OPA Gatekeeper in Kubernetes?**
-**Answer:** An admission controller that enforces custom organizational governance policies written in Rego across Kubernetes manifests.
-
-### **108. What is Kyverno?**
-**Answer:** A Kubernetes-native policy engine written in pure YAML that validates, mutates, and generates resources and verifies container image signatures.
-
-### **109. What is Helm and what are Helm Hooks?**
-**Answer:** The package manager for Kubernetes. Helm Hooks (`pre-install`, `post-upgrade`, `pre-delete`) allow executing specific jobs (database migrations) at defined lifecycle points during chart releases.
+- `pre-install`: Running a database migration script or validating external cluster dependencies before launching the main application pods.
+- `pre-upgrade`: Taking a database backup before upgrading an application to a newer version.
+- `post-install` / `post-upgrade`: Seeding a database with initial data or sending a Slack notification that a deployment succeeded.
+- `post-delete`: Cleaning up external resources or cleaning up persistent volumes that are not automatically removed by Kubernetes.
 
 ### **110. What is Helm Chart Dependency Management (`Chart.lock`)?**
 **Answer:** Defining subcharts in `Chart.yaml` and locking their exact semantic versions and tarball hashes in `Chart.lock`.
