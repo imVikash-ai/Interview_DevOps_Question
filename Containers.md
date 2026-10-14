@@ -384,14 +384,14 @@ DaemonSets are mainly used for background services that must be present on each 
 
 ### **42. What is a Kubernetes Job vs CronJob?**
 **Answer:**
-##### **Kubernetes Job:** 
+#### **Kubernetes Job:** 
 A Kubernetes Job is used to create one or more pods that perform a specific task and then terminate. Jobs are ideal for tasks that need to be run to completion, such as batch processing, data migration, or any task that needs to be executed once.
 
 Key Features of Jobs:
 - **Task Completion:** A Job ensures that a specified number of pods successfully terminate.
 - **Pod Restart Policy:** If a pod fails, the Job controller can create new pods to replace the failed ones until the task is completed.
 
-##### **Kubernetes CronJob:**
+#### **Kubernetes CronJob:**
  A Kubernetes CronJob is a specialized type of Job that runs on a schedule. CronJobs are useful for tasks that need to be performed periodically, such as backups, report generation, or system maintenance.
 
 Key Features of CronJobs:
@@ -410,7 +410,7 @@ Key Features of CronJobs:
 - **Access:** External (through NodeIP:NodePort).
 - **Use Case:** Quick and simple way to expose services externally, typically for development or testing.
 
-##### 3. **LoadBalancer**
+#### 3. **LoadBalancer**
 - **Purpose:** Exposes the service externally using a cloud provider’s load balancer.
 - **Access:** External (public IP via cloud provider).
 - **Use Case:** Suitable for production workloads, where a single IP is required for external clients to access services.
@@ -420,13 +420,15 @@ Key Features of CronJobs:
 - **Access:** External (resolves DNS to an external address).
 - **Use Case:** Used for redirecting traffic to an external service, e.g., a managed database or API outside the Kubernetes cluster.
 
-### **71. What is a Headless Service (`clusterIP: None`)?**
-**Answer:** A Service that does not allocate a ClusterIP. CoreDNS returns the individual `A` records of all backing Pod IPs directly, allowing clients to establish direct peer-to-peer connections (used for StatefulSets, Kafka, and Cassandra).
-
-### **72. What is Kubernetes Ingress vs Ingress Controller?**
+### **44. What is Kubernetes Ingress vs Ingress Controller?**
 **Answer:**
-- **Ingress:** A declarative API resource defining Layer 7 HTTP/HTTPS routing rules, TLS termination, and host/path routing.
-- **Ingress Controller:** The actual reverse proxy daemon (Nginx Ingress, Envoy, Traefik) that watches Ingress resources and configures routing rules.
+- **Ingress:** An Ingress is a Kubernetes resource that allows traffic to come into your Kubernetes cluster. The external traffic could be via HTTP or HTTPS to a service running within your Kubernetes cluster. The service is exposed by your Ingress to allow inbound traffic.
+
+Ingress provides externally available URLs, performs load balancing, terminates SSL/TLS, and offers name-based virtual hosting.
+
+- **Ingress Controller:** An Ingress controller is a daemon running in a Pod that watches the /ingresses endpoint on the API server. When a new endpoint is created, the daemon uses the configured set of rules to allow traffic into a service.
+
+A controller uses Ingress Rules to handle traffic to and from outside the cluster.
 
 ### **73. What is Kubernetes Gateway API?**
 **Answer:** The modern successor to Ingress providing role-oriented resource separation:
