@@ -424,11 +424,11 @@ Key Features of CronJobs:
 **Answer:**
 - **Ingress:** An Ingress is a Kubernetes resource that allows traffic to come into your Kubernetes cluster. The external traffic could be via HTTP or HTTPS to a service running within your Kubernetes cluster. The service is exposed by your Ingress to allow inbound traffic.
 
-Ingress provides externally available URLs, performs load balancing, terminates SSL/TLS, and offers name-based virtual hosting.
+  - Ingress provides externally available URLs, performs load balancing, terminates SSL/TLS, and offers name-based virtual hosting.
 
 - **Ingress Controller:** An Ingress controller is a daemon running in a Pod that watches the /ingresses endpoint on the API server. When a new endpoint is created, the daemon uses the configured set of rules to allow traffic into a service.
 
-A controller uses Ingress Rules to handle traffic to and from outside the cluster.
+  - A controller uses Ingress Rules to handle traffic to and from outside the cluster.
 
 ### **73. What is Kubernetes Gateway API?**
 **Answer:** The modern successor to Ingress providing role-oriented resource separation:
