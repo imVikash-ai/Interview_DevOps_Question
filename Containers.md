@@ -236,8 +236,6 @@ When you run a build, Docker checks its cache for each instruction in your `Dock
 
 Here is a side-by-side comparison to help you understand what they are and how they differ.
 
----
-
 **Direct Comparison**
 
 | **Feature**          | **Docker Scout**                                                                                                                   | **Trivy (by Aqua Security)**                                                                                               |
@@ -249,32 +247,18 @@ Here is a side-by-side comparison to help you understand what they are and how t
 | **Standout Feature** | **Context-aware fix recommendations** (e.g., "Change your base image to X to drop CVEs from 150 to 4").                            | **Multi-target scanning**; scans your whole repository for misconfigurations and exposed secrets alongside your container. |
 | **Licensing**        | Commercial product with a free tier (integrated into Docker subscription tiers).                                                   | **100% Open Source** (Apache 2.0).                                                                                         |
 
-### **43. What is `cgroups.json` / `config.json` in OCI?**
-**Answer:** The declarative specification consumed by `runc` defining namespaces, mounts, capabilities, process arguments, and resource limits to spawn a container.
+### **30. What is `docker system prune`?**
+**Answer:** The **`docker system prune`** command is **a global cleanup utility used to reclaim disk space by deleting unused Docker data**. Over time, Docker builds up clutter from stopped containers, old build caches, and untagged images, which can heavily consume storage.
 
-### **44. What is a Flatpak vs Snap vs Docker Container?**
-**Answer:** Flatpak and Snap are desktop application sandbox distribution formats; Docker containers are optimized for headless server processes and microservices with standardized OCI specs.
+**What it Deletes by Default**
 
-### **45. What is a Fork Bomb in containers and how is it prevented?**
-**Answer:** A malicious process repeatedly spawning infinite child processes to exhaust the kernel PID table. Prevented using cgroups PID limits (`--pids-limit 100` or Kubernetes `podPidsLimit`).
+When you run `docker system prune`, it safely targets only **unreferenced or stopped** resources. It will ask for confirmation before removing:
+- **Stopped containers:** All containers that are not currently running.
+- **Unused networks:** Networks not connected to at least one container.
+- **Dangling images:** Layers that no longer have a tag and are not associated with any container.
+- **Build cache:** Temporary files generated during the `docker build` process.
 
-### **46. What is Memory Swappiness in containers?**
-**Answer:** A Linux kernel parameter (`--memory-swappiness`) controlling how aggressively the kernel swaps container anonymous memory pages to disk under memory pressure.
-
-### **47. What is OOMKilled (Exit Code 137)?**
-**Answer:** The Linux kernel Out-Of-Memory Killer terminating the container process when its physical memory usage exceeds the assigned cgroup memory limit (`limits.memory`).
-
-### **48. What is CPU CFS (Completely Fair Scheduler) Throttling?**
-**Answer:** The kernel enforcing container CPU limits over a period (usually 100ms). If a container exhausts its allocated quota within the first 20ms, it is throttled (frozen) for the remaining 80ms, causing severe latency spikes.
-
-### **49. What is `seccomp` (Secure Computing Mode)?**
-**Answer:** A Linux kernel security facility that filters the system calls a container process is allowed to make to the kernel, blocking dangerous syscalls (e.g., `reboot`, `ptrace`).
-
-### **50. What is AppArmor / SELinux for containers?**
-**Answer:** Mandatory Access Control (MAC) kernel security modules that enforce granular filesystem and process permission profiles on containers regardless of user privileges.
-
-### **51. What is `docker system prune`?**
-**Answer:** A CLI command that cleans up unused Docker data: stopped containers, dangling images, unused build caches, and networks.
+*Note: By default, it **will not** delete volumes to prevent accidental data loss.* 
 
 ### **52. What is a Docker Plugin?**
 **Answer:** An out-of-process extension that adds capabilities to the Docker daemon (custom network drivers, volume drivers, logging drivers).
