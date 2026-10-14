@@ -563,7 +563,7 @@ A role on its own grants no access. A **binding** maps the role's permissions to
 - **No Resource Guarantees:** They share the pod's existing resource allocations and cannot be assigned custom resource limits or network ports.
 - **Shared Namespaces:** They can share namespaces (like the process or network namespace) with the main application container to inspect live processes and files.
 
-### **88. What is Node Affinity and Anti-Affinity?**
+### **54. What is Node Affinity and Anti-Affinity?**
 **Answer:**
 Node affinity and anti-affinity are **advanced scheduling features in Kubernetes that control where Pods are placed across worker nodes based on labels**. They act as an expressive, powerful alternative to the basic `nodeSelector` field. 
 
