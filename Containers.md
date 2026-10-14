@@ -209,7 +209,7 @@ When you run a build, Docker checks its cache for each instruction in your `Dock
 ### **33. What is `.dockerignore` and why is it critical?**
 **Answer:** A `.dockerignore` file is a plain-text configuration file placed in the root of a project's build context. It tells the Docker CLI which files and directories to exclude when packing up the project and sending it to the Docker daemon. It works similarly to a `.gitignore` file, though with distinct path-matching rules.
 
-### Why It Is Critical
+#### Why It Is Critical
 
 - **Speeds Up Build Times:** When you run `docker build`, the Docker CLI packs every file in your directory into a tar archive and sends it to the daemon as the build context. Excluding heavy, non-essential directories—like `node_modules` or local data dumps—prevents hundreds of megabytes of unnecessary data from transferring on every single build.
 - **Prevents Permanent Security Leaks:** Files copied into a Docker image leave permanent traces in the image's history layers. If you accidentally copy a `.env` file, database password, or private SSH key into a build—even if you delete it in a later `Dockerfile` step—anyone who downloads or inspects the image can recover those credentials.
