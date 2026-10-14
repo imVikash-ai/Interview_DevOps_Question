@@ -206,39 +206,30 @@ It is common to confuse Dockerfiles with Docker Compose files, but they serve en
 **Answer:** **Docker Image Layer Caching** is a mechanism that speeds up Docker image build times by reusing unchanged image layers from previous builds instead of recreating them from scratch.
 When you run a build, Docker checks its cache for each instruction in your `Dockerfile`. If it finds a match, it achieves a cache hit and instantly skips that step. If it doesn't, it triggers a cache miss and rebuilds that layer and all subsequent layers.
 
-### **33. What is `.dockerignore` and why is it critical?**
+### **25. What is `.dockerignore` and why is it critical?**
 **Answer:** A `.dockerignore` file is a plain-text configuration file placed in the root of a project's build context. It tells the Docker CLI which files and directories to exclude when packing up the project and sending it to the Docker daemon. It works similarly to a `.gitignore` file, though with distinct path-matching rules.
 
-#### Why It Is Critical
+#### Why It Is Critical:
 
 - **Speeds Up Build Times:** When you run `docker build`, the Docker CLI packs every file in your directory into a tar archive and sends it to the daemon as the build context. Excluding heavy, non-essential directories—like `node_modules` or local data dumps—prevents hundreds of megabytes of unnecessary data from transferring on every single build.
 - **Prevents Permanent Security Leaks:** Files copied into a Docker image leave permanent traces in the image's history layers. If you accidentally copy a `.env` file, database password, or private SSH key into a build—even if you delete it in a later `Dockerfile` step—anyone who downloads or inspects the image can recover those credentials.
 - **Avoids Unnecessary Rebuilds:** Noisy files that change constantly (such as `.git` history folders or local log files) can invalidate Docker's layer cache. Excluding them ensures Docker only rebuilds your image when actual application code changes.
 - **Reduces Image Size:** Keeping out test suites, markdown documentation, and local build artifacts keeps your final container footprint lean, which accelerates container pull times and deployments across servers.
 
-### **34. What is Container Storage Interface (CSI)?**
-**Answer:** An industry-standard interface specification that allows third-party storage providers (AWS EBS, Ceph, NetApp) to write plugins for block and file storage systems in Kubernetes without modifying core Kubernetes code.
-
-### **35. What is Container Network Interface (CNI)?**
+### **26. What is Container Network Interface (CNI)?**
 **Answer:** A CNCF specification and library providing a standardized interface for configuring network interfaces, IP addresses, and routing in Linux containers and Kubernetes pods (e.g., Calico, Cilium, AWS VPC CNI).
 
-### **36. What is Container Runtime Interface (CRI)?**
-**Answer:** A Kubernetes API interface allowing the `kubelet` to communicate with heterogeneous container runtimes (containerd, CRI-O) over gRPC without recompiling Kubernetes binaries.
-
-### **37. What is Distroless vs Alpine Linux base images?**
-**Answer:** Alpine uses `musl libc` and the `apk` package manager (can cause subtle C-extension bugs with Python/Node). Distroless uses `glibc` directly from Debian with zero shell or package manager, offering better compatibility and minimal attack surfaces.
-
-### **38. What is Podman Quadlet?**
-**Answer:** A systemd generator in Podman that translates declarative container configuration files into native `systemd` service units, managing containers as standard Linux system services.
-
-### **39. What is a Docker Context?**
-**Answer:** A mechanism that allows switching the target Docker CLI engine between different endpoints (e.g., local daemon, remote SSH server, AWS ECS).
-
 ### **40. What is Docker Content Trust (DCT)?**
-**Answer:** A system utilizing digital signatures to verify the publisher and integrity of container images pulled from registries using Notary.
+**Answer:** **Docker Content Trust (DCT)** is a security feature that enables digital signature verification of container data sent to and received from remote Docker registries. It allows image publishers to cryptographically sign their image tags, enabling consumers to verify the **integrity** (ensuring the image wasn't altered in transit) and the **publisher** (authenticity of the source) of the data before it is run or built upon.
 
 ### **41. What is an OCI Artifact?**
-**Answer:** Any non-container file type (Helm charts, WebAssembly modules, OPA policies, SBOMs) packaged and stored in standard OCI container registries using OCI specifications.
+**Answer:** An **Open Container Initiative (OCI) Artifact** is any non-container-image file or package—such as a Helm chart, WebAssembly (Wasm) module, cryptographic signature, Software Bill of Materials (SBOM), or AI model—stored and distributed inside standard OCI-compliant container registries.
+
+#### Key Concepts
+
+- **Beyond Containers:** While OCI registries were originally built strictly for Docker/container images, the OCI specification allows them to act as general-purpose, content-addressable storage for any software asset.
+- **How They Work:** They extend the standard OCI image manifest and layer structure, using custom media types or tools like **ORAS** (OCI Registry As Storage) to push and pull arbitrary files without needing a container runtime to execute them.
+
 
 ### **42. What is Docker Scout / Trivy?**
 **Answer:** Container security and vulnerability analysis tools that analyze image layers, detect CVEs in OS packages and language dependencies, and provide remediation suggestions.
