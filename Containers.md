@@ -551,25 +551,17 @@ A role on its own grants no access. A **binding** maps the role's permissions to
 - **Behavior:** Like the liveness probe, it runs continuously. However, an application might be alive (passing its liveness check) but temporarily unable to serve traffic—such as when it is experiencing an intense volume of background tasks, or losing connection to a mandatory backend database. 
 - **Failure Handling:** **It does not restart the container**. Instead, Kubernetes simply strips the Pod from the load balancer / Service endpoints. Traffic will bypass this Pod until the readiness probe passes again. 
 
-### **83. What are Init Containers?**
-**Answer:** Specialized containers that run and complete sequentially *before* primary application containers start. Used for blocking tasks (waiting for database availability, running migrations).
+### **52. What are Init Containers?**
+**Answer:** **Init Containers** are specialized, lightweight containers that run and complete their tasks before the main application containers start inside a Kubernetes Pod. They act as preparatory gates, ensuring that all prerequisites and environmental configurations are successfully met before the actual application goes live.
 
-### **84. What are Ephemeral Containers?**
-**Answer:** Temporary containers injected into existing running Pods for interactive debugging and network troubleshooting (`kubectl debug`) without restarting the Pod.
+### **53. What are Ephemeral Containers?**
+**Answer:** An ephemeral container is a short-lived container that is added dynamically to an already-running Kubernetes pod, primarily used for troubleshooting and interactive debugging.
 
-### **85. What is a Pod Disruption Budget (PDB)?**
-**Answer:** A policy limiting the number of Pod replicas of an application that can be unavailable simultaneously during voluntary disruptions (node draining, cluster upgrades).
+#### **Key Characteristics**
 
-### **86. What are Resource Requests vs Limits?**
-**Answer:**
-- **Requests:** The guaranteed minimum CPU and memory allocated for the Pod. Used by `kube-scheduler` to place the Pod on a node.
-- **Limits:** The hard upper bound of CPU and memory the Pod is allowed to consume. CPU exceeding limits causes CFS throttling; memory exceeding limits triggers OOMKill.
-
-### **87. What are Kubernetes Quality of Service (QoS) Classes?**
-**Answer:**
-1. **Guaranteed:** Every container has equal CPU and Memory Requests and Limits. Evicted last during resource exhaustion.
-2. **Burstable:** Requests are set and lower than Limits. Evicted when Guaranteed pods require resources.
-3. **BestEffort:** Zero requests and limits set. Evicted first during node memory pressure.
+- **Temporary Nature:** They are not part of the original application deployment specification and do not restart automatically after exiting.
+- **No Resource Guarantees:** They share the pod's existing resource allocations and cannot be assigned custom resource limits or network ports.
+- **Shared Namespaces:** They can share namespaces (like the process or network namespace) with the main application container to inspect live processes and files.
 
 ### **88. What is Node Affinity and Anti-Affinity?**
 **Answer:**
