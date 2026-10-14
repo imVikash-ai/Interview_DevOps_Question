@@ -127,8 +127,37 @@ Traditional container images include a full OS, often more than what is needed t
 - **Host:** Container shares the host network namespace directly with zero network isolation (no port mapping needed, maximum throughput).
 - **None:** Container has no network interface except loopback (`lo`), completely air-gapped.
 
-### **25. What is Docker Swarm vs Kubernetes?**
-**Answer:** Docker Swarm is Docker's native clustering tool—simple to set up but limited in advanced routing, autoscaling, and ecosystem integrations. Kubernetes is the industry-standard container orchestrator offering declarative reconciliation, service discovery, auto-scaling, complex storage, and extensive extension APIs.
+### **18. What is Docker Swarm vs Kubernetes?**
+Both **Docker Swarm** and **Kubernetes (K8s)** are **open-source container orchestration tools designed to manage, scale, and deploy clustered application containers**. However, they solve this problem with entirely different approaches to complexity, control, and scale.
+
+**The core distinction:** Docker Swarm focuses on simplicity and ease of use, making it suitable for smaller setups, while Kubernetes focuses on extensibility and control, making it a popular choice for large, complex enterprise environments.
+
+## At-a-Glance Comparison
+
+| Feature | Docker Swarm | Kubernetes (K8s) |
+|---|---|---|
+| **Setup & Installation** | **Very simple:** Built into Docker Engine. Start with `docker swarm init`. | **More complex:** Requires tooling such as `kubeadm` or a managed Kubernetes service. |
+| **Learning Curve** | **Low:** Uses the familiar Docker CLI and Compose-style workflows. | **Steeper:** Introduces abstractions such as Pods, Deployments, Services, and CRDs. |
+| **Scaling** | Supports manual scaling of services and replicas. | Supports manual scaling and automated scaling through features such as the Horizontal Pod Autoscaler (HPA). |
+| **Load Balancing** | Built-in routing mesh and service load balancing. | Service-based load balancing, with Ingress controllers or Gateway implementations for external HTTP routing. |
+| **Self-Healing** | Reconciles services and replaces failed task replicas. | Supports workload reconciliation, health probes, and automated container restarts or replacement. |
+| **Ecosystem & Community** | Smaller ecosystem, closely integrated with Docker tooling. | Extensive ecosystem with CNCF projects and many integrations. |
+
+---
+
+## Understanding Docker Swarm
+
+**Docker Swarm** is Docker's native clustering tool. Because it is built directly into the Docker engine, turning a machine into a cluster manager takes a single command. It uses standard Docker Compose files `(yaml)` to deploy applications across multiple nodes.
+
+- **Best for:** Small teams (typically under 10 engineers), simple stateless architectures, development/testing environments, and projects where minimizing configuration overhead is a priority.
+- **The Catch:** It lacks advanced native scheduling, has minimal built-in security isolation (RBAC), and monitoring requires piecing together third-party tools.
+
+## Understanding Kubernetes
+
+**Kubernetes (K8s)**Originally built by Google, Kubernetes is an advanced, production-grade platform designed to control every aspect of microservice architecture. It operates as a highly customisable, self-healing framework capable of running thousands of containers across multi-cloud environments
+
+- **Best for:** Large-scale distributed applications, multi-tenant environments, and organizations requiring high automation, custom routing rules, or rigid compliance.
+- **The Catch:** It comes with high operational overhead. Managing bare Kubernetes requires dedicated platform engineering resources, though cloud-managed services (like AWS EKS or Google GKE) help offset the infrastructure headache.
 
 ### **26. What is a Container Healthcheck (`HEALTHCHECK`)?**
 **Answer:** An instruction in a Dockerfile defining a command (e.g., `curl -f http://localhost:8080/healthz || exit 1`) run periodically by the container engine to determine if the internal application process is healthy.
