@@ -285,35 +285,40 @@ Docker uses a client-server architecture. The Docker CLI (`docker`) acts as the 
 - **Resource Allocation:** Sets up isolated file systems, environments, storage volumes, and network routing for individual containers.
 - **System Configuration:** Reads configurations from a centralized JSON file (`/etc/docker/daemon.json` on Linux) to customize runtimes, storage drivers, and log settings.
 
-### **55. What is a Container Image Digest?**
-**Answer:** An immutable, content-addressable SHA256 cryptographic hash of the image manifest (e.g., `image@sha256:abcd...`), guaranteeing identical image bits regardless of mutable tag changes.
+### **34. What is Docker Socket (`/var/run/docker.sock`)?**
+**Answer:** The **Docker socket** (`/var/run/docker.sock`) is the primary, UNIX-based network socket that serves as the API endpoint for the Docker daemon (`dockerd`).
+When you run any Docker command (like `docker run` or `docker ps`), the **Docker client-line interface (CLI)** sends that request directly through this socket file using local **Inter-Process Communication (IPC)**. The Docker daemon then receives the message, processes it, and manages your containers accordingly
 
-### **56. What is Layer Invalidation in Dockerfile?**
-**Answer:** When an instruction in a Dockerfile changes, Docker invalidates the cache for that instruction and forces all subsequent instructions to execute from scratch.
-
-### **57. What is Docker Socket (`/var/run/docker.sock`)?**
-**Answer:** The UNIX domain socket used by the Docker CLI to communicate with the Docker daemon. Mounting this socket into a container grants that container full root control over the host Docker daemon.
-
-### **58. What is Container Attestation?**
-**Answer:** Cryptographically signed statements attached to container images verifying their build provenance, test results, and vulnerability scanning compliance.
-
-### **59. What is `cri-dockerd`?**
-**Answer:** An adapter shim that allows Kubernetes to continue using the legacy Docker Engine as a CRI runtime after Kubernetes removed built-in `dockershim`.
-
-### **60. What is Firecracker MicroVM?**
-**Answer:** An open-source virtualization technology developed by AWS that creates lightweight, secure microVMs in sub-5 milliseconds with minimal memory footprint, powering AWS Lambda and Fargate.
-
----
-
-## 🟡 **Part 2: Kubernetes Core Architecture & Control Plane (Questions 61–140)**
-
-### **61. What are the core components of the Kubernetes Master / Control Plane?**
+### **35. What are the core components of the Kubernetes Master / Control Plane?**
 **Answer:**
-1. **`kube-apiserver`:** The centralized REST API gateway and validation hub; the only component that communicates with `etcd`.
-2. **`etcd`:** The distributed, highly consistent key-value store holding the entire cluster state.
-3. **`kube-scheduler`:** Assigns unscheduled Pods to optimal worker nodes based on resource requests, affinity, taints, and topology.
-4. **`kube-controller-manager`:** Runs core reconciliation control loops (Node Lifecycle, Deployment, ReplicaSet, ServiceAccount controllers).
-5. **`cloud-controller-manager`:** Integrates with underlying cloud provider APIs for Load Balancers, Route tables, and Block Volumes.
+**Kube-api-server → (For all communications)**
+- This api-server interacts directly with the user (i.e we apply .yml or .json manifest to kube-api-server)
+- This kube-api-server is meant to scale automatically as per load.
+- Kube-api-server is the front end of the control plane.
+
+**etcd**
+- Stores metadata and status of the cluster.
+- etcd is a consistent and high-available store (key-value-store)
+- Source of touch for cluster state (info about the state of the cluster)
+
+**etcd has the following features**
+1. Fully Replicated → The entire state is available on every node in the cluster.
+2. Secure → Implements automatic TLS with optional client-certificate authentication.
+3. Fast → Benchmarked at 10,000 writes per second.
+
+**Kube-scheduler (action)**
+- When users request the creation & management of Pods, Kube-scheduler is going to take action on these requests.
+- Handles POD creation and Management.
+- Kube-scheduler match/assigns any node to create and run pods.
+- A scheduler watches for newly created pods that have no node assigned. For every pod that the scheduler discovers, the scheduler becomes responsible for finding the best node for that pod to run.
+- The scheduler gets the information for hardware configuration from configuration files and schedules the Pods on nodes accordingly.
+
+**Controller-Manager**
+- Make sure the actual state of the cluster matches the desired state.
+- Two possible choices for controller manager
+1. If K8s is on the cloud, then it will be a cloud controller manager.
+2. If K8s is on non-cloud, then it will be kube-controller-manager.
+
 
 ### **62. What are the core components of a Kubernetes Worker Node?**
 **Answer:**
