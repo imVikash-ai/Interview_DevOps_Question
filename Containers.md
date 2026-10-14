@@ -160,7 +160,7 @@ Both **Docker Swarm** and **Kubernetes (K8s)** are **open-source container orche
 ### **19. What is a Container Healthcheck (`HEALTHCHECK`)?**
 **Answer:** A **Container Healthcheck (HEALTHCHECK)** is a configuration instruction used in containerization (most notably in **Docker**) to tell the container runtime how to test whether the container is still working correctly.
 
-### **27. What is Docker Volume vs Bind Mount vs tmpfs?**
+### **20. What is Docker Volume vs Bind Mount vs tmpfs?**
 **Answer:**
 **Direct Comparison**
 
@@ -173,8 +173,28 @@ Both **Docker Swarm** and **Kubernetes (K8s)** are **open-source container orche
 | **Best Used For**        | Databases, production data persistence, and sharing data between containers. | Local development (live code reloads) and sharing host configurations.       | Sensitive credentials, API keys, or high-speed cache/session state.      |
 
 
-### **28. What is Docker Compose?**
-**Answer:** A tool for defining and running multi-container Docker applications using a declarative YAML configuration file (`docker-compose.yml`).
+### **21. What is Docker Compose?**
+**Answer:** **Docker Compose** is **a declarative tool developed by Docker used for defining and running multi-container applications using a single configuration file**. Instead of managing several different containers using long, error-prone `docker run` commands in the terminal, you describe your entire application stack—services, databases, networks, storage, and variables—in a human-readable **YAML file** (`compose.yaml`).
+
+With this blueprint in place, a developer can build, start, and stop the entire multi-container environment using a **single command**.
+
+**Dockerfile vs. Docker Compose**
+
+It is common to confuse Dockerfiles with Docker Compose files, but they serve entirely distinct roles in a containerized pipeline: 
+
+| **Feature**      | **Dockerfile**                                   | **Docker Compose (`compose.yaml`)**                         |
+| ---------------- | ------------------------------------------------ | ----------------------------------------------------------- |
+| **Primary Goal** | **Builds** a single container image.             | **Runs and orchestrates** one or more containers.           |
+| **Scope**        | One individual component (e.g., just the API).   | The entire application stack (API + DB + Cache).            |
+| **Syntax**       | Imperative steps (`FROM`, `RUN`, `COPY`, `CMD`). | Declarative configuration (`services`, `ports`, `volumes`). |
+
+
+** How the Workflow Operates**
+
+1. **Write the Configuration:** You create a `compose.yaml` file defining your services. You can either pull pre-built images from Docker Hub or tell Compose to build them locally from a `Dockerfile`. 
+2. **Launch the Stack:** Run `docker compose up -d`. Compose intelligently analyzes the file, pulls/builds the images, spins up the networks, maps host ports, and launches the containers in the correct order using dependency rules (like `depends_on`).
+3. **Iterate Effeciently:** If you change a configuration or update a codebase, running `docker compose up` again will only recreate the specific containers that were modified rather than rebuilding the entire stack from scratch.
+4. **Clean Up:** Run `docker compose down` to stop the containers and cleanly wipe the temporary networks, returning your host machine to its original state. 
 
 ### **29. What is Kaniko?**
 **Answer:** An open-source tool developed by Google that builds container images from a Dockerfile inside a Kubernetes pod or container without requiring a Docker daemon or privileged root access.
