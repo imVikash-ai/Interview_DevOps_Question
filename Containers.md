@@ -384,13 +384,15 @@ DaemonSets are mainly used for background services that must be present on each 
 
 ### **42. What is a Kubernetes Job vs CronJob?**
 **Answer:**
-**Kubernetes Job:** A Kubernetes Job is used to create one or more pods that perform a specific task and then terminate. Jobs are ideal for tasks that need to be run to completion, such as batch processing, data migration, or any task that needs to be executed once.
+##### **Kubernetes Job:** 
+A Kubernetes Job is used to create one or more pods that perform a specific task and then terminate. Jobs are ideal for tasks that need to be run to completion, such as batch processing, data migration, or any task that needs to be executed once.
 
 Key Features of Jobs:
 - **Task Completion:** A Job ensures that a specified number of pods successfully terminate.
 - **Pod Restart Policy:** If a pod fails, the Job controller can create new pods to replace the failed ones until the task is completed.
 
-**Kubernetes CronJob:** A Kubernetes CronJob is a specialized type of Job that runs on a schedule. CronJobs are useful for tasks that need to be performed periodically, such as backups, report generation, or system maintenance.
+##### **Kubernetes CronJob:**
+ A Kubernetes CronJob is a specialized type of Job that runs on a schedule. CronJobs are useful for tasks that need to be performed periodically, such as backups, report generation, or system maintenance.
 
 Key Features of CronJobs:
 - **Scheduled Execution:** CronJobs run at specified times, defined using Cron syntax.
@@ -398,22 +400,22 @@ Key Features of CronJobs:
 
 ### **43. Explain Kubernetes Service Types (ClusterIP, NodePort, LoadBalancer, ExternalName).**
 **Answer:**
-1. **ClusterIP (Default)**
+#### 1. **ClusterIP (Default)**
 - **Purpose:** Exposes the service within the cluster.
 - **Access:** Internal (cluster-internal IP only).
 - **Use Case:** For internal communication between pods (e.g., microservices communicating with each other).
 
-2. **NodePort**
+#### 2. **NodePort**
 - **Purpose:** Exposes the service on a static port on each node’s IP.
 - **Access:** External (through NodeIP:NodePort).
 - **Use Case:** Quick and simple way to expose services externally, typically for development or testing.
 
-3. **LoadBalancer**
+##### 3. **LoadBalancer**
 - **Purpose:** Exposes the service externally using a cloud provider’s load balancer.
 - **Access:** External (public IP via cloud provider).
 - **Use Case:** Suitable for production workloads, where a single IP is required for external clients to access services.
 
-4. **ExternalName**
+#### 4. **ExternalName**
 - **Purpose:** Maps a service to an external DNS name.
 - **Access:** External (resolves DNS to an external address).
 - **Use Case:** Used for redirecting traffic to an external service, e.g., a managed database or API outside the Kubernetes cluster.
