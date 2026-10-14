@@ -219,11 +219,11 @@ When you run a build, Docker checks its cache for each instruction in your `Dock
 ### **26. What is Container Network Interface (CNI)?**
 **Answer:** A CNCF specification and library providing a standardized interface for configuring network interfaces, IP addresses, and routing in Linux containers and Kubernetes pods (e.g., Calico, Cilium, AWS VPC CNI).
 
-### **40. What is Docker Content Trust (DCT)?**
+### **27. What is Docker Content Trust (DCT)?**
 **Answer:** **Docker Content Trust (DCT)** is a security feature that enables digital signature verification of container data sent to and received from remote Docker registries. It allows image publishers to cryptographically sign their image tags, enabling consumers to verify the **integrity** (ensuring the image wasn't altered in transit) and the **publisher** (authenticity of the source) of the data before it is run or built upon.
 
-### **41. What is an OCI Artifact?**
-**Answer:** An **Open Container Initiative (OCI) Artifact** is any non-container-image file or package—such as a Helm chart, WebAssembly (Wasm) module, cryptographic signature, Software Bill of Materials (SBOM), or AI model—stored and distributed inside standard OCI-compliant container registries.
+### **28. What is an OCI Artifact?**
+**Answer:** An **Open Container Initiative (OCI) Artifact** is any non-container-image file or package-such as a Helm chart, WebAssembly (Wasm) module, cryptographic signature, Software Bill of Materials (SBOM), or AI model-stored and distributed inside standard OCI-compliant container registries.
 
 #### Key Concepts
 
@@ -231,8 +231,23 @@ When you run a build, Docker checks its cache for each instruction in your `Dock
 - **How They Work:** They extend the standard OCI image manifest and layer structure, using custom media types or tools like **ORAS** (OCI Registry As Storage) to push and pull arbitrary files without needing a container runtime to execute them.
 
 
-### **42. What is Docker Scout / Trivy?**
-**Answer:** Container security and vulnerability analysis tools that analyze image layers, detect CVEs in OS packages and language dependencies, and provide remediation suggestions.
+### **29. What is Docker Scout / Trivy?**
+**Answer:** **Docker Scout** and **Trivy** are both **security tools used to scan container images for known vulnerabilities (CVEs) and generate Software Bills of Materials (SBOMs)**. However, they approach container security from completely different angles: **Docker Scout is a native, ecosystem-driven tool focused on image remediation**, while **Trivy is a versatile, open-source multi-target scanner**.
+
+Here is a side-by-side comparison to help you understand what they are and how they differ.
+
+---
+
+**Direct Comparison**
+
+| **Feature**          | **Docker Scout**                                                                                                                   | **Trivy (by Aqua Security)**                                                                                               |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Core Philosophy**  | Embedded Docker ecosystem utility focused on **remediation and real-time policy**.                                                 | Swiss Army knife **open-source scanner** for cloud-native infrastructure.                                                  |
+| **Primary Scope**    | Container images and software supply chains.                                                                                       | Container images, filesystems, Git repos, IaC (Terraform, Kubernetes configs), secrets, and licenses.                      |
+| **Installation**     | Built-in to [**Docker Desktop**](https://docs.docker.com/scout/) and the `docker` CLI.                                             | Standalone single binary (can also run via Docker container).                                                              |
+| **Data & Speed**     | Evaluates metadata snapshots via **live cloud API calls**; instantly updates when new CVEs are published without needing re-scans. | Downloads and caches the **vulnerability database locally**; blistering speed on subsequent offline runs.                  |
+| **Standout Feature** | **Context-aware fix recommendations** (e.g., "Change your base image to X to drop CVEs from 150 to 4").                            | **Multi-target scanning**; scans your whole repository for misconfigurations and exposed secrets alongside your container. |
+| **Licensing**        | Commercial product with a free tier (integrated into Docker subscription tiers).                                                   | **100% Open Source** (Apache 2.0).                                                                                         |
 
 ### **43. What is `cgroups.json` / `config.json` in OCI?**
 **Answer:** The declarative specification consumed by `runc` defining namespaces, mounts, capabilities, process arguments, and resource limits to spawn a container.
