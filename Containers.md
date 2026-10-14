@@ -132,7 +132,7 @@ Both **Docker Swarm** and **Kubernetes (K8s)** are **open-source container orche
 
 **The core distinction:** Docker Swarm focuses on simplicity and ease of use, making it suitable for smaller setups, while Kubernetes focuses on extensibility and control, making it a popular choice for large, complex enterprise environments.
 
-## At-a-Glance Comparison
+** At-a-Glance Comparison**
 
 | Feature | Docker Swarm | Kubernetes (K8s) |
 |---|---|---|
@@ -143,16 +143,14 @@ Both **Docker Swarm** and **Kubernetes (K8s)** are **open-source container orche
 | **Self-Healing** | Reconciles services and replaces failed task replicas. | Supports workload reconciliation, health probes, and automated container restarts or replacement. |
 | **Ecosystem & Community** | Smaller ecosystem, closely integrated with Docker tooling. | Extensive ecosystem with CNCF projects and many integrations. |
 
----
-
-## Understanding Docker Swarm
+### Understanding Docker Swarm
 
 **Docker Swarm** is Docker's native clustering tool. Because it is built directly into the Docker engine, turning a machine into a cluster manager takes a single command. It uses standard Docker Compose files `(yaml)` to deploy applications across multiple nodes.
 
 - **Best for:** Small teams (typically under 10 engineers), simple stateless architectures, development/testing environments, and projects where minimizing configuration overhead is a priority.
 - **The Catch:** It lacks advanced native scheduling, has minimal built-in security isolation (RBAC), and monitoring requires piecing together third-party tools.
 
-## Understanding Kubernetes
+### Understanding Kubernetes
 
 **Kubernetes (K8s)**Originally built by Google, Kubernetes is an advanced, production-grade platform designed to control every aspect of microservice architecture. It operates as a highly customisable, self-healing framework capable of running thousands of containers across multi-cloud environments
 
