@@ -494,15 +494,41 @@ Kubernetes supports **four main access modes**:
 - **Behavior:** Pods on any node across the cluster can read and write to the exact same storage asset at the same time.
 - **Typical Use Case:** Shared file storage architectures, content management systems (like WordPress sharing a media library directory), or big data processing workflows. 
 
-### **79. What is a Kubernetes ServiceAccount (SA)?**
-**Answer:** An identity assigned to Pods to authenticate against the Kubernetes API Server. Tokens are mounted automatically at `/var/run/secrets/kubernetes.io/serviceaccount/token`.
-
-### **80. Explain Kubernetes RBAC: Role vs ClusterRole, RoleBinding vs ClusterRoleBinding.**
+### **50. Explain Kubernetes RBAC: Role vs ClusterRole, RoleBinding vs ClusterRoleBinding.**
 **Answer:**
-- **Role:** Grants API permissions (verbs: `get`, `list`, `create`) scoped strictly to a single namespace.
-- **ClusterRole:** Grants cluster-wide permissions across all namespaces and cluster-scoped resources (Nodes, PVs).
-- **RoleBinding:** Assigns a Role or ClusterRole to subjects within a specific namespace.
-- **ClusterRoleBinding:** Assigns a ClusterRole to subjects cluster-wide.
+**Kubernetes RBAC (Role-Based Access Control)** regulates access to resources based on four primary objects. Role and ClusterRole define what actions can be done, while RoleBinding and ClusterRoleBinding define who can do them
+
+**1. Defining Permissions: Role vs. ClusterRole**
+
+Both objects define a set of additive rules (there are no "deny" rules in Kubernetes RBAC) specifying which **verbs** (e.g., `get`, `list`, `create`) can be performed on which **resources** (e.g., `pods`, `services`). The primary difference is their **scope**:
+
+| **Feature**          | **Role**                                                                                                                     | **ClusterRole**                                                                                                                                |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Scope**            | **Namespace-scoped**. Must be created inside a specific namespace.                                                           | **Cluster-scoped**. Lives outside individual namespaces.                                                                                       |
+| **Target Resources** | Only targets resources within its designated namespace (e.g., Pods, Deployments).                                            | Can target namespaced resources, **cluster-scoped resources** (e.g., Nodes, PersistentVolumes), and non-resource endpoints (e.g., `/healthz`). |
+| **Primary Use Case** | Granting team or app permissions inside an isolated environment (e.g., allowing a developer to view pods in `frontend-dev`). | Defining broad system roles (e.g., cluster admins, node viewers) or creating reusable permission templates.                                    |
+
+**2. Granting Permissions: RoleBinding vs. ClusterRoleBinding**
+
+A role on its own grants no access. A **binding** maps the role's permissions to **Subjects** (Users, Groups, or ServiceAccounts).
+
+```text
+[ Subject ] ────────► [ Binding Object ] ────────► [ Role Object ]
+(User/Group/SA)       (RoleBinding or CRBinding)      (Role or ClusterRole)
+```
+
+**RoleBinding**
+
+- **Scope:** Tied to a specific namespace.
+- **Behavior:** It grants the permissions defined in a role *only within the namespace where the RoleBinding is created*. 
+- **Flexibility:** A `RoleBinding` can reference a local `Role`, **or it can reference a `ClusterRole`**.
+  - *Tip:* Referencing a `ClusterRole` via a `RoleBinding` is a best practice for reusability. It applies the cluster-wide template strictly within the limits of that single namespace. 
+
+**ClusterRoleBinding**
+
+- **Scope:** Cluster-wide.
+- **Behavior:** It lifts all namespace boundaries. It grants permissions across **all namespaces** in the cluster, as well as to any cluster-scoped resources defined in the role.
+- **Flexibility:** A `ClusterRoleBinding` **can only reference a `ClusterRole`**. It cannot reference a standard `Role`. 
 
 ### **81. What is an Admission Controller?**
 **Answer:** Plugins that intercept API Server requests after authentication and authorization, but *before* the object is persisted to `etcd`.
