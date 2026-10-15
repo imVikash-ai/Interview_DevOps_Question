@@ -102,7 +102,7 @@ The three primary cloud service models are **IaaS**, **PaaS**, and **SaaS**:
 - **Purpose:** Caches static and dynamic content (like images, videos, or API responses) so end users can download it from a nearby server instead of hitting the main origin data center.
 - **Key Characteristic:** Edge locations focus strictly on fast content delivery and security (DDoS mitigation), rather than running heavy backend compute workloads. 
 
-### **4. What is a Virtual Private Cloud (VPC) / Virtual Network (VNet)?**
+### **4. What is a Virtual Private Cloud (VPC) ?**
 **Answer:** A Virtual Private Cloud (VPC) is **a logically isolated private network hosted within a public cloud infrastructure**. It gives organizations complete control over their virtual networking environment—including IP address ranges, subnets, route tables, and firewalls—while using the scalable hardware of a public cloud provider like **Amazon Web Services (AWS) or **Google Cloud**
 
 **How a VPC Works**
@@ -119,9 +119,37 @@ The three primary cloud service models are **IaaS**, **PaaS**, and **SaaS**:
 - **Full Network Control:** Administrators design custom topologies, define private IP blocks, and manage traffic flow as if they owned a physical data center. 
 
 ### **5. Explain Public Subnet vs Private Subnet.**
-**Answer:**
-- **Public Subnet:** A subnet whose route table has a default route (`0.0.0.0/0`) pointing directly to an **Internet Gateway (IGW)**. Instances can have public IPs and communicate directly with the internet.
-- **Private Subnet:** A subnet whose route table routes outbound internet traffic through a **NAT Gateway** (or has no internet route). Instances have only private RFC 1918 IPs and cannot receive unsolicited inbound internet traffic.
+**Answer:** A public subnet has a direct route to the public internet via an Internet Gateway (IGW), whereas a private subnet has no direct route to the internet and isolates sensitive resources.
+
+**Public Subnet**
+
+- **Internet Access:** Directly connected to the internet through an Internet Gateway. 
+- **IP Addresses:** Resources can be assigned both public/Elastic IP addresses and private IP addresses. 
+- **Inbound & Outbound Traffic:** Can send and receive traffic directly to and from the public internet. 
+  - Public-facing web servers
+  - Application Load Balancers (ALB)
+  - Bastion hosts (for secure administrative SSH access)
+  - NAT Gateways (to allow private subnets outbound access)
+
+**Private Subnet**
+
+- **Internet Access:** Lacks a direct route to an Internet Gateway. Can only reach the internet for updates by routing outbound traffic through a **NAT Gateway** or **NAT Instance** placed in a public subnet. 
+- **IP Addresses:** Resources only receive private IP addresses.
+- **Inbound & Outbound Traffic:** Cannot be reached directly from the external internet; inbound traffic must flow through a load balancer or proxy residing in a public subnet. 
+- **Common Use Cases:**
+  - Back-end application servers
+  - Databases (e.g., MySQL, PostgreSQL)
+  - Internal microservices and sensitive data stores
+
+**Quick Comparison**
+
+| **Feature**                 | **Public Subnet**                   | **Private Subnet**                          |
+| --------------------------- | ----------------------------------- | ------------------------------------------- |
+| **Route to Internet**       | Yes (via Internet Gateway)          | No direct route (optional NAT for outbound) |
+| **Public IP Assigned**      | Yes                                 | No (Private IP only)                        |
+| **Direct External Inbound** | Allowed                             | Blocked                                     |
+| **Security Level**          | Lower (exposed to external traffic) | Higher (isolated from direct internet)      |
+| **Typical Tier**            | Web / Edge Tier                     | Application / Database Tier                 |
 
 ### **6. What is an Internet Gateway (IGW)?**
 **Answer:** A horizontally scaled, redundant, highly available VPC component that enables communication between resources in public subnets and the internet without bandwidth bottlenecks.
