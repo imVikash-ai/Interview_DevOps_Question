@@ -210,8 +210,20 @@ Both **NAT Gateways** and **NAT Instances** **allow resources in a private subne
 | **Defense order** | Security group first layer of defense, whereas Network ACL is the second layer of defense for outbound/egress traffic. | Network ACL first layer of defense, whereas the Security group is the second layer of defense for inbound/ingress traffic. |
 
 ### **9. What is VPC Peering and what are its limitations?**
-**Answer:** A direct point-to-point network connection between two VPCs routing traffic over private cloud backbones.
-- **Limitation:** Non-transitive routing (If VPC A peers with B, and B peers with C, VPC A *cannot* communicate with C through B). Requires $\frac{N(N-1)}{2}$ peering links for a full mesh.
+**Answer:** 
+
+**VPC Peering** is **a networking connection between two Virtual Private Clouds (VPCs) that allows them to route traffic using private IPv4 or IPv6 addresses**. 
+
+Traffic between peered VPCs stays entirely on the cloud provider's internal backbone network (such as the AWS global network) and never travels over the public internet, offering high speed, low latency, and enhanced security.
+**Key Limitations**
+
+- **No transitive peering:** Peering relationships are strictly one-to-one. If VPC A is peered with VPC B, and VPC B is peered with VPC C, VPC A cannot communicate with VPC C through VPC B. 
+- **No overlapping CIDR blocks:** You cannot create a peering connection between two VPCs that share matching or overlapping IPv4 or IPv6 address ranges. 
+- **No edge-to-edge routing:** Resources in one VPC cannot use the peer VPC's internet gateway, NAT device, VPN connection, or AWS Direct Connect to reach the internet or other networks. 
+- **Scaling complexity:** Because it is non-transitive, connecting many VPCs requires a full-mesh design (N(N-1)/2 connections), which becomes difficult to manage at scale (alternatives like **AWS Transit Gateway**)
+- **Manual configuration required:** Route tables and security groups must be manually updated in both VPCs to allow traffic across the connection. 
+- **No inter-region IPv6 support:** Inter-region VPC peering connections do not support IPv6 traffic in AWS. 
+- **Single-cloud scope:** Peering only operates between VPCs within the same cloud provider (e.g., AWS to AWS). 
 
 ### **10. What is AWS Transit Gateway (TGW)?**
 **Answer:** A centralized hub-and-spoke cloud router connecting hundreds of VPCs, AWS Direct Connect links, and IPsec VPNs through a single managed gateway, supporting transitive routing and centralized network inspection.
