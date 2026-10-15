@@ -2,7 +2,7 @@
 ---
 
 ### **1. What is Cloud Computing and what are the three primary service models (IaaS, PaaS, SaaS)?**
-**Answer:** Cloud computing is the delivery of on-demand computing resources—including servers, storage, databases, networking, and software—over the internet on a pay-as-you-go basis, removing the need to own and maintain physical data centers.
+**Answer:** Cloud computing is the delivery of on-demand computing resources—including servers, storage, databases, networking, and software-over the internet on a pay-as-you-go basis, removing the need to own and maintain physical data centers.
 
 The three primary cloud service models are **IaaS**, **PaaS**, and **SaaS**:
 
@@ -28,10 +28,52 @@ The three primary cloud service models are **IaaS**, **PaaS**, and **SaaS**:
 - **Examples:** Google Workspace/Gmail, Microsoft 365, Dropbox, Salesforce
 
 ### **2. Explain the Cloud Shared Responsibility Model across IaaS, PaaS, and Serverless.**
-**Answer:** Security in the cloud is shared between CSP and customer:
-- **Security OF the Cloud (Provider):** Physical security of global data centers, hardware, cables, power, hypervisors, and core networking.
-- **Security IN the Cloud (Customer):** Customer data encryption, IAM policies, security groups, firewall configurations, OS patching (IaaS), and application code.
-- *In Serverless (Lambda), the CSP assumes responsibility for OS patching, runtimes, and scaling; customer manages code and IAM execution roles.*
+**Answer:** 
+#### 1. Infrastructure as a Service (IaaS)
+
+- **Examples:** Amazon EC2, Azure Virtual Machines, Google Compute Engine.
+- **CSP Responsibility ("Security *of* the cloud"):**
+  - Physical data centers, server hardware, power, and network routing.
+  - Virtualization layer (hypervisor) and underlying physical host.
+- **Customer Responsibility ("Security *in* the cloud"):**
+  - Guest Operating System (OS) installation, updates, and security patching.
+  - Middleware, runtime, and application setup.
+  - Network firewalls, port configurations, and host-level network segmentation.
+  - Data classification, client-side encryption, and Identity and Access Management (IAM). 
+
+#### 2. Platform as a Service (PaaS)
+
+- **Examples:** AWS Elastic Beanstalk, Azure App Service, Google App Engine. 
+- **CSP Responsibility ("Security *of* the cloud"):**
+  - Physical infrastructure, networking, and virtualization.
+  - Operating system, runtime environments, and baseline platform/middleware updates.
+  - Core platform health and infrastructure-level network controls. 
+- **Customer Responsibility ("Security *in* the cloud"):**
+  - Application code, business logic, and custom configurations.
+  - Application-level network controls, firewalls, and traffic restrictions.
+  - User access controls, permissions, and IAM policies.
+  - Data storage, backup strategies, and data encryption. 
+
+#### 3. Serverless / Function-as-a-Service (FaaS)
+
+- **Examples:** AWS Lambda, Azure Functions, Google Cloud Functions. 
+- **CSP Responsibility ("Security *of* the cloud"):**
+  - All underlying infrastructure, physical hardware, and networking.
+  - Operating systems, container runtimes, automatic scaling, and underlying platform patching.
+  - Ephemeral compute environment isolation. 
+- **Customer Responsibility ("Security *in* the cloud"):**
+  - **Application code & logic:** Writing secure code without vulnerabilities (e.g., injection flaws).
+  - **IAM and execution roles:** Granting strict least-privilege permissions to the serverless function.
+  - **Data & secrets management:** Encrypting environment variables, API keys, and stored data.
+  - **Event source configurations:** Securing triggers, webhooks, or database streams connected to the function.
+
+**Summary Comparison**
+
+| **Layer / Model** | **CSP Manages**                                | **Customer Manages**                                         |
+| ----------------- | ---------------------------------------------- | ------------------------------------------------------------ |
+| **IaaS**          | Physical hardware, data centers, hypervisor    | OS, middleware, apps, network configs, data                  |
+| **PaaS**          | Hardware, OS, runtime, platform infrastructure | Application code, app-level network rules, data, IAM         |
+| **Serverless**    | Infrastructure, OS, runtime, scaling, patching | Function code, function IAM roles, secrets, input validation |
 
 ### **3. What is a Cloud Region vs an Availability Zone (AZ) vs a Local Zone / Edge Location?**
 **Answer:**
