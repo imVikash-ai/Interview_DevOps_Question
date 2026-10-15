@@ -546,10 +546,54 @@ Savings Plans and Reserved Instances (RIs) are cloud pricing models—primarily 
 - **Choose Reserved Instances if:** You require a guaranteed capacity reservation in a specific Availability Zone for critical production databases, or you are using services not covered by Savings Plans (such as Amazon Redshift or older RDS instance generations).
 
 ### **21. What is AWS Elastic Container Service (ECS)?**
-**Answer:** A fully managed container orchestration service developed by AWS that runs Docker containers using AWS-native IAM, VPC, and CloudWatch primitives without Kubernetes complexity.
+**Answer:** Amazon **Elastic Container Service (ECS)** is **a fully managed container orchestration service provided by Amazon Web Services (AWS) that lets you run, stop, and scale Docker and containerized applications without managing complex cluster infrastructure**.
+
+#### How ECS Works
+
+ECS handles the scheduling, placement, monitoring, and availability of your containers behind the scenes. Instead of dealing with low-level orchestration software, you interact with core concepts:
+
+- **Task Definition:** A blueprint (JSON file) that describes your container image, CPU and memory requirements, environment variables, and storage. 
+- **Task:** The running instantiation of a task definition on your cluster. 
+- **Service:** Manages long-running applications or microservices, ensuring a specified number of tasks are constantly running and replaced if they fail. 
+- **Cluster:** A logical grouping of tasks or services.
+
+**Compute Options (Launch Types)**
+
+You can choose how the underlying infrastructure is managed:
+
+- **AWS Fargate (Serverless):** AWS manages the servers automatically. You do not provision, patch, or scale virtual machines; you only define and pay for the CPU and memory your containers use. 
+- **Amazon EC2 Launch Type:** You provision and manage the underlying Amazon EC2 virtual machine instances yourself, giving you fine-grained control over the host environment. 
+- **Amazon ECS Anywhere:** Lets you run ECS tasks on your own on-premises servers or virtual machines. 
+
+**Key Benefits & Integrations**
+
+- **No Extra Cluster Management Fee:** ECS itself is free to use; you only pay for the underlying compute (EC2 or Fargate) and storage resources consumed.
+- **Tight AWS Integration:** Connects seamlessly with Amazon ECR for storing container images, Elastic Load Balancing for traffic distribution, **IAM** for security and task roles, and CloudWatch for logging and metrics.
+- **Scaling:** Supports automatic scaling of tasks and clusters based on workload demand.
 
 ### **22. What is AWS Fargate?**
-**Answer:** A serverless compute engine for containers (supporting ECS and EKS) where AWS provisions, patches, and manages the underlying EC2 worker instances, allowing customers to pay strictly for requested vCPU and memory.
+**Answer:** 
+**AWS Fargate** is **a serverless, pay-as-you-go compute engine that lets you run containers without managing underlying servers or virtual machine clusters**.
+
+**How It Works**
+
+- **No Server Management:** You do not need to provision, configure, patch, or scale Amazon EC2 instances.
+- **Orchestration Compatibility:** It works natively with Amazon ECS as a launch type and with Amazon EKS as a runtime profile for pods.
+- **Container-Centric Workflow:** You package your application into a container image, define your CPU, memory, and networking requirements, and launch it directly.
+- **Dedicated Isolation:** Each Fargate task or pod runs in its own single-tenant kernel and isolation boundary for enhanced security.
+
+**Key Features**
+
+- **Per-Second Billing:** You pay strictly for the amount of vCPU, memory, and ephemeral storage resources your tasks consume while running.
+- **Fargate Spot:** You can run interruptible workloads using spare capacity at up to 70% lower cost.
+- **Automatic Scaling:** Capacity scales up or down automatically based on application demand.
+- **Architecture Support:** Supports both Linux and Windows containers, as well as Arm64-based AWS Graviton processors (though dedicated GPUs are not supported).
+
+**Common Use Cases**
+
+- **Microservices & Web Apps:** Running APIs and web backends without worrying about cluster capacity.
+- **Batch and Data Processing:** Scaling parallel processing workloads up to 16 vCPUs and 120 GB of memory per task.
+- **Modernizing Legacy Applications:** Running containerized apps without refactoring the underlying infrastructure.
 
 ### **23. What is AWS Elastic Kubernetes Service (EKS)?**
 **Answer:** A certified Kubernetes conformant managed service that automates the provisioning, upgrading, patching, and high availability of the Kubernetes control plane across 3 AZs.
