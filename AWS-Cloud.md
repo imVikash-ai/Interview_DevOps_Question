@@ -172,8 +172,28 @@ To make a subnet use an IGW, specific networking components must be configured t
 
 ### **7. What is a NAT Gateway vs NAT Instance?**
 **Answer:**
-- **NAT Gateway:** A fully managed AWS service providing up to 100 Gbps bandwidth per gateway with automatic scaling, high availability within an AZ, and zero administrative maintenance.
-- **NAT Instance:** A self-managed EC2 instance running Linux iptables NAT. Requires manual patching, AMI updates, and script-based HA failover.
+Both **NAT Gateways** and **NAT Instances** **allow resources in a private subnet to connect to the internet while keeping those resources hidden from unsolicited inbound traffic**. However, they differ significantly in management, cost, performance, and features.
+
+**Key Differences at a Glance**
+
+| **Feature**         | **NAT Gateway**                                                       | **NAT Instance**                                                                |
+| ------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| **Type**            | Fully managed AWS service                                             | Self-managed Amazon EC2 instance (running a specialized AMI)                    |
+| **Availability**    | High availability with built-in redundancy per Availability Zone (AZ) | Manual setup required (e.g., using scripts) to handle failover across instances |
+| **Bandwidth**       | Automatically scales up to 100 Gbps                                   | Limited by the underlying EC2 instance type/size                                |
+| **Maintenance**     | Zero maintenance; AWS handles all patching and updates                | Manual maintenance; you must patch the OS and update software yourself          |
+| **Security Groups** | Uses Network ACLs (NACLs); cannot be attached to Security Groups      | Can be associated with standard EC2 Security Groups for granular control        |
+| **Extra Features**  | No port forwarding or bastion host capabilities                       | Supports **port forwarding** and can double as a **bastion/SSH host**           |
+| **Cost**            | Higher flat hourly rate + data processing fee                         | Cheaper (based on EC2 instance hourly pricing, e.g., a small `t3.nano`)         |
+
+**When to Use Which?**
+
+- **Use a NAT Gateway when:**
+  - You are running a production environment where uptime, high availability, and zero operational overhead are top priorities.
+  - You have medium-to-large or rapidly scaling bandwidth requirements. 
+- **Use a NAT Instance when:**
+  - You are on a tight budget (such as a small dev/test environment) and want to save money on low-volume traffic.
+  - You need custom network features like **port forwarding** or want to use the instance as a **bastion host**. 
 
 ### **8. What is a Security Group vs Network ACL (NACL)?**
 **Answer:**
