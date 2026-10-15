@@ -596,10 +596,59 @@ You can choose how the underlying infrastructure is managed:
 - **Modernizing Legacy Applications:** Running containerized apps without refactoring the underlying infrastructure.
 
 ### **23. What is AWS Elastic Kubernetes Service (EKS)?**
-**Answer:** A certified Kubernetes conformant managed service that automates the provisioning, upgrading, patching, and high availability of the Kubernetes control plane across 3 AZs.
+**Answer:** 
+**Amazon Elastic Kubernetes Service (Amazon EKS)** is **a fully managed service provided by AWS that simplifies running, managing, and scaling Kubernetes clusters**. 
+Kubernetes is an open-source system used to orchestrate containerized applications. Managing it independently requires setting up highly complex server environments, managing databases, and manual patching. **Amazon EKS removes this complexity by handling the Kubernetes control plane**—including the API server and etcd database—across multiple availability zones for automatic high availability and security.
+
+**Core Components & Architecture**
+
+An EKS environment is divided into two primary sections:
+
+- **The Control Plane (Managed by AWS):** AWS provisions, scales, and patches the master instances that manage the cluster. This ensures that even if a data center fails, your Kubernetes infrastructure stays online. 
+- **The Data Plane / Worker Nodes (Managed or Automated):** This is where your actual containers run. You can provision these using:
+  - **Amazon EC2:** Traditional virtual machines where you retain control over the OS and underlying compute instances.
+  - **AWS Fargate:** A serverless approach where you pay only for the exact CPU and memory your containers use, completely eliminating node management.
+  - **EKS Auto Mode:** An automation tier that automatically handles node provisioning, scaling, and network infrastructure for you.
+
+**Key Features and Capabilities**
+
+| **Feature** | **Description** |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **AWS Integrations** | Connects natively with core infrastructure like **AWS IAM** (for fine-grained user permissions), **Amazon VPC** (for networking isolate), and **Amazon CloudWatch** (for monitoring). |
+| **Upstream Compatibility** | Fully conformant with standard upstream Kubernetes. You can use standard tools like `kubectl`, Helm, and existing YAML configurations without vendor lock-in. |
+| **Hybrid Deployments** | Can be deployed in the cloud, on-premises using **EKS Anywhere**, or at the edge via **AWS Outposts**. |
+| **AI/ML Optimizations** | Highly optimized to run distributed training and inference workloads for generative AI and machine learning applications. |
 
 ### **24. What is AWS Lambda and what is its execution model?**
-**Answer:** A serverless event-driven compute service that executes code in response to triggers (S3 uploads, API Gateway HTTP calls, SQS messages) inside ephemeral Firecracker microVMs, billed per millisecond of execution.
+**Answer:**
+
+**AWS Lambda** is **a serverless, event-driven compute service provided by Amazon Web Services (AWS) that allows you to run code without provisioning or managing servers**. You simply upload your code as a function, and AWS automatically handles the underlying infrastructure, provisioning, scaling, patching, and monitoring. You only pay for the exact compute time your code consumes down to the millisecond.
+
+**The AWS Lambda Execution Model**
+
+Lambda executes your code inside a secure, isolated runtime environment managed by **Firecracker microVMs** (lightweight virtual machines) running on bare-metal infrastructure. 
+
+The lifecycle of an execution environment consists of three distinct phases:
+
+**The Init Phase**
+
+When a function is triggered for the first time, or scales up to handle more demand, AWS Lambda boots up a new microVM environment. During this phase, Lambda: 
+
+- Downloads the function code, layers, or container image.
+- Initializes the chosen runtime (e.g., Python, Node.js, Java).
+- Runs the function's initialization code—the global code written *outside* the main handler function (such as SDK imports and database connection setups).
+
+**2. The Invoke Phase**
+
+Once the environment is initialized, Lambda executes the specific handler function.
+
+- **Payload Processing**: The function receives the event payload (JSON data from a trigger like an S3 upload or an API gateway request) and executes the core business logic. 
+- **Single-Threaded Request Isolation**: A single execution environment can only process **one request at a time**. If a new request arrives while the current environment is busy, Lambda spins up a brand-new execution environment to handle it. 
+- **Concurrency Options**: Standard warm execution environments traditionally serve single requests sequentially. However, specific feature sets like **AWS Lambda Web Functions** allow a single warm execution environment to serve multiple concurrent web requests to drastically reduce cold starts.
+
+**3. The Shutdown Phase**
+
+If your function does not receive any triggers for a prolonged period, Lambda deactivates the environment. It alerts any integrated runtime extensions to let them execute cleanup tasks before permanently deleting the microVM container.
 
 ### **25. What is AWS Lambda Cold Start and how is it mitigated?**
 **Answer:** The initialization latency when Lambda downloads the container image, provisions a microVM, and initializes runtime engines. Mitigated using **Provisioned Concurrency** (pre-warmed microVMs) or **Lambda SnapStart** (resuming from microVM memory snapshots).
