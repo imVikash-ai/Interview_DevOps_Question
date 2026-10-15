@@ -290,9 +290,46 @@ An **interface VPC endpoint** is a specific type of VPC endpoint powered by AWS 
 
 ### **13. What is Elastic Load Balancing (ALB vs NLB vs GLB)?**
 **Answer:**
-- **ALB (Application Load Balancer - Layer 7):** Routes HTTP/HTTPS/gRPC traffic based on host headers, URL paths, query parameters, and HTTP methods; supports SSL termination and redirect rules.
-- **NLB (Network Load Balancer - Layer 4):** Routes TCP/UDP/TLS traffic; provides ultra-high throughput (millions of requests/sec), single-digit millisecond latency, static IP addresses per AZ, and client source IP preservation.
-- **GLB (Gateway Load Balancer - Layer 3):** Routes raw IP packets through third-party virtual security appliances (firewalls, deep packet inspection, IDS/IPS).
+Amazon Web Services (AWS) **Elastic Load Balancing (ELB) is a fully managed service that automatically distributes incoming application traffic across multiple targets**—such as Amazon EC2 instances, containers, and IP addresses. 
+
+The three primary managed load balancers under ELB are the **Application Load Balancer (ALB)**, **Network Load Balancer (NLB)**, and **Gateway Load Balancer (GLB)**. Each operates at a different layer of the OSI model to handle specific use cases. 
+
+**Core Comparison Table**
+
+| **Feature** | **Application Load Balancer (ALB)** | **Network Load Balancer (NLB)** | **Gateway Load Balancer (GLB)** |
+|---|---|---|---|
+| **OSI Layer** | Layer 7 (Application) | Layer 4 (Transport) | Layer 3 (Network / GENEVE) |
+| **Supported Protocols** | HTTP, HTTPS, WebSockets, gRPC | TCP, UDP, TLS | All IP traffic via GENEVE protocol |
+| **Traffic Inspection** | Content-based (URLs, hostnames, query strings, headers) | Connection-level (IP addresses, ports) | Packet-level / Third-party appliance inspection |
+| **Static IP Support** | No (uses DNS names) | Yes (1 static IP per Availability Zone) | Transparent network gateway |
+| **Performance** | High, suited for request-level routing | Ultra-low latency, millions of requests/sec | High throughput for appliance scaling |
+| **Key Integration** | AWS WAF, Lambda targets | AWS PrivateLink | Third-party firewalls and IDSs |
+
+**1. Application Load Balancer (ALB)**
+
+- **What it is:** A Layer 7 load balancer designed for web and microservices traffic. 
+- **How it works:** It inspects actual request content (such as HTTP headers, URL paths, host names, and query parameters) and routes traffic intelligently. 
+- **Best Use Cases:**
+  - Modern web applications and REST APIs.
+  - Microservice architectures running on Amazon ECS, EKS, or EC2.
+  - Scenarios requiring integration with **AWS Web Application Firewall (WAF)** or routing to AWS Lambda. 
+
+**2. Network Load Balancer (NLB)**
+
+- **What it is:** A Layer 4 load balancer built for extreme performance, high throughput, and ultra-low latency. 
+- **How it works:** It operates at the transport layer, forwarding TCP, UDP, and TLS packets without deeply parsing application payloads. It preserves the client's source IP address and offers static IP addresses per Availability Zone.
+- **Best Use Cases:**
+  - Real-time gaming, high-frequency trading platforms, and IoT workloads.
+  - Applications requiring a fixed/static public IP address for firewall whitelisting.
+  - Services exposing endpoints via **AWS PrivateLink**
+  - *Tip:* You can register an ALB behind an NLB if you need static IPs combined with Layer 7 routing features.
+
+**3. Gateway Load Balancer (GLB)**
+
+- **What it is:** A Layer 3/network-layer load balancer combined with a virtual network appliance gateway. 
+- **How it works:** It doesn't typically terminate client connections; instead, it transparently injects third-party virtual appliances (like firewalls, deep packet inspection [DPI] systems, and intrusion detection/prevention tools) into the network traffic flow using the GENEVE protocol.
+  - Deploying, scaling, and managing fleets of third-party security appliances across Amazon VPC boundaries.
+  - Centralized inspection of ingress, egress, and east-west traffic. 
 
 ### **14. What is Elastic Block Store (EBS) vs Simple Storage Service (S3) vs Elastic File System (EFS)?**
 **Answer:**
