@@ -333,6 +333,50 @@ The three primary managed load balancers under ELB are the **Application Load Ba
 
 ### **14. What is Elastic Block Store (EBS) vs Simple Storage Service (S3) vs Elastic File System (EFS)?**
 **Answer:**
+Amazon EBS, S3, and EFS are **three core storage services offered by AWS, each built for a different use case**. 
+
+## Quick Comparison Table
+
+| **Feature** | **Amazon EBS** | **Amazon S3** | **Amazon EFS** |
+| ----------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **Storage Type** | Block storage (virtual hard drive) | Object storage (flat file structure) | File storage (hierarchical NFS/POSIX) |
+| **Primary Access** | Attached to a **single** EC2 instance in one Availability Zone (AZ) | Accessed via HTTP/HTTPS API over the internet or AWS network | Mounted concurrently by **multiple** EC2 instances across multiple AZs |
+| **Performance / Speed** | Lowest latency, high IOPS (Tier 0) | Slower compared to block/file (Tier 3) | Moderate-to-high shared file performance |
+| **Max Capacity** | Up to 16 TiB per volume | Virtually unlimited (up to 5 TB per individual object) | Unlimited total size (47.9 TiB per single file) |
+| **Best Used For** | Boot volumes, transactional databases, high-performance local disks | Data lakes, backups, static websites, archiving (11 nines durability) | Shared web server fleets, content management systems (CMS), container storage |
+
+**Key Breakdown**
+
+#### 1. Amazon EBS (Elastic Block Store)
+
+- **What it is:** A virtual hard drive that you attach to a single Amazon EC2 instance.
+- **How it works:** It provides raw block-level storage that can be formatted with an operating system file system (like ext4 or NTFS). 
+- **Key traits:**
+  - Tied to a specific Availability Zone (though snapshots can be copied elsewhere).
+  - Offers the fastest, lowest-latency performance for a single machine. 
+- **Ideal for:** Operating system boot volumes and performance-heavy relational databases.
+
+#### 2. Amazon S3 (Simple Storage Service)
+
+- **What it is:** Object storage that saves data (files and metadata) in a flat structure inside "buckets". 
+- **How it works:** You interact with it via simple REST API calls over the web rather than mounting it as a traditional computer disk. 
+- **Key traits:**
+  - Massive scalability and extreme durability (11 nines: 99.999999999%).
+  - Not bootable and cannot be mounted as a file system directly by an OS kernel.
+  - Includes lifecycle policies to auto-archive cold data into cheaper tiers (like S3 Glacier). 
+- **Ideal for:** Backups, big data lakes, media distribution, and hosting static websites. 
+
+#### 3. Amazon EFS (Elastic File System)
+
+- **What it is:** A fully managed, shared file storage system using the NFSv4 protocol. 
+- **How it works:** Multiple EC2 instances, containers, or on-premises servers can mount and read/write to the exact same file system at the same time. 
+  - POSIX-compliant file system semantics (supports file locking and strong consistency).
+  - Automatically scales capacity up and down as you add or remove files without manual provisioning.
+  - Generally more expensive than S3 or EBS.
+- **Ideal for:** Shared Linux web server groups, content management platforms, and collaborative application directories. 
+
+### **15. What are EBS Volume Types (gp3, io2 Block Express, st1, sc1)?**
+**Answer:**
 Amazon Elastic Block Store (EBS) offers different volume types divided into **SSD-backed (for transactional workloads) and HDD-backed (for sequential, throughput-intensive workloads)**. 
 
 #### SSD-Backed Volume Types (Transactional & Low-Latency)
@@ -356,13 +400,13 @@ Amazon Elastic Block Store (EBS) offers different volume types divided into **SS
 - **Performance:** Up to 500 IOPS and 500 MiB/s throughput (125 GiB to 16 TiB size). 
 - **Best for:** Big data, Hadoop, Apache Spark, log processing, and data warehouses.
 
-### sc1 (Cold HDD)
+#### sc1 (Cold HDD)
 
 - **What it is:** The lowest-cost EBS volume type designed for infrequently accessed data that requires lower throughput.
 - **Performance:** Up to 250 IOPS and 250 MiB/s throughput (125 GiB to 16 TiB size).
 - **Best for:** Cold storage, mass data archives, backup sets, and data accessed rarely. 
 
-## Quick Comparison Table
+#### Quick Comparison Table
 
 | **Volume Type** | **Category** | **Max IOPS** | **Max Throughput** | **Max Size** | **Durability / Latency** |
 | --------------------- | ------------ | ------------ | ------------------ | ------------ | ------------------------ |
@@ -370,13 +414,6 @@ Amazon Elastic Block Store (EBS) offers different volume types divided into **SS
 | **io2 Block Express** | SSD | 256,000 | 4,000 MiB/s | 64 TiB | Sub-ms / 99.999% |
 | **st1** | HDD | 500 | 500 MiB/s | 16 TiB | Sequential-optimized |
 | **sc1** | HDD | 250 | 250 MiB/s | 16 TiB | Lowest cost / Infrequent |
-
-### **15. What are EBS Volume Types (gp3, io2 Block Express, st1, sc1)?**
-**Answer:**
-- **`gp3` (General Purpose SSD):** Baseline 3,000 IOPS and 125 MB/s throughput; independently provision IOPS and throughput without sizing volume size.
-- **`io2 Block Express` (Provisioned IOPS SSD):** Sub-millisecond latency, up to 256,000 IOPS and 4,000 MB/s throughput for mission-critical relational databases.
-- **`st1` (Throughput Optimized HDD):** Low-cost magnetic storage for high-throughput sequential big data workloads.
-- **`sc1` (Cold HDD):** Lowest-cost magnetic storage for infrequently accessed sequential files.
 
 ### **16. What is AWS EC2 Instance Metadata Service v2 (IMDSv2)?**
 **Answer:** A secure instance metadata service requiring a session-oriented token retrieved via `PUT` request with a mandatory `X-aws-ec2-metadata-token-ttl-seconds` header, completely mitigating Server-Side Request Forgery (SSRF) metadata theft attacks.
