@@ -416,17 +416,79 @@ Amazon Elastic Block Store (EBS) offers different volume types divided into **SS
 | **sc1** | HDD | 250 | 250 MiB/s | 16 TiB | Lowest cost / Infrequent |
 
 ### **16. What is AWS EC2 Instance Metadata Service v2 (IMDSv2)?**
-**Answer:** A secure instance metadata service requiring a session-oriented token retrieved via `PUT` request with a mandatory `X-aws-ec2-metadata-token-ttl-seconds` header, completely mitigating Server-Side Request Forgery (SSRF) metadata theft attacks.
+**Answer:**
+AWS EC2 Instance Metadata Service v2 (IMDSv2) is **Amazon's security-hardened version of the EC2 metadata endpoint that lets code running on an instance safely retrieve configuration and temporary IAM credentials**. 
+
+#### Key Security Enhancements in IMDSv2
+
+- **Session-Oriented Authentication:** Unlike IMDSv1 (which used simple unauthenticated HTTP GET requests), IMDSv2 requires code to first request a session token using an HTTP `PUT` request. 
+- **Mandatory Header Requirement:** This session token must be included as a header in all subsequent `GET` requests made to retrieve metadata. 
+- **Scoped to the Instance:** Session tokens are tied to the specific EC2 instance where they were created and cannot be used directly outside of it. 
+- **Mitigates Common Vulnerabilities:** It blocks a class of attacks like Server-Side Request Forgery (SSRF) vulnerabilities that previously allowed external parties to steal metadata or IAM credentials from IMDSv1 endpoints. 
+
+#### What Data Does IMDS Provide?
+
+- **Instance Identifiers:** Instance ID, AMI ID, instance type, and reservation ID.
+- **Network Details:** Local IPv4/IPv6 addresses, public IP/hostname, MAC address, and security groups.
+- **Placement & Tags:** Availability zone, region, and assigned resource tags.
+- **IAM Credentials:** Temporary, auto-rotating AWS security credentials associated with the instance's IAM role.
 
 ### **17. What is AWS Auto Scaling and Auto Scaling Groups (ASG)?**
-**Answer:** A service that automatically monitors compute utilization and dynamically adjusts the number of running EC2 instances to maintain predictable performance at the lowest possible cost.
+**Answer:**
+#### AWS Auto Scaling:
+
+- **Broader Service:** AWS Auto Scaling monitors your applications and automatically adjusts capacity across multiple AWS resources. 
+- **Supported Resources:** It works with Amazon EC2 (instances and Spot Fleets), Amazon ECS tasks, Amazon DynamoDB (tables and indexes), and Amazon Aurora Replicas. 
+- **Smart Scaling Plans:** It lets you create unified scaling plans that balance availability, performance, and cost using predictive scaling (machine learning that forecasts traffic up to 48 hours ahead). 
+
+#### Auto Scaling Group (ASG):
+
+- **Logical Collection:** An Auto Scaling Group (ASG) is a collection of Amazon EC2 instances treated as a single logical unit for scaling and management.
+- **Capacity Bounds:** You define three core settings for an ASG:
+  - **Minimum capacity:** The fewest number of instances that must run.
+  - **Maximum capacity:** The upper limit of instances allowed.
+  - **Desired capacity:** The target number of instances the ASG tries to maintain. 
+- **Automatic Healing:** It performs periodic health checks and automatically terminates and replaces unhealthy or failing EC2 instances. 
+- **Multi-AZ Balancing:** It automatically distributes and balances your EC2 instances across multiple Availability Zones (AZs) for high availability.
+
+#### Key Components of EC2 Auto Scaling
+
+- **Launch Template / Configuration:** Specifies the blueprint for new instances (such as the Amazon Machine Image [AMI], instance type, key pair, and security groups). 
+- **Auto Scaling Group (ASG):** The container and manager that enforces your capacity limits and multi-AZ layout. 
+- **Scaling Policies:** Rules that tell the ASG when to add or remove instances (such as target tracking, step scaling, or scheduled scaling).
 
 ### **18. Explain Auto Scaling Policies (Target Tracking, Step, Scheduled, Predictive).**
 **Answer:**
-- **Target Tracking:** Adjusts capacity to maintain a specific metric value (e.g., average CPU at 65% or ALB request count per target at 1,000).
-- **Step Scaling:** Scales capacity in defined increments based on CloudWatch alarm thresholds.
-- **Scheduled Scaling:** Pre-provisions capacity based on predictable recurring traffic schedules.
-- **Predictive Scaling:** Uses machine learning models to forecast future traffic and scale capacity in advance of spikes.
+#### Auto Scaling Policies in AWS
+
+Auto Scaling policies **automatically adjust the capacity of your cloud resources (like AWS EC2 instances or ECS tasks) to match real-time or anticipated demand**.
+
+**1. Target Tracking Scaling**
+
+- **What it does:** Works like a home thermostat. You pick a specific metric and a target value (e.g., maintain 60% average CPU utilization or 50 requests per target on an Application Load Balancer). 
+- **How it works:** AWS automatically calculates and manages the CloudWatch alarms and scaling adjustments needed to hold that target. It scales out quickly when the metric rises and scales in conservatively when the metric drops. 
+- **Best for:** Standard, simple, and adaptive scaling scenarios.
+
+**2. Step Scaling**
+
+- **What it does:** Responds to metric breaches using a graded set of rules or "steps" based on how far the metric deviates from a threshold. 
+- **How it works:** You define multiple thresholds and corresponding capacity adjustments. For example:
+  - If CPU is between 70% and 89%, add **1 instance**.
+  - If CPU is 90% or higher, add **2 instances** immediately.
+  - If CPU drops below 40%, remove **1 instance**. 
+- **Best for:** Applications needing fine-grained control and predictable behavior during large or varying traffic spikes. 
+
+**3. Scheduled Scaling**
+
+- **What it does:** Adjusts capacity based on a specific date, time, and recurring schedule.
+- **How it works:** You explicitly define start times, recurrence patterns, and desired, minimum, or maximum capacities. For instance, you can pre-scale an e-commerce platform ahead of a Friday flash sale or scale down overnight when traffic is low.
+- **Best for:** Known, predictable load patterns (e.g., batch processing jobs, daily business hours, or calendar-driven events).
+
+**4. Predictive Scaling**
+
+- **What it does:** Uses machine learning algorithms to analyze historical traffic patterns (from at least 14 days of CloudWatch data) and proactively scale out *before* the demand spike hits. 
+- **How it works:** It forecasts future traffic loads and automatically schedules capacity adjustments ahead of time, working alongside dynamic policies like target tracking. It can run in `ForecastOnly` mode to observe or active mode to take real action. 
+- **Best for:** Applications with recurring, cyclical traffic patterns (e.g., daily rush hours, weekly rhythms, or seasonal trends) where reactive scaling is too slow.
 
 ### **19. What is Spot Instance and how does Spot Fleet work?**
 **Answer:** Unused cloud compute capacity offered at up to **90% discount** compared to On-Demand rates. A Spot Fleet manages a mix of Spot and On-Demand instances across diverse instance types and AZs to maintain target capacity while minimizing interruption risk.
