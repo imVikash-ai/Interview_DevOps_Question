@@ -152,7 +152,23 @@ The three primary cloud service models are **IaaS**, **PaaS**, and **SaaS**:
 | **Typical Tier**            | Web / Edge Tier                     | Application / Database Tier                 |
 
 ### **6. What is an Internet Gateway (IGW)?**
-**Answer:** A horizontally scaled, redundant, highly available VPC component that enables communication between resources in public subnets and the internet without bandwidth bottlenecks.
+**Answer:** An **Internet Gateway (IGW)** is **a horizontally scaled, redundant, and fully managed cloud component—most commonly used in Amazon VPC—that allows two-way communication between a Virtual Private Cloud (VPC) and the public internet**. 
+
+**Key Functions**
+
+- **Bi-directional Traffic:** It serves as both an entry and exit point, allowing resources inside public subnets (such as web servers or EC2 instances) to reach the internet, and external users to connect to those resources.
+- **Network Address Translation (NAT):** It performs one-to-one NAT, translating the private IP address of an instance inside the VPC to a public IP address (and vice versa) for IPv4 traffic. 
+- **Support for Protocols:** It natively supports both IPv4 and IPv6 traffic.
+- **High Availability:** It is built with redundancy, scales automatically, and does not cause bandwidth constraints or availability risks to your network. 
+- **Cost:** An Internet Gateway itself is free to use on cloud platforms like AWS. 
+
+**How It Works in a VPC**
+
+To make a subnet use an IGW, specific networking components must be configured together:
+
+1. **Attachment:** The IGW must be attached to your VPC.
+2. **Route Tables:** The public subnet's route table must include a default route (`0.0.0.0/0`) pointing to the Internet Gateway.
+3. **Public IP & Security:** The target instance must have a public IPv4 address or an IPv6 address, and the security groups or network ACLs must allow the relevant inbound and outbound traffic. 
 
 ### **7. What is a NAT Gateway vs NAT Instance?**
 **Answer:**
