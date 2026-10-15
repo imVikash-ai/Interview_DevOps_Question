@@ -29,7 +29,7 @@ The three primary cloud service models are **IaaS**, **PaaS**, and **SaaS**:
 
 ### **2. Explain the Cloud Shared Responsibility Model across IaaS, PaaS, and Serverless.**
 **Answer:** 
-#### 1. Infrastructure as a Service (IaaS)
+#### =>. Infrastructure as a Service (IaaS)
 
 - **Examples:** Amazon EC2, Azure Virtual Machines, Google Compute Engine.
 - **CSP Responsibility ("Security *of* the cloud"):**
@@ -41,7 +41,7 @@ The three primary cloud service models are **IaaS**, **PaaS**, and **SaaS**:
   - Network firewalls, port configurations, and host-level network segmentation.
   - Data classification, client-side encryption, and Identity and Access Management (IAM). 
 
-#### 2. Platform as a Service (PaaS)
+#### =>. Platform as a Service (PaaS)
 
 - **Examples:** AWS Elastic Beanstalk, Azure App Service, Google App Engine. 
 - **CSP Responsibility ("Security *of* the cloud"):**
@@ -54,7 +54,7 @@ The three primary cloud service models are **IaaS**, **PaaS**, and **SaaS**:
   - User access controls, permissions, and IAM policies.
   - Data storage, backup strategies, and data encryption. 
 
-#### 3. Serverless / Function-as-a-Service (FaaS)
+#### =>. Serverless / Function-as-a-Service (FaaS)
 
 - **Examples:** AWS Lambda, Azure Functions, Google Cloud Functions. 
 - **CSP Responsibility ("Security *of* the cloud"):**
