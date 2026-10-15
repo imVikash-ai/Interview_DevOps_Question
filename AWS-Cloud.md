@@ -215,6 +215,7 @@ Both **NAT Gateways** and **NAT Instances** **allow resources in a private subne
 **VPC Peering** is **a networking connection between two Virtual Private Clouds (VPCs) that allows them to route traffic using private IPv4 or IPv6 addresses**. 
 
 Traffic between peered VPCs stays entirely on the cloud provider's internal backbone network (such as the AWS global network) and never travels over the public internet, offering high speed, low latency, and enhanced security.
+
 **Key Limitations**
 
 - **No transitive peering:** Peering relationships are strictly one-to-one. If VPC A is peered with VPC B, and VPC B is peered with VPC C, VPC A cannot communicate with VPC C through VPC B. 
@@ -226,7 +227,29 @@ Traffic between peered VPCs stays entirely on the cloud provider's internal back
 - **Single-cloud scope:** Peering only operates between VPCs within the same cloud provider (e.g., AWS to AWS). 
 
 ### **10. What is AWS Transit Gateway (TGW)?**
-**Answer:** A centralized hub-and-spoke cloud router connecting hundreds of VPCs, AWS Direct Connect links, and IPsec VPNs through a single managed gateway, supporting transitive routing and centralized network inspection.
+**Answer:** 
+
+AWS Transit Gateway (TGW) is **a managed cloud router and centralized networking service provided by Amazon Web Services**. It connects multiple Amazon Virtual Private Clouds (VPCs) and on-premises networks through a single, shared hub. 
+
+**How It Works**
+
+- **Hub-and-Spoke Model:** Instead of creating complex, hard-to-manage point-to-point (full-mesh) peering connections between every VPC and network, each resource attaches just once to the central Transit Gateway. 
+- **Layer 3 Routing:** It acts as a cloud router operating at the network layer, sending packets based on destination IP addresses using custom or default route tables. 
+- **Cross-Account Sharing:** Using **AWS Resource Access Manager (RAM)**, you can share a single Transit Gateway across different AWS accounts within your organization. 
+
+**Key Capabilities & Attachments**
+
+- **Resource Attachments:** Connects VPCs, AWS Site-to-Site VPN connections, Direct Connect gateways, Client VPN endpoints, and inter-region peering connections. 
+- **Transit Gateway Connect:** Integrates third-party SD-WAN appliances and network functions directly using GRE and BGP.
+- **Network Segmentation:** Uses multiple route tables, associations, and route propagation rules to isolate traffic between environments (such as separating production from development). 
+- **Equal Cost Multipath (ECMP):** Balances traffic and increases bandwidth across multiple paths or VPN tunnels.
+- **Multicast:** Supports native multicast routing for applications that require point-to-multipoint delivery. 
+
+**Main Benefits**
+
+- **Simplified Management:** Dramatically reduces the number of connections and route tables you must track as your cloud footprint grows.
+- **Global Connectivity:** Supports inter-region peering with encrypted traffic flowing over the high-speed global AWS backbone.
+- **Hybrid Cloud Access:** Lets a single VPN or Direct Connect attachment reach multiple attached VPCs simultaneously.
 
 ### **11. What is AWS PrivateLink (Interface VPC Endpoint)?**
 **Answer:** Enables private connectivity between VPCs, supported AWS services, and third-party SaaS applications using Elastic Network Interfaces (ENIs) with private IP addresses in your subnet, keeping traffic completely off the public internet.
