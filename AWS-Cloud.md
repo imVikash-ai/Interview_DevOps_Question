@@ -252,7 +252,24 @@ AWS Transit Gateway (TGW) is **a managed cloud router and centralized networking
 - **Hybrid Cloud Access:** Lets a single VPN or Direct Connect attachment reach multiple attached VPCs simultaneously.
 
 ### **11. What is AWS PrivateLink (Interface VPC Endpoint)?**
-**Answer:** Enables private connectivity between VPCs, supported AWS services, and third-party SaaS applications using Elastic Network Interfaces (ENIs) with private IP addresses in your subnet, keeping traffic completely off the public internet.
+**Answer:** AWS PrivateLink is **a technology that provides private connectivity between Virtual Private Clouds (VPCs), supported AWS services, partner/Marketplace services, and on-premises networks without exposing your traffic to the public internet**. 
+
+An **interface VPC endpoint** is a specific type of VPC endpoint powered by AWS PrivateLink. It places an Elastic Network Interface (ENI) with a private IP address directly into your chosen subnets, serving as an entry point for traffic destined for a target service. 
+
+**Key Characteristics**
+
+- **No Internet Exposure:** Traffic never traverses the public internet; it stays entirely within the secure global Amazon network. 
+- **No Gateways Required:** You do not need an Internet Gateway, NAT device, VPN connection, or AWS Direct Connect to reach the service.
+- **Elastic Network Interfaces (ENIs):** Each interface endpoint uses private IP addresses assigned from your subnet's IP range. 
+- **DNS Integration:** You can use private DNS hostnames so that standard API calls automatically route through the private endpoint instead of public endpoints. 
+- **Access Control:** You can attach IAM endpoint policies to control precisely who and what can access the connected service through the endpoint. 
+
+**Common Use Cases**
+
+- **Connecting to AWS Services:** Access services like Amazon ECS, Amazon ECR, Amazon Comprehend, or AWS Security Hub privately from private subnets.
+- **Cross-Account Services:** Connect your VPC to a Network Load Balancer (NLB) and VPC Endpoint Service hosted in a completely different AWS account. 
+- **SaaS & Marketplace Integration:** Consume third-party software-as-a-service (SaaS) applications hosted on AWS privately.
+- **On-Premises Hybrid Access:** Reach AWS or custom internal services from your on-premises data center via AWS Direct Connect or Site-to-Site VPN tied into your VPC.
 
 ### **12. What is an AWS Gateway VPC Endpoint?**
 **Answer:** A free route table entry connecting VPC subnets directly to **Amazon S3** and **Amazon DynamoDB** over AWS internal networks without using NAT Gateways or public IPs.
