@@ -333,9 +333,43 @@ The three primary managed load balancers under ELB are the **Application Load Ba
 
 ### **14. What is Elastic Block Store (EBS) vs Simple Storage Service (S3) vs Elastic File System (EFS)?**
 **Answer:**
-- **EBS:** Block storage volumes formatted with filesystems (ext4, XFS) attached to a single EC2 instance (low latency, high IOPS).
-- **S3:** Scalable object storage (binary payload + key + metadata) accessed via HTTP REST APIs with $99.999999999\%$ (11 9's) durability.
-- **EFS:** Fully managed POSIX-compliant Network File System (NFS) mountable concurrently across hundreds of compute instances (`ReadWriteMany`).
+Amazon Elastic Block Store (EBS) offers different volume types divided into **SSD-backed (for transactional workloads) and HDD-backed (for sequential, throughput-intensive workloads)**. 
+
+#### SSD-Backed Volume Types (Transactional & Low-Latency)
+
+#### gp3 (General Purpose SSD)
+
+- **What it is:** The default, all-purpose SSD volume for most workloads. It lets you scale IOPS and throughput independently of storage capacity. 
+- **Performance:** Up to 80,000 IOPS, 2,000 MiB/s throughput, and 1 GiB to 64 TiB size (with a baseline of 3,000 IOPS and 125 MiB/s included).
+- **Best for:** Most general applications, web servers, boot volumes, virtual desktops, and test/dev environments. 
+#### io2 Block Express (Provisioned IOPS SSD)
+
+- **What it is:** The highest-performance EBS storage engineered for mission-critical, low-latency, and high-intensity databases.
+- **Performance:** Up to 256,000 IOPS, 4,000 MiB/s throughput, 4 GiB to 64 TiB size, sub-millisecond latency, and 99.999% durability (Multi-Attach supported). 
+- **Best for:** Enterprise databases like SAP HANA, Oracle, and Microsoft SQL Server.
+
+#### HDD-Backed Volume Types (Throughput & Sequential Workloads)
+
+#### st1 (Throughput Optimized HDD)
+
+- **What it is:** A low-cost magnetic storage option optimized for large, sequential data access rather than small random I/O. 
+- **Performance:** Up to 500 IOPS and 500 MiB/s throughput (125 GiB to 16 TiB size). 
+- **Best for:** Big data, Hadoop, Apache Spark, log processing, and data warehouses.
+
+### sc1 (Cold HDD)
+
+- **What it is:** The lowest-cost EBS volume type designed for infrequently accessed data that requires lower throughput.
+- **Performance:** Up to 250 IOPS and 250 MiB/s throughput (125 GiB to 16 TiB size).
+- **Best for:** Cold storage, mass data archives, backup sets, and data accessed rarely. 
+
+## Quick Comparison Table
+
+| **Volume Type** | **Category** | **Max IOPS** | **Max Throughput** | **Max Size** | **Durability / Latency** |
+| --------------------- | ------------ | ------------ | ------------------ | ------------ | ------------------------ |
+| **gp3** | SSD | 80,000 | 2,000 MiB/s | 64 TiB | Single-digit ms |
+| **io2 Block Express** | SSD | 256,000 | 4,000 MiB/s | 64 TiB | Sub-ms / 99.999% |
+| **st1** | HDD | 500 | 500 MiB/s | 16 TiB | Sequential-optimized |
+| **sc1** | HDD | 250 | 250 MiB/s | 16 TiB | Lowest cost / Infrequent |
 
 ### **15. What are EBS Volume Types (gp3, io2 Block Express, st1, sc1)?**
 **Answer:**
