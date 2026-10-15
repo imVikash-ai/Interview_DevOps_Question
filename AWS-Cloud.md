@@ -459,8 +459,7 @@ AWS EC2 Instance Metadata Service v2 (IMDSv2) is **Amazon's security-hardened ve
 
 ### **18. Explain Auto Scaling Policies (Target Tracking, Step, Scheduled, Predictive).**
 **Answer:**
-#### Auto Scaling Policies in AWS
-
+#### Auto Scaling Policies in AWS:
 Auto Scaling policies **automatically adjust the capacity of your cloud resources (like AWS EC2 instances or ECS tasks) to match real-time or anticipated demand**.
 
 **1. Target Tracking Scaling**
@@ -491,12 +490,60 @@ Auto Scaling policies **automatically adjust the capacity of your cloud resource
 - **Best for:** Applications with recurring, cyclical traffic patterns (e.g., daily rush hours, weekly rhythms, or seasonal trends) where reactive scaling is too slow.
 
 ### **19. What is Spot Instance and how does Spot Fleet work?**
-**Answer:** Unused cloud compute capacity offered at up to **90% discount** compared to On-Demand rates. A Spot Fleet manages a mix of Spot and On-Demand instances across diverse instance types and AZs to maintain target capacity while minimizing interruption risk.
+**Answer:**
+An **Amazon EC2 Spot Instance** is an unused virtual server in the Amazon Web Services (AWS) cloud that you can rent at a steep discount—up to **90% off** the standard On-Demand price. A **Spot Fleet** is **an automated collection of Spot Instances (and optionally On-Demand instances) managed together through a single request to reach a target compute capacity**.
+
+#### Spot Instance:
+
+- **Spare Capacity:** AWS sells idle, unutilized data center compute capacity at fluctuating, discounted rates. 
+- **Disruption Risk:** AWS can reclaim a Spot Instance if it needs the capacity back for On-Demand customers. You receive a **2-minute warning** before the instance is terminated, stopped, or hibernated. 
+- **Best Uses:** Ideal for flexible, fault-tolerant workloads like batch processing, big data analytics, CI/CD pipelines, containerized tasks, and stateless web servers. Avoid using them for critical, single-instance databases. 
+
+#### How Does Spot Fleet Work?
+
+A **Spot Fleet** automates the provisioning and management of a pool of instances across multiple instance types, families, and Availability Zones (AZs):
+
+- **Single Request:** Instead of launching servers one-by-one, you define a target capacity (measured in instances, vCPUs, or memory units) using the **AWS EC2 Fleet Documentation**
+- **Diversification & Sourcing:** The fleet spreads your workload across different Spot pools (combinations of instance types and AZs) to lower the risk of mass interruptions and reduce costs. 
+- **Allocation Strategies:**
+  - **Lowest Price:** Provisions instances from the pool with the cheapest current Spot price.
+  - **Capacity Optimized / Price Capacity Optimized:** Balances price with availability to choose pools less likely to be interrupted.
+- **Capacity Maintenance:** If AWS terminates a Spot Instance due to a capacity shift, the Spot Fleet automatically launches a replacement instance to keep your target capacity intact (when configured to maintain capacity). 
+- **Note on Modern AWS Guidance:** While Spot Fleet is widely used, AWS generally recommends using **EC2 Fleet** or **Auto Scaling Groups** instead, as Spot Fleet relies on a legacy API.
 
 ### **20. What are Savings Plans vs Reserved Instances (RIs)?**
 **Answer:**
-- **Compute Savings Plans:** Flexible discount model (up to 72%) applied automatically across EC2, Lambda, and Fargate regardless of instance family, region, or OS in exchange for a 1- or 3-year hourly spend commitment.
-- **EC2 Instance Savings Plans / Standard RIs:** Higher discount tied to a specific instance family in a specific region.
+Savings Plans and Reserved Instances (RIs) are cloud pricing models—primarily used in AWS—that offer deep discounts off On-Demand rates in exchange for a 1-year or 3-year usage commitment. The main difference is **how** you commit: **Savings Plans lock in an hourly dollar spend for flexibility, whereas Reserved Instances lock in a specific configuration for maximum rigidity and capacity guarantees**.
+
+#### Key Differences
+
+| **Feature** | **Savings Plans (SPs)** | **Reserved Instances (RIs)** |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| **Commitment Unit** | A fixed dollar amount per hour (e.g., $10/hour) | A specific instance type, family, and size (e.g., `m5.large`) |
+| **Flexibility** | High; automatically applies across instance families, sizes, operating systems, regions, and services like Fargate or Lambda (Compute SP). | Low to Moderate; Standard RIs are locked to a family/region, while Convertible RIs allow manual exchanges. |
+| **Capacity Reservation** | No capacity reservation | Zonal RIs reserve physical compute capacity in a specific Availability Zone. |
+| **Maximum Discount** | Up to 72% off On-Demand | Up to 72%–75% off On-Demand (Standard RIs) |
+| **Service Coverage** | EC2, AWS Fargate, AWS Lambda, SageMaker, and select Database SPs | EC2, RDS, Redshift, OpenSearch, ElastiCache, and DynamoDB |
+| **Resale / Exit** | Cannot be resold or traded | Standard RIs can be listed on the AWS RI Marketplace |
+
+**Types of Each Model**
+
+#### AWS Savings Plans
+
+- **Compute Savings Plans:** Offer up to 66% savings. They apply automatically across any EC2 instance family, size, OS, region, and extend to AWS Fargate and AWS Lambda. 
+- **EC2 Instance Savings Plans:** Offer higher savings (up to 72%). They require a commitment to a specific EC2 instance family in a chosen region, though sizes and OS can change. 
+- **Specialized Savings Plans:** Include options for Amazon SageMaker and Database workloads. 
+
+#### AWS Reserved Instances
+
+- **Standard RIs:** Provide the highest discount (up to 72%–75%), but are rigid and cannot be changed after purchase. Zonal variants lock in physical capacity.
+- **Convertible RIs:** Offer a lower discount than Standard RIs, but allow you to exchange them for different instance configurations over time. 
+- **Scheduled RIs:** Designed for predictable workloads that run on a specific recurring time schedule.
+
+**When to Use Which**
+
+- **Choose Savings Plans if:** Your architecture is evolving, your team frequently rightsizes or moves to newer instance generations (like Graviton), or you run a mix of EC2, Fargate, and Lambda where you want automatic discount application.
+- **Choose Reserved Instances if:** You require a guaranteed capacity reservation in a specific Availability Zone for critical production databases, or you are using services not covered by Savings Plans (such as Amazon Redshift or older RDS instance generations).
 
 ### **21. What is AWS Elastic Container Service (ECS)?**
 **Answer:** A fully managed container orchestration service developed by AWS that runs Docker containers using AWS-native IAM, VPC, and CloudWatch primitives without Kubernetes complexity.
