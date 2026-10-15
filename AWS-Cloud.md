@@ -272,7 +272,21 @@ An **interface VPC endpoint** is a specific type of VPC endpoint powered by AWS 
 - **On-Premises Hybrid Access:** Reach AWS or custom internal services from your on-premises data center via AWS Direct Connect or Site-to-Site VPN tied into your VPC.
 
 ### **12. What is an AWS Gateway VPC Endpoint?**
-**Answer:** A free route table entry connecting VPC subnets directly to **Amazon S3** and **Amazon DynamoDB** over AWS internal networks without using NAT Gateways or public IPs.
+**Answer:** An **AWS Gateway VPC Endpoint** is **a virtual gateway that you specify as a target in your VPC route table to allow your resources to privately access Amazon S3 and Amazon DynamoDB without using an internet gateway, NAT device, or public IP address**.
+
+**Key Characteristics**
+
+- **Supported Services:** Currently restricted exclusively to **Amazon S3** and **Amazon DynamoDB**.
+- **Network Traffic:** Traffic stays entirely within the global AWS backbone network and never traverses the public internet. 
+- **No ENI Required:** Unlike interface endpoints powered by AWS PrivateLink, gateway endpoints do not use Elastic Network Interfaces (ENIs) or consume private IP addresses from your subnets. 
+- **Route Table Integration:** Automatically inserts an unmodifiable route into your selected VPC route tables using a prefix list for the target service. 
+- **Cost:** There is **no additional charge** for creating or using a gateway VPC endpoint. 
+
+**Main Benefits**
+
+- **Enhanced Security:** Keeps instances in private subnets isolated from the public internet while still letting them read and write to S3 buckets or DynamoDB tables.
+- **Access Control:** You can attach **VPC endpoint policies** (written in JSON) to restrict or fine-tune which users, roles, or resources can access the services through the endpoint. 
+- **Performance & Reliability:** Reduces latency and avoids bandwidth bottlenecks associated with internet gateways or NAT devices.
 
 ### **13. What is Elastic Load Balancing (ALB vs NLB vs GLB)?**
 **Answer:**
