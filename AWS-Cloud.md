@@ -1350,15 +1350,66 @@ You can route S3 event notifications to four main AWS services:
 - **Cost:** The S3 Event Notification feature itself is free, though you pay standard usage charges for the downstream services used (Lambda, SQS, SNS, or EventBridge).
 - **Loop Prevention:** To avoid infinite loops, ensure that any automated function writing data back to S3 does not target the exact same bucket or prefix that triggered the original event
 
-### **56. What is Amazon EventBridge?**
-**Answer:** A serverless event bus that ingests events from AWS services, custom microservices, and SaaS partners (Datadog, PagerDuty), routing them to downstream targets using declarative JSON filtering rules.
+### **54. What is Amazon EventBridge?**
+**Answer:** 
+Amazon EventBridge is **a serverless event bus service from Amazon Web Services (AWS) that connects application components, software-as-a-service (SaaS) apps, and AWS services using real-time data events**. 
 
-### **57. What is Amazon SQS (Standard vs FIFO)?**
+#### How It Works
+
+EventBridge operates on an **event-driven architecture**, functioning like a smart postal sorting facility: 
+
+- **Events:** A signal that a system state has changed (e.g., an S3 file upload, a new customer signup, or a third-party SaaS alert).
+- **Event Buses:** An ingestion pipeline that receives events (includes a default bus for AWS services, custom buses for your apps, and partner buses for SaaS apps).
+- **Rules:** Conditions that inspect incoming events and match relevant ones to specific destinations.
+- **Targets:** The downstream services that process the matching event, such as **AWS Lambda.**
+
+#### Core Features
+
+- **EventBridge Pipes:** Provides point-to-point integrations between event producers and consumers with built-in filtering and transformation without custom code.
+- **EventBridge Scheduler:** A serverless scheduler that triggers millions of tasks or API operations using cron or rate expressions.
+- **Schema Registry:** Stores and discovers event structures so developers can write code that consumes events cleanly.
+- **Archive and Replay:** Lets you save events and replay them later for testing or recovering from failures.
+
+#### Key Use Cases
+
+- **Microservices Decoupling:** Build loosely coupled applications where services react independently without direct, fragile point-to-point API calls. 
+- **SaaS Integrations:** Ingest real-time data directly from providers like Zendesk, Datadog, or PagerDuty. 
+- **Workflow Automation & Scheduling:** Trigger periodic maintenance jobs, report generation, or infrastructure compliance checks automatically. 
+- **Security & Audit Response:** Route security alerts from services like AWS GuardDuty or AWS Config to automated remediation workflows.
+
+### **55. What is Amazon SQS (Standard vs FIFO)?**
 **Answer:**
-- **Standard SQS:** Unlimited throughput, at-least-once message delivery (occasional duplicate messages), best-effort ordering.
-- **FIFO SQS:** Strictly first-in-first-out ordering, exactly-once processing (deduplication IDs), limited throughput (3,000 msgs/sec with batching).
 
-### **58. What is Amazon SNS (Simple Notification Service)?**
+Amazon Simple Queue Service (SQS) is **a fully managed message queuing service by AWS that lets you decouple and scale microservices, distributed systems, and serverless applications**. 
+
+AWS offers two types of SQS queues: **Standard** and **FIFO**.
+
+#### Key Differences at a Glance
+
+| **Feature** | **Standard Queues** | **FIFO Queues** |
+|---|---|---|
+| **Ordering** | **Best-effort ordering** (messages may occasionally arrive out of order) | **Strict First-In-First-Out** ordering per message group |
+| **Delivery & Processing** | **At-least-once delivery** (duplicates can occur) | **Exactly-once processing** (with 5-minute deduplication) |
+| **Throughput** | **Nearly unlimited** transactions per second (TPS) | **300 messages/sec** (or **3,000/sec** with batching; higher in high-throughput mode) |
+| **Queue Name Suffix** | Any name (e.g., `my-queue`) | Must end in `.fifo` (e.g., `my-queue.fifo`) |
+| **Dead-Letter Queue (DLQ)** | Must be a Standard DLQ | Must be a FIFO DLQ |
+
+#### Standard Queues
+
+- **Throughput:** Supports a nearly unlimited number of API calls per second.
+- **Ordering:** Provides best-effort ordering; messages may be delivered in a different order than sent.
+- **Duplicates:** Guarantees at-least-once delivery, meaning network delays or retries can cause duplicate messages. Your application must be **idempotent** (safe to process the same message more than once). 
+- **Best Used For:** High-volume scenarios where order and minor duplication do not matter, such as log aggregation, metric collection, or background job processing. 
+
+#### FIFO (First-In-First-Out) Queues
+
+- **Throughput:** Default limit of 300 messages per second (or up to 3,000 messages per second using batching of 10).
+- **Ordering:** Ensures messages are sent and received in strict sequential order. 
+- **Message Group ID:** Uses a `MessageGroupId` to group related messages. Ordering is strictly preserved within the same group, while different groups can run in parallel.
+- **Deduplication:** Automatically discards duplicate messages sent with the same deduplication ID within a 5-minute window. 
+- **Best Used For:** Workflows where sequence and uniqueness are critical, such as financial transactions, order processing, and state machine updates. 
+
+### **56. What is Amazon SNS (Simple Notification Service)?**
 **Answer:** A fully managed pub/sub messaging service that coordinates message delivery to thousands of subscriber endpoints (Lambda, SQS, HTTP webhooks, SMS, email).
 
 ### **59. What is AWS Step Functions?**
