@@ -848,13 +848,54 @@ AWS Site-to-Site VPN is **a fully managed service from Amazon Web Services that 
 - **Federation & Single Sign-On (SSO)**: Connect corporate directories (like Microsoft Active Directory) or external identity providers so employees can log in using existing credentials. 
 - **Temporary Credentials**: Use roles or AWS Security Token Service (STS) to issue short-lived credentials instead of sharing permanent secret keys.
 
-### **36. What is an IAM Policy and what are its core JSON elements?**
-**Answer:** A JSON document defining authorization:
-- `Effect`: `Allow` or `Deny`.
-- `Principal`: The user, account, or service granted or denied access.
-- `Action`: The specific API operations (e.g., `s3:GetObject`).
-- `Resource`: The Amazon Resource Name (ARN) targeted.
-- `Condition`: Contextual constraints (e.g., source IP, MFA status).
+### **34. What is an IAM Policy and what are its core JSON elements?**
+**Answer:**  An IAM (Identity and Access Management) policy is **a document in Amazon Web Services (AWS) that defines permissions using JavaScript Object Notation (JSON)**. It specifies who has what type of access to which AWS resources and under what conditions.
+
+**Core JSON Elements of an IAM Policy**
+
+An IAM policy document contains top-level elements and one or more individual statement blocks.
+
+**Top-Level Elements**
+
+- **`Version`**: Specifies the language version of the policy syntax (the standard current version is `"2012-10-17"`).
+- **`Statement`**: The main container for the policy rules. It can be a single statement object or an array of statement objects. 
+
+**Statement-Level Elements**
+
+Inside each statement block, the core elements define the actual permission rules:
+
+- **`Sid` (Statement ID - Optional)**: An optional human-readable identifier or name for a specific statement. 
+- **`Effect`**: Determines whether the statement allows or denies access. The values are `"Allow"` or `"Deny"`. 
+- **`Principal` (Required in resource-based/trust policies)**: Specifies the account, user, role, or federated identity user who is allowed or denied access (not used in standard identity-based policies). 
+- **`Action`**: A list of specific API operations that are allowed or denied (e.g., `s3:GetObject` or `iam:ListAccessKeys`). It can also use wildcards (`*`).
+- **`NotAction`**: Used to invert an `Action` element, matching everything *except* the listed API operations. 
+- **`Resource`**: Specifies the target AWS resource(s) identified by an Amazon Resource Name (ARN), such as a specific S3 bucket or DynamoDB table. 
+- **`NotResource`**: Used to match every resource *except* the ones explicitly listed by ARN. 
+- **`Condition` (Optional)**: Sets rules for when the policy is in effect, such as requiring Multi-Factor Authentication (MFA) or restricting access to a specific IP address.
+
+**Example Structure**
+
+**json**
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowS3ReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::example-bucket",
+        "arn:aws:s3:::example-bucket/*"
+      ]
+    }
+  ]
+}
+```
 
 ### **37. What is IAM Policy Evaluation Logic?**
 **Answer:**
