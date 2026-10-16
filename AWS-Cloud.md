@@ -759,14 +759,76 @@ Route 53 offers multiple routing policies to control how DNS queries are answere
 - **Edge Computing:** Runs serverless code closer to users using **CloudFront Functions** or **AWS Lambda@Edge** to customize requests and responses. 
 - **Pay-As-You-Go Pricing:** Charges are based on data transferred out from edge locations and total HTTP/HTTPS requests made, with a free tier available for new accounts. 
 
-### **32. What is AWS Global Accelerator?**
-**Answer:** A Layer 4 networking service providing static Anycast IP addresses that ingests client traffic into the closest edge PoP and routes it over the private AWS global fiber backbone directly to backend ALBs/EC2 instances.
+### **30. What is AWS Global Accelerator?**
+**Answer:**
+AWS Global Accelerator is **a networking service that improves the performance and availability of your applications for local and global users by routing traffic over the AWS Global Infrastructure**
 
-### **33. What is AWS Direct Connect (DX)?**
-**Answer:** A dedicated private physical fiber connection linking an on-premise data center directly to the AWS global network, bypassing the public internet to provide consistent bandwidth and low latency.
+**How It Works**
 
-### **34. What is AWS Site-to-Site VPN?**
-**Answer:** An encrypted IPsec VPN tunnel connecting an on-premise network gateway (Customer Gateway) to an AWS Virtual Private Gateway (VGW) or Transit Gateway over the public internet.
+- **Static Anycast IP Addresses:** You receive a set of two static IP addresses (IPv4 and optionally IPv6) that act as a fixed, global entry point for your application. These IPs are announced simultaneously from multiple **AWS Global Accelerator features** edge locations worldwide. 
+- **Edge Ingress:** When users connect to your app, traffic enters the closest AWS edge location and travels across the private AWS global network backbone instead of the congested public internet. 
+- **Layer 4 Support:** Unlike Amazon CloudFront (which focuses on HTTP/HTTPS), Global Accelerator operates at Layer 4 of the OSI model and supports both TCP and UDP protocols (making it ideal for gaming, IoT, and VoIP). 
+
+**Key Types of Accelerators**
+
+- **Standard Accelerator:** Directs user traffic to the optimal regional endpoint (such as an Application Load Balancer, Network Load Balancer, or EC2 instance) based on health, client location, and traffic dial policies.
+- **Custom Routing Accelerator:** Allows you to map one or more users to a specific destination among many destinations in a VPC subnet down to specific private IP addresses and ports.
+
+**Core Benefits**
+
+- **Instant Regional Failover:** Continuously monitors endpoint health and redirects traffic away from failing or unhealthy regions in under a minute. 
+- **No DNS Caching Delays:** Bypasses client-side DNS caching issues because the static entry point never changes.
+- **Traffic Control & Dials:** Lets you use traffic dials to fine-tune regional percentages for blue/green deployments, canary releases, or active-active disaster recovery. 
+
+### **31. What is AWS Direct Connect (DX)?**
+**Answer:** 
+**AWS Direct Connect (DX)** is **a cloud service from Amazon Web Services that creates a dedicated, private network connection between your on-premises data center, office, or colocation environment and AWS**. 
+
+By using standard Ethernet fiber-optic cables, it completely bypasses your Internet Service Provider (ISP) and the public internet. 
+
+**How It Works**
+
+- **Physical Link:** A high-speed fiber cable links your local router directly to an AWS Direct Connect router at a designated Direct Connect location (Point of Presence or PoP).
+- **Virtual Interfaces (VIFs):** Over this physical connection, you build logical virtual interfaces to route your traffic:
+  - **Private VIF:** Connects to your Amazon VPC using private IP addresses.
+  - **Public VIF:** Connects to global public AWS services like Amazon S3 or DynamoDB.
+  - **Transit VIF:** Connects to an AWS Transit Gateway to manage multi-VPC and multi-region traffic. 
+- **Connection Types:** You can choose a **Dedicated Connection** (1 Gbps, 10 Gbps, 100 Gbps, or 400 Gbps) directly from AWS or a **Hosted Connection** (from 50 Mbps up to 25 Gbps) provisioned through an **AWS Direct Connect Partner**
+
+**Key Benefits**
+
+- **Consistent Performance:** Bypassing the public internet avoids network congestion and latency spikes, delivering predictable throughput. 
+- **Enhanced Security:** Traffic stays on the private AWS global network rather than traversing the open internet. MACsec encryption is also supported on select dedicated ports. 
+- **Cost Efficiency:** Data transfer rates out of AWS via Direct Connect are typically lower than standard internet data transfer costs, particularly for high-volume workloads. 
+
+#### AWS Direct Connect vs. Site-to-Site VPN
+
+| **Feature** | **AWS Direct Connect** | **AWS Site-to-Site VPN** |
+|---|---|---|
+| **Network Path** | Private, dedicated fiber-optic link (bypasses public internet) | Encrypted tunnel routed over the public internet |
+| **Performance** | High bandwidth, low and consistent latency | Variable latency depending on public internet conditions |
+| **Setup Time** | Slower (requires physical colocation and cross-connect setup) | Faster (configured purely via software and internet) |
+| **Best For** | High-throughput, mission-critical, or real-time hybrid workloads | Lower-budget, backup, or quick-deployment connections |
+
+### **32. What is AWS Site-to-Site VPN?**
+**Answer:** 
+AWS Site-to-Site VPN is **a fully managed service from Amazon Web Services that creates a secure, encrypted connection between your on-premises network (such as a data center or branch office) and your Amazon Virtual Private Clouds (VPCs) or an AWS Transit Gateway over the public internet**. 
+
+**Key Components**
+
+- **Customer Gateway Device:** A physical device or software application on your local network that initiates and terminates the VPN connection.
+- **Customer Gateway:** An AWS resource that represents your on-premises customer gateway device in the AWS console. 
+- **Target Gateway (Virtual Private Gateway or Transit Gateway):** The VPN endpoint on the AWS side. A **Virtual Private Gateway** connects to a single VPC, while a **Transit Gateway** acts as a hub to connect multiple VPCs and on-premises networks. 
+- **VPN Tunnels:** Every Site-to-Site VPN connection automatically provides **two simultaneous VPN tunnels** across different Availability Zones for high availability and automatic failover.
+
+**Core Features & Capabilities**
+
+- **IPSec Encryption:** Uses Internet Protocol Security (IPSec) tunnels to protect data in transit between your site and AWS.
+- **Routing Options:** Supports **static routing** or **dynamic routing** using Border Gateway Protocol (BGP) for automated path selection and failover.
+- **High Availability & Redundancy:** If one tunnel or underlying AWS endpoint fails, traffic automatically switches to the second tunnel.
+- **Accelerated VPN:** Integrates with **AWS Global Accelerator** to route traffic through the nearest AWS edge location for better performance over long distances.
+- **Private IP VPN:** Allows you to run Site-to-Site VPN connections over **AWS Direct Connect** using private RFC1918 IP addresses instead of public endpoints.
+- **Monitoring:** Integrates with Amazon CloudWatch to track tunnel status, bandwidth, and network health
 
 ### **35. What is AWS IAM (Identity and Access Management)?**
 **Answer:** A service that centrally manages access permissions and authentication for users, groups, and compute workloads across AWS services.
