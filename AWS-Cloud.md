@@ -1193,17 +1193,74 @@ AWS Shield Standard and AWS Shield Advanced are **two tiers of Amazon Web Servic
 - **AWS Integration:** Automatically aggregates findings into the **AWS Security Hub**, sends events to Amazon EventBridge, and scales across multiple accounts via **AWS Organizations**.
 - **CIS Benchmarks:** Assesses EC2 instances against Center for Internet Security (CIS) hardening standards
 
-### **51. What is Amazon S3 Storage Classes (Standard, Infrequent Access, Glacier, Intelligent-Tiering)?**
+### **49. What is Amazon S3 Storage Classes (Standard, Infrequent Access, Glacier, Intelligent-Tiering)?**
 **Answer:**
-- **Standard:** High-throughput, low-latency for frequently accessed data.
-- **Standard-IA:** Lower storage cost, retrieval fee per GB for data accessed less frequently.
-- **Glacier Flexible / Deep Archive:** Lowest cost for archival storage (retrieval times from minutes to hours).
-- **Intelligent-Tiering:** Automatically moves objects between tiers based on access patterns with zero operational overhead and no retrieval fees.
+**Amazon S3 (Simple Storage Service)** is **a fully managed cloud-based object storage service offered by Amazon Web Services (AWS)**. It is designed to store, secure, and retrieve any amount of data from anywhere on the internet.
 
-### **52. What is Amazon S3 Versioning and MFA Delete?**
+#### Core Concepts
+
+- **Buckets:** Containers used to store objects. Every object in S3 must reside in a bucket, which has a unique global name and is created in a specific AWS Region. 
+- **Objects:** The fundamental entities stored in S3 (such as images, videos, documents, or backups). An object consists of the actual file data, a unique identifier (key), and associated metadata. 
+- **File Size & Scale:** Individual files can range from 0 bytes up to 5 TB in size, with virtually unlimited total storage capacity. 
+
+#### Amazon S3 Storage Classes:
+
+Amazon S3 (Simple Storage Service) **provides various storage classes designed to balance cost, performance, and access frequency**.
+
+#### 1. S3 Standard
+
+- **Use Case:** General-purpose storage for active, frequently accessed data. 
+- **Features:** High durability (99.999999999% across multiple Availability Zones), high availability (99.99%), and low latency. 
+- **Cost:** Highest storage rate, with no retrieval fees. 
+
+#### 2. Infrequent Access (IA) Classes
+
+- **S3 Standard-IA:** For data that is accessed less frequently (monthly) but requires rapid, millisecond access when needed. Data is stored across multiple Availability Zones. Requires a 30-day minimum storage duration. 
+- **S3 One Zone-IA:** For infrequently accessed data that does not need multiple Availability Zone resilience (stored in a single AZ), making it lower in cost than Standard-IA. Requires a 30-day minimum storage duration. 
+
+#### 3. S3 Intelligent-Tiering
+
+- **Use Case:** Data with unknown, changing, or unpredictable access patterns.
+- **Features:** Automatically moves objects between access tiers (Frequent, Infrequent, Archive Instant Access, and deeper archive tiers) based on how often you access them. 
+- **Cost:** Incurs a small monthly monitoring and automation fee per object, saving money by dropping inactive data into cheaper tiers without performance impact. 
+
+#### 4. Amazon S3 Glacier (Archive & Long-Term Storage)
+
+- **S3 Glacier Instant Retrieval:** For long-lived archive data that is rarely accessed (e.g., once a quarter) but still requires millisecond retrieval. Requires a 90-day minimum storage duration.
+- **S3 Glacier Flexible Retrieval (formerly S3 Glacier):** For archives accessed once or twice a year, with retrieval times ranging from minutes to hours (Expedited, Standard, or Bulk options). Requires a 90-day minimum storage duration.
+- **S3 Glacier Deep Archive:** The lowest-cost storage class for long-term retention and digital preservation (accessed once or twice a year), with retrieval times of 12 to 48 hours. Requires a 180-day minimum storage duration. 
+
+### **50. What is Amazon S3 Versioning and MFA Delete?**
 **Answer:**
-- **Versioning:** Keeps multiple historical variants of an object in the same bucket, protecting against accidental overwrites or deletions.
-- **MFA Delete:** Requires physical multi-factor authentication codes to permanently delete an object version.
+
+**Amazon S3 Versioning** and **MFA Delete** are **two critical data protection features provided by Amazon Web Services (AWS) to guard against accidental data loss, malicious overrides, and ransomware attacks**. 
+
+While **S3 Versioning** preserves old copies of your files, **MFA Delete** acts as an unbreakable padlock preventing those older copies from being permanently destroyed without physical multi-factor authentication.
+
+#### 1. Amazon S3 Versioning
+
+Amazon S3 Versioning allows you to keep **multiple variations of an object** in the same bucket. Instead of overwriting or permanently deleting a file, S3 creates a history of changes. 
+- **How Overwrites Work:** If you upload a new file with the exact same name as an existing file, S3 saves the new file as the "current version" and pushes the old file into a "noncurrent version" state. 
+- **How Deletions Work:** If a user deletes a file normally, S3 doesn't actually erase the data. Instead, it inserts a **Delete Marker** on top of the stack. To the user, the file looks gone (it returns a 404 error). However, the owner can easily restore the file by simply deleting that Delete Marker.
+- **Cost Factor:** You pay standard storage rates for each full version of the object retained. It does not save diffs or deltas. 
+
+#### 2. Amazon S3 MFA Delete
+
+While Versioning stops accidental deletions, a rogue admin or a compromised access key could still permanently destroy data by explicitly targeting specific `versionId` tags.
+
+When MFA Delete is enabled, **two forms of authentication are required** to perform destructive actions: your standard AWS credentials AND a six-digit code from a physical or virtual MFA device. 
+
+**MFA Delete is strictly required for two specific actions:**
+
+1. **Permanently deleting** a specific object version. 
+2. **Changing the versioning state** of the bucket (e.g., trying to turn versioning off). 
+
+| **Feature / Rule** | **S3 Versioning** | **MFA Delete** |
+|---|---|---|
+| **Primary Purpose** | Retain data history and recover from accidental overrides. | Prevent rogue or compromised users from permanently purging history. |
+| **Prerequisites** | None (can be turned on for any standard bucket). | **Requires S3 Versioning** to be enabled first. |
+| **Who can enable it?** | Bucket owner and authorized IAM users/roles. | **Only the AWS Root Account Owner**. |
+| **How to enable it?** | AWS Management Console, CLI, or API. | **AWS CLI or Rest API only** (cannot use the AWS Console). |
 
 ### **53. What is S3 Object Lock and WORM Storage?**
 **Answer:** Implements Write-Once-Read-Many (WORM) storage, preventing objects from being deleted or overwritten by any user (including the AWS root account) for a fixed retention period.
