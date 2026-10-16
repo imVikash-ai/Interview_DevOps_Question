@@ -1114,13 +1114,53 @@ AWS WAF integrates directly with several services, including:
 - **Managed Rules:** Offers pre-configured rule groups managed by AWS and trusted security partners to deploy quick protections.
 - **Custom Rules:** Lets you craft rules based on IP addresses, geographic locations, HTTP headers, query strings, and custom URIs. 
 
-### **47. What is AWS Shield Standard vs Shield Advanced?**
+### **45. What is AWS Shield Standard vs Shield Advanced?**
 **Answer:**
-- **Shield Standard (Free):** Automatic protection against Layer 3/4 DDoS attacks (SYN floods, UDP reflection).
-- **Shield Advanced (Paid):** 24/7 access to AWS DDoS Response Team (SRT), financial DDoS cost spike protection, and advanced Layer 7 attack analytics.
+AWS Shield Standard and AWS Shield Advanced are **two tiers of Amazon Web Services’ managed Distributed Denial of Service (DDoS) protection service**, which guards applications against attacks that exhaust network, compute, or application resources. 
 
-### **48. What is Amazon GuardDuty?**
-**Answer:** An intelligent threat detection service that continuously analyzes CloudTrail events, VPC Flow Logs, DNS logs, and EKS audit logs via machine learning to detect compromised instances and unauthorized crypto-mining.
+#### AWS Shield Standard
+
+- **Cost:** Included automatically and free of charge for all AWS customers. 
+- **Protection Level:** Defends against common, high-volume network- and transport-layer (Layer 3 and Layer 4) attacks, such as SYN floods, UDP floods, and reflection/amplification attacks.
+- **Detection & Mitigation:** Uses static thresholds, traffic signatures, and anomaly algorithms with always-on monitoring and automatic inline mitigation. 
+- **Covered Services:** Works seamlessly with Amazon CloudFront and Amazon Route 53. 
+
+#### AWS Shield Advanced
+
+- **Cost:** Paid subscription tier costing **$3,000 per month** with a 1-year commitment, plus standard data transfer fees.
+- **Protection Level:** Expands protection to Layer 7 (application layer) as well as enhanced defenses for Layer 3 and Layer 4.
+- **Covered Services:** Protects specific high-value resources including Amazon EC2 instances, Elastic Load Balancing (ELB) load balancers, Amazon CloudFront distributions, AWS Global Accelerator, and Amazon Route 53 hosted zones.
+- **Detection & Mitigation:** Uses health-based detection tied to CloudWatch alarms and Route 53 health checks to spot low-and-slow HTTP floods and complex application-layer attacks.
+- **AWS WAF Integration:** Automatically generates and manages AWS WAF (Web Application Firewall) rules to mitigate Layer 7 attacks, with application-layer DDoS protection included for up to 50 billion WAF requests per month.
+- **Support & Human Response:** Provides 24/7 access to the specialized AWS **DDoS Response Team (DRT)** during active high-severity attacks.
+- **DDoS Cost Protection:** Offers financial protection against scaling charges (such as sudden EC2 or ELB auto-scaling spikes caused by a DDoS event). 
+
+#### Key Comparison
+
+| **Feature** | **AWS Shield Standard** | **AWS Shield Advanced** |
+|---|---|---|
+| **Price** | Free (automatic) | $3,000 / month + commitment |
+| **OSI Layers Covered** | Layer 3 & Layer 4 (Network/Transport) | Layer 3, Layer 4, & Layer 7 (Application) |
+| **Detection Type** | Static thresholds & inline filtering | Health-based & custom anomaly detection |
+| **WAF Integration** | Manual setup required | Automatic rule generation & L7 mitigation |
+| **Human Support** | Standard AWS support channels | 24/7 access to the DDoS Response Team (DRT) |
+| **Cost Protection** | None | Financial coverage for traffic-scaling spikes |
+
+### **46. What is Amazon GuardDuty?**
+**Answer:** 
+**Amazon GuardDuty** is **a managed threat detection service that continuously monitors your Amazon Web Services (AWS) accounts, workloads, and data for malicious activity and unauthorized behavior**. 
+
+**How It Works**
+
+- **Data Ingestion:** Automatically collects and analyzes foundational logs and telemetry—including AWS CloudTrail events, Amazon VPC Flow Logs, and DNS query logs—without requiring agents or extra infrastructure. 
+- **Intelligence & AI:** Uses machine learning, anomaly detection, and integrated threat intelligence (such as lists of known malicious IP addresses and domain names) to spot unusual patterns. [
+- **Specialized Protection Plans:** Extends monitoring to specific resources like Amazon S3, Amazon EKS, Amazon RDS (Aurora login events), Lambda, and provides malware scanning for EBS volumes and S3 objects. 
+
+**Key Features**
+
+- **Prioritized Findings:** Generates clear security alerts (categorized as Low, Medium, or High severity) that pinpoint the affected resource, time, and nature of the threat (such as credential compromise, cryptomining, or data exfiltration).
+- **Central Management:** Aggregates findings across multiple AWS accounts into a single administrator account.
+- **Automated Integration:** Easily links with **AWS Security Hub**, Amazon Detective, and Amazon EventBridge to trigger automated responses. 
 
 ### **49. What is AWS Security Hub?**
 **Answer:** A centralized security posture management service that aggregates findings from GuardDuty, Inspector, Macie, and IAM Access Analyzer against CIS Benchmarks and PCI-DSS compliance standards.
