@@ -1085,8 +1085,34 @@ AWS Secrets Manager and AWS Systems Manager (SSM) Parameter Store are **both use
 - **Choose AWS Secrets Manager when:** You store sensitive credentials (like database logs or root API keys), need **automated rotation**, require cross-account sharing with fine-grained resource policies, or need multi-region replication for disaster recovery. 
 - **Choose Parameter Store when:** You need a low-cost or free option to store plain or encrypted configuration values, feature flags, or simple parameters that do not require automatic rotation. *(Note: You can also reference Secrets Manager secrets inside Parameter Store if you want a unified parameter path)*
 
-### **46. What is AWS WAF (Web Application Firewall)?**
-**Answer:** A Layer 7 firewall operating on CloudFront, ALB, API Gateway, and AppSync to block OWASP Top 10 web vulnerabilities (SQLi, XSS, rate floods).
+### **44. What is AWS WAF (Web Application Firewall)?**
+**Answer:**
+**AWS WAF** (**Web Application Firewall**) is a cloud-native security service by Amazon Web Services that helps protect your web applications and APIs from common web exploits and malicious bots.
+
+**How It Works**
+
+- **Inspects Traffic:** It monitors incoming HTTP and HTTPS requests forwarded to your supported AWS resources.
+- **Takes Action:** It evaluates each request against your security rules and can **allow**, **block**, or **count** (log) matching requests. If blocked, it typically returns an HTTP `403 Forbidden` error.
+- **Core Components:** It operates using **Web ACLs** (Web Access Control Lists) which contain individual **Rules** and reusable **Rule Groups**. 
+
+#### Supported AWS Resources
+
+AWS WAF integrates directly with several services, including:
+
+- Amazon CloudFront
+- Application Load Balancer (ALB)
+- Amazon API Gateway (REST APIs)
+- AWS AppSync (GraphQL APIs)
+- Amazon Cognito user pools
+- AWS App Runner services
+- AWS Amplify and AWS Verified Access 
+
+#### Key Features & Use Cases
+
+- **Common Threat Protection:** Automatically blocks standard web vulnerabilities like SQL injection (SQLi) and cross-site scripting (XSS).
+- **Bot Control & Fraud Prevention:** Monitors, blocks, or rate-limits automated web scrapers, crawler bots, account takeover (ATP), and fake account creation (ACFP).
+- **Managed Rules:** Offers pre-configured rule groups managed by AWS and trusted security partners to deploy quick protections.
+- **Custom Rules:** Lets you craft rules based on IP addresses, geographic locations, HTTP headers, query strings, and custom URIs. 
 
 ### **47. What is AWS Shield Standard vs Shield Advanced?**
 **Answer:**
