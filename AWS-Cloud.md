@@ -742,8 +742,22 @@ Route 53 offers multiple routing policies to control how DNS queries are answere
 - **IP-Based Routing Policy:** Directs traffic based on the specific IP address or CIDR block range of the user or client making the DNS query. 
 - **Multivalue Answer Routing Policy:** Returns multiple healthy IP addresses (up to eight) in a random order for a DNS query, paired with Route 53 health checks to improve availability and basic load balancing. 
 
-### **31. What is Amazon CloudFront?**
-**Answer:** A globally distributed Content Delivery Network (CDN) that securely delivers static/dynamic web content, videos, and APIs to users with low latency and high transfer speeds via edge locations.
+### **29. What is Amazon CloudFront?**
+**Answer:** **Amazon CloudFront** is **a high-speed Content Delivery Network (CDN) service provided by Amazon Web Services (AWS) that safely distributes static and dynamic web content, APIs, and videos to users globally with low latency**. 
+
+**How It Works**
+
+- **Global Edge Locations:** CloudFront stores (caches) copies of your website or application data across hundreds of globally distributed points of presence (PoPs) and regional edge caches. 
+- **Local Delivery:** When a user requests content, CloudFront routes them to the nearest edge location, serving the file instantly instead of fetching it from a distant origin server. 
+- **Origin Servers:** If the data is not yet cached at the edge, CloudFront pulls it from your designated origin—such as an Amazon S3 bucket, an Elastic Load Balancer (ELB), an Amazon EC2 instance, or any custom web server.
+- **AWS Backbone Network:** Traffic travels across the private, high-speed AWS global network rather than the congested public internet. 
+
+**Key Features**
+
+- **Speed and Performance:** Speeds up load times for images, CSS, JavaScript, and video streaming by bringing content closer to the consumer. 
+- **Security Integration:** Works natively with AWS WAF (Web Application Firewall) and AWS Shield to protect against DDoS attacks and web exploits. 
+- **Edge Computing:** Runs serverless code closer to users using **CloudFront Functions** or **AWS Lambda@Edge** to customize requests and responses. 
+- **Pay-As-You-Go Pricing:** Charges are based on data transferred out from edge locations and total HTTP/HTTPS requests made, with a free tier available for new accounts. 
 
 ### **32. What is AWS Global Accelerator?**
 **Answer:** A Layer 4 networking service providing static Anycast IP addresses that ingests client traffic into the closest edge PoP and routes it over the private AWS global fiber backbone directly to backend ALBs/EC2 instances.
