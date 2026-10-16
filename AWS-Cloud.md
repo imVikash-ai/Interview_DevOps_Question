@@ -830,8 +830,23 @@ AWS Site-to-Site VPN is **a fully managed service from Amazon Web Services that 
 - **Private IP VPN:** Allows you to run Site-to-Site VPN connections over **AWS Direct Connect** using private RFC1918 IP addresses instead of public endpoints.
 - **Monitoring:** Integrates with Amazon CloudWatch to track tunnel status, bandwidth, and network health
 
-### **35. What is AWS IAM (Identity and Access Management)?**
-**Answer:** A service that centrally manages access permissions and authentication for users, groups, and compute workloads across AWS services.
+### **33. What is AWS IAM (Identity and Access Management)?**
+**Answer:**  **AWS Identity and Access Management (IAM)** is **a free web service provided by Amazon Web Services that lets you securely control who can sign in to your account (authentication) and what actions they are allowed to perform on your resources (authorization)**. 
+
+**Core Components of AWS IAM**
+
+- **Root User**: The original identity created when you open an AWS account. It has unrestricted access to all services and billing, and best practices dictate locking it away and using it only for critical account setup. 
+- **IAM Users**: Individual people or applications that need long-term access to AWS. Each user has unique credentials (passwords or access keys).
+- **IAM Groups**: Collections of IAM users. Assigning permissions to a group automatically applies those permissions to every user inside it. 
+- **IAM Roles**: Temporary identities with specific permissions that can be assumed by trusted users, applications, or AWS services (like an EC2 instance needing to talk to S3). 
+- **IAM Policies**: JSON documents that formally define rules—stating which actions are allowed or denied on specific AWS resources. 
+
+**Key Features & Security Best Practices**
+
+- **Principle of Least Privilege**: Give users and services only the minimum permissions required to do their jobs.
+- **Multi-Factor Authentication (MFA)**: Require an extra verification code from a virtual or hardware authenticator app during login to stop unauthorized access. 
+- **Federation & Single Sign-On (SSO)**: Connect corporate directories (like Microsoft Active Directory) or external identity providers so employees can log in using existing credentials. 
+- **Temporary Credentials**: Use roles or AWS Security Token Service (STS) to issue short-lived credentials instead of sharing permanent secret keys.
 
 ### **36. What is an IAM Policy and what are its core JSON elements?**
 **Answer:** A JSON document defining authorization:
