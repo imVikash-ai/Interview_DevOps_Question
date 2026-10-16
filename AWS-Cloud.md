@@ -672,11 +672,59 @@ If your function does not receive any triggers for a prolonged period, Lambda de
 - **Fast Failover:** Automatically promotes a read replica to the primary writer instance in under 30 seconds if a failure occurs.
 - **Backtracking & Fast Cloning:** Allows you to rewind the database to a previous point in time or spin up full-size production clones in minutes.
 
-### **27. What is Amazon Aurora Serverless v2?**
-**Answer:** An on-demand auto-scaling configuration for Aurora that dynamically scales database compute capacity (measured in Aurora Capacity Units - ACUs) up and down in fractions of a second without dropping active connections.
+### **26. What is Amazon Aurora Serverless v2?**
+**Answer:** Amazon Aurora Serverless v2 is **an on-demand, auto-scaling configuration for Amazon Aurora that automatically monitors workload demands and adjusts database compute capacity in real time**.
 
-### **28. What is Amazon DynamoDB?**
-**Answer:** A fully managed, serverless NoSQL key-value and document database offering single-digit millisecond latency at any scale with multi-AZ replication, continuous backups, and Global Tables.
+**How It Works**
+
+- **Fine-Grained Scaling:** Automatically adjusts compute capacity in increments of **0.5 Aurora Capacity Units (ACUs)**—where 1 ACU equals roughly 2 GiB of memory combined with matching CPU and networking. 
+- **Separation of Compute and Storage:** Compute scales independently from the underlying distributed storage layer, which spreads six data copies across three Availability Zones (AZs). 
+- **Instant In-Place Scaling:** Scales up in milliseconds to handle traffic spikes and scales down conservatively to preserve cache, without requiring disruptive failovers or downtime. 
+- **Pay-Per-Use Pricing:** Billed on a per-second basis strictly for the capacity consumed, and supports scaling down to zero capacity during idle periods.
+
+**Key Features & Capabilities**
+
+- **Full Feature Parity:** Supports enterprise features like **Multi-AZ deployments**, up to 15 read replicas (readers), Global Databases, RDS Proxy, and Performance Insights.
+- **Engine Compatibility:** Works with compatible editions of **MySQL 8.0** and **PostgreSQL**.
+- **Mixed Clusters:** Allows you to combine both provisioned and serverless instances within the same database cluster.
+
+### **27. What is Amazon DynamoDB?**
+**Answer:** **Amazon DynamoDB** is **a serverless, fully managed, distributed NoSQL database service provided by Amazon Web Services (AWS)**. It is purpose-built to deliver **single-digit millisecond performance at any scale**, making it a go-to choice for modern, high-traffic applications like mobile backends, gaming leaderboards, and e-commerce platforms. 
+
+**Key Characteristics & Features**
+
+- **Fully Managed & Serverless:** AWS handles all the underlying infrastructure, software patching, updates, and physical hardware configuration. You simply create tables and read/write data.
+- **Highly Scalable:** It can scale up to handle millions of requests per second and petabytes of data without any degradation in performance. 
+- **Flexible Data Model:** Unlike relational databases (SQL), DynamoDB has a flexible schema. Aside from requiring a primary key, individual data records can have entirely different structures and sets of attributes. 
+- **Multi-Region Availability (Global Tables):** It offers "Global Tables," allowing you to replicate data across multiple AWS regions simultaneously in an active-active setup. 
+
+**Core Architecture Components**
+
+DynamoDB organizes its data model into three straightforward components:
+
+| **Component** | **SQL Equivalent** | **Description** |
+| ------------- | ------------------ | -------------------------------------------------------------------------- |
+| **Table** | Table | A collection of data records (e.g., a "Users" table). |
+| **Item** | Row / Record | A single data entry inside a table. Items have a max size limit of 400 KB. |
+| **Attribute** | Column | A key-value pair belonging to an item (e.g., Name="Alice", Age=25). |
+
+**The Role of Primary Keys**
+
+Every table requires a **Primary Key** to uniquely identify an item and physically partition data. It can be a:
+
+1. **Partition Key (Simple):** A single attribute used by DynamoDB's internal hashing algorithm to distribute data across physical storage nodes. 
+2. **Sort Key (Composite):** A combination of a Partition Key and a Sort Key. Items with the same partition key are grouped together and sorted by the sort key, allowing for complex historical or range queries. 
+
+**Capacity and Pricing Modes**
+
+When setting up a DynamoDB table, you can select from two capacity styles depending on your traffic profile:
+- **On-Demand Mode:** Automatically scales up or down based on incoming traffic spikes. Best for unpredictable workloads or brand-new apps, where you pay strictly per request. 
+- **Provisioned Mode:** You explicitly state the Read Capacity Units (RCU) and Write Capacity Units (WCU) you need. Best for predictable, steady traffic, offering lower baseline costs if fully utilized. 
+
+**Common Ecosystem Extensions**
+
+- **DynamoDB Streams:** Automatically captures item-level changes (inserts, updates, deletes) in real-time, allowing you to trigger serverless applications like AWS Lambda. 
+- **DynamoDB Accelerator (DAX):** An optional, fully managed in-memory cache that drops query latency down from milliseconds to microseconds.
 
 ### **29. What is DynamoDB Single-Table Design?**
 **Answer:** Modeling all business entities and relationships within a **single DynamoDB table** using composite partition keys (`PK`) and sort keys (`SK`) along with Global Secondary Indexes (GSIs) to fetch complex relational data in a single `Query` API call.
