@@ -855,13 +855,12 @@ AWS Site-to-Site VPN is **a fully managed service from Amazon Web Services that 
 
 An IAM policy document contains top-level elements and one or more individual statement blocks.
 
-**Top-Level Elements**
+**Top-Level Elements:**
 
 - **`Version`**: Specifies the language version of the policy syntax (the standard current version is `"2012-10-17"`).
 - **`Statement`**: The main container for the policy rules. It can be a single statement object or an array of statement objects. 
 
-**Statement-Level Elements**
-
+**Statement-Level Elements:**
 Inside each statement block, the core elements define the actual permission rules:
 
 - **`Sid` (Statement ID - Optional)**: An optional human-readable identifier or name for a specific statement. 
@@ -873,7 +872,7 @@ Inside each statement block, the core elements define the actual permission rule
 - **`NotResource`**: Used to match every resource *except* the ones explicitly listed by ARN. 
 - **`Condition` (Optional)**: Sets rules for when the policy is in effect, such as requiring Multi-Factor Authentication (MFA) or restricting access to a specific IP address.
 
-**Example Structure**
+**Example Structure:**
 
 **json**
 
@@ -897,11 +896,34 @@ Inside each statement block, the core elements define the actual permission rule
 }
 ```
 
-### **37. What is IAM Policy Evaluation Logic?**
+### **35. What is IAM Policy Evaluation Logic?**
 **Answer:**
-1. Default: Explicit Deny overrides all.
-2. If no explicit Deny, check for an explicit Allow.
-3. If no explicit Allow, the final decision is an Implicit Deny.
+AWS IAM Policy Evaluation Logic is **the step-by-step rule set Amazon Web Services uses to decide whether to allow or deny an API request**. 
+
+#### Core Evaluation Rules
+
+- **Default Deny:** All requests are denied by default unless an explicit allow grants access. 
+- **Explicit Deny Overrides All:** If any applicable policy explicitly contains a `Deny` statement, the request is denied immediately, and evaluation stops. 
+- **Explicit Allow Requires Concurrence:** For a request to succeed, it must be explicitly allowed, and it must **not** be restricted or blocked by any boundary or control layer. 
+
+**Policy Types Involved in Evaluation**
+
+AWS checks multiple layers of policies depending on your environment: 
+
+- **Service Control Policies (SCPs):** Set boundaries at the AWS Organizations or Organizational Unit (OU) level; they act as maximum limits for accounts.
+- **Resource-Based Policies:** Attached directly to resources (such as an S3 bucket or KMS key) specifying who can access them.
+- **Identity-Based Policies:** Attached to IAM users, groups, or roles (managed or inline policies).
+- **Permissions Boundaries:** Entity-level maximum limits placed on an IAM user or role.
+- **Session Policies:** Restrictive policies passed when creating a temporary role session (e.g., via AWS STS).
+
+**Step-by-Step Decision Flow (Single Account)**
+
+When an API request arrives inside a single AWS account, AWS evaluates the context in this general sequence: 
+
+1. **Check for Explicit Deny:** AWS scans all applicable policies (SCPs, resource-based, identity-based, boundaries, session policies). If **any** policy has an explicit `Deny`, access is denied.
+2. **Check SCPs & Boundaries:** If an SCP or Permissions Boundary applies, it must allow the action. If it restricts or omits the action, access is denied. 
+3. **Check Grants (Identity-based or Resource-based):** AWS looks for an explicit `Allow` in either the identity-based policy or the resource-based policy.
+4. **Final Verdict:** If an explicit allow exists and no deny or boundary block is triggered, the request is allowed. Otherwise, it defaults to denied.
 
 ### **38. What is an IAM Role vs IAM User?**
 **Answer:**
