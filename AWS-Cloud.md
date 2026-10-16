@@ -1174,8 +1174,24 @@ AWS Shield Standard and AWS Shield Advanced are **two tiers of Amazon Web Servic
 - **Prioritization & Risk Analytics:** It helps you analyze security trends, identify critical exposures, and filter findings to focus on what matters most. 
 - **Automated Remediation:** It integrates with **Amazon EventBridge** and automation rules to trigger workflows or fixes when specific security issues arise
 
-### **50. What is Amazon Inspector?**
-**Answer:** An automated vulnerability scanner that scans EC2 instances, Amazon ECR container images, and Lambda functions for software vulnerabilities and network reachability flaws.
+### **48. What is Amazon Inspector?**
+**Answer:** 
+**Amazon Inspector** is **an automated, continuous vulnerability management service provided by Amazon Web Services (AWS)**. It continuously discovers and scans your cloud workloads for software vulnerabilities and unintended network exposures.
+
+#### What It Scans
+
+- **Amazon EC2 Instances:** Scans operating system packages and network reachability using agent-based (via the AWS Systems Manager / SSM Agent) or agentless scanning methods. 
+- **Amazon ECR Containers:** Scans container images for operating system and programming language package vulnerabilities.
+- **AWS Lambda Functions:** Scans function code and software dependencies. 
+- **Code Repositories & CI/CD Tools:** Integrates with tools like GitHub and GitLab to scan application code (SAST), dependencies (SCA), and Infrastructure as Code (IaC). 
+
+#### Key Features
+
+- **Continuous & Automated Scanning:** Automatically re-scans workloads as new Common Vulnerabilities and Exposures (CVEs) are published or when environment resources change. 
+- **Contextual Risk Scoring:** Calculates an Amazon Inspector Risk Score by combining standard CVSS scores with real-time environmental data (such as network accessibility and exploit availability) to help you prioritize urgent patches. 
+- **Software Bill of Materials (SBOM):** Centrally generates and exports **SBOM** reports for compliance and auditing. 
+- **AWS Integration:** Automatically aggregates findings into the **AWS Security Hub**, sends events to Amazon EventBridge, and scales across multiple accounts via **AWS Organizations**.
+- **CIS Benchmarks:** Assesses EC2 instances against Center for Internet Security (CIS) hardening standards
 
 ### **51. What is Amazon S3 Storage Classes (Standard, Infrequent Access, Glacier, Intelligent-Tiering)?**
 **Answer:**
