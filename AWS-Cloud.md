@@ -1162,8 +1162,17 @@ AWS Shield Standard and AWS Shield Advanced are **two tiers of Amazon Web Servic
 - **Central Management:** Aggregates findings across multiple AWS accounts into a single administrator account.
 - **Automated Integration:** Easily links with **AWS Security Hub**, Amazon Detective, and Amazon EventBridge to trigger automated responses. 
 
-### **49. What is AWS Security Hub?**
-**Answer:** A centralized security posture management service that aggregates findings from GuardDuty, Inspector, Macie, and IAM Access Analyzer against CIS Benchmarks and PCI-DSS compliance standards.
+### **47. What is AWS Security Hub?**
+**Answer:** 
+**AWS Security Hub** is **a cloud security service that unifies security operations, centralizes visibility, and assesses compliance across your AWS accounts and resources**. 
+
+#### Core Functions & Features
+
+- **Unified Security Operations:** It brings together and correlates security findings from multiple AWS services—such as **Amazon GuardDuty** (threat detection), **Amazon Inspector** (vulnerability management), **Amazon Macie** (sensitive data discovery), and **AWS Security Hub CSPM** (Cloud Security Posture Management).
+- **Automated Compliance Checks:** It continuously evaluates your AWS environment against industry standards and best practices, such as the *AWS Foundational Security Best Practices (FSBP)*, *CIS*, *PCI DSS*, and *NIST*. 
+- **Standardized Findings:** It formats findings into standard structures (like ASFF and OCSF) so you do not have to translate or manage different data formats manually. 
+- **Prioritization & Risk Analytics:** It helps you analyze security trends, identify critical exposures, and filter findings to focus on what matters most. 
+- **Automated Remediation:** It integrates with **Amazon EventBridge** and automation rules to trigger workflows or fixes when specific security issues arise
 
 ### **50. What is Amazon Inspector?**
 **Answer:** An automated vulnerability scanner that scans EC2 instances, Amazon ECR container images, and Lambda functions for software vulnerabilities and network reachability flaws.
