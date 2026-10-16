@@ -925,16 +925,53 @@ When an API request arrives inside a single AWS account, AWS evaluates the conte
 3. **Check Grants (Identity-based or Resource-based):** AWS looks for an explicit `Allow` in either the identity-based policy or the resource-based policy.
 4. **Final Verdict:** If an explicit allow exists and no deny or boundary block is triggered, the request is allowed. Otherwise, it defaults to denied.
 
-### **38. What is an IAM Role vs IAM User?**
+### **36. What is an IAM Role vs IAM User?**
 **Answer:**
-- **IAM User:** An identity with long-term static credentials (passwords, access keys). *Modern standard: Avoid IAM users; use corporate SSO.*
-- **IAM Role:** An identity with temporary, short-lived security credentials assumed by trusted entities (EC2, Lambda, Pods via IRSA, cross-account administrators).
+**An IAM User is a permanent AWS identity with long-term credentials (passwords and access keys) assigned to a specific person or application, whereas an IAM Role is a temporary identity without long-term credentials that can be assumed by a user, application, or AWS service to gain short-lived permissions**. 
 
-### **39. What is AWS IAM Identity Center (AWS SSO)?**
-**Answer:** A centralized identity service that connects to corporate identity providers (Okta, Azure AD, Google Workspace) to provide unified single sign-on across multi-account AWS Organizations.
+#### Key Differences
 
-### **40. What is an AWS Service Control Policy (SCP)?**
-**Answer:** An organizational policy defining the **maximum available permissions** across accounts in an AWS Organization. If an SCP denies an action, even the root user of a member account cannot perform it.
+| **Feature** | **IAM User** | **IAM Role** |
+|---|---|---|
+| **Identity Type** | Permanent identity for a specific human or workload | Temporary, assumable identity for trusted entities |
+| **Credentials** | Long-term (passwords and static API access keys) | Short-term temporary security tokens (with session expiration) |
+| **Ownership** | Tied to a specific person or application | Not tied to a single person; can be shared or assumed dynamically |
+| **Main Use Cases** | Direct console/CLI access for individual developers, emergency MFA access, or legacy non-federated systems | AWS services (e.g., EC2, Lambda), cross-account access, and workforce federation (SAML/OIDC) |
+| **Security Risk** | Higher risk if static access keys leak | Lower risk because credentials automatically expire and rotate |
+
+### **37. What is AWS IAM Identity Center (AWS SSO)?**
+**Answer:** 
+**AWS IAM Identity Center** (formerly known as **AWS Single Sign-On** or **AWS SSO**) is **Amazon Web Services' recommended service for managing centralized single sign-on (SSO) access across multiple AWS accounts, AWS Organizations, and external cloud applications**.
+
+**Key Features**
+
+- **Centralized Access Management:** Replaces the need to manage individual IAM users or credentials in every single AWS account.
+- **Single Sign-On Portal:** Gives workforce users a single web portal to access all their assigned AWS accounts and external business applications (such as Salesforce, Microsoft 365, or Box) with one set of credentials.
+- **Identity Source Flexibility:** Connects with your existing corporate identity provider (IdP)—including Microsoft Entra ID, Okta, Google Workspace, or Active Directory—or uses the built-in **AWS IAM Identity Center Directory**
+- **Permission Sets:** Uses reusable, fine-grained permission sets assigned at the organization or group level instead of hardcoded roles or static access keys.
+- **Temporary Credentials:** Issues temporary session credentials via role assumption rather than long-term access keys, improving security. 
+
+#### AWS IAM vs. AWS IAM Identity Center
+
+- **AWS IAM:** Best for managing fine-grained permissions and access control *within a single* AWS account, or for programmatic application code. 
+- **AWS IAM Identity Center:** Best for managing human workforce identities, multiple AWS accounts (10+ accounts), and enterprise-wide application federation.
+
+### **38. What is an AWS Service Control Policy (SCP)?**
+**Answer:** 
+An **AWS Service Control Policy (SCP)** is **a preventive guardrail in AWS Organizations that sets the maximum available permissions for member accounts**.
+
+#### Key Characteristics of SCPs
+
+- **They do not grant permissions:** An SCP acts as a filter or ceiling. It never gives access on its own. To let a user or role do something, you still need standard IAM policies or resource-based policies. 
+- **Inheritance & Scope:** SCPs apply to all AWS accounts in an Organization, an Organizational Unit (OU), or a specific account to which they are attached. They do **not** affect the management (master) account or service-linked roles. 
+- **Applies to Root Users:** Unlike standard IAM policies, an explicit `Deny` in an SCP blocks actions for *all* identities in the account, including the root user.
+- **Default State:** By default, a newly created account has a policy called `FullAWSAccess` attached, which allows all actions. If you remove `FullAWSAccess` without replacing it with another allow policy, all actions in that account are blocked. 
+
+**Common Use Cases**
+
+- **Restrict geographic regions:** Block users from launching resources outside specific AWS regions (e.g., denying actions outside the EU or Mumbai). 
+- **Prevent account removal:** Stop members from running `organizations:LeaveOrganization` to escape central governance. 
+- **Enforce service limitations:** Disallow expensive or unapproved EC2 instance types or require multi-factor authentication (MFA) for critical actions like termination. 
 
 ### **41. What is AWS CloudTrail?**
 **Answer:** A governance service that records **every single API call** made in an AWS account (who called what API, when, from which IP, and with what request parameters) for compliance and auditing.
