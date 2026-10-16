@@ -1033,8 +1033,30 @@ AWS Systems Manager (SSM) Session Manager is **a fully managed capability of AWS
 - **IAM Role:** The instance needs an attached IAM role with the `AmazonSSMManagedInstanceCore` policy.
 - **Outbound Connectivity:** The instance must have outbound HTTPS (port 443) access to AWS Systems Manager service endpoints.
 
-### **44. What is AWS Key Management Service (KMS)?**
-**Answer:** A managed service for creating, controlling, and rotating cryptographic encryption keys (KMS Customer Managed Keys) used across AWS storage and applications.
+### **42. What is AWS Key Management Service (KMS)?**
+**Answer:**
+**AWS Key Management Service (AWS KMS)** is **a managed cloud service that helps you create, control, and manage cryptographic keys used to encrypt, decrypt, and digitally sign your data**. It is built directly into the AWS infrastructure and uses hardware security modules (HSMs) validated under FIPS 140-3 Level 3 standards to protect your keys.
+
+#### Core Concepts & Key Types
+
+- **KMS Key:** The primary resource in AWS KMS that contains the key material and metadata (such as key ID, creation date, and policies). 
+- **Symmetric Keys:** A single 256-bit AES key used for both encryption and decryption.
+- **Asymmetric Keys:** A public and private key pair (such as RSA or Elliptic Curve/ECC) used for encryption, decryption, or digital signatures. 
+- **HMAC Keys:** Keys used to generate and verify Hash-based Message Authentication Codes.
+- **Envelope Encryption:** A common AWS pattern where your actual data is encrypted with a unique data key, and that data key is subsequently encrypted by a KMS key. 
+
+#### How Key Types are Managed
+
+- **Customer Managed Keys (CMKs):** Keys that you create, own, rotate, and control with custom key policies.
+- **AWS Managed Keys:** Default keys that AWS automatically creates and manages inside your account for specific services.
+- **AWS Owned Keys:** A collection of keys that an AWS service owns and shares across multiple AWS accounts.
+
+#### Key Features & Integration
+
+- **Access Control:** You define strict IAM (Identity and Access Management) and key policies to separate *who can manage* keys from *who can use* them.
+- **Service Integration:** Deeply integrated with over 100 AWS services (like Amazon S3, Amazon EBS, and Amazon RDS) to easily encrypt stored data. You can explore official options directly on the **AWS KMS Product Page**
+- **Auditing:** Integrated with **AWS CloudTrail** to log all key usage, API calls, and administrative actions for compliance and forensics. 
+- **Hardware Protection:** All master keys are guarded inside FIPS-validated hardware security modules.
 
 ### **45. What is AWS Secrets Manager vs Parameter Store?**
 **Answer:**
