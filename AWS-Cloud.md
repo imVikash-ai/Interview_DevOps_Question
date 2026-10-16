@@ -726,16 +726,21 @@ When setting up a DynamoDB table, you can select from two capacity styles depend
 - **DynamoDB Streams:** Automatically captures item-level changes (inserts, updates, deletes) in real-time, allowing you to trigger serverless applications like AWS Lambda. 
 - **DynamoDB Accelerator (DAX):** An optional, fully managed in-memory cache that drops query latency down from milliseconds to microseconds.
 
-### **29. What is DynamoDB Single-Table Design?**
-**Answer:** Modeling all business entities and relationships within a **single DynamoDB table** using composite partition keys (`PK`) and sort keys (`SK`) along with Global Secondary Indexes (GSIs) to fetch complex relational data in a single `Query` API call.
+### **28. What is Amazon Route 53 and what are its routing policies?**
+**Answer:** Amazon Route 53 is **a highly available and scalable Domain Name System (DNS) web service provided by Amazon Web Services (AWS) that translates human-readable domain names into numeric IP addresses to connect end users to internet applications**. It also handles domain registration, health-checking of resources, and hybrid DNS resolution through Route 53 Resolver. 
 
-### **30. What is Amazon Route 53 and what are its routing policies?**
-**Answer:** A highly available, authoritative Cloud DNS service supporting:
-- **Simple Routing:** Standard single-record lookup.
-- **Weighted Routing:** Distributes traffic based on assigned percentage ratios.
-- **Latency-Based Routing:** Directs users to the AWS region providing the lowest network latency.
-- **Failover Routing:** Automated DNS health-check failover to backup disaster recovery regions.
-- **Geolocation / Geoproximity Routing:** Directs users based on client geographic coordinates or country.
+#### Amazon Route 53 Routing Policies
+
+Route 53 offers multiple routing policies to control how DNS queries are answered and how traffic is directed to your resources:
+
+- **Simple Routing Policy:** The default policy used when you have a single resource (such as an EC2 instance or S3 bucket) that needs to handle all traffic for a domain without any special routing logic.
+- **Weighted Routing Policy:** Distributes traffic across multiple resources based on assigned proportional weights (e.g., sending 70% of traffic to Server A and 30% to Server B). Commonly used for A/B testing or blue-green deployments. 
+- **Latency-Based Routing Policy:** Directs user requests to the AWS Region that provides the lowest network latency for that specific user. 
+- **Failover Routing Policy:** Configures active-passive disaster recovery. It routes traffic to a primary resource when it is healthy, and automatically switches to a secondary resource if health checks fail.
+- **Geolocation Routing Policy:** Routes traffic based on the geographic location (country or continent) of the user making the request, which is useful for content localization or regulatory compliance. 
+- **Geoproximity Routing Policy:** Routes traffic based on the geographic distance between your users and your resources, with an optional traffic bias (shrinking or expanding the geographic area served by a resource). 
+- **IP-Based Routing Policy:** Directs traffic based on the specific IP address or CIDR block range of the user or client making the DNS query. 
+- **Multivalue Answer Routing Policy:** Returns multiple healthy IP addresses (up to eight) in a random order for a DNS query, paired with Route 53 health checks to improve availability and basic load balancing. 
 
 ### **31. What is Amazon CloudFront?**
 **Answer:** A globally distributed Content Delivery Network (CDN) that securely delivers static/dynamic web content, videos, and APIs to users with low latency and high transfer speeds via edge locations.
