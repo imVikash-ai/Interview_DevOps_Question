@@ -1058,10 +1058,32 @@ AWS Systems Manager (SSM) Session Manager is **a fully managed capability of AWS
 - **Auditing:** Integrated with **AWS CloudTrail** to log all key usage, API calls, and administrative actions for compliance and forensics. 
 - **Hardware Protection:** All master keys are guarded inside FIPS-validated hardware security modules.
 
-### **45. What is AWS Secrets Manager vs Parameter Store?**
+### **43. What is AWS Secrets Manager vs Parameter Store?**
 **Answer:**
-- **Secrets Manager:** Supports automated secret rotation (using Lambda), cross-account access, and KMS encryption.
-- **Parameter Store (SSM):** Hierarchical key-value store for configuration data and encrypted strings; cost-effective for general configs.
+AWS Secrets Manager and AWS Systems Manager (SSM) Parameter Store are **both used to store sensitive data and configuration settings**, but they have different primary use cases, features, and pricing models. 
+
+**Core Purpose**
+
+- **AWS Secrets Manager:** Purpose-built exclusively for managing sensitive credentials—such as database passwords, API keys, and OAuth tokens—throughout their entire lifecycle.
+- **Parameter Store:** A general-purpose configuration store (part of AWS Systems Manager) that holds non-sensitive configuration data (like feature flags or database connection strings) as well as optional encrypted secrets.
+
+#### Key Differences
+
+| **Feature** | **AWS Secrets Manager** | **AWS Systems Manager Parameter Store** |
+|---|---|---|
+| **Primary Use Case** | Confidential secrets requiring frequent rotation, auditing, and strict governance. | General application configuration, environment settings, and basic secrets. |
+| **Automatic Rotation** | **Built-in:** Native automatic rotation integration for RDS, Redshift, and DocumentDB (plus Lambda custom logic). | **None built-in:** Requires custom scripts via AWS Lambda and EventBridge. |
+| **Pricing** | Paid service: **$0.40** per secret per month, plus **$0.05** per 10,000 API calls. | Standard parameters are **free**. Advanced parameters cost **$0.05** per parameter/month. |
+| **Size Limit** | Up to **64 KB** per secret. | Up to **4 KB** (Standard tier) or **8 KB** (Advanced tier). |
+| **Max Capacity** | Up to **500,000** secrets per region/account. | Up to **10,000** standard parameters or **100,000** advanced parameters. |
+| **Cross-Account Access** | Native support via direct resource-based policies on secrets. | Not natively supported out-of-the-box (requires Advanced parameters with AWS RAM). |
+| **Multi-Region Replication** | Built-in out-of-the-box replication. | Not natively supported out-of-the-box. |
+| **Version Control** | Multiple active versions supported via staging labels. | Only single active version for parameters. |
+
+#### When to Use Which
+
+- **Choose AWS Secrets Manager when:** You store sensitive credentials (like database logs or root API keys), need **automated rotation**, require cross-account sharing with fine-grained resource policies, or need multi-region replication for disaster recovery. 
+- **Choose Parameter Store when:** You need a low-cost or free option to store plain or encrypted configuration values, feature flags, or simple parameters that do not require automatic rotation. *(Note: You can also reference Secrets Manager secrets inside Parameter Store if you want a unified parameter path)*
 
 ### **46. What is AWS WAF (Web Application Firewall)?**
 **Answer:** A Layer 7 firewall operating on CloudFront, ALB, API Gateway, and AppSync to block OWASP Top 10 web vulnerabilities (SQLi, XSS, rate floods).
