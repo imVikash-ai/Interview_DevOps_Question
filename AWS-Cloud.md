@@ -1262,10 +1262,28 @@ When MFA Delete is enabled, **two forms of authentication are required** to perf
 | **Who can enable it?** | Bucket owner and authorized IAM users/roles. | **Only the AWS Root Account Owner**. |
 | **How to enable it?** | AWS Management Console, CLI, or API. | **AWS CLI or Rest API only** (cannot use the AWS Console). |
 
-### **53. What is S3 Object Lock and WORM Storage?**
-**Answer:** Implements Write-Once-Read-Many (WORM) storage, preventing objects from being deleted or overwritten by any user (including the AWS root account) for a fixed retention period.
+### **51. What is S3 Object Lock and WORM Storage?**
+**Answer:** 
 
-### **54. What is Amazon S3 Cross-Region Replication (CRR)?**
+**S3 Object Lock is an Amazon S3 feature that enforces a WORM (Write Once, Read Many) storage model to prevent data from being deleted or overwritten**. 
+
+#### WORM Storage
+
+- **Write Once, Read Many:** Data can be written or uploaded a single time, and it can be read or copied freely, but it cannot be altered, modified, or erased until a predefined time expires.
+- **Immutability:** It creates a tamper-proof and unchangeable record of data.
+- **Regulatory Compliance:** It satisfies strict legal and industry standards like SEC 17a-4(f), FINRA 4511, and CFTC 1.31.
+
+#### How S3 Object Lock Works
+
+- **Automatic Versioning:** S3 Object Lock requires S3 Versioning to be enabled on the bucket. 
+- **Retention Periods:** You can lock object versions for a fixed duration—ranging from 1 day up to 100 years. 
+- **Retention Modes:**
+  - **Governance Mode:** Everyday users cannot delete or overwrite the object, but authorized users with the `s3:BypassGovernanceRetention` permission can override or remove the lock.
+  - **Compliance Mode:** No user—including the root account owner—can delete or alter the object version until the retention period expires. 
+- **Legal Holds:** An independent protection mechanism that locks an object indefinitely until a compliance officer or administrator explicitly removes it (useful for active lawsuits or investigations). 
+- **Ransomware Protection:** Even if an attacker gains administrative access to your environment, locked objects remain safe from premature deletion or encryption-based overwrites
+
+### **52. What is Amazon S3 Cross-Region Replication (CRR)?**
 **Answer:** Automatically replicates newly uploaded objects across buckets in different AWS regions asynchronously for disaster recovery and low-latency local access.
 
 ### **55. What is Amazon S3 Event Notifications?**
