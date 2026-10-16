@@ -1538,7 +1538,22 @@ A **multi-cloud strategy** is **an approach where an organization uses cloud com
 - **Control Tower:** The orchestration engine that automates the creation of the landing zone. It integrates core AWS services like **AWS Organizations**, AWS IAM Identity Center, **AWS CloudTrail** and AWS Config.
 
 ### **77. What is an AWS Organization Unit (OU)?**
-**Answer:** A logical grouping of AWS accounts within an AWS Organization used to apply hierarchical Service Control Policies (e.g., Core OU, Workloads OU).
+**Answer:** 
+
+An **AWS Organizational Unit (OU)** is **a container that groups multiple AWS accounts inside an **AWS Organizations**
+
+#### Key Characteristics
+
+- **Hierarchical Structure:** OUs sit under the main organization root. You can also nest OUs inside other OUs to build a multi-level tree.
+- **Policy Inheritance:** When you attach a policy—such as a Service Control Policy (SCP)—to an OU, every account and child OU inside it automatically inherits those rules.
+- **Account Flexibility:** An account can belong to only one OU at a time, and you can move accounts between OUs as your needs change.
+- **Naming Rules:** OU names must be unique within their direct parent OU or root.
+
+#### Common Use Cases
+
+- **By Function or Workload:** Grouping accounts into logical divisions like a **Security OU**, an **Infrastructure OU**, a **Workloads (Production/Non-Production) OU**, or a **Sandbox/R&D OU**. 
+- **By Compliance Requirements:** Isolating accounts that must meet strict regulatory standards (such as HIPAA or PCI-DSS) so you can apply restrictive security and service limits via SCPs. 
+- **By Environment or Team:** Organizing accounts by lifecycle stage (Dev, Test, Prod) or by department (Engineering, Finance).
 
 ### **78. What is Cloud FinOps and what is the FinOps Lifecycle?**
 **Answer:** Cloud Financial Management framework optimizing cloud spending across three continuous phases: **Inform** (tagging, cost allocation), **Optimize** (right-sizing, discount commitments), and **Operate** (continuous governance).
