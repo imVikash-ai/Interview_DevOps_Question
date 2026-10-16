@@ -630,7 +630,7 @@ Lambda executes your code inside a secure, isolated runtime environment managed 
 
 The lifecycle of an execution environment consists of three distinct phases:
 
-**The Init Phase**
+**1. The Init Phase**
 
 When a function is triggered for the first time, or scales up to handle more demand, AWS Lambda boots up a new microVM environment. During this phase, Lambda: 
 
@@ -650,11 +650,27 @@ Once the environment is initialized, Lambda executes the specific handler functi
 
 If your function does not receive any triggers for a prolonged period, Lambda deactivates the environment. It alerts any integrated runtime extensions to let them execute cleanup tasks before permanently deleting the microVM container.
 
-### **25. What is AWS Lambda Cold Start and how is it mitigated?**
-**Answer:** The initialization latency when Lambda downloads the container image, provisions a microVM, and initializes runtime engines. Mitigated using **Provisioned Concurrency** (pre-warmed microVMs) or **Lambda SnapStart** (resuming from microVM memory snapshots).
+### **25. What is Amazon Aurora?**
+**Answer:** Amazon Aurora is **a fully managed, cloud-native relational database service built by Amazon Web Services (AWS) that is compatible with MySQL and PostgreSQL**. It is part of the Amazon Relational Database Service.
 
-### **26. What is Amazon Aurora?**
-**Answer:** A cloud-native relational database engine compatible with PostgreSQL and MySQL. It decouples compute from storage, utilizing a distributed shared storage volume replicated **6-way across 3 AZs** with quorum writes ($4/6$) and reads ($3/6$).
+**Core Architecture & Performance**
+
+- **Storage and Compute Separation:** Unlike traditional databases, Aurora uses a log-structured distributed storage system independent of compute instances.
+- **High Throughput:** It delivers up to 5x the throughput of standard MySQL and 3x the throughput of standard PostgreSQL.
+- **Fault Tolerance:** Aurora automatically replicates every piece of data six times across three Availability Zones (AZs). It can survive the loss of up to two copies without losing write availability and up to three copies without losing read availability.
+- **Self-Healing Storage:** The storage layer continuously scans data blocks for errors and repairs them automatically.
+
+**Deployment Options**
+
+- **Aurora Provisioned:** You choose a fixed instance class for predictable, steady-state workloads and scale via read replicas.
+- **Aurora Serverless (v2):** Automatically scales compute and memory in fractions of a second based on application demand, ideal for variable or unpredictable traffic.
+- **Aurora Global Database:** Spans multiple AWS regions with sub-second replication latency for high-speed local reads and disaster recovery.
+
+**Key Features**
+
+- **Read Replicas:** Supports up to 15 low-latency read replicas sharing the same underlying storage volume.
+- **Fast Failover:** Automatically promotes a read replica to the primary writer instance in under 30 seconds if a failure occurs.
+- **Backtracking & Fast Cloning:** Allows you to rewind the database to a previous point in time or spin up full-size production clones in minutes.
 
 ### **27. What is Amazon Aurora Serverless v2?**
 **Answer:** An on-demand auto-scaling configuration for Aurora that dynamically scales database compute capacity (measured in Aurora Capacity Units - ACUs) up and down in fractions of a second without dropping active connections.
