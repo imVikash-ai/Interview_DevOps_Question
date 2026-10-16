@@ -1013,8 +1013,25 @@ Amazon CloudWatch is **a fully managed monitoring and observability service prov
 - **Alarms:** Rules that watch a specific metric or expression and automatically trigger notifications or actions (like scaling capacity or restarting a server) when thresholds are crossed.
 - **Automated Actions:** Integration with services like AWS Lambda or Amazon SNS to remediate issues or send alerts the moment an anomaly is spotted
 
-### **43. What is AWS Systems Manager (SSM) Session Manager?**
-**Answer:** A fully managed agent-based service that provides secure, one-click shell access to EC2 instances **without opening inbound SSH port 22, without bastion hosts, and without public IPs**.
+### **41. What is AWS Systems Manager (SSM) Session Manager?**
+**Answer:** 
+AWS Systems Manager (SSM) Session Manager is **a fully managed capability of AWS Systems Manager that lets you securely connect to your Amazon EC2 instances, on-premises servers, and virtual machines (VMs)**.
+
+**Key Features and Benefits**
+
+- **No Open Inbound Ports:** You do not need to open SSH (port 22) or RDP (port 3389) ports on your security groups. 
+- **No Bastion Hosts or SSH Keys:** It removes the operational overhead of running jump boxes or managing/rotating SSH key pairs.
+- **Browser-Based & CLI Access:** Launch an interactive, one-click shell session directly from the **AWS Systems Manager Session Manager** console or use the AWS CLI with the Session Manager plugin. 
+- **Centralized IAM Permissions:** Access control is managed strictly via AWS Identity and Access Management (IAM), allowing fine-grained permissions on who can connect to which instances. 
+- **Cross-Platform Support:** Works out-of-the-box for Linux (Bash), Windows (PowerShell/CMD), and macOS. 
+- **Port Forwarding:** Supports tunneling traffic to and from your instances (such as forwarding local ports to a private web server or database).
+- **Auditing and Logging:** Automatically log all session activity, commands, and outputs to Amazon S3 or Amazon CloudWatch Logs, and track session events via **AWS CloudTrail**
+
+## Core Requirements
+
+- **SSM Agent:** Must be installed and running on the target instance (pre-installed on many Amazon Linux and Windows AMIs).
+- **IAM Role:** The instance needs an attached IAM role with the `AmazonSSMManagedInstanceCore` policy.
+- **Outbound Connectivity:** The instance must have outbound HTTPS (port 443) access to AWS Systems Manager service endpoints.
 
 ### **44. What is AWS Key Management Service (KMS)?**
 **Answer:** A managed service for creating, controlling, and rotating cryptographic encryption keys (KMS Customer Managed Keys) used across AWS storage and applications.
