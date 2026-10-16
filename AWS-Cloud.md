@@ -1512,7 +1512,7 @@ The fundamental difference is that **AWS CloudFormation is a proprietary, AWS-na
 - **Choose Terraform if:** You operate a **multi-cloud or hybrid infrastructure**, prefer a more natural, reusable coding syntax (HCL), or want access to a massive, open-source community ecosystem for third-party integrations.
 
 
-### **75. What is Multi-Cloud Strategy and what are its trade-offs?**
+### **59. What is Multi-Cloud Strategy and what are its trade-offs?**
 **Answer:** 
 A **multi-cloud strategy** is **an approach where an organization uses cloud computing services from two or more public cloud providers (such as Amazon Web Services [AWS], Microsoft Azure, and Google Cloud Platform [GCP]) simultaneously to run applications, store data, and host workloads**.
 
@@ -1532,12 +1532,12 @@ A **multi-cloud strategy** is **an approach where an organization uses cloud com
 - **Security and Governance Friction:** Enforcing uniform access controls, compliance audits, and security monitoring across diverse cloud configurations is harder than managing a single stack.
 - **Hidden or Rising Costs:** Poorly managed multi-cloud footprints can inflate bills due to redundant management software, cross-cloud data transfer fees, and fragmented resource tracking
 
-### **76. What is AWS Control Tower and Landing Zones?**
+### **60. What is AWS Control Tower and Landing Zones?**
 **Answer:** 
 - **Landing Zone:** The enterprise-wide container that holds your AWS Organizations, Organizational Units (OUs), shared accounts, and access policies. It typically includes a management account, a Security OU (with dedicated **Audit** and **Log Archive** accounts), and optional production or sandbox OUs. 
 - **Control Tower:** The orchestration engine that automates the creation of the landing zone. It integrates core AWS services like **AWS Organizations**, AWS IAM Identity Center, **AWS CloudTrail** and AWS Config.
 
-### **77. What is an AWS Organization Unit (OU)?**
+### **61. What is an AWS Organization Unit (OU)?**
 **Answer:** 
 
 An **AWS Organizational Unit (OU)** is **a container that groups multiple AWS accounts inside an **AWS Organizations**
