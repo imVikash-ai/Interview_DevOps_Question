@@ -1587,7 +1587,23 @@ The FinOps lifecycle is an iterative, continuous process defined by the **FinOps
   - Repeat the cycle continuously as infrastructure, code, and business demands evolve.
 
 ### **79. What is AWS Cost & Usage Report (CUR)?**
-**Answer:** The most comprehensive dataset of AWS cost and usage data, delivering hourly or daily CSV/Parquet files to an S3 bucket for analysis in Amazon Athena and QuickSight.
+**Answer:** 
+The **AWS Cost and Usage Report (CUR)** is **the most detailed and comprehensive single source of billing and usage data available in Amazon Web Services (AWS)**. 
+
+**Key Features & How It Works**
+
+- **Line-by-Line Granularity:** It provides a granular breakdown of every charge on your AWS account, categorized by product, resource ID, operation, usage type, and custom tags. 
+- **Time Granularity:** Data can be viewed by the hour, day, or month. 
+- **Delivery to S3:** AWS publishes and updates the report daily, delivering it to an **Amazon S3** bucket that you own. 
+- **File Formats:** Reports are available in **CSV** or Apache **Parquet** formats.
+- **CUR 2.0 (Data Exports):** AWS now recommends **CUR 2.0** (via AWS Data Exports), which offers modern enhancements like split cost allocation for container workloads (Amazon ECS, EKS, and AWS Batch) and improved integration.
+
+**Common Use Cases**
+
+- **Cost Allocation & Tracking:** Attribute cloud expenses to specific teams, projects, or cost centers using custom tags or resource-level data. 
+- **Savings Plans & Reserved Instances (RIs):** Track amortization, fee breakdowns, and utilization of discount programs.
+- **Data Analytics & Querying:** Process and query massive CUR datasets using serverless tools like **Amazon Athena** (via SQL), load them into **Amazon Redshift**, or visualize them in **Amazon QuickSight**. 
+- **Cost Optimization:** Investigate cost anomalies, audit unexpected spending spikes, and feed raw data into third-party FinOps tools
 
 ### **80. What is Infracost in FinOps?**
 **Answer:** A CLI tool that parses Terraform code in CI/CD pull requests, calculates the exact monthly cloud cost impact of proposed changes, and posts an interactive breakdown comment onto the PR.
