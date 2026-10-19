@@ -2283,14 +2283,21 @@ You pay only for what you consume:
 - Backup evaluations or Audit Manager reports used
 - No minimum fees or upfront setup charges
 
-### **123. What is AWS Route 53 Resolver DNS Firewall?**
-**Answer:** A managed firewall that allows filtering and blocking outbound DNS queries from VPC resources to known malicious domains or DNS data exfiltration tunnels.
-
-### **124. What is AWS WAF Managed Rule Groups?**
-**Answer:** Pre-configured security rule sets maintained by AWS and security partners (Core Rule Set, Known Bad Inputs, SQLi, Bot Control) applied in 1 click.
-
 ### **125. What is AWS IAM Permission Boundary?**
-**Answer:** An advanced IAM feature using a managed policy to set the **maximum permissions** that an identity-based policy can grant to an IAM entity, preventing developers from elevating their own privileges.
+**Answer:**
+An **AWS IAM Permissions Boundary** is **an advanced AWS Identity and Access Management (IAM) feature that sets the maximum possible permissions an IAM entity (user or role) can have**. 
+
+#### How It Works
+
+- **Does not grant access:** A permissions boundary alone does not give a user or role permission to do anything.
+- **Acts as a ceiling/filter:** It defines the outer limit of what the entity is allowed to do.
+- **The Intersection Rule:** An entity's effective permissions are the exact overlap (intersection) between its regular identity-based policies and its permissions boundary. If an action is allowed by an identity policy but blocked or omitted by the permissions boundary, it is denied.
+- **Denials override:** An explicit `Deny` in either an identity policy or a permissions boundary will block the request. 
+
+#### Common Use Cases
+
+- **Safe Delegation:** Allow developers or junior admins to create and manage IAM roles without risking accidental or malicious privilege escalation (such as attaching a full `AdministratorAccess` policy). 
+- **Enforcing Guardrails:** Maintain strict organizational compliance and governance by capping maximum resource access (e.g., restricting a team so they can only manage Amazon S3, even if another policy tries to grant wider access)
 
 ### **126. What is AWS KMS Multi-Region Keys?**
 **Answer:** Primary KMS keys in one region that can be replicated into other regions with the exact same key material and Key ID, allowing client-side encrypted data to be decrypted in multiple regions without re-encrypting.
