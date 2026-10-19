@@ -1650,9 +1650,25 @@ Because application traffic fluctuations and code deployments alter resource req
 5. **Automate:** Utilize tools like the Vertical Pod Autoscaler (VPA) or platform engines (such as **Cast AI** or **ScaleOps**) to handle adjustments dynamically at scale. 
 
 ### **65. What is Cloud Egress Traffic Cost and how is it minimized?**
-**Answer:** Charges incurred when data moves outbound from a cloud provider to the public internet or across cloud regions. Minimized using CDNs (CloudFront), VPC Endpoints, and keeping high-volume communication within the same AZ.
+**Answer:** 
+**Cloud egress traffic cost** is **the fee a cloud provider charges when data leaves their network and travels to an external destination**—such as the public internet, an on-premises data center, a different cloud provider, or a separate geographic region/availability zone. 
 
-### **83. What is Cross-AZ Data Transfer Cost?**
+- **Ingress is Free:** Inbound data moving into a cloud provider's network is universally free.
+- **Egress is Metered:** Outbound data is measured per gigabyte (GB) and typically ranges from $0.09+ per GB for the public internet, plus lower fees for inter-region or cross-zone transfers. Moving a petabyte of data can cost up to $74,000–$75,000.
+- **Vendor Lock-in:** Providers charge these fees to recoup massive network infrastructure costs and to discourage customers from moving data off their platform ("data gravity").
+
+#### How Cloud Egress Traffic Cost is Minimized
+
+Organizations lower egress fees through architectural, caching, and network optimization strategies:
+
+- **Use Content Delivery Networks (CDNs):** Deploy CDNs (such as Cloudflare or CloudFront) to cache and serve static or frequently accessed content at the edge, reducing direct pulls from core cloud storage.
+- **Compress Data:** Apply data compression and change data capture (CDC) techniques before transmission to shrink the overall volume of outbound bytes.
+- **Optimize Data Proximity:** Store data closer to the end-users, applications, or regions that consume it most frequently to avoid cross-region or cross-zone transfer tolls. 
+- **Deploy Dedicated Private Links:** Utilize private network connections—such as AWS Direct Connect, Azure ExpressRoute, or dedicated interconnections—which offer more predictable, lower, or flat-rate pricing structures than the open public internet.
+- **Leverage Free Tiers and Alternative Providers:** Take advantage of monthly free egress allowances (e.g., AWS's first 100 GB/month or higher limits on alternative providers like **Oracle Cloud Infrastructure**) or select providers with zero-egress fee models. 
+- **Monitor and Set Budget Alerts:** Track outbound transfer spikes using cloud cost management tools, tag heavy-use resources, and configure automated spending alerts.
+
+### **66. What is Cross-AZ Data Transfer Cost?**
 **Answer:** Cloud providers charge data transfer fees (e.g., $0.01 per GB) for traffic traveling between two different Availability Zones within the same region.
 
 ### **84. What is AWS Network Firewall?**
