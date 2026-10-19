@@ -1825,11 +1825,24 @@ Unlike traditional Identity and Access Management (IAM) tools that primarily han
 - **Environments & Pipelines:** It supports multi-account or multi-region setups (e.g., testing, staging, production) and automatically generates continuous delivery workflows via **AWS CodePipeline** directly from Git repositories.
 - **Operational Command:** It includes built-in operational commands to view live logs (`copilot svc logs`), check system health, scale services, and map shell access (`copilot svc exec`) right from the local terminal. 
 
-### **93. What is AWS SAM (Serverless Application Model)?**
-**Answer:** An open-source framework and CLI extending CloudFormation with shorthand syntax to define Lambda functions, API Gateways, and DynamoDB tables.
+### **74. What is Serverless Framework?**
+**Answer:** 
+The **Serverless Framework** is **an open-source command-line interface (CLI) and development tool that lets you build, compile, and deploy serverless applications and Functions-as-a-Service (FaaS) like AWS Lambda, Azure Functions, and Google Cloud Functions without manually managing the underlying cloud infrastructure**.
 
-### **94. What is Serverless Framework?**
-**Answer:** An open-source multi-cloud framework that automates deploying serverless applications (AWS Lambda, Azure Functions, Google Cloud Functions) via declarative YAML manifests.
+#### Core Concepts
+
+- **Functions:** Individual blocks of code (such as a Node.js or Python script) that execute in response to an event. 
+- **Events:** Triggers that cause your functions to run (such as an HTTP request via an API Gateway, a file upload to an S3 bucket, or a database update). 
+- **Resources:** The underlying cloud infrastructure (like DynamoDB tables, S3 buckets, or IAM roles) that your application needs. 
+- **`serverless.yml` Configuration:** A single YAML file where you define your functions, triggers, and cloud resources, which the framework automatically translates into native infrastructure templates (such as AWS CloudFormation).
+- **Multi-Language Support:** Works with Node.js, Python, Java, Go, C#, Ruby, and more.
+
+#### Key Features
+
+- **Infrastructure as Code (IaC):** Manages and deploys both your application code and your cloud infrastructure in a single command (`serverless deploy`).
+- **Local Development (`serverless dev`):** Lets you test and proxy live cloud events locally during development.
+- **Plugin Ecosystem:** Extends core capabilities with custom logging, optimization, and CI/CD integrations.
+- **Automatic Scaling:** Applications scale up automatically with incoming traffic and incur zero compute costs when idle.
 
 ### **95. What is AWS CDK (Cloud Development Kit)?**
 **Answer:** An open-source software development framework to define cloud infrastructure using familiar programming languages (**TypeScript, Python, Go, Java**) which synthesizes into CloudFormation templates.
