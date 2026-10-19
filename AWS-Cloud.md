@@ -1758,7 +1758,7 @@ There are four key phases of a CSPM tool's workflow, although each happens conti
 - **Amazon GuardDuty:** Provides threat detection and intelligence to feed into overall posture visibility.
 - **AWS Trusted Advisor:** Delivers account-level recommendations covering security, cost, and performance optimization.
 
-### **89. What is Cloud Workload Protection Platform (CWPP)?**
+### **71. What is Cloud Workload Protection Platform (CWPP)?**
 **Answer:** 
 A **Cloud Workload Protection Platform (CWPP)** is **a cybersecurity solution designed to protect server workloads across hybrid, multi-cloud, and on-premises environments**. 
 
@@ -1783,8 +1783,28 @@ A "workload" refers to any software, application, database, or service running o
 - **CWPP vs. CSPM (Cloud Security Posture Management):** CWPP focuses on protecting the **workloads** and their runtime behavior, whereas CSPM focuses on auditing and fixing cloud **infrastructure and configuration** policies. 
 - **CWPP vs. CNAPP (Cloud-Native Application Protection Platform):** CWPP is often a core component of a broader **CNAPP**, which combines workload protection (CWPP) with posture management (CSPM) and code-to-cloud security. 
 
-### **90. What is Cloud Infrastructure Entitlement Management (CIEM)?**
-**Answer:** Managing and enforcing least-privilege identity access across multi-cloud environments, detecting over-privileged service accounts and unused IAM permissions.
+### **72. What is Cloud Infrastructure Entitlement Management (CIEM)?**
+**Answer:** 
+**Cloud Infrastructure Entitlement Management (CIEM)** is **a security discipline and software category that discovers, analyzes, and manages access permissions and identities across cloud and multi-cloud environments** (such as AWS, Microsoft Azure, and Google Cloud). 
+
+Unlike traditional Identity and Access Management (IAM) tools that primarily handle basic login authentication or broad on-premises access rules, CIEM focuses on **effective access**—evaluating both direct permissions and complex, inherited, or nested rights (such as group memberships and cross-account role assumptions).
+
+#### Core Functions of CIEM
+
+- **Multi-Cloud Visibility:** Maps out every human identity (employees, contractors, guests) and non-human identity (service accounts, APIs, apps, serverless functions, IoT devices) and what resources they can reach in a single view.
+- **Enforcing Least-Privilege (PoLP):** Automatically identifies over-provisioned or "idle" permissions and right-sizes them so identities only hold the exact minimum access needed to do their jobs.
+- **Attack Path Analysis:** Spotlights "toxic combinations" of permissions—such as an over-privileged, internet-exposed service account that an attacker could use to move laterally to a sensitive database. 
+- **Anomaly & Behavior Detection:** Monitors how and when entitlements are actually used to spot hijacked accounts, credential theft, or unauthorized privilege escalation.
+- **Compliance Reporting:** Generates automated audit trails and governance reports for frameworks like GDPR, HIPAA, PCI DSS, and SOC 2. 
+
+#### CIEM vs. Related Security Terms
+
+| **Security Tool** | **What It Does** | **How It Differs from CIEM** |
+|---|---|---|
+| **IAM** (Identity & Access Management) | Defines and manages user logins, roles, and basic permissions. | IAM creates and assigns access; CIEM audits, analyzes, and right-sizes those permissions dynamically. |
+| **CSPM** (Cloud Security Posture Management) | Scans cloud infrastructure for misconfigurations (e.g., open S3 storage buckets). | CSPM fixes *resource/network* misconfigurations, whereas CIEM fixes *identity/entitlement* risks. |
+| **PAM** (Privileged Access Management) | Protects high-risk administrative accounts, often on-premises. | PAM focuses on vaulting and locking down admin vaults; CIEM is built specifically for dynamic, cloud-native entitlements at scale. |
+| **SIEM** (Security Information & Event Management) | Collects logs and alerts across systems to detect active threats. | SIEM alerts you *while* an event happens; CIEM works upstream to prevent excessive access rights from existing in the first place. |
 
 ### **91. What is AWS App Runner?**
 **Answer:** A fully managed service that makes it easy for developers to deploy containerized web applications and APIs directly from source code or container images without managing VPCs or load balancers.
