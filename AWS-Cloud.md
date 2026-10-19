@@ -1879,6 +1879,7 @@ The framework relies on three main hierarchical concepts:
 
 ### **76. Scenario: Architect a Multi-Region Active-Active web application across `us-east-1` and `eu-west-1` with conflict-free data replication.**
 **Answer:**
+
 **1. Architecture**
 - Deploy the application in two AWS regions: `us-east-1` and `eu-west-1`.
 - Use Amazon Route 53 with latency-based routing and health checks, or AWS Global Accelerator, to direct users to healthy regional endpoints.
@@ -1948,13 +1949,53 @@ The framework relies on three main hierarchical concepts:
 
 "My first step would be to use Cost Explorer and the Cost and Usage Report to identify the exact usage types responsible for the $50,000 spike. Then I would reduce unnecessary CloudWatch log ingestion, configure appropriate retention policies, and investigate excessive S3 API calls using available access logs and CloudTrail data events. Finally, I would implement AWS Budgets, Cost Anomaly Detection, and monitoring alerts to prevent similar incidents in the future. I would prioritize immediate cost control without compromising security, auditing, or application availability."
 
-### **103. Scenario: Design an automated disaster recovery failover system for PostgreSQL with RPO < 1 minute and RTO < 5 minutes.**
+### **78. Scenario: Design an automated disaster recovery failover system for PostgreSQL with RPO < 1 minute and RTO < 5 minutes.**
 **Answer:**
-1. **Database:** Deploy **Amazon Aurora Global Database** across Primary (`us-east-1`) and DR (`us-west-2`) regions (storage replication latency $< 1$ second, satisfying RPO $< 1$ min).
-2. **Monitoring:** Route 53 health check probes a synthetic `/healthz` endpoint verifying database read/write queries.
-3. **Automated Failover Lambda (Under 2 minutes, satisfying RTO $< 5$ min):**
-   - Promotes Aurora secondary cluster to standalone Primary (`aws rds failover-global-cluster`).
-   - Updates Route 53 DNS records to point traffic to the DR region.
+
+**1. Architecture Design**
+- I would deploy PostgreSQL on Amazon RDS Multi-AZ or Amazon Aurora PostgreSQL, depending on the application requirements.
+- For disaster recovery across regions, I would maintain a cross-region replica using PostgreSQL replication or an appropriate managed database replication feature.
+- I would configure automated health checks and monitoring to detect primary database failures.
+- I would use Amazon Route 53 or an application-level database endpoint to redirect application connections after failover.
+
+**2. Achieve RPO < 1 Minute**
+- RPO (Recovery Point Objective) defines the maximum acceptable data loss.
+- I would use continuous replication and monitor replication lag to keep it below 60 seconds.
+- For PostgreSQL, I would configure streaming replication and WAL (Write-Ahead Log) archiving where appropriate.
+- I would monitor replication lag, WAL transmission, and replica health using Amazon CloudWatch.
+- I would validate the actual recovery point through regular disaster recovery testing.
+
+**3. Achieve RTO < 5 Minutes**
+- RTO (Recovery Time Objective) defines the maximum acceptable time to restore service.
+- I would automate failure detection, replica promotion, and application reconnection.
+- I would use a stable database endpoint or controlled DNS update to direct traffic to the promoted database.
+- I would configure applications with connection pooling, retry logic, and bounded exponential backoff.
+- I would keep the standby database provisioned and ready rather than relying on restoring a backup during an incident.
+
+**4. Automated Failover Workflow**
+- Detect primary database failure through database health checks and monitoring.
+- Confirm the failure to reduce the risk of unnecessary failover.
+- Promote the healthy standby or cross-region replica.
+- Update the database endpoint or routing configuration.
+- Reconnect application services and validate database reads and writes.
+- Notify the operations team and record the failover event.
+
+**5. Monitoring and Alerting**
+- Use CloudWatch alarms for replication lag, database availability, CPU, storage, and connection health.
+- Send alerts through Amazon SNS.
+- Use automated runbooks or AWS Systems Manager Automation where supported.
+- Regularly test failover, recovery, and failback procedures.
+
+**6. Important Design Considerations**
+- RPO below one minute is not guaranteed simply by enabling replication; it must be measured and tested.
+- Cross-region asynchronous replication can lose recent transactions during an unexpected primary-region failure.
+- Prevent split-brain scenarios by ensuring only one database is writable after failover.
+- Validate that the selected PostgreSQL service and replication mode support the required recovery targets.
+- Use backups and point-in-time recovery as additional protection, not as the primary mechanism for meeting a five-minute RTO.
+
+**Final Interview Statement**
+
+"I would maintain a continuously replicated, pre-provisioned PostgreSQL standby in a separate region, monitor replication lag to meet the sub-one-minute RPO, and automate failure detection, replica promotion, and application reconnection to target an RTO below five minutes. I would also implement split-brain prevention, monitoring, and regular disaster recovery drills to verify that both objectives are achievable under real failure conditions."
 
 ### **104. How do you implement Zero-Trust Cloud Network Segmentation without managing hundreds of firewall appliances?**
 **Answer:**
