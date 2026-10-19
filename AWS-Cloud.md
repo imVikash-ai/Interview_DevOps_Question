@@ -1586,7 +1586,7 @@ The FinOps lifecycle is an iterative, continuous process defined by the **FinOps
   - Track real-time KPIs and measure cloud efficiency against business growth.
   - Repeat the cycle continuously as infrastructure, code, and business demands evolve.
 
-### **79. What is AWS Cost & Usage Report (CUR)?**
+### **63. What is AWS Cost & Usage Report (CUR)?**
 **Answer:** 
 The **AWS Cost and Usage Report (CUR)** is **the most detailed and comprehensive single source of billing and usage data available in Amazon Web Services (AWS)**. 
 
@@ -1605,13 +1605,51 @@ The **AWS Cost and Usage Report (CUR)** is **the most detailed and comprehensive
 - **Data Analytics & Querying:** Process and query massive CUR datasets using serverless tools like **Amazon Athena** (via SQL), load them into **Amazon Redshift**, or visualize them in **Amazon QuickSight**. 
 - **Cost Optimization:** Investigate cost anomalies, audit unexpected spending spikes, and feed raw data into third-party FinOps tools
 
-### **80. What is Infracost in FinOps?**
-**Answer:** A CLI tool that parses Terraform code in CI/CD pull requests, calculates the exact monthly cloud cost impact of proposed changes, and posts an interactive breakdown comment onto the PR.
+### **64. What is Kubernetes Right-Sizing in Cloud Optimization?**
+**Answer:**
+**Kubernetes Right-Sizing** is **the cloud optimization practice of matching the CPU and memory resources allocated to workloads and infrastructure with their actual, real-world usage patterns**. The goal is to eliminate waste and lower cloud bills without risking application performance, throttling, or crashes. 
 
-### **81. What is Kubernetes Right-Sizing in Cloud Optimization?**
-**Answer:** Tuning container CPU and memory `requests` and `limits` to match actual historical resource utilization, eliminating over-provisioned idle cloud waste.
+According to the **2026 State of Kubernetes Optimization Report** by **Cast AI** standard production Kubernetes clusters show an average CPU utilization of just **8%**, leaving roughly **69% of requested CPU entirely unused**. Right-sizing directly closes this massive "overprovisioning gap". 
 
-### **82. What is Cloud Egress Traffic Cost and how is it minimized?**
+#### The Mechanics: Where Right-Sizing Happens
+
+Right-sizing operates across two primary levels of the Kubernetes ecosystem:
+
+**1. Workload Level (Pods & Deployments)**
+
+This focuses on configuring individual containers precisely using two native Kubernetes mechanisms:
+
+- **Requests (The Floor):** The minimum amount of CPU and memory guaranteed to a pod. The Kubernetes scheduler uses this number to decide which node can fit the pod. Over-estimating requests leads to unutilized but paid-for cloud capacity. 
+- **Limits (The Ceiling):** The maximum amount of resources a pod can draw. Exceeding CPU limits causes throttling (sluggish performance); exceeding memory limits triggers the feared `OOMKilled` (Out Of Memory) error, crashing the container.
+
+**2. Infrastructure Level (Nodes & Clusters)**
+
+Once individual pods are right-sized, engineers must right-size the cluster nodes themselves: 
+
+- **Bin-Packing:** Consolidating workloads onto fewer, appropriately sized virtual machines (nodes) to eliminate fragmentation. 
+- **Instance Selection:** Choosing the correct VM families (e.g., compute-optimized vs. memory-optimized) to prevent running workloads on overly expensive, mismatched underlying infrastructure. 
+
+**The Business and Operational Benefits**
+
+A successful right-sizing strategy delivers highly predictable returns across engineering and finance teams:
+
+| **Benefit** | **Impact** | **How it works** |
+|---|---|---|
+| **Cloud Cost Reduction** | **30% to 80% savings** | Eliminates the margin of wasted capacity you pay for but never use. |
+| **Improved Performance** | **Fewer slowdowns** | Prevents resource starvation by allocating headroom where it is actually needed. |
+| **Operational Stability** | **Less on-call fatigue** | Drastically lowers the frequency of unexpected OOM kills and erratic latency spikes. |
+
+**The 5-Step Continuous Workflow**
+
+Because application traffic fluctuations and code deployments alter resource requirements, right-sizing is a continuous, iterative cycle: 
+
+1. **Observe:** Collect historical telemetry (typically P95 or P99 metrics) over at least a two-week window to capture normal traffic spikes.
+2. **Analyze:** Compare actual CPU/memory footprints against what was formally requested.
+3. **Adjust Requests:** Tune the baseline `requests` down to match the actual typical peak profile. 
+4. **Set Defensive Limits:** Configure safe `limits` to stop a single rogue pod from breaking neighboring applications. 
+5. **Automate:** Utilize tools like the Vertical Pod Autoscaler (VPA) or platform engines (such as **Cast AI** or **ScaleOps**) to handle adjustments dynamically at scale. 
+
+### **65. What is Cloud Egress Traffic Cost and how is it minimized?**
 **Answer:** Charges incurred when data moves outbound from a cloud provider to the public internet or across cloud regions. Minimized using CDNs (CloudFront), VPC Endpoints, and keeping high-volume communication within the same AZ.
 
 ### **83. What is Cross-AZ Data Transfer Cost?**
