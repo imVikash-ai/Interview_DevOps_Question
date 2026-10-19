@@ -1706,16 +1706,38 @@ A **Cross-AZ Data Transfer Cost** is **the fee a cloud provider—such as Amazon
 | **Deep Packet Inspection / IPS** | Yes (Layer 7, Suricata signatures) | No | No |
 | **Management** | Fully managed service with rule updates & automatic scaling | Configured per resource | Configured per subnet |
 
-### **85. What is AWS Security Lake?**
-**Answer:** Automatically centralizes security telemetry data (CloudTrail, VPC Flow Logs, Route 53, GuardDuty) from AWS and third-party sources into an Amazon S3 data lake formatted in the Open Cybersecurity Schema Framework (OCSF).
+### **68. What is AWS IAM Access Analyzer?**
+**Answer:**
+AWS IAM Access Analyzer is **a security service from Amazon Web Services that uses mathematical logic and automated reasoning to help you set, verify, and refine permissions and enforce the principle of least privilege**. 
 
-### **86. What is AWS IAM Access Analyzer?**
-**Answer:** Evaluates resource-based policies (S3 bucket policies, KMS keys, IAM roles) using formal mathematical reasoning to identify resources accessible to external unauthorized accounts.
+#### Core Capabilities
 
-### **87. What is AWS Macie?**
-**Answer:** A data security and privacy service that uses machine learning and pattern matching to discover, classify, and alert on Sensitive Personal Identifiable Information (PII) stored in S3 buckets.
+IAM Access Analyzer guides you through the permissions lifecycle using three main types of analyzers: 
 
-### **88. What is Cloud Security Posture Management (CSPM)?**
+- **External Access Analyzer:** Identifies resource-based policies that grant access to external entities outside your defined zone of trust (such as other AWS accounts, root users, federated users, or anonymous users). It supports resources like Amazon S3 buckets, IAM roles, KMS keys, Lambda functions, and SQS queues.
+- **Internal Access Analyzer:** Evaluates identity policies, resource policies, Service Control Policies (SCPs), and Resource Control Policies (RCPs) to show which internal IAM users and roles within your organization have access to critical resources (such as S3, DynamoDB, or RDS). 
+- **Unused Access Analyzer:** Identifies potential risks from dormant credentials and permissions—including unused IAM roles, access keys, console passwords, and unused service or action-level permissions across your environment. 
+
+#### Key Functions
+
+- **Automated Reasoning ("Provable Security"):** Uses formal mathematical logic rather than probability to definitively determine all possible access paths to your resources. 
+- **Policy Validation & Custom Checks:** Lets you validate IAM policies against AWS best practices and custom corporate security standards before you deploy them into production. 
+- **Policy Generation:** Analyzes your actual activity from **AWS CloudTrail** logs to automatically generate tailored, fine-grained least-privilege policies. 
+- **Remediation & Preview:** Provides quick-action links to delete unused credentials or preview public and cross-account access impacts *before* changes go live.
+
+### **69. What is AWS Macie?**
+**Answer:** 
+Amazon Macie is **a fully managed data security and privacy service by Amazon Web Services (AWS) that uses machine learning and pattern matching to discover, classify, and protect sensitive data stored in Amazon S3 (Simple Storage Service)**. 
+
+#### Core Capabilities
+
+- **Sensitive Data Discovery:** Automatically identifies Personally Identifiable Information (PII), Protected Health Information (PHI), financial data (such as credit card numbers), and custom data types via regular expressions. 
+- **S3 Security & Access Monitoring:** Continuously evaluates your S3 general-purpose buckets for security and access risks, flagging public exposure, unencrypted data, and improper cross-account sharing. 
+- **Automated vs. Targeted Scanning:** Performs continuous automated discovery sampling or lets you run targeted, one-time, daily, weekly, or monthly discovery jobs. 
+- **Multi-Account & Compliance Support:** Integrates with **AWS Organizations** to manage multiple accounts from a central administrator, aiding compliance with standards like GDPR, HIPAA, and PCI-DSS. 
+- **Actionable Findings:** Generates security findings that can be sent to Amazon EventBridge, AWS Security Hub, or integrated workflows for rapid remediation. 
+
+### **70. What is Cloud Security Posture Management (CSPM)?**
 **Answer:** Continuous automated assessment of cloud infrastructure configurations against compliance standards (CIS, NIST, PCI-DSS) to detect security misconfigurations and compliance drift.
 
 ### **89. What is Cloud Workload Protection Platform (CWPP)?**
