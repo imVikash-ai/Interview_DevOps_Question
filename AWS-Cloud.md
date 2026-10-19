@@ -2207,8 +2207,35 @@ An **Amazon DynamoDB global table** is **a fully managed, multi-Region, and mult
 - **Zero Capacity Planning:** **ElastiCache Serverless** automatically scales compute, memory, and network resources in real time based on traffic. 
 - **Engine Support:** Works with both Valkey/Redis and Memcached, eliminating the need to manually provision or resize node clusters. 
 
-### **118. What is Amazon OpenSearch Service?**
-**Answer:** A fully managed search and analytics engine derived from open-source Elasticsearch, used for real-time application search, log analytics, and time-series monitoring.
+### **85. What is Amazon OpenSearch Service?**
+**Answer:**
+
+**Amazon OpenSearch Service** (commonly known as AWS OpenSearch) is **a fully managed cloud service used to perform real-time full-text search, vector search, log analytics, application monitoring, and generative AI/RAG workflows at scale**. 
+
+It is built upon **OpenSearch**, an open-source search and analytics suite originally forked by AWS from Elasticsearch 7.10. 
+
+#### Core Capabilities
+
+- **Search & Retrieval:** Supports lexical (keyword) search, k-NN vector search (for AI and semantic search using algorithms like HNSW and FAISS), and hybrid search in a single engine. 
+- **Observability & Analytics:** Handles log analytics, application performance monitoring (APM), and trace analytics using OpenSearch Dashboards, Logstash, and AWS integrations. 
+- **AI & Machine Learning:** Features native ML Commons for embedding generation and inference, alongside deep integrations with Amazon Bedrock and SageMaker. 
+- **Data Ingestion:** Supports real-time and batch ingestion via HTTP, OpenSearch Ingestion, Zero-ETL pipelines (from S3, DynamoDB, CloudWatch, Security Lake), Kinesis, and AWS Glue.
+
+#### Deployment Options
+
+You can run AWS OpenSearch through two primary modes:
+
+1. **Managed Clusters (Amazon OpenSearch Service):**
+   - Gives you full control over instance types, shard configurations, and scaling policies.
+   - Scales up to petabytes of data with multi-AZ stability, UltraWarm/cold storage tiers, and automated node replacement.
+2. **OpenSearch Serverless:**
+   - Eliminates manual capacity planning.
+   - Automatically scales compute and storage independently based on actual workload demands, even scaling down to zero idle costs. 
+
+#### Security & Compliance
+
+- Encrypts data at rest (using AWS KMS) and in transit (using TLS).
+- Includes fine-grained access control (index, document, and field-level security), VPC support, IAM, SAML authentication, and certifications for HIPAA, PCI-DSS, FedRAMP, and SOC. 
 
 ### **119. What is AWS DMS (Database Migration Service)?**
 **Answer:** A managed service that migrates relational databases, data warehouses, and NoSQL databases to AWS with continuous data replication (Change Data Capture - CDC) to ensure zero downtime during cutovers.
