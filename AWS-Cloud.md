@@ -1669,7 +1669,20 @@ Organizations lower egress fees through architectural, caching, and network opti
 - **Monitor and Set Budget Alerts:** Track outbound transfer spikes using cloud cost management tools, tag heavy-use resources, and configure automated spending alerts.
 
 ### **66. What is Cross-AZ Data Transfer Cost?**
-**Answer:** Cloud providers charge data transfer fees (e.g., $0.01 per GB) for traffic traveling between two different Availability Zones within the same region.
+**Answer:**
+A **Cross-AZ Data Transfer Cost** is **the fee a cloud provider—such as Amazon Web Services (AWS)—charges when data moves between different Availability Zones (AZs) inside the same cloud region**. 
+
+#### Cost Breakdown
+
+- **Rate:** Typically **$0.01 per GB** on the sending side and **$0.01 per GB** on the receiving side.
+- **Total Round Trip:** Moving data across AZs and back results in a total cost of **$0.02 per GB**.
+- **Free Alternative:** Data transferred between resources located inside the *same* Availability Zone using private IP addresses is completely **free**. 
+
+#### Common Triggers
+
+- **App-to-Database Communication:** An application server in AZ A querying a database instance in AZ B.
+- **Distributed Systems & Caching:** Kafka, Cassandra, Flink, or Kubernetes (EKS/ECS) clusters replicating data or routing pod-to-pod traffic across multiple zones.
+- **Load Balancers:** Traffic flowing from a client or load balancer in one AZ to target instances in another AZ.
 
 ### **84. What is AWS Network Firewall?**
 **Answer:** A stateful, managed network firewall and intrusion detection/prevention system (IDS/IPS) deployed inside VPCs to inspect Layer 3–7 traffic using Suricata-compatible rules.
