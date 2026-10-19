@@ -1875,32 +1875,39 @@ The framework relies on three main hierarchical concepts:
 - **Reusable Code:** Build modular, reusable infrastructure components and share them across your organization or the open-source community. 
 - **Automatic Security Management:** The framework handles complex, granular tasks like creating IAM roles and policy statements based on logical intent, reducing human error. 
 
-### **96. What is Pulumi in Cloud Architecture?**
-**Answer:** An open-source Infrastructure as Code platform that provisions cloud resources (AWS, Azure, GCP, Kubernetes) using general-purpose programming languages with real-time state management.
+## 🔴 Advanced Architectures, Multi-Region DR & Production Scenarios 
 
-### **97. What is Crossplane Composite Resource Definition (XRD)?**
-**Answer:** A custom Kubernetes API defined by platform teams that bundles multi-cloud resources (e.g., an S3 bucket + IAM role + RDS instance) into a single developer abstraction.
-
-### **98. What is AWS Lattice (VPC Lattice)?**
-**Answer:** An application-layer networking service that consistently connects, monitors, and secures service-to-service communication across VPCs and compute types (EKS, ECS, Lambda, EC2) without complex routing or proxies.
-
-### **99. What is AWS Cloud WAN?**
-**Answer:** A managed wide area networking (WAN) service that builds, manages, and monitors global networks connecting multiple cloud regions, VPCs, and on-premises data centers via a central policy dashboard.
-
-### **100. What is AWS App Mesh?**
-**Answer:** A managed service mesh based on Envoy Proxy that provides application-level networking, traffic splitting, and end-to-end telemetry across ECS, EKS, and EC2.
-
----
-
-## 🔴 **Part 3: Advanced Architectures, Multi-Region DR & Production Scenarios (Questions 101–250)**
-
-### **101. Scenario: Architect a Multi-Region Active-Active web application across `us-east-1` and `eu-west-1` with conflict-free data replication.**
+### **76. Scenario: Architect a Multi-Region Active-Active web application across `us-east-1` and `eu-west-1` with conflict-free data replication.**
 **Answer:**
-1. **Global Ingress:** AWS Global Accelerator / Route 53 Latency-Based routing directs users to the nearest regional Application Load Balancer.
-2. **Compute Layer:** Amazon EKS clusters deployed in each region running identical containerized microservices managed via ArgoCD.
-3. **Data Layer:** **Amazon Aurora Global Database** with Write-Forwarding, or **DynamoDB Global Tables** with multi-region active-active replication and Last-Write-Wins (LWW) conflict resolution.
-4. **Caching Layer:** Amazon ElastiCache (Redis) Global Datastore replicating caches across regions.
-5. **Static Assets:** S3 Cross-Region Replication (CRR) behind CloudFront with multi-origin failover.
+**1. Architecture**
+- Deploy the application in two AWS regions: `us-east-1` and `eu-west-1`.
+- Use Amazon Route 53 with latency-based routing and health checks, or AWS Global Accelerator, to direct users to healthy regional endpoints.
+- Deploy an Application Load Balancer (ALB) and an application tier running on ECS or EKS across multiple Availability Zones in each region.
+
+**2. Data Replication**
+- Use Amazon DynamoDB Global Tables to replicate data across both regions.
+- Both regions can serve read and write requests locally using Multi-Region Eventual Consistency (MREC).
+- Use conditional writes, version checks, idempotency keys, and application-level conflict-resolution logic to prevent conflicting updates.
+- For critical transactions, such as payments or inventory, implement additional consistency controls instead of relying only on last-writer-wins.
+
+**3. High Availability and Disaster Recovery**
+- Configure health checks and Amazon CloudWatch alarms to detect regional failures.
+- If one region becomes unavailable, redirect traffic to the healthy region.
+- Configure backups, encryption, centralized logging, and regular failover testing.
+
+**4. Important Design Considerations**
+- DynamoDB Global Tables with eventual consistency do not guarantee that every concurrent update will be preserved.
+- Minimize conflicts by assigning each customer or entity a home region.
+- `us-east-1` and `eu-west-1` cannot participate in the same DynamoDB Multi-Region Strong Consistency (MRSC) global table. Use MREC with application-level conflict handling for this design.
+
+**5. Expected Outcome**
+- Both regions actively serve production traffic.
+- Users receive low-latency access to a nearby healthy region.
+- The architecture provides regional resilience, traffic failover, and controlled data conflict resolution.
+
+**Final Interview Statement**
+
+"My primary focus would be to achieve high availability through active-active deployment while ensuring data correctness through conflict-aware application design, because replication alone does not guarantee conflict-free business transactions."
 
 ### **102. Scenario: Your company receives an unexpected $50,000 monthly cloud bill spike caused by CloudWatch Logs and S3 API calls. How do you remediate?**
 **Answer:**
