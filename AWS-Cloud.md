@@ -1684,8 +1684,27 @@ A **Cross-AZ Data Transfer Cost** is **the fee a cloud provider—such as Amazon
 - **Distributed Systems & Caching:** Kafka, Cassandra, Flink, or Kubernetes (EKS/ECS) clusters replicating data or routing pod-to-pod traffic across multiple zones.
 - **Load Balancers:** Traffic flowing from a client or load balancer in one AZ to target instances in another AZ.
 
-### **84. What is AWS Network Firewall?**
-**Answer:** A stateful, managed network firewall and intrusion detection/prevention system (IDS/IPS) deployed inside VPCs to inspect Layer 3–7 traffic using Suricata-compatible rules.
+### **67. What is AWS Network Firewall?**
+**Answer:**
+**AWS Network Firewall** is **a managed, stateful network firewall and intrusion detection and prevention (IDS/IPS) service designed to protect your Amazon Virtual Private Cloud (Amazon VPC)**. 
+
+#### Core Capabilities
+
+- **Stateful Traffic Inspection:** Inspects complete network context—including source, destination, ports, protocols, and application-layer patterns—for both inbound (ingress) and outbound (egress) traffic. 
+- **Intrusion Prevention System (IPS):** Uses active traffic flow inspection and Suricata-compatible signature-based detection to block active threats and vulnerabilities.
+- **Layer 7 & Web Filtering:** Supports FQDN (Fully Qualified Domain Name) filtering, HTTP/HTTPS domain filtering, SNI inspection, and geographic IP filtering. 
+- **Inline TLS Inspection:** Decrypts, inspects, and re-encrypts network flows to prevent hidden threats and data exfiltration. 
+- **Automatic Scaling:** Automatically scales with your network traffic while maintaining built-in high availability across Availability Zones.
+- **Centralized Management:** Integrates with **AWS Firewall Manager** and AWS Transit Gateway to deploy and enforce consistent security policies across multiple accounts and VPCs.
+
+#### How It Compares to Other AWS Controls
+
+| **Feature** | **AWS Network Firewall** | **Security Groups** | **Network ACLs (NACLs)** |
+|---|---|---|---|
+| **Scope** | VPC perimeter, subnets, and multi-VPC (East-West / North-South) via Transit Gateway | Instance / Resource level | Subnet level |
+| **Statefulness** | Stateful (tracks active communication sessions) | Stateful | Stateless (evaluates inbound and outbound rules separately) |
+| **Deep Packet Inspection / IPS** | Yes (Layer 7, Suricata signatures) | No | No |
+| **Management** | Fully managed service with rule updates & automatic scaling | Configured per resource | Configured per subnet |
 
 ### **85. What is AWS Security Lake?**
 **Answer:** Automatically centralizes security telemetry data (CloudTrail, VPC Flow Logs, Route 53, GuardDuty) from AWS and third-party sources into an Amazon S3 data lake formatted in the Open Cybersecurity Schema Framework (OCSF).
