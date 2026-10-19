@@ -2237,8 +2237,19 @@ You can run AWS OpenSearch through two primary modes:
 - Encrypts data at rest (using AWS KMS) and in transit (using TLS).
 - Includes fine-grained access control (index, document, and field-level security), VPC support, IAM, SAML authentication, and certifications for HIPAA, PCI-DSS, FedRAMP, and SOC. 
 
-### **119. What is AWS DMS (Database Migration Service)?**
-**Answer:** A managed service that migrates relational databases, data warehouses, and NoSQL databases to AWS with continuous data replication (Change Data Capture - CDC) to ensure zero downtime during cutovers.
+### **86. What is AWS DMS (Database Migration Service)?**
+**Answer:**
+
+AWS Database Migration Service (AWS DMS) is **a managed cloud service that moves and replicates relational databases, data warehouses, NoSQL databases, and other data stores to the AWS Cloud, between cloud setups, or from the cloud back to on-premises environments**. 
+
+#### Key Capabilities & How It Works
+
+- **Minimal Downtime:** Keeps your source database fully operational during the migration. It performs an initial data copy and then uses **Change Data Capture (CDC)** to continuously mirror real-time inserts, updates, and deletes. 
+- **Homogeneous and Heterogeneous Migrations:** Supports same-engine migrations (e.g., Oracle to Oracle) as well as cross-engine migrations (e.g., Oracle or SQL Server to Amazon Aurora or PostgreSQL).
+- **Schema Conversion:** Works with **DMS Schema Conversion** (or the downloadable AWS Schema Conversion Tool) to assess and translate database schemas, code objects, and stored procedures. 
+- **Discovery & Assessment:** Uses tools like **DMS Fleet Advisor** to scan and inventory on-premises servers, databases, and schemas before you migrate. 
+- **Flexible Infrastructure:** Can run on dedicated replication instances (with optional Multi-AZ high availability) or via **DMS Serverless**, which automatically scales capacity and uses pay-as-you-go pricing. 
+- **Supported Engines:** Works with widely used commercial and open-source platforms including Oracle, PostgreSQL, Microsoft SQL Server, MySQL, MariaDB, Amazon Redshift, and Amazon Aurora
 
 ### **120. What is AWS DataSync?**
 **Answer:** An online data transfer service that simplifies, automates, and accelerates copying terabytes of data between on-premises storage and AWS S3, EFS, or FSx over Direct Connect or VPN.
