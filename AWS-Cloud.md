@@ -1738,7 +1738,25 @@ Amazon Macie is **a fully managed data security and privacy service by Amazon We
 - **Actionable Findings:** Generates security findings that can be sent to Amazon EventBridge, AWS Security Hub, or integrated workflows for rapid remediation. 
 
 ### **70. What is Cloud Security Posture Management (CSPM)?**
-**Answer:** Continuous automated assessment of cloud infrastructure configurations against compliance standards (CIS, NIST, PCI-DSS) to detect security misconfigurations and compliance drift.
+**Answer:** **CSPM (cloud security posture management)** is a tool for visualizing, prioritizing, and remediating security findings across your cloud infrastructure. A CSPM continuously ingests and correlates security data from various services to offer advanced insights on your overall security posture score, threats, vulnerabilities, and more. CSPM offers remediation workflows, alignment to standard frameworks, and views on security over time.
+
+#### How does CSPM work?
+There are four key phases of a CSPM tool's workflow, although each happens continuously and concurrently.
+
+- **Discovery :** The CSPM tool discovers all your cloud assets, cloud services, and connections, so that it can accurately monitor security across the cloud environment.
+
+- **Evaluation :** CSPM tools check against compliance standards and set controls to identify which inventory items and their cloud configurations are compliant.
+
+- **Prioritization :** The CSPM tool scores and prioritizes security findings across various security areas, such as threats, vulnerabilities, and sensitive data.
+
+- **Remediation :** The CSPM tool creates guidance and automations for the remediation of identified security issues.
+
+#### Native AWS CSPM Tools
+
+- **AWS Security Hub CSPM**:** Acts as the central hub for posture management, running automated best-practice checks and aggregating findings from native services and partner tools.
+- **AWS Config****:** Tracks resource configuration changes and evaluates them against predefined rules.
+- **Amazon GuardDuty:** Provides threat detection and intelligence to feed into overall posture visibility.
+- **AWS Trusted Advisor:** Delivers account-level recommendations covering security, cost, and performance optimization.
 
 ### **89. What is Cloud Workload Protection Platform (CWPP)?**
 **Answer:** Security tools that protect workloads (VMs, containers, serverless) at runtime using behavioral anomaly detection, vulnerability scanning, and intrusion detection.
