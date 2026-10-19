@@ -1844,8 +1844,36 @@ The **Serverless Framework** is **an open-source command-line interface (CLI) an
 - **Plugin Ecosystem:** Extends core capabilities with custom logging, optimization, and CI/CD integrations.
 - **Automatic Scaling:** Applications scale up automatically with incoming traffic and incur zero compute costs when idle.
 
-### **95. What is AWS CDK (Cloud Development Kit)?**
-**Answer:** An open-source software development framework to define cloud infrastructure using familiar programming languages (**TypeScript, Python, Go, Java**) which synthesizes into CloudFormation templates.
+### **75. What is AWS CDK (Cloud Development Kit)?**
+**Answer:** 
+The **AWS Cloud Development Kit (AWS CDK)** is **an open-source software development framework used to define and provision cloud infrastructure using familiar programming languages**. Instead of writing verbose JSON or YAML files, developers can write imperative code that the CDK automatically synthesizes into declarative **AWS CloudFormation**templates to safely deploy resources.
+
+#### Supported Programming Languages
+
+You can manage your infrastructure alongside your application code using: 
+
+- **TypeScript** and **JavaScript**
+- **Python**
+- **Go**
+- **Java**
+- **C# / .NET** 
+
+#### Core Components of AWS CDK
+
+The framework relies on three main hierarchical concepts: 
+
+- **Constructs:** The basic building blocks of CDK code. They represent a cloud component (like an Amazon S3 bucket or a DynamoDB table) and encapsulate everything CloudFormation needs to create it.
+  - *L1 (Low-level):* Direct, 1:1 mappings of CloudFormation resources.
+  - *L2 (Intent-driven):* Higher-level abstractions built with pre-configured defaults, boilerplate logic, and automatic security policies.
+  - *L3 (Patterns):* Architectural patterns that stitch multiple services together (e.g., an entire load-balanced ECS container service). 
+- **Stacks:** A collection of constructs that are provisioned together. Stacks represent the basic unit of deployment, mapping directly to a single CloudFormation stack.
+- **Apps:** The root entry point of your CDK project. An app contains one or more stacks and defines the scope for your entire cloud architecture. 
+
+#### Key Benefits
+
+- **Familiar Tooling:** Leverage modern IDE features like autocomplete, inline documentation, and refactoring tools directly on your infrastructure. 
+- **Reusable Code:** Build modular, reusable infrastructure components and share them across your organization or the open-source community. 
+- **Automatic Security Management:** The framework handles complex, granular tasks like creating IAM roles and policy statements based on logical intent, reducing human error. 
 
 ### **96. What is Pulumi in Cloud Architecture?**
 **Answer:** An open-source Infrastructure as Code platform that provisions cloud resources (AWS, Azure, GCP, Kubernetes) using general-purpose programming languages with real-time state management.
