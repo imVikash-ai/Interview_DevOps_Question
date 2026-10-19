@@ -2120,37 +2120,42 @@ To securely connect an on-premises data center to AWS VPCs with automatic failov
 - Make the Direct Connect path your preferred active route (e.g., higher local preference) and configure the Site-to-Site VPN as the standby/backup path.
 - When BGP stops receiving health/keepalive packets over Direct Connect, routes automatically withdraw and shift traffic over the IPsec VPN tunnels. 
 
-### **107. What is Google Cloud Spanner and how does it achieve global consistency without violating the CAP theorem?**
+### **82. Scenario: An engineer accidentally modifies a production security group to open port 22 (`0.0.0.0/0`) to the entire internet. How do you detect and auto-remediate this in under 30 seconds?**
 **Answer:**
-Cloud Spanner uses the **TrueTime API** (synchronized atomic clocks and GPS receivers in every Google data center) to bound clock uncertainty ($\epsilon \le 7\text{ms}$). This global clock assigns monotonically increasing commit timestamps without distributed locking overhead, providing strict external consistency (Serializability).
+**1. Detection**
+- Use AWS CloudTrail to record security group changes through the `AuthorizeSecurityGroupIngress` API event.
+- Create an Amazon EventBridge rule to detect inbound SSH access on port 22 from `0.0.0.0/0`.
+- Trigger the remediation workflow immediately when a matching event occurs.
 
-### **108. Design an enterprise AWS Multi-Account Organization Structure.**
-**Answer:**
-```
-[ Root Management Account ]
-  ├── 📂 Core OU
-  │     ├── 🔒 Log Archive Account (Centralized S3 CloudTrail / VPC Flow Logs)
-  │     └── 🛡️ Security Tooling Account (SecurityHub, GuardDuty, IAM Identity Center)
-  ├── 📂 Infrastructure OU
-  │     ├── 🌐 Shared Network Account (Transit Gateway, Direct Connect, Inspection VPC)
-  │     └── 🛠️ Shared Services Account (Artifact Registry, CI/CD Runners, Vault)
-  └── 📂 Workloads OU
-        ├── 🧪 Dev / Staging Workload Accounts
-        └── 🚀 Production Workload Account
-```
+**2. Automated Remediation**
+- Use AWS Lambda to inspect the affected security group and identify the unauthorized SSH rule.
+- Automatically revoke the offending ingress permission using the `RevokeSecurityGroupIngress` API.
+- Preserve all legitimate security group rules and remove only the rule exposing port 22 to the entire internet.
+- Configure the Lambda execution role with least-privilege permissions.
 
-### **109. What is Azure Confidential Computing and AWS Nitro Enclaves?**
-**Answer:** Hardware-isolated trusted execution environments (TEE) with no persistent storage, no interactive access (no SSH), and no external networking, connected only via a virtual socket (`vsock`) to process sensitive cryptographic keys, PII data, and confidential machine learning models.
+**3. Security and Reliability**
+- Use AWS IAM to restrict who can modify production security groups.
+- Enable AWS Config to evaluate security group compliance and maintain configuration history.
+- Send remediation results to Amazon SNS or a security monitoring platform.
+- Configure error handling, retries, and alarms if remediation fails.
+- Use AWS Systems Manager Automation or AWS Config remediation as additional options where appropriate.
 
-### **110. Scenario: An engineer accidentally modifies a production security group to open port 22 (`0.0.0.0/0`) to the entire internet. How do you detect and auto-remediate this in under 30 seconds?**
-**Answer:**
-1. **Detection:** AWS Config rule `incoming-ssh-disabled` detects non-compliant change via CloudTrail.
-2. **Trigger:** AWS Config publishes compliance state change to **Amazon EventBridge**.
-3. **Remediation:** EventBridge triggers an **AWS SSM Automation Document** or Lambda function.
-4. **Execution:** The script calls `aws ec2 revoke-security-group-ingress` to delete the `0.0.0.0/0` rule and alerts SecOps on Slack within 30 seconds.
+**4. Validation and Testing**
+- Test the workflow in a non-production environment before enabling it in production.
+- Measure the time from the CloudTrail event to successful rule removal.
+- Verify that the exposed SSH rule is removed without disrupting other authorized traffic.
+- Alert the security team if remediation does not complete within the target time.
 
-### **111. What is AWS Graviton and how does it improve Cloud Unit Economics?**
-**Answer:** Custom 64-bit ARM-based processors designed by AWS (Graviton3, Graviton4) that deliver up to **40% better price-performance** and 60% lower energy consumption compared to equivalent x86-64 (Intel/AMD) instances.
+**5. Expected Outcome**
+- Detect unauthorized SSH exposure automatically.
+- Remove the risky ingress rule within the 30-second target under normal operating conditions.
+- Minimize the window of exposure without requiring manual intervention.
+- Maintain an audit trail of the change and remediation action.
+
+##### Final Interview Answer
+
+"I would implement an event-driven remediation workflow using AWS CloudTrail, Amazon EventBridge, and AWS Lambda. CloudTrail records the security group modification, and EventBridge immediately matches the event when port 22 is opened to `0.0.0.0/0`. It invokes Lambda, which identifies and revokes only the offending ingress rule using least-privilege IAM permissions. I would log the remediation, notify the security team, and configure alarms for failures. I would also use AWS Config for continuous compliance monitoring and test the end-to-end workflow to verify that it consistently meets the 30-second target. Since AWS services have variable processing latency, I would measure actual remediation time rather than assume the target is guaranteed."
+
 
 ### **112. What is AWS Nitro System?**
 **Answer:** A collection of dedicated hardware cards and a lightweight hypervisor that offloads virtually all virtualization and security functions (networking, storage, security monitoring) from the main host CPU, dedicating nearly 100% of host CPU/RAM to customer workloads.
