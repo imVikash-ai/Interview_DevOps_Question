@@ -2173,10 +2173,39 @@ An **Amazon DynamoDB global table** is **a fully managed, multi-Region, and mult
 - **Disaster Recovery & High Availability:** Raises table availability from single-Region (99.99%) to multi-Region tiers (99.999%), ensuring applications can keep running if an entire Region experiences an outage.
 - **Conflict Resolution:** Handles concurrent writes across different Regions using a **last writer wins** reconciliation model. 
 
-### **117. What is AWS ElastiCache (Redis vs Memcached)?**
+### **84. What is AWS ElastiCache (Redis vs Memcached)?**
 **Answer:**
-- **Redis:** In-memory data store supporting rich data structures (hashes, sorted sets), persistence, Pub/Sub, replication, and automatic failover.
-- **Memcached:** Simple, multi-threaded in-memory key-value caching system designed for caching pure HTML/database queries.
+
+**Amazon ElastiCache** is **a fully managed, in-memory caching service by AWS that boosts application performance by retrieving data from fast in-memory caches instead of slower disk-based databases**. It supports **Redis OSS / Valkey** and **Memcached** as its core caching engines, and also offers a zero-maintenance **ElastiCache Serverless** option. 
+
+#### AWS ElastiCache Engines at a Glance
+
+| **Feature / Capability** | **Redis OSS / Valkey** | **Memcached** |
+|---|---|---|
+| **Architecture** | Single-threaded per core (supports clustering & multi-AZ) | True multi-threaded (scales well across multi-core EC2 instances) |
+| **Data Types** | Rich (Strings, Hashes, Lists, Sets, Sorted Sets, Streams, Geospatial) | Simple key-value string structures |
+| **Persistence** | Built-in disk persistence (RDB snapshots) | None (purely in-memory) |
+| **High Availability** | Replication, Multi-AZ failover, automatic backups | No native replication or node-based backup (though available in Memcached Serverless) |
+| **Advanced Features** | Pub/Sub, Lua scripting, transactions, vector/full-text search (Valkey) | Raw, simple high-speed object caching |
+| **Licensing** | Redis 8.0+ uses AGPLv3; AWS recommends **Valkey** as a permissive open-source alternative | Fully open-source BSD licensing |
+
+#### When to Choose Redis (or Valkey)
+
+- **Complex Data Structures:** Use when your app relies on sorted sets, leaderboards, hashes, or spatial data. 
+- **Persistence & Durability:** Use when data needs to survive restarts or be backed up to snapshots. 
+- **High Availability & Replication:** Use when you need Multi-AZ read replicas, automated failover, and Pub/Sub messaging.
+- **Recommended Alternative:** AWS supports **Valkey** as a modern, lower-cost, drop-in open-source replacement for Redis OSS. 
+
+#### When to Choose Memcached
+
+- **Simple, Pure Caching:** Use when you only need to store and retrieve simple key-value string objects (like basic database query results or page fragments). 
+- **Multi-Core Scaling:** Use if you want true multi-threading that scales horizontally across large multi-core EC2 instances without the overhead of complex features.
+- **Low Operational Complexity:** Use when you want a straightforward, low-maintenance caching layer where data can easily be regenerated if lost.
+
+#### ElastiCache Serverless Option
+
+- **Zero Capacity Planning:** **ElastiCache Serverless** automatically scales compute, memory, and network resources in real time based on traffic. 
+- **Engine Support:** Works with both Valkey/Redis and Memcached, eliminating the need to manually provision or resize node clusters. 
 
 ### **118. What is Amazon OpenSearch Service?**
 **Answer:** A fully managed search and analytics engine derived from open-source Elasticsearch, used for real-time application search, log analytics, and time-series monitoring.
