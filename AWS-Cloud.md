@@ -1909,12 +1909,44 @@ The framework relies on three main hierarchical concepts:
 
 "My primary focus would be to achieve high availability through active-active deployment while ensuring data correctness through conflict-aware application design, because replication alone does not guarantee conflict-free business transactions."
 
-### **102. Scenario: Your company receives an unexpected $50,000 monthly cloud bill spike caused by CloudWatch Logs and S3 API calls. How do you remediate?**
+### **77. Scenario: Your company receives an unexpected $50,000 monthly cloud bill spike caused by CloudWatch Logs and S3 API calls. How do you remediate?**
 **Answer:**
-1. **Investigation:** Query AWS Cost Explorer and Cost & Usage Report (CUR) filtered by Usage Type to identify runaway microservices writing verbose `DEBUG` logs.
-2. **Log Remediation:** Enforce a 30-day retention policy on all CloudWatch log groups; configure application logging frameworks to switch from `DEBUG` to `INFO`/`WARN`.
-3. **S3 Remediation:** Fix microservice backup scripts executing un-batched `ListObjectsV2` loops in tight while-loops.
-4. **Governance:** Set up AWS Budgets with anomaly detection alerts on Slack when spend exceeds forecasted thresholds.
+
+**1. Identify the Root Cause**
+- Open AWS Cost Explorer to identify which services, regions, and usage types caused the cost increase.
+- Use AWS Cost and Usage Reports (CUR) to investigate CloudWatch Logs ingestion, storage, and S3 API request charges.
+- Check CloudWatch Logs for excessive ingestion and S3 for high-volume `GET`, `PUT`, `LIST`, and other API requests.
+- Use CloudTrail data events, where enabled, to identify which users, applications, or roles are generating excessive S3 API calls.
+
+**2. Remediate CloudWatch Logs Costs**
+- Identify applications generating excessive logs, such as debug-level logs or repeated error messages.
+- Reduce unnecessary logging and switch production applications to appropriate log levels.
+- Configure CloudWatch Logs retention policies to automatically delete logs after the required retention period.
+- Use metric filters and subscription filters where appropriate to reduce unnecessary downstream processing.
+- Review log ingestion and storage patterns before changing logging configurations to avoid losing important audit or security data.
+
+**3. Remediate S3 API Costs**
+- Identify buckets and applications generating excessive `GET`, `PUT`, `LIST`, or other requests.
+- Enable S3 server access logging or CloudTrail S3 data events where appropriate to investigate request patterns.
+- Reduce unnecessary API calls by implementing caching, batching, pagination, and exponential backoff where suitable.
+- Review application retry loops and inefficient object-listing operations.
+- Use S3 Lifecycle policies to transition or expire objects according to business and compliance requirements.
+
+**4. Prevent Future Cost Spikes**
+- Create AWS Budgets with alerts for actual and forecasted spending.
+- Configure CloudWatch alarms and billing notifications to detect unusual usage.
+- Use AWS Cost Anomaly Detection to identify unexpected spending patterns.
+- Apply least-privilege IAM permissions and investigate suspicious API activity.
+- Establish regular cost reviews and resource ownership tagging.
+
+**5. Validate the Remediation**
+- Compare current usage and estimated costs against the previous billing period.
+- Verify that logging, auditing, and application functionality remain intact.
+- Monitor the next billing cycles to ensure the cost reduction is sustained.
+
+**Final Interview Statement**
+
+"My first step would be to use Cost Explorer and the Cost and Usage Report to identify the exact usage types responsible for the $50,000 spike. Then I would reduce unnecessary CloudWatch log ingestion, configure appropriate retention policies, and investigate excessive S3 API calls using available access logs and CloudTrail data events. Finally, I would implement AWS Budgets, Cost Anomaly Detection, and monitoring alerts to prevent similar incidents in the future. I would prioritize immediate cost control without compromising security, auditing, or application availability."
 
 ### **103. Scenario: Design an automated disaster recovery failover system for PostgreSQL with RPO < 1 minute and RTO < 5 minutes.**
 **Answer:**
