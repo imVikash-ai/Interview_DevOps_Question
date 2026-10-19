@@ -2251,14 +2251,37 @@ AWS Database Migration Service (AWS DMS) is **a managed cloud service that moves
 - **Flexible Infrastructure:** Can run on dedicated replication instances (with optional Multi-AZ high availability) or via **DMS Serverless**, which automatically scales capacity and uses pay-as-you-go pricing. 
 - **Supported Engines:** Works with widely used commercial and open-source platforms including Oracle, PostgreSQL, Microsoft SQL Server, MySQL, MariaDB, Amazon Redshift, and Amazon Aurora
 
-### **120. What is AWS DataSync?**
-**Answer:** An online data transfer service that simplifies, automates, and accelerates copying terabytes of data between on-premises storage and AWS S3, EFS, or FSx over Direct Connect or VPN.
+### **87. What is AWS Backup?**
+**Answer:**
 
-### **121. What is Amazon FSx for Lustre?**
-**Answer:** A fully managed, high-performance POSIX filesystem optimized for compute-intensive workloads (machine learning training, high-performance computing, video rendering) with sub-millisecond latencies and hundreds of gigabytes/sec throughput.
+**AWS Backup** is **a fully managed service from Amazon Web Services that centralizes and automates data protection across AWS cloud services and hybrid on-premises environments**. It removes the need for custom scripts or managing individual manual snapshots across separate services.
 
-### **122. What is AWS Backup?**
-**Answer:** A centralized backup service that automates and manages data protection across AWS services (EBS, RDS, DynamoDB, EFS, S3) using declarative backup plans and automated cross-region replication.
+#### Core Capabilities
+
+- **Policy-Based Backup Plans:** Define automated schedules, backup windows, and retention rules in a single place. 
+- **Centralized Management:** Control and monitor backups across multiple AWS accounts and regions using **AWS Organizations.**
+- **Incremental Backups:** Save full copies on the initial run, then store only changed data blocks for subsequent backups to reduce storage costs.
+- **Lifecycle Management:** Automatically transition backups from warm storage to lower-cost cold storage or delete them after expiration. 
+- **Compliance & Security:** Use **Vault Lock** (WORM / Write Once, Read Many) for immutable backups, independent KMS encryption keys, and AWS Backup Audit Manager for compliance reporting.
+- **Restore Testing:** Automatically test and validate recovery points on a regular schedule to verify disaster recovery readiness. 
+
+#### Supported Resources
+
+AWS Backup supports dozens of services across compute, storage, and databases: 
+
+- **Compute & Containers:** Amazon EC2, Amazon EKS
+- **Storage:** Amazon S3, Amazon EBS, Amazon EFS, Amazon FSx variants, AWS Storage Gateway
+- **Databases:** Amazon RDS, Amazon Aurora, Amazon DynamoDB, Amazon DocumentDB, Amazon Neptune, Amazon Redshift, Amazon Timestream
+- **Applications & Hybrid:** SAP HANA on Amazon EC2, AWS CloudFormation stacks, and on-premises VMware workloads (via VMware Cloud and AWS Outposts) 
+
+#### How Pricing Works
+
+You pay only for what you consume: 
+
+- Amount of backup storage used (split between warm and cold tiers)
+- Data restored and data transferred across regions
+- Backup evaluations or Audit Manager reports used
+- No minimum fees or upfront setup charges
 
 ### **123. What is AWS Route 53 Resolver DNS Firewall?**
 **Answer:** A managed firewall that allows filtering and blocking outbound DNS queries from VPC resources to known malicious domains or DNS data exfiltration tunnels.
