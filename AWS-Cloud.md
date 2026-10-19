@@ -1806,11 +1806,24 @@ Unlike traditional Identity and Access Management (IAM) tools that primarily han
 | **PAM** (Privileged Access Management) | Protects high-risk administrative accounts, often on-premises. | PAM focuses on vaulting and locking down admin vaults; CIEM is built specifically for dynamic, cloud-native entitlements at scale. |
 | **SIEM** (Security Information & Event Management) | Collects logs and alerts across systems to detect active threats. | SIEM alerts you *while* an event happens; CIEM works upstream to prevent excessive access rights from existing in the first place. |
 
-### **91. What is AWS App Runner?**
-**Answer:** A fully managed service that makes it easy for developers to deploy containerized web applications and APIs directly from source code or container images without managing VPCs or load balancers.
+### **73. What is AWS Copilot CLI?**
+**Answer:** 
+**AWS Copilot CLI** is **an open-source command-line interface tool designed to simplify the building, releasing, and operating of production-ready containerized applications on AWS**. It acts as an abstraction layer over complex infrastructure, allowing developers to focus on application logic rather than manual provisioning.
 
-### **92. What is AWS Copilot CLI?**
-**Answer:** An open-source command-line tool that allows developers to build, release, and operate production-ready containerized applications on AWS ECS and AWS Fargate.
+*Note: AWS Copilot CLI reached its official end of support from AWS in mid-2026. While it remains available as an open-source project on GitHub, AWS recommends migrating workloads to newer alternatives like Amazon ECS Express Mode or AWS Cloud Development Kit (CDK) Layer 3 constructs.* 
+
+#### Key Features and Architecture
+
+- **Target Environments:** It automates deployment onto **Amazon Elastic Container Service (ECS)**, **AWS Fargate** (serverless compute), and **AWS App Runner**. 
+- **Opinionated Service Patterns:** Instead of writing raw Infrastructure-as-Code (IaC), developers configure applications using a declarative `manifest.yml` file. Copilot converts these into standard **AWS CloudFormation** stacks. It provides several pre-built application patterns:
+  - **Load Balanced Web Service:** Public-facing, auto-scaling web apps utilizing an Application Load Balancer.
+  - **Request-Driven Web Service:** Serverless HTTP applications powered by AWS App Runner.
+  - **Backend Service:** Internal private microservices accessible only via internal service discovery.
+  - **Worker Service:** Message processors driven asynchronously via Amazon SQS queues.
+  - **Scheduled Job:** Ephemeral batch processing tasks triggered by cron or rate expressions.
+  - **Static Site:** Globally distributed frontend code managed via Amazon S3 and Amazon CloudFront. 
+- **Environments & Pipelines:** It supports multi-account or multi-region setups (e.g., testing, staging, production) and automatically generates continuous delivery workflows via **AWS CodePipeline** directly from Git repositories.
+- **Operational Command:** It includes built-in operational commands to view live logs (`copilot svc logs`), check system health, scale services, and map shell access (`copilot svc exec`) right from the local terminal. 
 
 ### **93. What is AWS SAM (Serverless Application Model)?**
 **Answer:** An open-source framework and CLI extending CloudFormation with shorthand syntax to define Lambda functions, API Gateways, and DynamoDB tables.
