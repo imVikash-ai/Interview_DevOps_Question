@@ -1759,7 +1759,29 @@ There are four key phases of a CSPM tool's workflow, although each happens conti
 - **AWS Trusted Advisor:** Delivers account-level recommendations covering security, cost, and performance optimization.
 
 ### **89. What is Cloud Workload Protection Platform (CWPP)?**
-**Answer:** Security tools that protect workloads (VMs, containers, serverless) at runtime using behavioral anomaly detection, vulnerability scanning, and intrusion detection.
+**Answer:** 
+A **Cloud Workload Protection Platform (CWPP)** is **a cybersecurity solution designed to protect server workloads across hybrid, multi-cloud, and on-premises environments**. 
+
+#### What Does a CWPP Protect?
+
+A "workload" refers to any software, application, database, or service running on compute resources, including: 
+
+- **Virtual Machines (VMs)** in public or private clouds
+- **Containers** and Kubernetes clusters
+- **Serverless functions**
+- **Bare-metal servers** and physical data center hardware
+
+#### Core Capabilities
+
+- **Real-Time Runtime Protection:** Continuously monitors active workloads to detect and block threats like malware, memory exploits, and unauthorized processes. 
+- **Vulnerability & Configuration Management:** Scans workloads for known software flaws and misconfigurations. 
+- **Microsegmentation & Least-Privilege Enforcement:** Isolates workloads and restricts lateral movement if an attacker breaches one part of the network. 
+- **Agent-Based or Agentless Deployment:** Operates via lightweight software agents installed inside workloads or via cloud APIs for agentless visibility. 
+
+#### How CWPP Differs from Other Cloud Security Tools
+
+- **CWPP vs. CSPM (Cloud Security Posture Management):** CWPP focuses on protecting the **workloads** and their runtime behavior, whereas CSPM focuses on auditing and fixing cloud **infrastructure and configuration** policies. 
+- **CWPP vs. CNAPP (Cloud-Native Application Protection Platform):** CWPP is often a core component of a broader **CNAPP**, which combines workload protection (CWPP) with posture management (CSPM) and code-to-cloud security. 
 
 ### **90. What is Cloud Infrastructure Entitlement Management (CIEM)?**
 **Answer:** Managing and enforcing least-privilege identity access across multi-cloud environments, detecting over-privileged service accounts and unused IAM permissions.
