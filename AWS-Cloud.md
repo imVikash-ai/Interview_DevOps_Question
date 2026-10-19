@@ -2086,11 +2086,39 @@ The framework relies on three main hierarchical concepts:
 
 "I would choose EKS Managed Node Groups when I want AWS-managed node lifecycle operations and straightforward production management. I would use Self-Managed Node Groups when I need more control over EC2 configuration, bootstrap scripts, or node lifecycle behavior. For workloads with variable demand, I would prefer Karpenter because it dynamically provisions suitable EC2 instances based on pending pod requirements and can consolidate underutilized nodes to reduce costs. In production, I could combine Managed Node Groups for baseline workloads with Karpenter for dynamically scaling application workloads."
 
-### **106. How do you securely connect an on-prem data center to AWS VPCs with automatic failover?**
+### **81. How do you securely connect an on-prem data center to AWS VPCs with automatic failover?**
 **Answer:**
-1. **Primary Link:** **AWS Direct Connect (DX)** with Direct Connect Gateway connected to AWS Transit Gateway.
-2. **Backup Link:** **IPsec Site-to-Site VPN** connected to the same Transit Gateway.
-3. **BGP Routing:** Direct Connect routes advertised with higher BGP priority (shorter AS-Path). If Direct Connect fails, BGP fails over traffic to the IPsec VPN tunnel within seconds.
+
+To securely connect an on-premises data center to AWS VPCs with automatic failover, **combine AWS Direct Connect (for high-speed, private fiber connectivity) with an AWS Site-to-Site VPN (using IPsec encryption for security and automatic fallback) through an AWS Transit Gateway**.
+
+#### Core Architecture Components
+
+- **AWS Direct Connect:** Provides a dedicated, low-latency, private physical connection that bypasses the public internet. Add a VPN over Direct Connect or a backup Site-to-Site VPN to encrypt traffic and ensure redundancy. 
+- **AWS Site-to-Site VPN:** Establishes dual, redundant IPsec tunnels per connection using IKEv1 or IKEv2 encryption. If your primary Direct Connect path drops, traffic automatically shifts to the encrypted VPN tunnels. 
+- **AWS Transit Gateway (TGW):** Acts as a cloud router allowing you to centrally manage connectivity between your on-premises data center and multiple AWS VPCs. 
+- **Border Gateway Protocol (BGP):** Use BGP dynamic routing on both your on-premises customer gateway devices and the AWS side. BGP handles health checks and automatically updates route tables for sub-second to fast convergence during a failover.
+
+#### Step-by-Step Configuration Flow
+
+#### 1. Set up the Transit Gateway
+
+- Create an AWS Transit Gateway in your target region and attach your target VPCs. 
+
+#### 2. Configure Direct Connect (Primary Path)
+
+- Provision a Direct Connect connection and attach a Private Virtual Interface (VIF) or Transit VIF to your Transit Gateway via a Direct Connect Gateway.
+- Enable BGP peering sessions between your on-premises router and AWS. 
+
+#### 3. Configure AWS Site-to-Site VPN (Backup Path)
+
+- Create an AWS Site-to-Site VPN connection attached to the same Transit Gateway.
+- Deploy a compatible customer gateway device in your on-premises data center and terminate the two built-in IPsec tunnels.
+
+#### 4. Configure BGP Path Preference (Failover Logic)
+
+- Tune BGP attributes (such as **AS-Path Prepending** or **LOCAL_PREF**) on your on-premises routers.
+- Make the Direct Connect path your preferred active route (e.g., higher local preference) and configure the Site-to-Site VPN as the standby/backup path.
+- When BGP stops receiving health/keepalive packets over Direct Connect, routes automatically withdraw and shift traffic over the IPsec VPN tunnels. 
 
 ### **107. What is Google Cloud Spanner and how does it achieve global consistency without violating the CAP theorem?**
 **Answer:**
