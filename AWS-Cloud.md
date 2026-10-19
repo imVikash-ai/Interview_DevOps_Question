@@ -2156,21 +2156,22 @@ To securely connect an on-premises data center to AWS VPCs with automatic failov
 
 "I would implement an event-driven remediation workflow using AWS CloudTrail, Amazon EventBridge, and AWS Lambda. CloudTrail records the security group modification, and EventBridge immediately matches the event when port 22 is opened to `0.0.0.0/0`. It invokes Lambda, which identifies and revokes only the offending ingress rule using least-privilege IAM permissions. I would log the remediation, notify the security team, and configure alarms for failures. I would also use AWS Config for continuous compliance monitoring and test the end-to-end workflow to verify that it consistently meets the 30-second target. Since AWS services have variable processing latency, I would measure actual remediation time rather than assume the target is guaranteed."
 
+### **83. What is DynamoDB Global Tables?**
+**Answer:**
+An **Amazon DynamoDB global table** is **a fully managed, multi-Region, and multi-active database feature that automatically replicates your table data across multiple AWS Regions or AWS accounts**. 
 
-### **112. What is AWS Nitro System?**
-**Answer:** A collection of dedicated hardware cards and a lightweight hypervisor that offloads virtually all virtualization and security functions (networking, storage, security monitoring) from the main host CPU, dedicating nearly 100% of host CPU/RAM to customer workloads.
+#### How It Works
 
-### **113. What is AWS EBS Fast Snapshot Restore (FSR)?**
-**Answer:** Eliminates the latency of I/O operations on blocks when creating EBS volumes from snapshots by pre-warming blocks immediately upon creation.
+- **Replica Tables:** A global table consists of two or more identical replica tables placed in different AWS Regions. Each replica shares the same table name and primary key schema.
+- **Automatic Propagation:** When your application writes or updates data in one replica, DynamoDB automatically and asynchronously replicates that change to all other replicas using Amazon DynamoDB Streams. 
+- **Multi-Active Access:** Applications can perform low-latency reads and writes locally in any participating Region rather than routing all traffic to a single primary database. 
 
-### **114. What is Amazon Aurora Global Database Write-Forwarding?**
-**Answer:** Allows secondary read-only Aurora database clusters in remote regions to accept SQL write statements directly, automatically forwarding the transaction to the primary writer cluster in the primary region over AWS internal networks.
+#### Key Features & Capabilities
 
-### **115. What is DynamoDB Streams and what is its integration with Lambda?**
-**Answer:** An ordered, time-sequenced log of item-level modifications (insert, update, delete) in a DynamoDB table. Lambda functions consume streams to trigger asynchronous real-time event-driven processing (e.g., updating search indexes, sending notifications).
-
-### **116. What is DynamoDB Global Tables?**
-**Answer:** A fully managed multi-region, multi-active database that replicates DynamoDB tables across chosen AWS regions with single-digit millisecond latency, resolving write conflicts using Last-Write-Wins (LWW).
+- **Consistency Options:** Supports multi-Region eventual consistency (default) as well as multi-Region strong consistency for workloads requiring strict synchronization. 
+- **Multi-Account Support:** Allows you to replicate tables across separate AWS accounts and Regions for stronger security, isolation, and governance boundaries. 
+- **Disaster Recovery & High Availability:** Raises table availability from single-Region (99.99%) to multi-Region tiers (99.999%), ensuring applications can keep running if an entire Region experiences an outage.
+- **Conflict Resolution:** Handles concurrent writes across different Regions using a **last writer wins** reconciliation model. 
 
 ### **117. What is AWS ElastiCache (Redis vs Memcached)?**
 **Answer:**
