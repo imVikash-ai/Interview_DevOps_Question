@@ -1555,8 +1555,36 @@ An **AWS Organizational Unit (OU)** is **a container that groups multiple AWS ac
 - **By Compliance Requirements:** Isolating accounts that must meet strict regulatory standards (such as HIPAA or PCI-DSS) so you can apply restrictive security and service limits via SCPs. 
 - **By Environment or Team:** Organizing accounts by lifecycle stage (Dev, Test, Prod) or by department (Engineering, Finance).
 
-### **78. What is Cloud FinOps and what is the FinOps Lifecycle?**
-**Answer:** Cloud Financial Management framework optimizing cloud spending across three continuous phases: **Inform** (tagging, cost allocation), **Optimize** (right-sizing, discount commitments), and **Operate** (continuous governance).
+### **62. What is Cloud FinOps and what is the FinOps Lifecycle?**
+**Answer:**
+**Cloud FinOps** (Financial Operations) is **an operational framework and cultural practice that unites technology, finance, and business teams to manage variable cloud spending and maximize business value**. Rather than just cutting costs, FinOps helps organizations make data-driven trade-offs between speed, cost, and performance.
+
+#### The FinOps Lifecycle
+The FinOps lifecycle is an iterative, continuous process defined by the **FinOps Foundation** and structured around three core phases:
+
+**1. Inform**
+
+- **Goal:** Create complete cost visibility and allocation. 
+- **Key Activities:**
+  - Track cloud usage and map expenditures to specific teams, products, features, or business units (cost allocation).
+  - Deliver accessible, real-time reports and dashboards to engineers, finance, and executives.
+  - Identify spending anomalies, waste, and unit economics (cost per transaction, customer, or user). 
+
+**2. Optimize**
+
+- **Goal:** Actively reduce cloud waste and adjust resource consumption. 
+- **Key Activities:**
+  - **Rightsizing:** Match cloud resources (such as compute instances or storage) to actual performance requirements.
+  - **Commitment-based discounts:** Leverage reserved instances, savings plans, or spot instances offered by cloud providers (AWS, Azure, Google Cloud).
+  - **Architecture tuning:** Collaborate with engineers to refactor applications or automate the shutdown of idle/non-production resources.
+
+**3. Operate**
+
+- **Goal:** Continuously monitor, govern, and evaluate performance against business goals. 
+- **Key Activities:**
+  - Establish governance policies, budgets, and automated guardrails.
+  - Track real-time KPIs and measure cloud efficiency against business growth.
+  - Repeat the cycle continuously as infrastructure, code, and business demands evolve.
 
 ### **79. What is AWS Cost & Usage Report (CUR)?**
 **Answer:** The most comprehensive dataset of AWS cost and usage data, delivering hourly or daily CSV/Parquet files to an S3 bucket for analysis in Amazon Athena and QuickSight.
