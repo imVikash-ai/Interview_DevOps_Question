@@ -1997,9 +1997,49 @@ The framework relies on three main hierarchical concepts:
 
 "I would maintain a continuously replicated, pre-provisioned PostgreSQL standby in a separate region, monitor replication lag to meet the sub-one-minute RPO, and automate failure detection, replica promotion, and application reconnection to target an RTO below five minutes. I would also implement split-brain prevention, monitoring, and regular disaster recovery drills to verify that both objectives are achievable under real failure conditions."
 
-### **104. How do you implement Zero-Trust Cloud Network Segmentation without managing hundreds of firewall appliances?**
+### **79. How do you implement Zero-Trust Cloud Network Segmentation without managing hundreds of firewall appliances?**
 **Answer:**
-Deploy **AWS Network Firewall** centrally in an inspection VPC attached to AWS Transit Gateway, combined with AWS VPC Lattice and Service Mesh (Istio) mTLS to enforce identity-based Layer 7 access controls between microservices.
+
+**1. Architecture and Approach**
+- I would implement a Zero-Trust security model based on the principle of "Never Trust, Always Verify."
+- I would use AWS-native services instead of managing hundreds of individual firewall appliances.
+- I would segment workloads based on application, environment, and sensitivity, such as production, development, and database tiers.
+
+**2. Implement Network Segmentation**
+- Use Amazon VPCs and private subnets to isolate workloads.
+- Use Security Groups as stateful, workload-level firewalls that allow only explicitly required traffic.
+- Use AWS Network Firewall for centralized network inspection when advanced filtering is required.
+- Use AWS Transit Gateway to connect multiple VPCs and centralize routing.
+- Use AWS Firewall Manager to centrally manage and enforce firewall policies across multiple AWS accounts.
+
+**3. Enforce Zero-Trust Access**
+- Apply least-privilege Security Group rules using specific ports, protocols, and trusted Security Group references.
+- Use AWS IAM roles and temporary credentials instead of long-lived access keys.
+- Use AWS Systems Manager Session Manager for secure administrative access without exposing SSH or RDP ports.
+- Use AWS PrivateLink to provide private access to supported services without exposing traffic to the public internet.
+- Integrate AWS IAM Identity Center and multi-factor authentication for workforce access.
+
+**4. Automate Policy Management**
+- Use AWS Firewall Manager and AWS Organizations to enforce consistent security policies across accounts.
+- Use Infrastructure as Code, such as Terraform, to create and version-control network security rules.
+- Use AWS Config to detect noncompliant resources and trigger remediation workflows.
+- Use CI/CD pipelines to validate security policies before deployment.
+
+**5. Monitoring and Compliance**
+- Enable VPC Flow Logs to analyze network traffic.
+- Use Amazon GuardDuty to detect suspicious activity.
+- Use AWS CloudTrail to audit API activity and configuration changes.
+- Send relevant findings to Amazon CloudWatch and the security monitoring platform for alerting and investigation.
+
+**6. Expected Outcome**
+- Reduced firewall appliance management overhead.
+- Consistent security policies across hundreds of VPCs and AWS accounts.
+- Reduced lateral movement between workloads.
+- Improved visibility, compliance, and operational efficiency.
+
+#### Final Interview Answer
+
+"I would implement Zero Trust using AWS-native, policy-driven security rather than managing hundreds of firewall appliances. I would use VPC segmentation and Security Groups for workload-level isolation, AWS Transit Gateway for centralized connectivity, and AWS Firewall Manager to enforce security policies across multiple accounts. I would automate provisioning with Terraform, monitor traffic through VPC Flow Logs and GuardDuty, and use IAM least privilege with temporary credentials. This approach provides scalable network segmentation, centralized governance, and reduced operational overhead."
 
 ### **105. Compare EKS Managed Node Groups vs Self-Managed Node Groups vs Karpenter Nodes.**
 **Answer:**
