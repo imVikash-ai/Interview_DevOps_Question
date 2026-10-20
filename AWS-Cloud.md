@@ -2787,9 +2787,29 @@ The service operates on a **pay-as-you-go** model billed per second of audio pro
 - **Financial & Legal Services:** Automatically scan contracts, insurance claims, or legal briefs for critical terms and redact sensitive data.
 
 ### **110. What is Amazon SageMaker?**
-**Answer:** A fully managed machine learning platform that provides tools to build, train, tune, and deploy machine learning models at scale.
+**Answer:** 
 
-### **194. What is Amazon SageMaker JumpStart?**
+**Amazon SageMaker** (renamed Amazon SageMaker AI in December 2024) is **a fully managed cloud service from Amazon Web Services (AWS) that helps developers and data scientists build, train, test, and deploy machine learning (ML) and generative AI models**.
+
+It removes the heavy lifting of setting up, provisioning, and maintaining underlying servers and infrastructure. 
+
+#### Core Stages of the SageMaker Workflow
+
+SageMaker covers the complete machine learning lifecycle:
+
+- **Build:** Use tools like Amazon SageMaker Studio (a web-based IDE), Jupyter notebooks, and data prep tools like SageMaker Data Wrangler to write code and process datasets. 
+- **Train:** Run model training jobs on scalable cloud hardware without managing clusters. It supports distributed training and popular frameworks like PyTorch, TensorFlow, and XGBoost.
+- **Deploy:** Host trained models to serve real-time, batch, asynchronous, or serverless predictions via APIs. 
+
+#### Key Features
+
+- **SageMaker AI / Studio:** A unified workspace for managing experiments, debugging, and collaborative development.
+- **SageMaker JumpStart:** Provides access to pre-trained foundation models, open-source models, and one-click deployment templates.
+- **SageMaker Pipelines:** Built-in MLOps and CI/CD tools to automate data preparation, training, and deployment workflows.
+- **Model Monitor:** Tracks live production endpoints to catch data drift or drops in model accuracy.
+- **Unified Studio & Lakehouse:** Integrates analytics, SQL querying, and zero-ETL data lake access across Amazon S3 and Amazon Redshift
+
+### **111. What is Amazon SageMaker JumpStart?**
 **Answer:** A hub of pre-trained open-source and proprietary foundation models that can be evaluated and deployed in 1 click.
 
 ### **195. What is AWS Panorama?**
