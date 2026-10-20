@@ -2633,71 +2633,27 @@ The core difference between **AWS Elastic Beanstalk** and **AWS App Runner** lie
 - **Financial Modeling and Risk Analysis:** Processing large-scale end-of-day market calculations and historical simulations.
 - **Machine Learning:** Queuing and managing training jobs with prioritized access.
 
-### **155. What is AWS CloudFormation StackSets?**
-**Answer:** Enables provisioning, updating, or deleting CloudFormation stacks across multiple AWS accounts and multiple AWS regions in a single automated operation.
+### **103. What is AWS Well-Architected Framework?**
+**Answer:** 
 
-### **156. What is AWS CloudFormation Drift Detection?**
-**Answer:** Identifies when actual cloud infrastructure configurations have been manually modified outside of CloudFormation management templates.
+The **AWS Well-Architected Framework** is **a set of foundational questions, design principles, and best practices provided by Amazon Web Services to help cloud architects build and operate secure, high-performing, resilient, and cost-effective workloads**.
 
-### **157. What is AWS CloudFormation Custom Resources?**
-**Answer:** Allows executing Lambda functions during CloudFormation stack provisioning to execute custom code (populating databases, calling external APIs).
+#### The Six Pillars
 
-### **158. What is Amazon VPC Reachability Analyzer?**
-**Answer:** A configuration analysis tool that performs formal mathematical verification of network paths between VPC resources without sending real test packets.
+The framework is organized around six core operational and technical pillars: 
 
-### **159. What is AWS Network Access Analyzer?**
-**Answer:** Validates whether network architectures comply with security and regulatory segmentation policies (e.g., verifying database subnets have no path to the internet).
+- **Operational Excellence:** Focuses on running, monitoring, and continuously improving processes, procedures, and code deployments to deliver business value. 
+- **Security:** Protects information, systems, and assets through risk assessments, identity and access management, and threat detection.
+- **Reliability:** Ensures a workload performs its intended function consistently and recovers automatically from infrastructure or service disruptions. 
+- **Performance Efficiency:** Uses IT and computing resources efficiently to meet system requirements and adapt as demand or technology evolves. 
+- **Cost Optimization:** Analyzes, controls, and eliminates unnecessary spending or undifferentiated heavy lifting to deliver maximum value at the lowest price. 
+- **Sustainability:** Minimizes the long-term environmental and energy impacts of cloud workloads by maximizing resource utilization.
 
-### **160. What is AWS Global Accelerator vs Amazon CloudFront?**
-**Answer:**
-- **CloudFront:** Caches HTTP/HTTPS web content and media at edge locations worldwide.
-- **Global Accelerator:** Routes non-HTTP and HTTP TCP/UDP traffic over private fiber backbones directly to backend endpoints without caching.
+#### Key Components & Tools
 
-### **161. What is AWS Transfer Family?**
-**Answer:** A fully managed service for transferring files securely into and out of Amazon S3 or Amazon EFS over SFTP, FTPS, and FTP protocols.
-
-### **162. What is Amazon MQ?**
-**Answer:** A managed message broker service for open-source industry-standard messaging protocols (Apache ActiveMQ and RabbitMQ) for migrating legacy enterprise systems to the cloud.
-
-### **163. What is Amazon Kinesis Data Streams vs Amazon SQS?**
-**Answer:**
-- **SQS:** Individual message queue; messages are consumed and deleted; independent worker consumers.
-- **Kinesis:** Ordered, real-time data stream; records are retained for days; multiple independent consumer applications read from shards concurrently.
-
-### **164. What is Amazon Kinesis Data Firehose?**
-**Answer:** A fully managed streaming ETL service that captures, transforms, and automatically loads streaming data into Amazon S3, Redshift, OpenSearch, and Splunk in near-real-time.
-
-### **165. What is AWS Glue DataBrew?**
-**Answer:** A visual data preparation tool that allows data analysts to clean, normalize, and enrich data visually with over 250 pre-built transformations without writing code.
-
-### **166. What is AWS Lake Formation?**
-**Answer:** A service that simplifies building, securing, and managing data lakes on Amazon S3, providing centralized fine-grained column- and row-level access control.
-
-### **167. What is Amazon QuickSight?**
-**Answer:** A cloud-scale, serverless Business Intelligence (BI) service with built-in machine learning insights and interactive dashboards.
-
-### **168. What is AWS Directory Service (AWS Managed Microsoft AD)?**
-**Answer:** A fully managed Microsoft Active Directory service running on real Windows Server domain controllers in AWS.
-
-### **169. What is AWS Single Sign-On (IAM Identity Center) SCIM Protocol?**
-**Answer:** Automatically synchronizes users, groups, and permissions from external identity providers (Okta, Azure AD) into AWS IAM Identity Center via System for Cross-domain Identity Management (SCIM).
-
-### **170. What is Amazon Cognito (User Pools vs Identity Pools)?**
-**Answer:**
-- **User Pools:** User directories providing sign-up, sign-in, and MFA authentication for web/mobile applications.
-- **Identity Pools (Federated Identities):** Authorizes users to obtain temporary AWS IAM credentials to access AWS services directly.
-
-### **171. What is AWS CloudEndure Disaster Recovery / AWS Elastic Disaster Recovery (DRS)?**
-**Answer:** Continuously replicates block storage volumes of physical, virtual, or cloud-based servers into AWS at the block level, orchestrating rapid failover in minutes during disasters.
-
-### **172. What is AWS Application Migration Service (MGN)?**
-**Answer:** The primary migration service for lift-and-shift server migrations to AWS, utilizing block-level continuous data replication with minimal downtime.
-
-### **173. What is AWS Migration Hub?**
-**Answer:** A central location to track the progress of application migrations across multiple AWS and partner tools.
-
-### **174. What is AWS Well-Architected Framework?**
-**Answer:** Six architectural pillars for designing reliable, secure, efficient, and cost-effective cloud systems: **Operational Excellence**, **Security**, **Reliability**, **Performance Efficiency**, **Cost Optimization**, and **Sustainability**.
+- **Trade-Offs:** Architects use the framework to balance competing priorities (e.g., opting for lower cost in a dev environment versus higher reliability in production). 
+- **AWS Well-Architected Tool:** A free, self-service assessment mechanism available in the AWS Management Console used to evaluate workloads, track milestones, and identify high-risk issues. 
+- **Domain Lenses:** Specialized extensions of the framework tailored for specific technologies or industries (such as serverless, SaaS, or machine learning)
 
 ### **175. What is AWS Well-Architected Tool?**
 **Answer:** A service in the AWS Console that provides a consistent process to review workloads against AWS best practices and generates remediation milestone plans.
