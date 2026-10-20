@@ -2368,20 +2368,28 @@ You can analyze flow log data using several native AWS tools and third-party pla
 - **Third-Party Observability Tools:**
   - Export or stream logs into specialized security and network analytics platforms (such as Kentik, Splunk, or Datadog) for multi-cloud or hybrid network forensics
 
-### **130. What is AWS Cost Anomaly Detection?**
-**Answer:** Uses advanced machine learning to continuously monitor cost and usage telemetry, detecting unusual spend spikes and sending root-cause alert emails or Slack notifications.
+### **92. What is AWS Health Dashboard (Personal Health Dashboard)?**
+**Answer:**
 
-### **131. What is AWS Compute Optimizer?**
-**Answer:** A machine learning service that analyzes historical CloudWatch utilization metrics to recommend optimal EC2 instance types, EBS volume configurations, and Lambda memory sizes to reduce costs.
+The **AWS Health Dashboard** (formerly known as the **Personal Health Dashboard** or PHD) is **a built-in monitoring tool that provides ongoing, personalized visibility into the performance and availability of the Amazon Web Services (AWS) resources and services you actually use**. 
 
-### **132. What is Cloud Custodian YAML Policy Structure?**
-**Answer:** A framework defining `resource` (e.g., `ec2`), `filters` (e.g., `tag:Environment: absent`), and `actions` (e.g., `stop`, `notify`) to automate cloud compliance and cost governance.
+#### Service Health Dashboard vs. AWS Health Dashboard
 
-### **133. What is AWS Health Dashboard (Personal Health Dashboard)?**
-**Answer:** Provides personalized alerts and remediation guidance when AWS is experiencing events that may impact your specific infrastructure and resources.
+- **AWS Service Health Dashboard:** Publicly available to everyone without logging in. It shows the general, region-wide status of all AWS services. 
+- **AWS Health Dashboard (Personal):** Requires authentication into your AWS account. It filters out noise and delivers tailored alerts, troubleshooting guidance, and notices that directly impact your specific resources and infrastructure. 
 
-### **134. What is AWS X-Ray?**
-**Answer:** A distributed tracing service that collects telemetry across microservices, generating service graphs and identifying performance bottlenecks.
+#### Key Features
+
+- **Personalized Event Views:** Shows open issues, recent events, and scheduled maintenance (such as EC2 hardware degradation or planned network changes) that specifically affect your account or organization. 
+- **No Setup Required:** The dashboard is automatically enabled for all authenticated AWS users and starts tracking activity immediately.
+- **Event History:** Keeps a log of health events affecting your account or organization from the past 90 days. 
+- **Remediation Guidance:** Provides actionable steps and diagnostic information to help you quickly resolve or plan around issues. 
+- **Multi-Account Support:** If you use **AWS Organizations**, you can aggregate notifications across all your sub-accounts for a centralized view. 
+
+#### Integrations and Automation
+
+- **Amazon EventBridge (formerly CloudWatch Events):** You can build custom rules to route AWS Health events to targets like Amazon SNS, AWS Lambda, Amazon SQS, or Slack/Chat applications for automated responses. 
+- **AWS Health API:** Allows you to programmatically pull health data into your own internal dashboards, ticketing systems, or third-party IT management tools
 
 ### **135. What is Amazon Managed Grafana (AMG) and Amazon Managed Prometheus (AMP)?**
 **Answer:** Fully managed, highly available, secure serverless Prometheus time-series storage and Grafana visualization services operating in AWS.
