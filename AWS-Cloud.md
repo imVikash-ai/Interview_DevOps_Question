@@ -2436,8 +2436,25 @@ In a standard AWS cloud architecture, Amazon Bedrock operates as a **core intell
 - **Serverless Scaling:** AWS manages all underlying GPU infrastructure and scaling automatically. 
 - **Built-in Guardrails & Agents:** Includes managed agents, prompt routing, model distillation, and safety guardrails directly inside the cloud workflow.
 
-### **139. What is AWS Private CA (Certificate Authority)?**
-**Answer:** A managed private certificate authority service that automates issuing, configuring, and renewing private X.509 TLS certificates for internal microservices and IoT devices.
+### **95. What is AWS Private CA (Certificate Authority)?**
+**Answer:**
+
+**AWS Private Certificate Authority (AWS Private CA)** is **a managed, highly available cloud service that lets you create and run your own internal public key infrastructure (PKI) without the high cost and complexity of maintaining physical hardware**.
+
+#### Core Purpose
+
+- **Private Trust:** It issues digital X.509 certificates trusted *only* within your organization or private network, rather than across the public internet. 
+- **Resource Identification:** You use these certificates to authenticate and encrypt traffic for internal servers, containers, applications, users, mobile devices, and Internet of Things (IoT) hardware.
+
+#### Key Features
+
+- **CA Hierarchies:** Build and manage root and subordinate certificate authorities using the **AWS Private CA Dashboard**, APIs, SDKs, or CloudFormation.
+- **Operating Modes:**
+  - **General-Purpose Mode (Default):** Issues certificates with any custom validity period and supports revocation mechanisms.
+  - **Short-Lived Certificate Mode:** Issues ultra-short-lived certificates valid for up to 7 days, eliminating the need to set up certificate revocation lists (CRLs). 
+- **Hardware Security:** Private keys are stored safely inside FIPS-validated Hardware Security Modules (HSMs) managed by AWS. 
+- **Integrations:** Easily connects with **AWS Certificate Manager (ACM)**, Amazon Elastic Kubernetes Service (EKS), Active Directory, and SCEP (Simple Certificate Enrollment Protocol).
+- **Revocation Controls:** Supports both Certificate Revocation Lists (CRLs) and Online Certificate Status Protocol (OCSP)
 
 ### **140. What is AWS AppConfig?**
 **Answer:** A capability of AWS Systems Manager that enables teams to deploy application configurations and feature flags to production workloads dynamically with built-in validation and automated rollback alarms.
