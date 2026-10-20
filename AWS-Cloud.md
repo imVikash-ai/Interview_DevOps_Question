@@ -2391,8 +2391,30 @@ The **AWS Health Dashboard** (formerly known as the **Personal Health Dashboard*
 - **Amazon EventBridge (formerly CloudWatch Events):** You can build custom rules to route AWS Health events to targets like Amazon SNS, AWS Lambda, Amazon SQS, or Slack/Chat applications for automated responses. 
 - **AWS Health API:** Allows you to programmatically pull health data into your own internal dashboards, ticketing systems, or third-party IT management tools
 
-### **135. What is Amazon Managed Grafana (AMG) and Amazon Managed Prometheus (AMP)?**
-**Answer:** Fully managed, highly available, secure serverless Prometheus time-series storage and Grafana visualization services operating in AWS.
+### **93. What is Amazon Managed Grafana (AMG) and Amazon Managed Prometheus (AMP)?**
+**Answer:** 
+
+**Amazon Managed Grafana (AMG)** and **Amazon Managed Service for Prometheus (AMP)** are **fully managed, cloud-native observability services from Amazon Web Services (AWS) designed to monitor containerized applications, microservices, and hybrid infrastructure without manual server management**.
+
+#### Amazon Managed Service for Prometheus (AMP)
+
+- **What it is:** A serverless, Prometheus-compatible monitoring and alerting service built for large-scale container and Kubernetes environments. 
+- **Core Functions:** Ingests, filters, and queries millions of time-series metrics using PromQL (Prometheus Query Language). 
+- **Architecture:** Uses Cortex open-source time-series storage horizontally under the hood. It automatically scales based on your ingestion and query load. 
+- **Key Benefit:** Eliminates the operational overhead of provisioning, patching, and scaling standalone Prometheus servers.
+
+#### Amazon Managed Grafana (AMG)
+
+- **What it is:** A fully managed data visualization and analysis service built in collaboration with Grafana Labs.
+- **Core Functions:** Queries, correlates, and visualizes operational metrics, logs, and traces from diverse sources. 
+- **Integrations:** Natively connects to AMP, Amazon CloudWatch, AWS X-Ray, Amazon Timestream, Elasticsearch, and third-party tools like Azure Monitor or Google Cloud Operations.
+- **Security & Access:** Features built-in single sign-on (SSO) via IAM Identity Center / SAML 2.0, fine-grained access control, and automated AWS Signature Version 4 (SigV4) authentication to talk to AMP workspaces. 
+
+#### How They Work Together
+
+- AMP collects and stores time-series metric data from your Kubernetes clusters, Amazon EKS, or EC2 instances.
+- AMG acts as the visualization layer, pulling data directly from AMP workspaces to render rich dashboards, graphs, and alerts.
+- Authentication between the two is handled automatically via IAM and SigV4 without requiring manual secret management.
 
 ### **136. What is AWS Fault Injection Service (FIS)?**
 **Answer:** A managed chaos engineering service that injects controlled faults (CPU stress, network latency, AZ outages) across AWS workloads to test system resilience.
