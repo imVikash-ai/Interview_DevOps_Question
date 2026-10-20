@@ -2488,8 +2488,25 @@ Amazon Athena is **a serverless, interactive query service from Amazon Web Servi
 2. **Catalog Metadata:** Use **AWS Glue Data Catalog** to define the schema and table structure for your files.
 3. **Run SQL:** Write and execute standard SQL queries straight from the Amazon Athena Console, CLI, or connected Business Intelligence tools via JDBC/ODBC drivers.
 
-### **142. What is AWS Glue and AWS Glue Data Catalog?**
-**Answer:** A serverless data integration service that automates discovering, preparing, and combining data for analytics. The Data Catalog acts as a centralized metadata repository for table definitions.
+### **98. What is AWS Glue and AWS Glue Data Catalog?**
+**Answer**
+
+**AWS Glue** is **a serverless, scalable data integration service from Amazon Web Services (AWS) used to discover, prepare, move, and combine data for analytics, machine learning (ML), and application development**. 
+- **No Infrastructure to Manage:** It runs automatically without provisioning or managing servers.
+- **ETL Capabilities:** It builds, runs, and monitors Extract, Transform, and Load (ETL) pipelines using visual canvases, notebooks, or automated Spark/Ray engines.
+- **Wide Connectivity:** It connects to over 70 to 100+ diverse data sources (such as Amazon S3, RDS, Redshift, and external databases). 
+
+#### What is the AWS Glue Data Catalog?
+
+The **AWS Glue Data Catalog** is a centralized, persistent metadata repository that stores structural and operational information about your data assets. 
+
+- **Single Source of Truth:** It holds table definitions, column names, data types, partition details, and physical storage locations while the actual data remains in its original source (like S3 or a database). 
+- **Crawlers and Classifiers:** Automatic programs called **AWS Glue Crawlers** scan your data stores, infer schemas using classifiers, and automatically populate or update the Data Catalog. 
+- **Cross-Service Integration:** It acts as a shared metadata layer for other AWS analytics tools, allowing you to query and analyze data seamlessly across Amazon Athena, Amazon EMR, **Amazon Redshift Spectrum**, and AWS Lake Formation.
+- **Key Components:**
+  - **Databases & Tables:** Logical groupings of metadata table definitions.
+  - **Connections:** Metadata properties needed to connect to external data stores.
+  - **Schema Registry:** Manages and validates streaming data schemas.
 
 ### **143. What is Amazon Redshift?**
 **Answer:** A fully managed, petabyte-scale cloud data warehouse service that uses columnar storage and massively parallel processing (MPP) to execute complex analytical queries.
