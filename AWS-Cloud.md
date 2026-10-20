@@ -2531,19 +2531,51 @@ The **AWS Glue Data Catalog** is a centralized, persistent metadata repository t
 - **Zero-ETL Integration:** Supports automated, pipeline-free replication of transactional data from services like Amazon Aurora or DynamoDB.
 - **Data Sharing:** Allows live, read-only data sharing across different Redshift clusters, AWS accounts, or regions without copy overhead
 
-### **144. What is AWS Lambda Function URLs?**
-**Answer:** A dedicated HTTP(S) endpoint for Lambda functions, providing direct web invocation without requiring an API Gateway or Application Load Balancer.
-
-### **145. What is AWS Lambda Extensions API?**
-**Answer:** Enables integrating Lambda functions with external monitoring, observability, and security tools (Datadog, Dynatrace, New Relic) by running companion processes inside the Lambda execution environment.
-
-### **146. What is AWS Serverless Express / Mangum?**
-**Answer:** Adapter packages allowing standard Node.js Express or Python FastAPI/ASGI web applications to execute seamlessly inside AWS Lambda behind API Gateway.
-
-### **147. What is AWS SQS Long Polling vs Short Polling?**
+### **100. What is AWS SQS Long Polling vs Short Polling?**
 **Answer:**
-- **Short Polling:** Queries a subset of SQS servers and returns immediately, even if the queue is empty (increases empty response costs).
-- **Long Polling (`WaitTimeSeconds: 20`):** Waits up to 20 seconds for messages to arrive, reducing empty responses and lowering API costs by over 90%.
+
+The primary difference between **Amazon SQS Short Polling** and **Long Polling** is **how long the consumer waits for a message to arrive and how thoroughly AWS queries its distributed infrastructure**. 
+
+In almost all scenarios, **Long Polling is the recommended best practice** because it dramatically lowers costs and improves retrieval efficiency. 
+
+#### Direct Comparison
+
+| **Feature** | **Short Polling (Default)** | **Long Polling** |
+|---|---|---|
+| **Wait Time (`WaitTimeSeconds`)** | **`0` seconds** (returns immediately) | **`1` to `20` seconds** |
+| **Server Query Behavior** | Queries only a **subset** of SQS servers | Queries **all** SQS servers |
+| **Empty Responses** | **High**; returns an empty response immediately if the sampled servers have no messages. | **Low**; holds the request open until a message arrives or the timeout expires. |
+| **False Empties** | **Yes**; can miss a message if it sits on a server that wasn't sampled. | **No**; scans the entire pool to guarantee message delivery if one exists. |
+| **Cost Efficiency** | **Expensive for quiet queues** due to high volumes of empty API requests. | **Highly Cost-Effective**; slashes unnecessary API requests and billing. |
+
+#### Detailed Breakdown
+
+#### 1. Short Polling (The Default)
+
+When a consumer requests messages via the `ReceiveMessage` API, SQS samples a **weighted random subset** of its underlying distributed servers. 
+
+- **The Good:** It returns a response instantly, whether it finds a message or not. 
+- **The Bad:** Because it doesn't look everywhere, it can return an empty response even if there are messages waiting on other unsampled servers (a "false empty"). If your consumer runs in a tight loop, this behavior triggers thousands of rapid, billable API calls that drain your budget on an empty queue. 
+
+#### 2. Long Polling
+
+Long polling activates whenever you set `WaitTimeSeconds` to any value **greater than 0** (up to a maximum of 20 seconds). 
+
+- **The Good:** When a request comes in, SQS queries **all** of its internal servers. If the queue is empty, SQS holds the connection open and waits. The moment a message arrives, it is sent to the consumer instantly. 
+- **The Bad:** It keeps a thread/connection open, which requires your consumer to handle persistent connections gracefully. 
+
+#### When should you use each?
+
+#### Use Long Polling when:
+
+- You want to **minimize AWS infrastructure costs** (fewer API calls mean lower bills). 
+- Your queue experiences low or intermittent traffic, meaning it sits empty for long stretches. 
+- You want to eliminate false empty responses and minimize application network noise. 
+
+#### Use Short Polling when:
+
+- Your application is single-threaded and queries **multiple queues** sequentially. Long polling would freeze that single thread on an empty queue, preventing it from checking other queues that might have data. 
+- Your application requires an immediate response and cannot tolerate open HTTP connection hold times
 
 ### **148. What is SQS Message Visibility Timeout?**
 **Answer:** The period during which a message is hidden from other consumers after being fetched by a worker. If the consumer crashes before deleting the message, the message becomes visible again for another consumer to retry.
