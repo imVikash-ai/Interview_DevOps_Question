@@ -2416,14 +2416,25 @@ The **AWS Health Dashboard** (formerly known as the **Personal Health Dashboard*
 - AMG acts as the visualization layer, pulling data directly from AMP workspaces to render rich dashboards, graphs, and alerts.
 - Authentication between the two is handled automatically via IAM and SigV4 without requiring manual secret management.
 
-### **136. What is AWS Fault Injection Service (FIS)?**
-**Answer:** A managed chaos engineering service that injects controlled faults (CPU stress, network latency, AZ outages) across AWS workloads to test system resilience.
+### **94. What is Amazon Bedrock in Cloud Architecture?**
+**Answer:**
 
-### **137. What is AWS CodeArtifact?**
-**Answer:** A secure, highly scalable, managed artifact repository service that makes it easy to publish and store software packages (npm, PyPI, Maven, NuGet) inside private VPCs.
+Amazon Bedrock is **a fully managed, serverless platform** in cloud architecture that allows developers to build and scale generative AI applications using foundation models (FMs) through a single API.
 
-### **138. What is Amazon Bedrock in Cloud Architecture?**
-**Answer:** A fully managed service that offers choice of high-performing foundation models (FMs) from leading AI companies via a single API, along with built-in security, privacy, and responsible AI guardrails.
+#### Where It Sits in Cloud Architecture
+
+In a standard AWS cloud architecture, Amazon Bedrock operates as a **core intelligence and model abstraction layer**:
+
+- **Client & Application Layer:** User-facing clients (web, mobile, or chatbots) send requests through compute and routing services like **AWS Lambda**, Amazon ECS, Amazon EC2, or **API Gateway**.
+- **Bedrock Intelligence Layer:** Your application calls Bedrock via a unified API rather than managing raw GPU clusters, driver patching, or separate third-party vendor contracts. Bedrock routes the prompt to the selected model. 
+- **Data & RAG Layer:** Integrates natively with storage and databases like Amazon S3, Amazon RDS, **DynamoDB**, and OpenSearch to power Retrieval-Augmented Generation (RAG) using Knowledge Bases. 
+- **Security & Compliance Layer:** Governed by **AWS IAM**, **KMS**, **VPC**, and **CloudTrail** to ensure zero data retention for training and enterprise-grade privacy.
+
+#### Key Architectural Capabilities
+
+- **Unified Model Access:** Choose from top foundation models (such as Amazon Nova, Anthropic Claude, Meta Llama, and Mistral AI) through one API without changing application code.
+- **Serverless Scaling:** AWS manages all underlying GPU infrastructure and scaling automatically. 
+- **Built-in Guardrails & Agents:** Includes managed agents, prompt routing, model distillation, and safety guardrails directly inside the cloud workflow.
 
 ### **139. What is AWS Private CA (Certificate Authority)?**
 **Answer:** A managed private certificate authority service that automates issuing, configuring, and renewing private X.509 TLS certificates for internal microservices and IoT devices.
