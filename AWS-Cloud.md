@@ -2951,12 +2951,140 @@ I would use security groups to allow HTTPS traffic to the load balancer, applica
 For cost optimization, I would use Auto Scaling, right-sized resources, VPC endpoints, and appropriate NAT Gateway configurations. Finally, I would enable Multi-AZ deployment, health checks, backups, and cost monitoring to maintain availability, security, and operational efficiency."
 
 
-### **202. Scenario: Your API is experiencing DDoS attack traffic exceeding 500,000 req/sec. How do you mitigate this in AWS?**
+### **112. Scenario: Your API is experiencing DDoS attack traffic exceeding 500,000 req/sec. How do you mitigate this in AWS?**
 **Answer:**
-1. Place **Amazon CloudFront** with **AWS Shield** in front of the Application Load Balancer to absorb Layer 3/4 SYN and UDP floods at the global edge.
-2. Enable **AWS WAF Rate-Based Rules** (e.g., block client IPs sending $> 2,000$ requests in 5 minutes).
-3. Apply AWS Managed Core Rule Set and Bot Control to block automated scrapers and bad user-agents.
-4. Configure origin cloaking so only CloudFront can reach the ALB via custom header verification.
+
+#### 1. Immediate Mitigation Strategy
+
+If my API receives more than 500,000 requests per second, I would focus on protecting the application, filtering malicious traffic at the edge, maintaining availability for legitimate users, and identifying the attack pattern.
+
+I would use **AWS Shield, AWS WAF, Amazon CloudFront, and Elastic Load Balancing** as part of a layered defense strategy.
+
+The main objective is to filter malicious traffic before it reaches the application servers.
+
+#### 2. AWS DDoS Mitigation Architecture
+
+```text
+                  Internet Traffic
+                         |
+              Legitimate + Malicious
+                    Requests
+                         |
+             +-----------------------+
+             | Amazon CloudFront     |
+             | AWS Shield Protection |
+             +-----------------------+
+                         |
+             +-----------------------+
+             | AWS WAF               |
+             | Rate-Based Rules      |
+             | Managed Rules         |
+             | IP Reputation Rules   |
+             +-----------------------+
+                         |
+             +-----------------------+
+             | Application Load      |
+             | Balancer (ALB)        |
+             +-----------------------+
+                         |
+             +-----------------------+
+             | Private Application   |
+             | Tier                  |
+             | EC2 / ECS / EKS       |
+             +-----------------------+
+                         |
+             +-----------------------+
+             | Database Tier         |
+             | Amazon RDS            |
+             +-----------------------+
+```
+
+**Key principle:** Filter traffic as close to the user as possible instead of allowing every request to reach the application servers.
+
+#### 3. Immediate Response Steps
+
+**Step 1: Enable AWS Shield Protection**
+
+- **AWS Shield Standard:** Automatically protects supported AWS services against common network- and transport-layer DDoS attacks at no additional charge.
+- **AWS Shield Advanced:** Provides enhanced DDoS protection, attack visibility, and access to the AWS Shield Response Team under its applicable terms.
+
+For a critical production API, I would verify that the relevant resources are protected and evaluate Shield Advanced for additional protection.
+
+**Step 2: Configure AWS WAF Rules**
+
+I would attach an AWS WAF web ACL to CloudFront or another supported API entry point.
+
+I would configure:
+
+- **Rate-based rules:** Limit excessive requests from a source.
+- **AWS Managed Rules:** Filter common malicious request patterns.
+- **IP reputation rules:** Block traffic associated with known malicious sources.
+- **Anti-DDoS managed rules:** Use the appropriate AWS WAF protection for application-layer attacks.
+- **Endpoint-specific limits:** Protect expensive endpoints such as login, search, and report generation.
+
+Rate limits should be based on legitimate traffic patterns and application capacity. IP-based rate limiting alone is insufficient against distributed attacks involving many source addresses.
+
+**Step 3: Use Amazon CloudFront**
+
+I would place Amazon CloudFront in front of the API wherever the architecture supports it.
+
+- Distribute traffic through AWS edge locations.
+- Cache eligible GET responses to reduce requests reaching the origin.
+- Restrict direct access to the origin so attackers cannot bypass CloudFront.
+- Apply AWS WAF protections at the appropriate entry point.
+
+CloudFront helps reduce origin load, but dynamic API requests still require appropriate filtering and throttling.
+
+**Step 4: Protect the Backend**
+
+- Place application servers behind an Application Load Balancer or use Amazon API Gateway when appropriate.
+- Keep backend resources in private subnets wherever possible.
+- Configure Auto Scaling and health checks.
+- Implement authentication, request validation, and payload-size limits.
+- Apply application-level throttling and quotas.
+- Use caching and queues for suitable workloads to protect downstream services.
+
+**Important:** Auto Scaling alone does not mitigate a DDoS attack. It may increase infrastructure costs while malicious traffic continues consuming resources.
+
+**Step 5: Monitor and Respond**
+
+I would use Amazon CloudWatch, AWS WAF logs, CloudFront metrics, and AWS Shield notifications to monitor the attack.
+
+Key metrics include:
+
+- Request rate and blocked requests.
+- Application latency and error rates.
+- ALB target health and request count.
+- EC2 CPU utilization and application capacity.
+- Database connections and resource utilization.
+- AWS spending and cost anomalies.
+
+I would notify the security and operations teams, preserve logs for investigation, and contact AWS Support or the Shield Response Team when eligible.
+
+#### 4. Cost Optimization
+
+| Service or Technique | Benefit |
+|---|---|
+| CloudFront caching | Reduces origin requests for cacheable content |
+| AWS Shield Standard | Provides included protection for supported services |
+| AWS WAF | Filters unwanted traffic before it reaches the application |
+| API throttling | Limits excessive backend resource consumption |
+| Auto Scaling | Adjusts application capacity according to demand |
+| CloudWatch alarms | Helps detect abnormal traffic and spending |
+| VPC endpoints | Can reduce NAT processing costs for supported AWS service traffic |
+
+AWS WAF, CloudFront, Shield Advanced, and additional compute capacity can incur charges. I would monitor costs throughout the incident without weakening essential security protections.
+
+#### Final Interview Answer
+
+"I would first identify whether the DDoS attack is targeting the network layer or the application layer. I would use AWS Shield for DDoS protection, CloudFront to distribute traffic at the edge, and AWS WAF rate-based and managed rules to filter malicious requests.
+
+I would restrict direct access to the origin, enable caching wherever possible, and protect the backend using an ALB or API Gateway, private application resources, authentication, and application-level throttling.
+
+I would monitor CloudWatch metrics, WAF logs, and Shield events to identify attack patterns and maintain availability for legitimate users. Finally, I would coordinate with AWS Support or the Shield Response Team if necessary and monitor costs closely.
+
+My goal is to mitigate malicious traffic at the edge while keeping legitimate API requests available."
+
 
 ### **203. Scenario: How do you migrate an on-premise Oracle database to Amazon Aurora PostgreSQL with minimal downtime?**
 **Answer:**
