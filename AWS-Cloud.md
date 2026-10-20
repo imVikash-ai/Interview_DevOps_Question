@@ -2655,17 +2655,23 @@ The framework is organized around six core operational and technical pillars:
 - **AWS Well-Architected Tool:** A free, self-service assessment mechanism available in the AWS Management Console used to evaluate workloads, track milestones, and identify high-risk issues. 
 - **Domain Lenses:** Specialized extensions of the framework tailored for specific technologies or industries (such as serverless, SaaS, or machine learning)
 
-### **175. What is AWS Well-Architected Tool?**
-**Answer:** A service in the AWS Console that provides a consistent process to review workloads against AWS best practices and generates remediation milestone plans.
+### **104. What is AWS Budgets?**
+**Answer:** 
 
-### **176. What is AWS Trusted Advisor?**
-**Answer:** An automated online tool that provides real-time recommendations to optimize AWS infrastructure across cost, performance, security, fault tolerance, and service quotas.
+**AWS Budgets** is **a native financial management tool from Amazon Web Services that lets you set custom cost or usage limits, track spending in real time, and receive alerts when your spend approaches or exceeds your thresholds**. 
 
-### **177. What is AWS Service Quotas (Limits)?**
-**Answer:** A central service to view and request quota increases for AWS service limits across accounts and regions.
+#### Core Types of Budgets
 
-### **178. What is AWS Budgets?**
-**Answer:** A service allowing organizations to set custom cost and usage limits, triggering automated email and SNS alerts when actual or forecasted spend exceeds thresholds.
+- **Cost Budgets**: Set spending limits for specific services or your total account, and get notified when actual or forecasted costs go over. 
+- **Usage Budgets**: Track resource consumption (such as hours or data units) against a defined maximum limit. 
+- **RI Utilization & Coverage Budgets**: Monitor your Reserved Instances (RIs) or Savings Plans to see if utilization or coverage drops below a safe percentage. 
+
+#### Key Features
+
+- **Proactive Alerts**: Send notifications via email, Amazon SNS, Slack, or Microsoft Teams when actual or predicted spending crosses your thresholds.
+- **Automated Actions**: Use AWS Budgets Actions to automatically stop EC2 instances, restrict IAM user permissions, or target AWS Auto Scaling groups if a budget limit is breached. 
+- **Multi-Dimensional Filters**: Filter and track costs by AWS service, linked accounts, regions, or resource tags.
+- **Pricing**: You get your first two standard budgets for free. Additional budgets cost $0.02 per day, and action-enabled budgets cost $0.10 per day after the first two free ones
 
 ### **179. What is AWS Cost Categories?**
 **Answer:** Groups cost and usage information into custom categories (e.g., by business unit, project, or application team) using rule-based mappings over cost allocation tags.
