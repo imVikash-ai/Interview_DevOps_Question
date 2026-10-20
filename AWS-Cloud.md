@@ -3086,13 +3086,6 @@ I would monitor CloudWatch metrics, WAF logs, and Shield events to identify atta
 My goal is to mitigate malicious traffic at the edge while keeping legitimate API requests available."
 
 
-### **203. Scenario: How do you migrate an on-premise Oracle database to Amazon Aurora PostgreSQL with minimal downtime?**
-**Answer:**
-1. **Schema Conversion:** Use **AWS Schema Conversion Tool (SCT)** to convert Oracle PL/SQL stored procedures, triggers, and schemas into PostgreSQL DDL.
-2. **Initial Load & Replication:** Deploy **AWS Database Migration Service (DMS)** to execute full initial data load and enable ongoing **Change Data Capture (CDC)**.
-3. **Validation:** Verify data integrity between source Oracle and target Aurora.
-4. **Cutover:** Point application connection strings to the Aurora endpoint during a scheduled 2-minute maintenance window and stop CDC replication.
-
 ### **204. Scenario: How do you implement Cross-Account IAM access securely without static credentials?**
 **Answer:**
 1. In Account B (Target): Create an IAM Role with a Trust Policy specifying `Principal: { "AWS": "arn:aws:iam::AccountA:root" }` and an `sts:ExternalId` condition to prevent the Confused Deputy problem.
