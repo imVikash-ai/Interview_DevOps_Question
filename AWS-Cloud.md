@@ -2469,8 +2469,24 @@ AWS AppConfig is **a capability of AWS Systems Manager that lets you create, man
 - **Gradual Rollouts & Monitoring:** Control the speed of deployments and integrate with Amazon CloudWatch to automatically roll back changes if error rates spike. 
 - **Flexible Retrieval:** Fetch data using direct APIs (`StartConfigurationSession` and `GetLatestConfiguration`) or via the lightweight **AWS AppConfig Agent** (which acts as a local cache/sidecar for EC2, ECS, or EKS)
 
-### **141. What is Amazon Athena?**
-**Answer:** An interactive serverless query service that allows analyzing petabytes of data stored in Amazon S3 using standard SQL queries without managing database infrastructure.
+### **97. What is Amazon Athena?**
+**Answer:**
+
+Amazon Athena is **a serverless, interactive query service from Amazon Web Services (AWS) that lets you analyze data directly in Amazon S3 using standard SQL or Apache Spark**. 
+
+#### Core Features
+
+- **Serverless Architecture:** There are no servers, databases, or clusters to set up, patch, or manage.
+- **Schema-on-Read:** You can query raw files (such as CSV, JSON, ORC, Avro, and Parquet) in S3 without needing to move or transform them first. 
+- **Distributed Query Engine:** Built on open-source **Trino** and **Presto**, it runs queries in parallel across large datasets for fast results. 
+- **Pay-Per-Query Pricing:** You only pay for the exact amount of data scanned by the queries you run.
+- **Federated Queries:** You can use data source connectors (powered by AWS Lambda) to query and join data across relational, non-relational, and cloud data stores alongside S3. 
+
+#### How It Works
+
+1. **Store Data:** Keep your raw or structured data inside Amazon S3.
+2. **Catalog Metadata:** Use **AWS Glue Data Catalog** to define the schema and table structure for your files.
+3. **Run SQL:** Write and execute standard SQL queries straight from the Amazon Athena Console, CLI, or connected Business Intelligence tools via JDBC/ODBC drivers.
 
 ### **142. What is AWS Glue and AWS Glue Data Catalog?**
 **Answer:** A serverless data integration service that automates discovering, preparing, and combining data for analytics. The Data Catalog acts as a centralized metadata repository for table definitions.
