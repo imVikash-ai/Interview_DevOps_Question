@@ -2608,8 +2608,30 @@ The core difference between **AWS Elastic Beanstalk** and **AWS App Runner** lie
 - **Monoliths and legacy apps:** It easily migrates existing workloads that are tied to specific runtime engines or need local server storage adjustments. 
 - **Cost Predictability:** If you run heavy, constant traffic 24/7, managing your own persistent EC2 scaling groups via Beanstalk can often be more cost-optimized than high-volume App Runner request pricing
 
-### **154. What is AWS Batch?**
-**Answer:** A fully managed batch computing service that plans, schedules, and executes containerized batch workloads across dynamically provisioned EC2 and Spot instance fleets.
+### **102. What is AWS Batch?**
+**Answer:** 
+
+**AWS Batch** is **a fully managed cloud computing service on Amazon Web Services (AWS) that allows developers, scientists, and engineers to run large-scale, asynchronous, and resource-intensive batch jobs without manually managing server clusters or software**. 
+
+#### Core Functions
+
+- **Job Scheduler:** Manages job lifecycles from pending to running to finished, handling priorities, dependencies, automated retries, and timeouts. 
+- **Resource Orchestration Engine:** Dynamically provisions and scales the optimal quantity and type of compute resources (CPU, memory, GPUs) based on incoming workload volume, and scales down to zero when the queue is empty to save costs. 
+- **Containerized Workloads:** Executes jobs packaged in Docker containers (stored in Amazon ECR) across Amazon EC2, **AWS Fargate**, or Amazon EKS.
+
+#### Key Components
+
+- **Job:** A unit of work (such as a script or containerized application) submitted to AWS Batch.
+- **Job Definition:** A template that specifies application properties, container images, memory/vCPU requirements, and IAM roles.
+- **Job Queue:** A prioritized holding area where submitted jobs wait until the scheduler routes them to a compute environment.
+- **Compute Environment:** A collection of managed or unmanaged compute resources (On-Demand instances, Spot instances, or Fargate) configured to run jobs. 
+
+#### Common Use Cases
+
+- **Genomics and Bioinformatics:** Assembling DNA sequences and running secondary genomic analyses.
+- **Drug Discovery:** Screening molecular libraries and running computational chemistry simulations.
+- **Financial Modeling and Risk Analysis:** Processing large-scale end-of-day market calculations and historical simulations.
+- **Machine Learning:** Queuing and managing training jobs with prioritized access.
 
 ### **155. What is AWS CloudFormation StackSets?**
 **Answer:** Enables provisioning, updating, or deleting CloudFormation stacks across multiple AWS accounts and multiple AWS regions in a single automated operation.
