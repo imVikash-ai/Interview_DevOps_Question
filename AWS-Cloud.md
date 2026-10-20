@@ -2508,8 +2508,28 @@ The **AWS Glue Data Catalog** is a centralized, persistent metadata repository t
   - **Connections:** Metadata properties needed to connect to external data stores.
   - **Schema Registry:** Manages and validates streaming data schemas.
 
-### **143. What is Amazon Redshift?**
-**Answer:** A fully managed, petabyte-scale cloud data warehouse service that uses columnar storage and massively parallel processing (MPP) to execute complex analytical queries.
+### **99. What is Amazon Redshift?**
+**Answer:** 
+
+**Amazon Redshift** is **a fully managed, petabyte-scale cloud data warehouse service offered by Amazon Web Services (AWS) that is designed for high-performance data analysis and complex analytical queries**. 
+
+#### Core Characteristics & Architecture
+
+- **Columnar Storage:** Instead of storing data by row like traditional databases, Redshift stores data by column. This reduces disk I/O because queries only scan the specific columns they need.
+- **Massively Parallel Processing (MPP):** Redshift distributes query execution and data storage across multiple compute nodes, allowing it to process massive datasets in parallel. 
+- **PostgreSQL Compatibility:** While built as a distinct MPP analytics engine, its SQL interface is compatible with PostgreSQL, working smoothly with standard BI and reporting tools. 
+- **Cluster Architecture:** Composed of a **Leader Node** (which handles client connections and query planning) and multiple **Compute Nodes** (which store data and run queries). 
+
+#### Key Operational Models
+
+- **Amazon Redshift Provisioned:** You manually select and scale node types (such as RA3 nodes) for steady, predictable production workloads.
+- **Amazon Redshift Serverless:** Automatically provisions and scales database capacity based on active query volume, charging you only for active usage without idle costs.
+
+#### Important Features
+
+- **Redshift Spectrum:** Lets you run queries directly against structured and semi-structured data stored in an Amazon S3 data lake without having to load it into Redshift first.
+- **Zero-ETL Integration:** Supports automated, pipeline-free replication of transactional data from services like Amazon Aurora or DynamoDB.
+- **Data Sharing:** Allows live, read-only data sharing across different Redshift clusters, AWS accounts, or regions without copy overhead
 
 ### **144. What is AWS Lambda Function URLs?**
 **Answer:** A dedicated HTTP(S) endpoint for Lambda functions, providing direct web invocation without requiring an API Gateway or Application Load Balancer.
