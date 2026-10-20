@@ -2698,7 +2698,23 @@ The framework is organized around six core operational and technical pillars:
 - **Lex V2 Only:** The original Amazon Lex V1 reached end of support in 2025, making Amazon Lex V2 the current standard.
 
 ### **106. What is Amazon Polly?**
-**Answer:** A service that turns text into lifelike speech using advanced deep learning technologies.
+**Answer:** 
+
+Amazon Polly is **a cloud-based text-to-speech (TTS) service offered by Amazon Web Services (AWS) that converts written text into lifelike spoken audio**.
+
+#### Key Features
+
+- **Voice Options:** Provides dozens of natural-sounding male and female voices across 60 languages, utilizing standard, neural (NTTS), long-form, and generative AI engines.
+- **Speech Control:** Supports Speech Synthesis Markup Language (SSML) and custom lexicons to adjust pronunciation, pitch, volume, and speaking rate. 
+- **Real-time Streaming & Storage:** Delivers real-time audio streams via API and allows unlimited caching, storage, and replaying of generated audio in formats like MP3 and OGG.
+- **Metadata & Accessibility:** Generates time-stamped metadata for visual word highlighting and facial animation synchronization.
+
+#### Common Use Cases
+
+- **Contact Centers:** Frequently integrated into automated telephony systems and interactive voice response (IVR) platforms like Amazon Connect. 
+- **Content Narration:** Used to convert web pages, news articles, and e-books into audio tracks or podcasts. 
+- **E-Learning & Apps:** Powers voice prompts in language-learning platforms (such as Duolingo) and speech-enabled mobile or web applications. 
+- **Accessibility:** Helps build screen-reader and voice-assistance tools for users with visual impairments or reading difficulties
 
 ### **190. What is Amazon Rekognition?**
 **Answer:** A computer vision service that analyzes images and videos to detect objects, faces, text, and inappropriate content.
