@@ -2456,8 +2456,18 @@ In a standard AWS cloud architecture, Amazon Bedrock operates as a **core intell
 - **Integrations:** Easily connects with **AWS Certificate Manager (ACM)**, Amazon Elastic Kubernetes Service (EKS), Active Directory, and SCEP (Simple Certificate Enrollment Protocol).
 - **Revocation Controls:** Supports both Certificate Revocation Lists (CRLs) and Online Certificate Status Protocol (OCSP)
 
-### **140. What is AWS AppConfig?**
-**Answer:** A capability of AWS Systems Manager that enables teams to deploy application configurations and feature flags to production workloads dynamically with built-in validation and automated rollback alarms.
+### **96. What is AWS AppConfig?**
+**Answer:** 
+
+AWS AppConfig is **a capability of AWS Systems Manager that lets you create, manage, and deploy application configuration changes and feature flags in real time without redeploying your code**. 
+
+#### Key Capabilities
+
+- **Feature Flags:** Safely turn features on or off, conduct A/B or multivariate testing, or target specific user segments without code changes. 
+- **Dynamic Configurations:** Update operational parameters, thresholds, or timeouts on the fly. 
+- **Built-in Validation:** Use JSON schemas or **AWS Lambda** functions to validate configuration data syntactically and semantically before deployment to prevent outages. 
+- **Gradual Rollouts & Monitoring:** Control the speed of deployments and integrate with Amazon CloudWatch to automatically roll back changes if error rates spike. 
+- **Flexible Retrieval:** Fetch data using direct APIs (`StartConfigurationSession` and `GetLatestConfiguration`) or via the lightweight **AWS AppConfig Agent** (which acts as a local cache/sidecar for EC2, ECS, or EKS)
 
 ### **141. What is Amazon Athena?**
 **Answer:** An interactive serverless query service that allows analyzing petabytes of data stored in Amazon S3 using standard SQL queries without managing database infrastructure.
