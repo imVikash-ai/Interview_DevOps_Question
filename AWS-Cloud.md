@@ -2810,7 +2810,17 @@ SageMaker covers the complete machine learning lifecycle:
 - **Unified Studio & Lakehouse:** Integrates analytics, SQL querying, and zero-ETL data lake access across Amazon S3 and Amazon Redshift
 
 ### **111. What is Amazon SageMaker JumpStart?**
-**Answer:** A hub of pre-trained open-source and proprietary foundation models that can be evaluated and deployed in 1 click.
+**Answer:**
+
+Amazon SageMaker JumpStart is **a machine learning (ML) hub and accelerator within Amazon SageMaker AI** that lets you discover, evaluate, fine-tune, and deploy foundation models, built-in algorithms, and end-to-end solutions with just a few clicks.
+
+#### Key Capabilities
+
+- **Model Discovery & Evaluation:** Browse hundreds of open-source and proprietary foundation models (FMs) from providers like Meta, Hugging Face, Cohere, AI21, and NVIDIA. Each model comes with benchmark data, licensing info, and sample notebooks. 
+- **One-Click Deployment:** Launch models directly to real-time SageMaker inference endpoints using pre-configured, optimized deployment settings (balanced, throughput-optimized, latency-optimized, or cost-optimized) without managing custom containers.
+- **Model Customization & Fine-Tuning:** Fine-tune base models using your own data via techniques like Supervised Fine-Tuning (SFT), Low-Rank Adaptation (LoRA), and Direct Preference Optimization (DPO). 
+- **Pre-Built Solutions:** Access ready-to-use reference architectures and templates for common use cases like computer vision, sentiment analysis, fraud detection, and demand forecasting.
+- **Security & Governance:** Keep data encrypted inside your Virtual Private Cloud (VPC) without sharing it to train underlying foundation models, and use private hubs to control which teams can access specific models.
 
 ### **195. What is AWS Panorama?**
 **Answer:** An appliance and SDK that brings computer vision to existing on-premises IP cameras to automate inspection at the edge.
