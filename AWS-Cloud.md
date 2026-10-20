@@ -2283,7 +2283,7 @@ You pay only for what you consume:
 - Backup evaluations or Audit Manager reports used
 - No minimum fees or upfront setup charges
 
-### **125. What is AWS IAM Permission Boundary?**
+### **88. What is AWS IAM Permission Boundary?**
 **Answer:**
 An **AWS IAM Permissions Boundary** is **an advanced AWS Identity and Access Management (IAM) feature that sets the maximum possible permissions an IAM entity (user or role) can have**. 
 
@@ -2299,8 +2299,26 @@ An **AWS IAM Permissions Boundary** is **an advanced AWS Identity and Access Man
 - **Safe Delegation:** Allow developers or junior admins to create and manage IAM roles without risking accidental or malicious privilege escalation (such as attaching a full `AdministratorAccess` policy). 
 - **Enforcing Guardrails:** Maintain strict organizational compliance and governance by capping maximum resource access (e.g., restricting a team so they can only manage Amazon S3, even if another policy tries to grant wider access)
 
-### **126. What is AWS KMS Multi-Region Keys?**
-**Answer:** Primary KMS keys in one region that can be replicated into other regions with the exact same key material and Key ID, allowing client-side encrypted data to be decrypted in multiple regions without re-encrypting.
+### **89. What is AWS KMS Multi-Region Keys?**
+**Answer:**
+AWS KMS Multi-Region Keys is **a feature of AWS Key Management Service that lets you create interoperable encryption keys across different AWS Regions**. 
+
+#### Key Concept
+
+- **Interoperability:** Keys in different Regions share the same key ID (starting with `mrk-`) and key material. 
+- **Ciphertext Portability:** You can encrypt data in one AWS Region and decrypt it in another Region without needing to re-encrypt or make cross-Region service calls. 
+- **Primary and Replica Structure:** Each set consists of one **multi-Region primary key** in a single Region, which can be replicated into one or more secondary **replica keys** in other Regions within the same AWS partition. 
+
+#### Shared vs. Independent Properties
+
+- **Shared Properties (Automatically Synchronized):** Key ID, key material, key spec, key usage, origin, and automatic key rotation status.
+- **Independent Properties (Managed Separately):** Key policies, IAM grants, aliases, tags, and enabled/disabled states can differ for each Region to enforce localized access control.
+
+#### Common Use Cases
+
+- **Disaster Recovery & Resiliency:** Keep encrypted data and processing pipelines active or recoverable during a regional outage.
+- **Global Data Management:** Support globally distributed architectures like Amazon DynamoDB Global Tables or active-active applications.
+- **Distributed Signing:** Perform message encryption, decryption, digital signing, or verification across multiple geographic locations using asymmetric keys
 
 ### **127. What is AWS Secrets Manager Automatic Secret Rotation?**
 **Answer:** A built-in feature that triggers an AWS Lambda function every $N$ days to generate a new database password, apply it to the database engine, and update the secret value in Secrets Manager without downtime.
