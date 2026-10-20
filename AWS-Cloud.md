@@ -2320,13 +2320,28 @@ AWS KMS Multi-Region Keys is **a feature of AWS Key Management Service that lets
 - **Global Data Management:** Support globally distributed architectures like Amazon DynamoDB Global Tables or active-active applications.
 - **Distributed Signing:** Perform message encryption, decryption, digital signing, or verification across multiple geographic locations using asymmetric keys
 
-### **127. What is AWS Secrets Manager Automatic Secret Rotation?**
-**Answer:** A built-in feature that triggers an AWS Lambda function every $N$ days to generate a new database password, apply it to the database engine, and update the secret value in Secrets Manager without downtime.
+### **90. What is AWS Secrets Manager Automatic Secret Rotation?**
+**Answer:** 
 
-### **128. What is AWS Resource Access Manager (RAM)?**
-**Answer:** A service that allows sharing AWS resources (Transit Gateways, Subnets, License Manager rules) securely across multiple AWS accounts within an AWS Organization.
+**AWS Secrets Manager Automatic Secret Rotation** is **a built-in feature that periodically updates your sensitive credentials—such as database passwords, API keys, and third-party tokens—in both AWS Secrets Manager and the target database or service without manual intervention**. 
 
-### **129. What is AWS VPC Flow Logs and how are they analyzed?**
+#### How It Works
+
+- **Credential Update:** When rotation triggers, Secrets Manager generates a new credential, updates the target service (like Amazon RDS or a partner system) with the new secret, and marks it active.
+- **Reduction of Risks:** Regularly changing credentials lowers the window of opportunity for attackers if a key or password is leaked. 
+
+#### Types of Rotation
+
+- **Managed Rotation:** Handled directly by AWS for most supported secret types without requiring custom code or a Lambda function.
+- **Managed External Secrets Rotation:** Used for secrets held by Secrets Manager partners to update credentials on the partner's system without a Lambda function. 
+- **Lambda Function Rotation:** Uses a custom or template-provided **AWS Lambda** function to update the secret and the target database or service for other custom secret types. During rotation, Secrets Manager invokes the Lambda function across sequential steps (`create_secret`, `set_secret`, `test_secret`, `finish_secret`).
+
+#### Scheduling and Configuration
+
+- **Frequency:** You can schedule rotations using rate or cron expressions in UTC, with frequencies as often as every four hours.
+- **Rotation Windows:** You can define a specific time window (similar to a maintenance window) during which the rotation must occur to minimize application downtime
+
+### **91. What is AWS VPC Flow Logs and how are they analyzed?**
 **Answer:** Captures IP traffic information going to and from network interfaces in a VPC. Streamed to CloudWatch Logs or Amazon S3 and analyzed using SQL queries in **Amazon Athena**.
 
 ### **130. What is AWS Cost Anomaly Detection?**
