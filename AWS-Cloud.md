@@ -2822,33 +2822,134 @@ Amazon SageMaker JumpStart is **a machine learning (ML) hub and accelerator with
 - **Pre-Built Solutions:** Access ready-to-use reference architectures and templates for common use cases like computer vision, sentiment analysis, fraud detection, and demand forecasting.
 - **Security & Governance:** Keep data encrypted inside your Virtual Private Cloud (VPC) without sharing it to train underlying foundation models, and use private hubs to control which teams can access specific models.
 
-### **195. What is AWS Panorama?**
-**Answer:** An appliance and SDK that brings computer vision to existing on-premises IP cameras to automate inspection at the edge.
-
-### **196. What is AWS IoT Core?**
-**Answer:** A managed cloud platform that lets connected IoT devices securely interact with cloud applications over MQTT, HTTP, and WebSockets.
-
-### **197. What is AWS IoT Greengrass?**
-**Answer:** An open-source edge runtime and cloud service that helps build, deploy, and manage intelligent device software at the edge.
-
-### **198. What is AWS Outposts?**
-**Answer:** A fully managed service that delivers physical AWS infrastructure (servers and racks) directly to on-premises data centers for consistent hybrid cloud operations.
-
-### **199. What is AWS Wavelength?**
-**Answer:** Embeds AWS compute and storage services within 5G telecommunications networks to deliver ultra-low-latency applications to mobile devices.
-
-### **200. What is AWS Snowcone / Snowball / Snowmobile?**
+### **111. Scenario: How do you design a secure, cost-effective VPC architecture for a three-tier web application?**
 **Answer:**
-- **Snowcone:** Ultra-portable, ruggedized edge computing device (8TB).
-- **Snowball Edge:** Petabyte-scale data migration and edge compute device (80TB).
-- **Snowmobile:** 45-foot ruggedized shipping container truck for migrating up to **100 Petabytes** of data to AWS.
 
-### **201. Scenario: How do you design a secure, cost-effective VPC architecture for a three-tier web application?**
-**Answer:**
-1. **Public Subnet:** Application Load Balancer and NAT Gateway.
-2. **Private Application Subnet:** Containerized application pods (EKS/ECS) routing outbound traffic through the NAT Gateway.
-3. **Isolated Database Subnet:** Relational database cluster (Aurora) with **zero internet routes**, accessible *only* via Security Group ingress from the application tier.
-4. **VPC Endpoints:** S3 Gateway Endpoint to eliminate NAT Gateway data charges for static asset uploads.
+#### 1. Architecture Overview
+
+I would design a three-tier architecture in AWS using a VPC with public and private subnets across at least two Availability Zones (AZs) to ensure high availability, security, and fault tolerance.
+
+The architecture consists of three layers:
+
+- **Web Tier:** Application Load Balancer (ALB) in public subnets to receive HTTPS traffic from the internet.
+- **Application Tier:** EC2 instances or containers in private subnets to run application logic.
+- **Database Tier:** Amazon RDS in isolated private subnets to store application data without direct internet access.
+
+#### 2. VPC Network Design
+
+I would create a VPC with CIDR block `10.0.0.0/16` and divide it into subnets across two Availability Zones.
+
+| Component | AZ-1 | AZ-2 |
+|---|---|---|
+| Public subnet | `10.0.1.0/24` | `10.0.2.0/24` |
+| Private application subnet | `10.0.11.0/24` | `10.0.12.0/24` |
+| Private database subnet | `10.0.21.0/24` | `10.0.22.0/24` |
+
+#### Key Components
+
+- **Internet Gateway (IGW):** Enables internet connectivity for resources permitted by routing and security controls.
+- **Public Subnets:** Host the internet-facing ALB and, if required, NAT Gateways.
+- **Private Application Subnets:** Host application servers without public IP addresses.
+- **Isolated Database Subnets:** Host RDS instances without a direct internet route.
+- **Route Tables:** Control traffic routing between subnets, the internet gateway, NAT Gateways, and VPC endpoints.
+
+#### 3. Security Implementation
+
+I would follow the principle of least privilege and configure security groups to control communication between the tiers.
+
+| Security Group | Allowed Inbound Traffic |
+|---|---|
+| ALB Security Group | HTTPS (443) from the internet |
+| Application Security Group | Application port, such as 8080, only from the ALB security group |
+| Database Security Group | MySQL (3306) or PostgreSQL (5432), only from the application security group |
+
+#### Additional Security Measures
+
+- Use AWS WAF with the ALB to help protect against common web exploits.
+- Use IAM roles instead of hardcoded AWS credentials.
+- Store database credentials in AWS Secrets Manager.
+- Encrypt data at rest using AWS KMS and data in transit using TLS.
+- Use AWS Systems Manager Session Manager for secure administrative access instead of exposing SSH publicly.
+- Enable VPC Flow Logs, AWS CloudTrail, and CloudWatch alarms for monitoring and auditing.
+- Use Network ACLs as an additional subnet-level security layer where appropriate.
+- Enable Multi-AZ deployment and database backups for resilience and recovery.
+
+#### 4. Cost Optimization
+
+I would optimize costs without compromising essential security and availability.
+
+- **NAT Gateway:** Use one NAT Gateway per AZ for production workloads requiring resilient outbound connectivity. For development environments, a single NAT Gateway can reduce costs, with an availability trade-off.
+- **VPC Endpoints:** Use S3 and other suitable VPC endpoints to reduce NAT data-processing costs and enable private connectivity to supported AWS services.
+- **Auto Scaling:** Scale application instances based on CPU utilization, request count, or other relevant metrics.
+- **Right-Sizing:** Select EC2 and RDS instance types based on workload requirements and actual utilization.
+- **Database Optimization:** Use storage autoscaling where appropriate and consider Reserved Instances for predictable database workloads.
+- **Log Management:** Configure log retention policies and avoid unnecessary data storage and transfer costs.
+- **Monitoring:** Use AWS Budgets and Cost Explorer to track spending and identify cost-saving opportunities.
+
+#### 5. High Availability and Traffic Flow
+
+The request flow would be:
+
+1. A user sends an HTTPS request to the Application Load Balancer.
+2. The ALB forwards the request to healthy application instances in private subnets.
+3. The application communicates with Amazon RDS through the database port.
+4. Application servers access required AWS services through suitable VPC endpoints or controlled outbound connectivity.
+5. Auto Scaling adds or removes application instances according to workload demand.
+6. Multi-AZ deployment helps maintain availability during an Availability Zone or database-instance failure.
+
+#### 6. Architecture Diagram
+
+```text
+                    Internet Users
+                          |
+                        HTTPS
+                       Port 443
+                          |
+                 +-------------------+
+                 |  Internet Gateway |
+                 +-------------------+
+                          |
+              +-------------------------+
+              |     Public Subnets      |
+              |                         |
+              |  Application Load       |
+              |  Balancer (ALB)         |
+              +-------------------------+
+                          |
+                  Application Traffic
+                          |
+              +-------------------------+
+              | Private Application     |
+              | Subnets                 |
+              |                         |
+              | EC2 / Auto Scaling      |
+              | or ECS Containers       |
+              +-------------------------+
+                          |
+                   Database Traffic
+                          |
+              +-------------------------+
+              | Isolated Private        |
+              | Database Subnets        |
+              |                         |
+              | Amazon RDS               |
+              | Multi-AZ Deployment     |
+              +-------------------------+
+
+        VPC CIDR: 10.0.0.0/16
+        Deployment: At least two AZs
+```
+
+Security groups restrict communication between tiers. Application and database resources do not need public IP addresses, and the database is not publicly accessible.
+
+#### Final Interview Answer
+
+"I would design a three-tier AWS VPC architecture across at least two Availability Zones. The public subnets would contain an Application Load Balancer, the private application subnets would host EC2 instances or containers, and isolated private subnets would host Amazon RDS.
+
+I would use security groups to allow HTTPS traffic to the load balancer, application traffic only from the load balancer, and database traffic only from the application tier. I would also implement IAM roles, encryption, Secrets Manager, AWS WAF, and centralized monitoring.
+
+For cost optimization, I would use Auto Scaling, right-sized resources, VPC endpoints, and appropriate NAT Gateway configurations. Finally, I would enable Multi-AZ deployment, health checks, backups, and cost monitoring to maintain availability, security, and operational efficiency."
+
 
 ### **202. Scenario: Your API is experiencing DDoS attack traffic exceeding 500,000 req/sec. How do you mitigate this in AWS?**
 **Answer:**
