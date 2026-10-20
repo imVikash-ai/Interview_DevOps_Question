@@ -2716,11 +2716,54 @@ Amazon Polly is **a cloud-based text-to-speech (TTS) service offered by Amazon W
 - **E-Learning & Apps:** Powers voice prompts in language-learning platforms (such as Duolingo) and speech-enabled mobile or web applications. 
 - **Accessibility:** Helps build screen-reader and voice-assistance tools for users with visual impairments or reading difficulties
 
-### **190. What is Amazon Rekognition?**
-**Answer:** A computer vision service that analyzes images and videos to detect objects, faces, text, and inappropriate content.
+### **107. What is Amazon Rekognition?**
+**Answer:** 
 
-### **191. What is Amazon Transcribe?**
-**Answer:** An automatic speech recognition service that converts speech audio to text with timestamps and speaker identification.
+**Amazon Rekognition** is **a cloud-based, fully managed computer vision service provided by Amazon Web Services (AWS)**. It allows developers to add advanced image and video analysis to applications without needing machine learning expertise.
+
+The platform is accessed through simple APIs that process media files stored in Amazon S3. 
+
+#### Core Features
+
+- **Object and Scene Detection:** Identifies thousands of everyday items, people, animals, and environments within photos and video streams. 
+- **Facial Analysis and Recognition:** Detects faces, estimates age ranges and emotions, matches or compares faces, and checks for face liveness to prevent spoofing or deepfakes. 
+- **Celebrity Recognition:** Pinpoints well-known public figures in media libraries.
+- **Text Detection (OCR):** Extracts printed and handwritten text from images, such as street signs, license plates, or documents. 
+- **Content Moderation:** Automatically flags unsafe, violent, or inappropriate content to help platforms enforce community guidelines. 
+- **Personal Protective Equipment (PPE) Detection:** Checks whether workers are wearing safety gear like helmets, vests, and face masks. 
+- **Custom Labels:** Allows businesses to train models using their own images to recognize specific logos, products, or custom objects.
+
+#### Common Use Cases
+
+- **Identity Verification:** Onboarding digital users safely via face-matching and liveness checks.
+- **Media Indexing:** Tagging and searching massive video and photo archives automatically by timestamp, objects, or spoken/written text.
+- **Workplace Safety:** Monitoring live camera feeds to ensure compliance with industrial safety protocols.
+- **Automated Moderation:** Filtering user-generated images and video uploads at scale.
+
+### **108. What is Amazon Transcribe?**
+**Answer:** # Amazon Transcribe
+
+**Amazon Transcribe** is **a fully managed Automatic Speech Recognition (ASR) service from Amazon Web Services (AWS) that uses machine learning to convert spoken audio into written text**.
+
+#### Core Capabilities
+
+- **Batch & Real-Time Processing:** Transcribe pre-recorded audio and video files stored in Amazon Simple Storage Service (Amazon S3) or stream live audio in real time. 
+- **Speaker Diarization:** Automatically identifies and separates different speakers in a conversation (supporting up to 10 distinct speakers). 
+- **Timestamps:** Generates word-level and sentence-level timestamps, making it easy to sync audio with subtitles or locate specific spoken words.
+- **Language Support:** Supports over 100 languages and dialects, with automatic language identification features. 
+- **Customization & Filters:** Allows custom vocabularies for specialized industry terms (such as legal or medical jargon via Amazon Transcribe Medical) as well as vocabulary filtering (such as blocking profanity). 
+- **Security & Compliance:** Offers data encryption in transit and at rest, and select versions are HIPAA-eligible. 
+
+#### Common Use Cases
+
+- **Customer Support:** Transcribing call center recordings to analyze customer sentiment, track issues, and generate automated summaries with *Amazon Transcribe Call Analytics*. 
+- **Subtitles & Captions:** Creating text tracks for video-on-demand, movies, or live broadcasts.
+- **Meeting Notes:** Capturing corporate meetings and conversations into searchable text documents. 
+- **Healthcare:** Assisting medical practitioners with clinical documentation and Electronic Health Record (EHR) entry. 
+
+#### Pricing
+
+The service operates on a **pay-as-you-go** model billed per second of audio processed, with 1-second increments and no minimum duration. AWS provides a **Free Tier** offering 60 minutes of transcription per month for the first 12 months. Review detailed rates on the Amazon Transcribe Pricing Page.
 
 ### **192. What is Amazon Comprehend?**
 **Answer:** A natural language processing (NLP) service that extracts insights, sentiment, and key phrases from unstructured text.
