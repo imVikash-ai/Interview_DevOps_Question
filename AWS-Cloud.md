@@ -2342,7 +2342,31 @@ AWS KMS Multi-Region Keys is **a feature of AWS Key Management Service that lets
 - **Rotation Windows:** You can define a specific time window (similar to a maintenance window) during which the rotation must occur to minimize application downtime
 
 ### **91. What is AWS VPC Flow Logs and how are they analyzed?**
-**Answer:** Captures IP traffic information going to and from network interfaces in a VPC. Streamed to CloudWatch Logs or Amazon S3 and analyzed using SQL queries in **Amazon Athena**.
+**Answer:** 
+
+AWS VPC Flow Logs is **a native network monitoring feature that captures information about the IP traffic going to and from network interfaces (ENIs), subnets, or whole Virtual Private Clouds (VPCs) in Amazon Web Services**.
+
+#### What VPC Flow Logs Capture
+
+- **Traffic Types:** Configurable to capture `ACCEPTED` traffic, `REJECTED` traffic, or `ALL` traffic. 
+- **Core Data Fields:** Records source and destination IP addresses, source and destination ports, IANA protocol numbers, packet and byte counts, start and end timestamps, and action statuses (`ACCEPT` or `REJECT`). 
+- **Where Data Goes:** Flow log records can be published to **Amazon CloudWatch Logs**, **Amazon S3**, or **Amazon Data Firehose**. 
+- **Performance Impact:** Data is collected outside the actual network traffic path, meaning it adds zero latency or throughput penalty to your instances.
+
+#### How VPC Flow Logs Are Analyzed
+
+You can analyze flow log data using several native AWS tools and third-party platforms depending on your destination choice:
+
+- **Amazon CloudWatch Logs Insights:**
+  - Run interactive, SQL-like queries directly on log data stored inside CloudWatch log groups to search for specific error patterns or blocked traffic. 
+- **Amazon CloudWatch Contributor Insights:**
+  - Set up rules to find top talkers, such as the highest contributors to rejected traffic or top source IP addresses hitting your network. 
+- **Amazon Athena (S3 Destination):**
+  - Query flow logs stored in an S3 bucket (saved in formats like GZIP or Parquet) using standard SQL statements. You can create a structured table in Athena via point-and-click or CloudFormation templates to inspect large-scale historical network flows.
+- **Visual Dashboards (Amazon Managed Grafana / QuickSight):**
+  - Connect CloudWatch Logs, Athena, or metric filters to build visual operational dashboards tracking inter-region traffic, security group rejections, and throughput. 
+- **Third-Party Observability Tools:**
+  - Export or stream logs into specialized security and network analytics platforms (such as Kentik, Splunk, or Datadog) for multi-cloud or hybrid network forensics
 
 ### **130. What is AWS Cost Anomaly Detection?**
 **Answer:** Uses advanced machine learning to continuously monitor cost and usage telemetry, detecting unusual spend spikes and sending root-cause alert emails or Slack notifications.
