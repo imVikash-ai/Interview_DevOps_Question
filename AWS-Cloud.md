@@ -2671,39 +2671,33 @@ The framework is organized around six core operational and technical pillars:
 - **Proactive Alerts**: Send notifications via email, Amazon SNS, Slack, or Microsoft Teams when actual or predicted spending crosses your thresholds.
 - **Automated Actions**: Use AWS Budgets Actions to automatically stop EC2 instances, restrict IAM user permissions, or target AWS Auto Scaling groups if a budget limit is breached. 
 - **Multi-Dimensional Filters**: Filter and track costs by AWS service, linked accounts, regions, or resource tags.
-- **Pricing**: You get your first two standard budgets for free. Additional budgets cost $0.02 per day, and action-enabled budgets cost $0.10 per day after the first two free ones
+- **Pricing**: You get your first two standard budgets for free. Additional budgets cost $0.02 per day, and action-enabled budgets cost $0.10 per day after the first two free ones.
 
-### **179. What is AWS Cost Categories?**
-**Answer:** Groups cost and usage information into custom categories (e.g., by business unit, project, or application team) using rule-based mappings over cost allocation tags.
+### **105. What is Amazon Lex?**
+**Answer:**
 
-### **180. What is Amazon Athena Federated Query?**
-**Answer:** Allows executing SQL queries across data stored in relational, non-relational, object, and custom data sources (S3, DynamoDB, PostgreSQL, Redis) using Lambda connectors.
+**Amazon Lex** is **a fully managed artificial intelligence (AI) service from Amazon Web Services (AWS) used to build conversational voice and text interfaces into applications**. 
 
-### **181. What is AWS Clean Rooms?**
-**Answer:** Helps companies securely collaborate and analyze collective datasets without sharing raw underlying customer records.
+#### Core Features & Technology
 
-### **182. What is AWS Audit Manager?**
-**Answer:** Continuously audits AWS usage to simplify risk assessment and compliance reporting against industry standards (HIPAA, GDPR, PCI-DSS).
+- **Alexa Technology:** It shares the same Automatic Speech Recognition (ASR) and Natural Language Understanding (NLU) deep learning lineage that powers Amazon Alexa. 
+- **Intents and Slots:** You define an *intent* (the action a user wants to perform, like booking a flight) and *slots* (the specific parameters needed to fulfill it, like date or destination). 
+- **Generative AI Capabilities:** Modern versions integrate with Amazon Bedrock to streamline bot design or generate conversational responses automatically. 
+- **AWS Integration:** It connects natively with **AWS Lambda** to run backend business logic, and integrates with services like Amazon Connect, DynamoDB, and CloudWatch. 
+- **Multi-Channel Deployment:** You can publish your bots to mobile devices, web apps, and messaging services (such as Facebook Messenger or Slack). 
 
-### **183. What is Amazon CodeWhisperer / Amazon Q Developer?**
-**Answer:** A generative AI-powered coding assistant that generates code recommendations, writes unit tests, and conducts security vulnerability scans directly in IDEs and CLI.
+#### Common Use Cases
 
-### **184. What is AWS SimSpace Weaver?**
-**Answer:** A managed service that enables building dynamic, massive-scale spatial simulations (modeling entire cities) across distributed compute instances.
+- **Customer Service & IVR:** Automating phone or chat self-service before handing complex issues over to human agents (frequently paired with Amazon Connect).
+- **Internal Help Desks:** Helping employees check company policies, submit tickets, or look up information.
+- **Appointment & Order Tracking:** Allowing users to schedule services, check order statuses, or complete e-commerce transactions. 
 
-### **185. What is AWS Wickr?**
-**Answer:** An end-to-end encrypted enterprise communications service providing secure messaging, calling, and file sharing.
+#### Pricing & Versions
 
-### **186. What is AWS Data Exchange?**
-**Answer:** A service that makes it easy to find, subscribe to, and use third-party data in the cloud from thousands of commercial data providers.
+- **Pay-as-you-go:** There are no upfront fees or minimum commitments; you are billed per text or speech request processed.
+- **Lex V2 Only:** The original Amazon Lex V1 reached end of support in 2025, making Amazon Lex V2 the current standard.
 
-### **187. What is Amazon Kendra?**
-**Answer:** An intelligent search service powered by machine learning that searches unstructured enterprise documents using natural language queries.
-
-### **188. What is Amazon Lex?**
-**Answer:** A service for building conversational interfaces (chatbots) using natural language understanding and automatic speech recognition (powers Amazon Alexa).
-
-### **189. What is Amazon Polly?**
+### **106. What is Amazon Polly?**
 **Answer:** A service that turns text into lifelike speech using advanced deep learning technologies.
 
 ### **190. What is Amazon Rekognition?**
