@@ -2765,10 +2765,28 @@ The platform is accessed through simple APIs that process media files stored in 
 
 The service operates on a **pay-as-you-go** model billed per second of audio processed, with 1-second increments and no minimum duration. AWS provides a **Free Tier** offering 60 minutes of transcription per month for the first 12 months. Review detailed rates on the Amazon Transcribe Pricing Page.
 
-### **192. What is Amazon Comprehend?**
-**Answer:** A natural language processing (NLP) service that extracts insights, sentiment, and key phrases from unstructured text.
+### **109. What is Amazon Comprehend?**
+**Answer:** 
 
-### **193. What is Amazon SageMaker?**
+**Amazon Comprehend** is **a fully managed Natural Language Processing (NLP) service from Amazon Web Services (AWS) that uses machine learning to extract insights, meaning, and structure from text**. You do not need prior machine learning experience to use it. 
+
+#### Key Features
+
+- **Sentiment Analysis:** Identifies whether text expresses a positive, negative, neutral, or mixed tone (useful for customer reviews or feedback). 
+- **Entity Recognition:** Detects and categorizes names, dates, locations, organizations, and quantities. 
+- **Key Phrase Extraction:** Pulls out main nouns and important concepts from a document. 
+- **Language Detection:** Automatically spots the primary language of a text document. 
+- **PII Detection & Redaction:** Identifies and hides Personally Identifiable Information (like phone numbers, SSNs, or names) to protect privacy. 
+- **Syntax Analysis:** Examines text structure, breaking down words into adjectives, verbs, and parts of speech.
+- **Custom Models (AutoML):** Allows you to train custom classification or custom entity models tailored to your specific business domain. 
+
+#### Common Use Cases
+
+- **Customer Support & Call Centers:** Categorize incoming support tickets and analyze call transcripts or logs.
+- **E-Commerce & Reviews:** Monitor and sort thousands of product reviews by sentiment or key topics.
+- **Financial & Legal Services:** Automatically scan contracts, insurance claims, or legal briefs for critical terms and redact sensitive data.
+
+### **110. What is Amazon SageMaker?**
 **Answer:** A fully managed machine learning platform that provides tools to build, train, tune, and deploy machine learning models at scale.
 
 ### **194. What is Amazon SageMaker JumpStart?**
