@@ -458,7 +458,27 @@ It serves as a core foundation for Continuous Integration (CI) and Continuous De
 - **Strict TBD vs. Short-Lived Branches:** Smaller teams may commit directly to the trunk, while larger engineering organizations use short-lived pull-request branches merged daily via automated merge queues. As noted by a **consensus on Reddit**, many teams adopt short-lived feature branches paired with main-branch releases rather than raw direct-to-trunk commits.
 
 ### **21. What is GitFlow?**
-**Answer:** A branching model with long-lived branches (`develop`, `feature`, `release`, `hotfix`, `master`) that often leads to merge conflicts and slow delivery cycles.
+**Answer:** 
+
+Gitflow is **a legacy Git branching model introduced by Vincent Driessen in 2010 that organizes code around strict rules and multiple permanent and temporary branches**. It was designed to manage complex software release schedules and support multiple concurrent versions of a product, though it is largely superseded today by simpler strategies like trunk-based development or GitHub Flow. 
+
+You can learn more about its core rules through the **Gitflow Workflow Guide** by Atlassian.
+
+#### Core Branch Types in Gitflow
+
+Gitflow divides your repository into two permanent main branches and several temporary auxiliary branches: 
+
+- **`main` (or `master`)**: Permanent branch that holds the official, production-ready release history, with each commit typically tagged with a version number. 
+- **`develop`**: Permanent integration branch where code for upcoming features converges and sits as a pre-production staging area. 
+- **Feature branches**: Temporary branches created off `develop` to build new features; once finished, they merge back into `develop`. 
+- **Release branches**: Temporary branches forked from `develop` when preparing a new production release, allowing final bug fixes and documentation updates before merging into both `main` and `develop`. 
+- **Hotfix branches**: Temporary branches forked directly from `main` to address urgent production bugs, merging back into both `main` and `develop`.
+
+#### When to Use vs. Alternatives
+
+- **Best used for**: Projects with scheduled release cycles, software supporting multiple live public versions simultaneously (like mobile apps), or regulated environments needing strict audit trails. 
+- **Drawbacks**: Adds branch-management overhead and can slow down continuous delivery due to merge conflicts from long-lived branches. 
+- **Modern alternatives**: GitHub Flow (a single `main` branch with short-lived feature branches) or Trunk-Based Development for rapid, continuous deployment. 
 
 ### **22. What is Static Application Security Testing (SAST)?**
 **Answer:** Whitebox security testing that scans uncompiled source code for vulnerabilities (SQL injection, buffer overflows, insecure cryptography) before compilation.
