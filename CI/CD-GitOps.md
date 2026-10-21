@@ -84,7 +84,21 @@ It expands upon **Continuous Integration (CI)** by pushing every code change tha
 - **Continuous Deployment:** The entire pipeline is fully automated from commit to production. There is no manual gatekeeper.
 
 ### **5. What are the key stages of a production CI/CD pipeline?**
-**Answer:** 1. Source Trigger (webhook), 2. Static Analysis & Linting (SAST, secret scanning), 3. Build & Compilation, 4. Unit & Integration Testing, 5. Artifact Packaging & Signing (Docker, SBOM, Cosign), 6. Staging Deployment & DAST/E2E Testing, 7. Production Progressive Rollout (Canary/GitOps).
+**Answer:**
+
+A production CI/CD (Continuous Integration and Continuous Delivery/Deployment) pipeline automates code progression from source control to live environments. Its key stages include **source/commit, build, automated testing, security scanning, artifact management, staging/approval, and production deployment followed by monitoring**.
+
+#### Key Stages of a CI/CD Pipeline
+
+- **Source / Code Commit:** Developers push code to a version control system like Git (GitHub or GitLab), which fires a webhook to trigger the pipeline. 
+- **Build & Compile:** The system pulls the source code, installs dependencies, compiles binaries, or builds container images (e.g., via Docker). 
+- **Automated Testing (CI):** Fast automated checks run, including unit tests, linting, and basic code-quality analysis (e.g., SonarQube) to catch regression issues early. 
+- **Security & Vulnerability Scans:** Static Application Security Testing (SAST) and container/dependency scans (e.g., Trivy) check for open CVEs or secrets.
+- **Artifact Storage:** Validated builds and packages are versioned and pushed to an artifact repository (e.g., JFrog Artifactory or Nexus). 
+- **Staging & Acceptance Testing:** The artifact deploys to a pre-production or staging environment where integration, end-to-end (E2E), and user acceptance tests (UAT) execute. 
+- **Approval Gate (Continuous Delivery) or Auto-Deploy (Continuous Deployment):** Either a manual sign-off is granted by an operator or the pipeline automatically pushes the release live.
+- **Production Release & Strategies:** The app rolls out using zero-downtime methods like **blue/green deployments** or **canary releases**. 
+- **Monitoring & Feedback:** Post-deployment tools (e.g., Prometheus, Grafana) track performance metrics, logs, and error budgets, triggering automatic rollbacks if anomalies occur.
 
 ### **6. What is an Artifact in CI/CD?**
 **Answer:** The compiled, packaged, immutable deployable unit produced by a build pipeline (Docker image, JAR, NPM package, Helm chart) that is promoted across environments.
