@@ -518,7 +518,38 @@ SAST tools are built to flag flaws outlined in standards like the OWASP Top 10 a
 - **Language and framework dependency:** Tools must specifically support the programming language and libraries being analyzed.
 
 ### **23. What is Dynamic Application Security Testing (DAST)?**
-**Answer:** Blackbox security testing that attacks a running application from the outside to discover runtime vulnerabilities, authentication bypasses, and misconfigurations.
+**Answer:** 
+
+**Dynamic Application Security Testing (DAST)** is **a cybersecurity method that evaluates a running web application or API from the outside-in by simulating external hacker attacks**. 
+
+#### How DAST Works
+
+- **Black-Box Testing:** DAST tools test applications without access to the internal source code, architecture, or design documents. 
+- **Automated Payload Injection:** Scanners send malicious inputs—such as SQL injection (SQLi), Cross-Site Scripting (XSS), and authentication bypass payloads—to the live application. 
+- **Behavior Analysis:** The tool observes the application’s HTTP responses, error codes, and functional behavior to determine if an attack successfully exposed a vulnerability.
+
+#### Common Vulnerabilities Found by DAST
+
+- Input validation flaws (SQL injection, XSS, command injection)
+- Authentication and session management issues
+- Server, API, and database configuration mistakes
+- Insecure redirects and improper error handling 
+
+#### Key Pros and Cons
+
+- **Pros:**
+  - Language-agnostic and independent of the underlying framework.
+  - Finds runtime and configuration-based flaws that static code analyzers miss.
+  - Mimics a real-world attacker with low false-positive rates for exploitable paths. 
+- **Cons:**
+  - Cannot pinpoint the exact line of code responsible for a flaw.
+  - Requires a working runtime or staging environment to test properly.
+  - Cannot cover internal business logic or deep backend code paths as thoroughly as internal scans. 
+
+#### Popular DAST Tools
+
+- **Open Source:** OWASP ZAP (Zed Attack Proxy)
+- **Commercial:** Burp Suite, Acunetix, Netsparker, IBM AppScan, and Veracode 
 
 ### **24. What is Software Composition Analysis (SCA)?**
 **Answer:** Scanning open-source third-party dependencies against national vulnerability databases (NVD) for known CVEs.
