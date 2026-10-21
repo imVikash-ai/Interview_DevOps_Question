@@ -718,7 +718,22 @@ Originally started as a community-maintained project, ARC was officially **adopt
 Because running ARC requires advanced knowledge of container orchestration, network routing, and Kubernetes API pressure tuning, it is typically managed by dedicated platform or DevOps teams.
 
 ### **30. What is OIDC (OpenID Connect) in CI/CD?**
-**Answer:** Federated authentication allowing CI runners to request short-lived, temporary cloud credentials (AWS STS / GCP IAM) using JWT tokens without static API keys.
+**Answer:** 
+
+OpenID Connect (OIDC) in CI/CD is **a keyless authentication pattern**. It lets pipelines prove their identity to cloud providers (like AWS, Azure, or GCP) using short-lived, cryptographically signed tokens instead of storing long-lived static secrets or passwords. 
+
+#### How OIDC Works in CI/CD
+
+- **Job Request:** The CI/CD tool (such as **GitHub Actions** or GitLab) generates a JSON Web Token (JWT) for the running job.
+- **Token Exchange:** The job presents this token to the cloud provider's Security Token Service (STS).
+- **Claim Validation:** The cloud provider checks specific claims inside the token (like the repository name, branch, or environment).
+- **Temporary Access:** If valid, the cloud provider issues temporary, short-lived credentials for that specific job session.
+
+#### Key Benefits
+
+- **No Stored Secrets:** You do not need to generate, rotate, or manually store cloud API keys inside your CI/CD settings.
+- **Reduced Blast Radius:** Tokens expire automatically after a short time, limiting the risk if a token ever leaks.
+- **Fine-Grained Trust:** Access can be locked down to specific branches, tags, or pull requests using claim conditions.
 
 ### **31. What is an SBOM (Software Bill of Materials)?**
 **Answer:** A formal, machine-readable nested inventory of all software packages, libraries, and transitive dependencies bundled inside a software container or binary.
