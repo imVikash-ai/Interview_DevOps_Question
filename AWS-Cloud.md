@@ -3086,7 +3086,7 @@ I would monitor CloudWatch metrics, WAF logs, and Shield events to identify atta
 My goal is to mitigate malicious traffic at the edge while keeping legitimate API requests available."
 
 
-### **204. Scenario: How do you implement Cross-Account IAM access securely without static credentials?**
+### **113. Scenario: How do you implement Cross-Account IAM access securely without static credentials?**
 **Answer:**
 
 #### 1. Understand the Scenario
@@ -3258,12 +3258,145 @@ Finally, I would enforce least privilege, restrict trust relationships, and audi
 This combination provides secure cross-account access without long-term credentials.
 
 
-### **205. Scenario: EC2 instances in a private subnet cannot download software updates from GitHub. How do you troubleshoot?**
+### **114. Scenario: EC2 instances in a private subnet cannot download software updates from GitHub. How do you troubleshoot?**
 **Answer:**
-1. Check Route Table: Verify the private subnet route table has `0.0.0.0/0` pointing to an active **NAT Gateway**.
-2. Check NAT Gateway Subnet: Ensure the NAT Gateway resides in a **Public Subnet** whose route table points to an **Internet Gateway**.
-3. Check Security Groups: Verify the EC2 instance Security Group allows outbound TCP traffic on port 443 (HTTPS).
-4. Check Network ACLs: Ensure subnet NACLs allow outbound ephemeral ports (`1024-65535`) and inbound response traffic.
+
+#### 1. Understand the Problem
+
+An EC2 instance in a private subnet does not have a public IP address and cannot directly access the internet.
+
+To download software updates from GitHub, the instance needs an outbound internet connection through a NAT Gateway or another approved egress mechanism.
+
+My first step is to identify whether the issue is related to routing, NAT Gateway configuration, security rules, DNS resolution, or the application itself.
+
+#### 2. Troubleshooting Steps
+
+**Step 1: Check the Route Table**
+
+- Verify that the private subnet is associated with the correct route table.
+- Check whether a default route exists for outbound internet traffic.
+- The route should point to a NAT Gateway in a public subnet.
+
+Example private subnet route table:
+
+| Destination   | Target         |
+| ------------- | -------------- |
+| `10.0.0.0/16` | `local`        |
+| `0.0.0.0/0`   | `nat-xxxxxxxx` |
+
+If the NAT Gateway route is missing, add the appropriate route.
+
+**Step 2: Verify the NAT Gateway**
+
+- Confirm that the NAT Gateway is in the `Available` state.
+- Ensure it is deployed in a public subnet.
+- Verify that the public subnet's route table has a default route to an Internet Gateway.
+- Check that the NAT Gateway has an Elastic IP address.
+
+Example public subnet route:
+
+| Destination   | Target         |
+| ------------- | -------------- |
+| `10.0.0.0/16` | `local`        |
+| `0.0.0.0/0`   | `igw-xxxxxxxx` |
+
+Remember: a NAT Gateway allows private instances to initiate outbound connections. It does not allow unsolicited inbound internet connections.
+
+**Step 3: Check Security Groups**
+
+Verify the EC2 instance's security group.
+
+- Allow outbound HTTPS traffic on TCP port `443`.
+- Allow DNS traffic if required by the configured DNS resolver.
+- Ensure the security group is not restricting the required destination traffic.
+
+Example outbound rule:
+
+| Type  | Protocol | Port | Destination |
+| ----- | -------- | ---- | ----------- |
+| HTTPS | TCP      | 443  | `0.0.0.0/0` |
+
+Security groups are stateful, so response traffic for permitted connections is automatically allowed.
+
+**Step 4: Check Network ACLs (NACLs)**
+
+- Verify that the subnet's NACL permits outbound HTTPS traffic on port `443`.
+- Ensure inbound rules permit return traffic through the appropriate ephemeral ports.
+- Remember that NACLs are stateless, so both outbound and inbound rules must allow the connection.
+
+**Step 5: Test DNS Resolution and Connectivity**
+
+Connect to the instance using AWS Systems Manager Session Manager or another approved access method.
+
+Run these commands on a Linux instance:
+
+```
+# Check DNS resolution
+nslookup github.com
+
+# Test HTTPS connectivity
+curl -I --connect-timeout 10 https://github.com
+
+# Check routing table
+ip route
+
+# Test TCP port 443
+nc -vz github.com 443
+```
+
+Interpret the results:
+
+- If DNS resolution fails, investigate DNS settings, VPC DNS support, and resolver access.
+- If DNS works but HTTPS times out, investigate the NAT Gateway, route tables, security groups, NACLs, and upstream network restrictions.
+- If HTTPS works but Git operations fail, investigate Git configuration, proxy settings, authentication, and repository permissions.
+
+**Step 6: Check Git and Repository Access**
+
+If basic HTTPS connectivity works, test Git itself:
+
+```
+git ls-remote https://github.com/OWNER/REPOSITORY.git
+```
+
+Replace `OWNER/REPOSITORY` with the actual repository.
+
+If this fails, check whether the repository is private, credentials are configured correctly, or a corporate proxy is required.
+
+**Step 7: Check AWS Monitoring and Logs**
+
+Review the following:
+
+- NAT Gateway CloudWatch metrics, such as `ErrorPortAllocation` and `PacketsDropCount`.
+- VPC Flow Logs for rejected or missing traffic patterns.
+- Route table associations and subnet network configuration.
+- Any firewall, proxy, or organizational egress policies.
+
+Use these findings to identify where the connection is failing.
+
+## 4. Common Issues and Solutions
+
+| Issue                              | Solution                                              |
+| ---------------------------------- | ----------------------------------------------------- |
+| NAT Gateway route missing          | Add `0.0.0.0/0` pointing to the NAT Gateway           |
+| NAT Gateway unavailable            | Restore or recreate the NAT Gateway                   |
+| Public subnet lacks an IGW route   | Add the default route to the Internet Gateway         |
+| HTTPS blocked                      | Permit outbound TCP 443 and required return traffic   |
+| DNS resolution fails               | Check VPC DNS settings and resolver configuration     |
+| NACL blocks return traffic         | Allow the required ephemeral ports                    |
+| Git authentication fails           | Verify credentials and repository permissions         |
+| NAT Gateway port allocation errors | Investigate connection volume and NAT Gateway metrics |
+
+#### Final Interview Answer
+
+"I would troubleshoot the issue layer by layer, starting with the network configuration.
+
+First, I would check whether the private subnet's route table has a default route pointing to a NAT Gateway. Then I would verify that the NAT Gateway is available, has an Elastic IP, and is deployed in a public subnet whose route table points to an Internet Gateway.
+
+Next, I would check the EC2 security group, network ACLs, and DNS resolution. I would use commands such as `nslookup github.com`, `curl -I https://github.com`, and `git ls-remote` to determine whether the failure is related to DNS, network connectivity, or Git authentication.
+
+Finally, I would review VPC Flow Logs and NAT Gateway CloudWatch metrics to identify dropped traffic or connection issues. After identifying the root cause, I would fix the relevant configuration and verify that the EC2 instance can download updates successfully.
+
+Throughout the process, I would keep the EC2 instance private and avoid assigning it a public IP just to solve the connectivity issue."
 
 ### **206. Scenario: An S3 bucket with public access disabled was accessed from an external unauthorized IP. How do you investigate?**
 **Answer:**
