@@ -369,7 +369,21 @@ Many modern cloud platforms and DevOps systems support this model natively or th
 - **CI/CD Pipelines:** Automate testing and deployment handoffs using platforms like **Octopus Deploy**
 
 ### **17. What is a Canary Deployment?**
-**Answer:** Rolling out a release to a small fraction of real users (e.g., 5%), monitoring error rates and latency, and incrementally shifting traffic to 100% if healthy.
+**Answer:** 
+
+A canary deployment is **a software release strategy that rolls out a new version of an application to a small subset of users or servers first**. It monitors real-world performance and errors before gradually shifting 100% of the traffic over, minimizing the impact of potential bugs. 
+
+#### How It Works
+
+- **Traffic Splitting:** A load balancer, service mesh, or gateway routes a small percentage of requests (like 1% to 5%) to the new "canary" version while the rest go to the stable version.
+- **Real-Time Monitoring:** Systems track error rates, latency, and CPU usage.
+- **Gradual Rollout:** If metrics look healthy, traffic steps up in phases (e.g., 25%, 50%, 75%, then 100%).
+- **Automated Rollback:** If errors spike, traffic quickly switches back to the stable version before most users notice.
+
+#### Pros and Cons
+
+- **Pros:** Tests code in a live production environment with real users, costs less than running two full duplicate environments (like blue-green deployments), and limits the blast radius of failures. 
+- **Cons:** Requires strict monitoring and instrumentation, and routing traffic across two active versions can complicate database schemas and API compatibility.
 
 ### **18. What is Dark Launching?**
 **Answer:** Deploying backend code to production completely hidden behind feature flags to validate performance and database queries under live load without exposing UI features.
