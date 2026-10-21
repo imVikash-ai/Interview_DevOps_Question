@@ -124,7 +124,22 @@ In CI/CD, an **artifact** is **any file, binary, package, or document produced d
 - **Dedicated artifact repositories:** Long-term, version-controlled systems like **JetBrains TeamCity Artifact Repositories**, JFrog Artifactory, Nexus, or cloud registries (like Google Artifact Registry) to store, scan, and manage release candidates.
 
 ### **7. What is the "Build Once, Deploy Anywhere" principle?**
-**Answer:** The architectural rule that code is compiled and packaged into an immutable container/binary once during CI, and the exact same binary is deployed to Dev, Staging, and Production by injecting environment-specific configs at runtime.
+**Answer:** 
+
+The "Build Once, Deploy Anywhere" principle is **a DevOps and software engineering best practice**. It states that an application should be compiled and packaged into a single, immutable artifact (such as a Docker image, JAR file, or Helm chart) just once during the CI/CD pipeline, and that exact same binary or package should be promoted across all environments—from Development and QA to Staging and Production—without rebuilding. 
+
+#### Core Concepts
+
+- **Immutable Artifacts**: The code and its dependencies are locked into a single package. You never re-compile code as it moves closer to production. 
+- **Environment Configuration Separation**: Instead of baking environment-specific settings (like database URLs or API keys) into the build, configuration is injected externally at runtime (via environment variables, secret managers, or external config files).
+- **Parity Across Stages**: Testing happens on the exact same bits that will run in production, eliminating the dreaded "works on my machine" problem or build discrepancies between tiers.
+
+#### Key Benefits
+
+- **Reliability & Predictability**: Knowing that the staged artifact is bit-for-bit identical to production reduces unexpected bugs and deployment failures. 
+- **Speed**: Skipping redundant compile and packaging steps at every single testing or deployment stage speeds up your pipeline. 
+- **Traceability & Auditing**: Every artifact can be uniquely tagged (using Git commit hashes or build IDs), making rollbacks clean and tracking issues straightforward. 
+- **Security**: Secrets and environment-specific credentials are kept out of the build and image registry, applied safely only when launched.
 
 ### **8. What is a Build Matrix in CI/CD?**
 **Answer:** A configuration that spawns multiple parallel pipeline jobs across combinations of operating systems (Ubuntu, macOS, Windows) and runtime versions (Node 18, 20, 22).
