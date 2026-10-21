@@ -212,7 +212,59 @@ Semantic Versioning (SemVer) is **a standard numbering system for software relea
 - **Build metadata:** Added with a plus sign (e.g., `1.0.0+20261021`) to track build or commit info.
 
 ### **11. What are Conventional Commits?**
-**Answer:** A structured commit message specification (`feat:`, `fix:`, `chore:`, `feat!:`) that enables automated tools (Semantic Release) to calculate version bumps and generate changelogs.
+**Answer:** 
+
+**Conventional Commits** is **a lightweight specification that adds a human- and machine-readable structure to Git commit messages**. It provides a standardized template so that anyone reading the history can quickly understand the intent of a code change, and automated tools can parse the history to manage versioning and changelogs.
+
+#### Basic Structure of a Commit Message
+
+A conventional commit message adheres to this exact layout: 
+
+**text**
+
+```text
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+Use code with caution.
+
+- **Type:** Mandatory label indicating the category of change (e.g., `feat`, `fix`).
+- **Scope**: Optional context enclosed in parentheses to specify the area of the codebase affected (e.g., `auth`, `api`, `ui`).
+- **Description**: A short, clear summary of the code change.
+- **Body**: Optional deeper explanation of the motivation or changes.
+- **Footer**: Optional metadata, such as tracking issue numbers or signaling a breaking change.
+
+#### Common Commit Types
+
+Based on the **Conventional Commits Specification**, the standard types include: 
+
+- **`feat`**: Introduces a new feature to the codebase.
+- **`fix`**: Patches a bug in the code.
+- **`docs`**: Changes or additions exclusively to documentation.
+- **`style`**: Formatting changes (white-space, missing semicolons, linter fixes) that do not affect code logic.
+- **`refactor`**: Rewriting or restructuring code without adding a feature or fixing a bug.
+- **`perf`**: Code changes that specifically improve execution speed or memory performance.
+- **`test`**: Adding missing tests or correcting existing ones.
+- **`chore`**: Maintenance tasks, build script updates, or dependency version bumps that do not touch production code.
+- **`build`**: Changes that affect the build system or external dependencies.
+- **`ci`**: Changes to continuous integration configuration files and scripts.
+
+#### Handling Breaking Changes
+
+If a commit introduces an incompatible API change or breaks backward compatibility, it is marked as a **breaking change**: 
+
+- Append an exclamation mark (`!`) directly before the colon in the type/scope: `feat(api)!: remove v1 endpoints`.
+- Or include `BREAKING CHANGE: <description>` in the footer section. 
+
+#### Why Use Conventional Commits?
+
+- **Automated Semantic Versioning (SemVer)**: Tools like **semantic-release** read the commit types to automatically decide whether to bump a *major* (`BREAKING CHANGE` or `!`), *minor* (`feat`), or *patch* (`fix`) version.
+- **Automatic Changelogs**: Scripts can automatically aggregate and format commit messages into release notes.
+- **Tooling Integration**: Enforced via Git hooks using utilities like **Commitlint** and **Husky** to block improperly formatted commits.
 
 ### **12. What is a Linter and why must it run early?**
 **Answer:** A static analysis tool checking code formatting, syntax errors, and style rules without running code. Running linters first provides sub-minute feedback and saves expensive build compute minutes.
