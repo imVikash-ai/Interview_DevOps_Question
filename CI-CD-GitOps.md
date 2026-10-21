@@ -325,7 +325,21 @@ A webhook in CI/CD is **an automated HTTP POST request sent in real time from a 
 - **Event-Driven Automation:** Links disparate tools (GitHub, Slack, Jira, Jenkins) into a seamless automated pipeline.
 
 ### **15. What are Ephemeral / Preview Environments?**
-**Answer:** Short-lived, isolated environments spun up automatically when a Pull Request is opened and destroyed upon merge or closure, allowing live feature testing.
+**Answer:** 
+
+Ephemeral or preview environments are **short-lived, fully isolated application deployments automatically spun up for a specific Git branch or pull request (PR) and destroyed once that code is merged or closed**. They replace shared staging servers with dedicated, conflict-free test spaces. 
+
+#### How They Work
+
+- **Triggered on Demand:** Opening or pushing to a pull request automatically kicks off a CI/CD pipeline to provision the stack.
+- **Complete Isolation:** Each environment has its own network, database, services, and unique URL so changes never collide.
+- **Automatic Teardown:** Merging or closing the pull request triggers clean-up, destroying the infrastructure and stopping cloud costs.
+
+#### Key Benefits
+
+- **No Staging Bottlenecks:** Multiple team members can test different features at the same time without stepping on each other.
+- **Faster Feedback Loops:** QA engineers, product managers, and automated tests can review live web or mobile builds right away via a unique link.
+- **Lower Infrastructure Costs:** Resources run for minutes or hours instead of sitting idle in permanent staging clusters.
 
 ### **16. What is a Blue-Green Deployment?**
 **Answer:** Running two identical production environments (Blue and Green) where live traffic is routed to Blue while Green is tested, switching traffic instantly via load balancer upon validation.
