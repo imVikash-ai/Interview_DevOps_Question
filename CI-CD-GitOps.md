@@ -386,7 +386,26 @@ A canary deployment is **a software release strategy that rolls out a new versio
 - **Cons:** Requires strict monitoring and instrumentation, and routing traffic across two active versions can complicate database schemas and API compatibility.
 
 ### **18. What is Dark Launching?**
-**Answer:** Deploying backend code to production completely hidden behind feature flags to validate performance and database queries under live load without exposing UI features.
+**Answer:** 
+
+Dark launching is **a software deployment strategy where new features or back-end systems are rolled out into a live production environment silently**. Users interact with the application without knowing the new code is running behind the scenes, allowing teams to test performance and gather data safely. 
+
+#### How It Works
+
+- **Feature Flags:** Developers use toggles to turn new code on or off remotely without redeploying the app. 
+- **Traffic Forking:** Requests can be duplicated in the background so a new service processes real data while throwing away the output response. 
+- **Silent Rollout:** A tiny fraction of real users (like 1% to 5%) see a new UI element while the rest of the user base remains on the legacy version. 
+
+#### Main Benefits
+
+- **Real-World Testing:** Teams test system scaling and heavy loads using actual production traffic rather than fake staging environments.
+- **Risk Reduction:** If bugs or high error rates pop up, engineers can flip a switch to disable the feature instantly.
+- **Decoupled Release:** The act of deploying code to servers is separated from the act of releasing it to the public. 
+
+#### Dark Launch vs. Similar Strategies
+
+- **Canary Release:** Exposes a new feature or infrastructure change to a small group of *visible* users to monitor live metrics or errors.
+- **Dark Launch:** Focuses on hidden background processing or invisible front-end testing where users do not realize they are part of a test.
 
 ### **19. What is a Feature Flag (Toggle)?**
 **Answer:** A conditional code branch that decouples code deployment from feature release, enabling features to be enabled/disabled instantly via an API or management UI.
