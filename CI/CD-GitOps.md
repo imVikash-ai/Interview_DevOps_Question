@@ -1,13 +1,22 @@
-# **CI/CD & GitOps - DevOps Interview Questions (200 Questions)**
-
-Welcome to the **CI/CD & GitOps** master collection containing **200 comprehensive interview questions and detailed answers** covering Continuous Integration, Continuous Delivery, GitHub Actions, GitLab CI, Jenkins, ArgoCD, Flux, Tekton, Progressive Delivery, and Supply Chain Security.
-
----
-
-## 🟢 **Part 1: CI/CD Fundamentals & Workflows (Questions 1–50)**
+## CI/CD Fundamentals & Workflows 
 
 ### **1. What is CI/CD and what core problems does it solve?**
-**Answer:** CI/CD stands for Continuous Integration and Continuous Delivery/Deployment. It automates the building, testing, packaging, and deployment of software to eliminate manual human errors, reduce release cycle times from months to minutes, catch integration bugs early, and ensure code in `main` is always production-ready.
+**Answer:** 
+
+CI/CD stands for **Continuous Integration** and **Continuous Delivery/Deployment**. It is **a software development practice that automates building, testing, and releasing code**. CI merges code changes frequently into a central repository with automated tests, while CD automatically prepares or releases those changes to production. 
+
+#### Core Components of CI/CD
+
+- **Continuous Integration (CI):** Developers merge code updates into a shared main branch often (multiple times a day). Each commit triggers automated builds and tests to spot bugs immediately. 
+- **Continuous Delivery (CD):** Validated code from CI is automatically built, packaged, and prepped for a release. It requires a manual click or approval before going live to production. 
+- **Continuous Deployment (CD):** An extension of continuous delivery where every change that passes all automated tests goes straight into the live production environment without human intervention. 
+
+#### Core Problems CI/CD Solves
+
+- **"Integration Hell" & Late-Stage Conflicts:** In traditional workflows, developers worked in isolation for weeks. Merging massive codebases all at once caused severe conflicts. CI solves this by forcing frequent, small merges that are easy to fix. 
+- **Manual & Error-Prone Deployments:** Manually FTP-ing files or running shell scripts on servers leads to human error and downtime. CI/CD automates the build-and-release pipeline.
+- **Slow Feedback Loops:** Waiting until the end of a multi-month project to test software means bugs are deeply embedded and costly to fix. Automated tests run on every single commit, offering instant feedback.
+- **Code Freezes & Release Anxiety:** Big-bang releases make teams terrified of breaking production. Automated canary rollouts, blue/green deployments, and test suites make shipping updates routine and low-risk.
 
 ### **2. What is Continuous Integration (CI)?**
 **Answer:** The practice where developers frequently commit code to a shared repository (multiple times daily). Each commit triggers automated builds, linters, and unit/integration tests to provide immediate feedback on code health.
