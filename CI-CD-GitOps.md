@@ -671,7 +671,33 @@ According to **GitHub Docs**, the feature requires specific configuration:
 - **CI Integration:** Your GitHub Actions or CI pipeline must be configured to trigger on the `merge_group` event to run checks while the PR is in the queue.
 
 ### **28. What is Self-Hosted Runner vs Cloud-Hosted Runner?**
-**Answer:** Cloud-hosted runners are fully managed VMs by GitHub/GitLab; Self-hosted runners run in private VPCs with custom hardware, GPUs, and private network access.
+**Answer:** 
+
+**A cloud-hosted runner (managed by the platform provider like GitHub) is a pre-configured virtual machine that requires zero setup and is maintained automatically. A self-hosted runner is a machine or VM that you provision, run, and maintain on your own infrastructure to gain full environment control and network access**. 
+
+#### Key Differences
+
+| **Feature** | **Cloud-Hosted Runner** | **Self-Hosted Runner** |
+|---|---|---|
+| **Infrastructure** | Managed and hosted by the provider (e.g., GitHub/Azure) | Managed by you (on-premises, AWS, GCP, Azure) |
+| **Setup & Maintenance** | Instant setup; automatic updates, security patches, and clean state per job | Requires manual installation, OS hardening, patching, and lifecycle management |
+| **Hardware & OS** | Fixed standard choices (e.g., Ubuntu, Windows, macOS with default CPU/RAM) | Full control over custom hardware, GPUs, ARM chips, and specialized OS images |
+| **Network & Access** | Isolated public cloud; cannot directly access internal corporate networks or private databases | Can connect directly to local private networks, internal APIs, and on-premise hardware |
+| **Cost** | Billed per minute (or free for public repositories) | You pay for underlying compute/hardware plus engineering maintenance overhead |
+
+#### When to Choose Cloud-Hosted Runners
+
+- You want a fast, maintenance-free CI/CD setup.
+- Your project uses standard build environments (Linux, Windows, macOS).
+- You are building public/open-source code where standard runners are free.
+- You prefer ephemeral, fresh virtual machines for every single job execution.
+
+#### When to Choose Self-Hosted Runners
+
+- You need access to private corporate networks, local servers, or restricted databases.
+- You require custom hardware like heavy GPUs, specialized architecture, or pre-installed software tools.
+- You have strict data residency, compliance, or security regulations that forbid public cloud execution.
+- You want to persist state, caches, or files across multiple sequential workflow runs.
 
 ### **29. What is Actions Runner Controller (ARC)?**
 **Answer:** A Kubernetes operator that deploys and autoscales ephemeral GitHub Actions runner pods on Kubernetes based on webhook events.
