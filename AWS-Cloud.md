@@ -3760,10 +3760,148 @@ Finally, I would implement the appropriate fix and compare the latency, throttli
 
 ### **117. Scenario: How do you achieve 99.999% SLA for static website hosting?**
 **Answer:**
-Host static assets in **Amazon S3** behind **Amazon CloudFront** with **CloudFront Origin Groups**:
-- Primary Origin: S3 Bucket in Region 1 (`us-east-1`).
-- Secondary Origin: S3 Bucket in Region 2 (`eu-west-1`) synchronized via Cross-Region Replication (CRR).
-- CloudFront automatically fails over to the secondary origin on HTTP 500/502/503/504 errors in under 1 second.
+
+#### 1. Understand the Requirement
+
+Achieving 99.999% availability means designing the website for five-nines availability.
+
+For static website hosting on AWS, I would use Amazon S3 to store static files and Amazon CloudFront as the content delivery network (CDN).
+
+However, S3 and CloudFront alone do not automatically guarantee a 99.999% end-to-end SLA. I would design for high availability, eliminate single points of failure, and verify the applicable AWS service SLAs.
+
+- 99.999% availability allows approximately 5 minutes and 15 seconds of downtime per year.
+- The architecture should tolerate failures without making the website unavailable.
+- Monitoring, automated recovery, and deployment safety are essential.
+
+#### 2. High-Availability Architecture
+
+Users / Global Traffic
+
+Amazon Route 53
+
+DNS routing and health-check-based failover where applicable
+
+Amazon CloudFront
+
+Global edge caching, HTTPS, and origin failover configuration
+
+Primary S3 Origin
+
+Website assets
+
+Failover Origin
+
+Replicated assets in another Region
+
+CloudFront origin failover requires appropriate origin groups and failover criteria.
+
+#### 3. Implementation Steps
+
+**Step 1: Host Static Files in Amazon S3**
+
+- Store HTML, CSS, JavaScript, images, and other static assets in S3.
+- Keep S3 Block Public Access enabled.
+- Use CloudFront Origin Access Control (OAC) to allow CloudFront to retrieve content securely.
+- Apply least-privilege bucket policies.
+
+This prevents direct public access to the S3 origin while allowing users to access the website through CloudFront.
+
+**Step 2: Use Amazon CloudFront**
+
+CloudFront distributes content across edge locations, reducing latency and allowing cached content to remain available even if an origin experiences a temporary problem.
+
+I would configure:
+
+- HTTPS using AWS Certificate Manager.
+- Appropriate cache policies and long cache lifetimes for versioned assets.
+- Compression and HTTP security headers.
+- AWS WAF for protection against common web attacks.
+- Origin failover for eligible origin errors.
+
+Important: CloudFront origin failover is generally triggered by configured HTTP status codes for eligible requests, and failover behavior differs by request method. I would test the configuration rather than assume every failure is automatically recovered.
+
+**Step 3: Configure Cross-Region Disaster Recovery**
+
+I would create a secondary S3 bucket in another AWS Region.
+
+- Enable S3 Cross-Region Replication.
+- Ensure replication permissions and encryption settings are configured correctly.
+- Monitor replication status and replication lag.
+- Configure a CloudFront origin group with a primary and secondary origin.
+- Test the failover behavior during a simulated primary-origin failure.
+
+This protects against certain regional failures, but replication is not instantaneous in every circumstance and must be monitored.
+
+**Step 4: Configure DNS and Domain Availability**
+
+I would use Route 53 for domain management and appropriate health checks or failover routing when the architecture requires DNS-level failover.
+
+I would also configure:
+
+- Reliable domain registration and renewal.
+- Appropriate DNS TTL values.
+- Correct ACM certificate validation and renewal.
+- Monitoring for DNS resolution failures.
+
+DNS failover is not instantaneous, and DNS caching can delay the effect of a change.
+
+**Step 5: Monitor Availability**
+
+I would configure CloudWatch alarms and external availability monitoring.
+
+| Metric or check            | Purpose                                                     |
+| -------------------------- | ----------------------------------------------------------- |
+| CloudFront `5xxErrorRate`  | Detect origin or delivery errors                            |
+| CloudFront `4xxErrorRate`  | Identify client errors and possible access misconfiguration |
+| CloudFront `OriginLatency` | Identify origin response delays                             |
+| S3 `5xxErrors`             | Monitor server-side errors                                  |
+| Synthetic HTTP checks      | Verify that users can load the website                      |
+| Replication metrics        | Detect replication delays or failures                       |
+
+I would send alerts through Amazon SNS and use an incident-response process to investigate failures quickly.
+
+**Step 6: Make Deployments Safe**
+
+A highly available architecture can still experience downtime from a faulty release.
+
+I would use CI/CD with:
+
+- Automated testing before deployment.
+- Versioned static assets.
+- Immutable or versioned releases.
+- Staged deployments and automated rollback.
+- CloudFront invalidations only when needed.
+
+For example, if a new JavaScript release breaks the website, I should be able to restore the previous known-good version quickly.
+
+#### 4. Failure Scenarios and Recovery:
+
+| Failure                         | Mitigation                                                           |
+| ------------------------------- | -------------------------------------------------------------------- |
+| CloudFront edge or origin issue | Use CloudFront's distributed delivery and configured origin failover |
+| Primary S3 bucket unavailable   | Serve eligible requests from a replicated secondary origin           |
+| Accidental file deletion        | Use S3 versioning and appropriate recovery controls                  |
+| Faulty deployment               | Roll back to the previous known-good release                         |
+| DNS resolution issue            | Monitor DNS and maintain a correctly configured domain setup         |
+| Security attack                 | Use AWS WAF, least privilege, and appropriate traffic controls       |
+
+#### 5. Important SLA Consideration:
+
+Five-nines availability is a design target, not something I would promise merely because I use S3 and CloudFront.
+
+I would calculate the end-to-end availability based on the complete request path, including DNS, CDN, origin, certificates, deployments, and other dependencies. I would also review the current AWS service SLAs and their exclusions.
+
+For a static site, CloudFront caching can reduce dependency on the origin for cached objects. However, cache misses, uncached content, configuration errors, and failures affecting the CDN itself can still affect availability.
+
+#### Final Interview Answer:
+
+"To achieve 99.999% availability for static website hosting, I would design a highly available architecture using Amazon S3, CloudFront, and Route 53.
+
+I would store static content in S3, keep the bucket private, and use CloudFront with Origin Access Control to deliver content securely over HTTPS. For disaster recovery, I would configure cross-Region S3 replication and a CloudFront origin group with a secondary origin.
+
+I would monitor CloudFront error rates, origin latency, S3 errors, and synthetic website checks using CloudWatch and alerting. I would also implement safe CI/CD deployments, versioning, rollback, and regular failover testing.
+
+Finally, I would validate the complete architecture against the five-nines availability target and the applicable AWS SLAs. I would not claim that the target is guaranteed by a single service; it requires careful design, testing, monitoring, and operational discipline."
 
 ### **118. Scenario: How do you ensure compliance for HIPAA / PCI-DSS data storage in AWS?**
 **Answer:**
