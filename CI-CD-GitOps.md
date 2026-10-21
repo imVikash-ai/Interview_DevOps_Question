@@ -196,7 +196,20 @@ Pipeline caching stores reusable dependency files (like `node_modules` or Maven 
 | **Failure Impact** | Slower build (falls back to download) | Broken pipeline / failed deployment |
 
 ### **10. What is Semantic Versioning (SemVer)?**
-**Answer:** Formatting release versions as `MAJOR.MINOR.PATCH` (e.g., `2.4.1`) where MAJOR indicates breaking changes, MINOR indicates backward-compatible features, and PATCH indicates bug fixes.
+**Answer:** 
+
+Semantic Versioning (SemVer) is **a standard numbering system for software releases that uses a Major.Minor.Patch format** (such as `2.4.1`). Each number explains the scope of changes and helps users know if an upgrade is safe or will break compatibility. 
+
+#### The Version Format (X.Y.Z)
+
+- **Major (X):** Increased for **breaking changes** that are not backward-compatible.
+- **Minor (Y):** Increased for **new features** added in a backward-compatible way.
+- **Patch (Z):** Increased for **backward-compatible bug fixes**. 
+
+#### Additional Tags
+
+- **Pre-release:** Added with a hyphen (e.g., `1.0.0-alpha.1`) to show an unstable or test build.
+- **Build metadata:** Added with a plus sign (e.g., `1.0.0+20261021`) to track build or commit info.
 
 ### **11. What are Conventional Commits?**
 **Answer:** A structured commit message specification (`feat:`, `fix:`, `chore:`, `feat!:`) that enables automated tools (Semantic Release) to calculate version bumps and generate changelogs.
