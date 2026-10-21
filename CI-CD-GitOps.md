@@ -481,7 +481,41 @@ Gitflow divides your repository into two permanent main branches and several tem
 - **Modern alternatives**: GitHub Flow (a single `main` branch with short-lived feature branches) or Trunk-Based Development for rapid, continuous deployment. 
 
 ### **22. What is Static Application Security Testing (SAST)?**
-**Answer:** Whitebox security testing that scans uncompiled source code for vulnerabilities (SQL injection, buffer overflows, insecure cryptography) before compilation.
+**Answer:** 
+
+**Static Application Security Testing (SAST)** is **a white-box testing methodology that analyzes uncompiled source code, bytecode, or binaries to find security vulnerabilities without running the application**.
+
+#### How SAST Works
+
+- **White-box analysis:** Evaluates the application from the "inside out" by inspecting internal logic, architecture, and syntax. 
+- **No execution required:** Scans code files at rest rather than launching a live system. 
+- **Core analytical techniques:**
+  - **Data flow analysis:** Tracks how user-controlled or untrusted data moves across the system.
+  - **Control flow analysis:** Examines the sequence of operations, loops, and conditional logic.
+  - **Syntactic pattern matching:** Compares code against known security signatures, rules, and bad practices. 
+
+#### Common Vulnerabilities Detected
+
+SAST tools are built to flag flaws outlined in standards like the OWASP Top 10 and SANS Top 25, including: 
+
+- **SQL and Command Injections**
+- **Cross-Site Scripting (XSS)**
+- **Buffer Overflows**
+- **XML External Entity (XXE) attacks**
+- **Hardcoded secrets, API keys, and weak cryptographic practices** 
+
+#### Advantages of SAST
+
+- **Early detection ("Shift-Left"):** Finds vulnerabilities during the coding or build phase before software reaches production, making fixes far cheaper and faster.
+- **High code coverage:** Can rapidly scan millions of lines of source code across 100% of the codebase. 
+- **Exact pin-pointing:** Identifies the specific file, function, and line number where a security flaw lives. 
+- **Pipeline integration:** Plugs directly into Integrated Development Environments (IDEs), version control (e.g., **GitHub Code Scanning**, and CI/CD pipelines.)
+
+#### Limitations of SAST
+
+- **False positives:** Can frequently flag safe code as a vulnerability, requiring manual developer triage.
+- **No runtime visibility:** Cannot detect issues that only manifest when the application is running, such as environmental misconfigurations, weak network permissions, or broken live authentication logic.
+- **Language and framework dependency:** Tools must specifically support the programming language and libraries being analyzed.
 
 ### **23. What is Dynamic Application Security Testing (DAST)?**
 **Answer:** Blackbox security testing that attacks a running application from the outside to discover runtime vulnerabilities, authentication bypasses, and misconfigurations.
