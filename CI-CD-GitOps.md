@@ -285,7 +285,27 @@ A linter is **a static code analysis tool that scans source code without running
 - **Immediate feedback:** Developers learn best practices in real time as the editor or terminal highlights mistakes immediately after typing.
 
 ### **13. What is Secret Masking in CI/CD?**
-**Answer:** Automatically detecting registered secret strings in pipeline logs and replacing them with `***` to prevent accidental credential leakage in build logs.
+**Answer:** 
+
+Secret masking in CI/CD is a security feature that automatically hides sensitive values—such as API keys, passwords, and tokens—by replacing them with placeholder characters (like `***`) in build logs and console outputs. It acts as a safety net against accidental exposure, though it is only a presentation layer control rather than a full secret management solution. 
+
+#### How Secret Masking Works
+
+- **Pattern & String Matching:** CI/CD platforms (like GitHub Actions or GitLab CI/CD) scan stdout/stderr streams for registered secret strings and swap them out before writing to logs.
+- **Variable Configuration:** Users register secrets in project or organization settings and flag them as "masked" so the runner knows which values to scrub. 
+- **UI Redaction:** Masked variables are hidden or obfuscated not just in real-time terminal output, but also in archived web UI job histories. 
+
+#### Limitations and Risks
+
+- **Exact String Dependency:** Masking typically fails if the secret is transformed, encoded (e.g., Base64), truncated, or split before it hits the log. 
+- **Artifact Exfiltration:** Masking protects console logs, but it does not stop a poorly written script from writing the secret to a file and saving it as a downloadable build artifact. 
+- **Not a True Vault:** It does not encrypt secrets at runtime or restrict which processes or containers can read the credential once the job starts. 
+
+#### Best Practices for CI/CD Security
+
+- **Use Dedicated Secret Managers:** Store credentials in external tools like HashiCorp Vault, AWS Secrets Manager, or Azure Key Vault rather than plain-text CI variables. 
+- **Adopt Short-Lived Credentials:** Prefer dynamic tokens with short Time-To-Live (TTL) or OpenID Connect (OIDC) over static, long-lived access keys. 
+- **Disable Verbose Debugging:** Turn off trace or debug logging (`set -x` or equivalent flags) in pipeline steps that handle sensitive parameters. 
 
 ### **14. What is a Webhook in CI/CD?**
 **Answer:** An HTTP POST callback sent from a Git repository (GitHub/GitLab) to a CI server upon events (`push`, `pull_request_opened`) to trigger immediate pipeline execution.
