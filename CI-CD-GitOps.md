@@ -308,7 +308,21 @@ Secret masking in CI/CD is a security feature that automatically hides sensitive
 - **Disable Verbose Debugging:** Turn off trace or debug logging (`set -x` or equivalent flags) in pipeline steps that handle sensitive parameters. 
 
 ### **14. What is a Webhook in CI/CD?**
-**Answer:** An HTTP POST callback sent from a Git repository (GitHub/GitLab) to a CI server upon events (`push`, `pull_request_opened`) to trigger immediate pipeline execution.
+**Answer:** 
+
+A webhook in CI/CD is **an automated HTTP POST request sent in real time from a code repository (like GitHub or GitLab) to a CI/CD server (like Jenkins or CircleCI) the moment a specific event occurs**—such as a code push, pull request, or merge.
+
+#### How Webhooks Work in CI/CD
+
+- **Event Trigger:** A developer performs an action in the source control system, such as committing code to the `main` branch.
+- **Instant Push:** Instead of the CI/CD tool continuously asking the repo *"did anything change?"* (polling), the repository immediately pushes an HTTP POST payload containing event data to a designated URL endpoint. 
+- **Pipeline Execution:** The CI/CD system receives the payload, verifies it, and kicks off automated tasks like building, running tests, or deploying code. 
+
+#### Key Benefits
+
+- **Real-Time Speed:** Builds and tests start instantly without delay or scheduled polling gaps.
+- **Lower Server Load:** Eliminates constant request overhead on repository and CI/CD servers.
+- **Event-Driven Automation:** Links disparate tools (GitHub, Slack, Jira, Jenkins) into a seamless automated pipeline.
 
 ### **15. What are Ephemeral / Preview Environments?**
 **Answer:** Short-lived, isolated environments spun up automatically when a Pull Request is opened and destroyed upon merge or closure, allowing live feature testing.
