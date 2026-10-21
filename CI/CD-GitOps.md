@@ -68,7 +68,20 @@ It expands upon **Continuous Integration (CI)** by pushing every code change tha
 - **Lower Risk:** Releasing smaller, incremental updates makes troubleshooting much simpler than deploying massive updates all at once.
 
 ### **4. What is Continuous Deployment (CD)?**
-**Answer:** The fully automated release practice where every commit that passes all automated pipeline tests is deployed directly into production with zero human intervention.
+**Answer:** 
+
+**Continuous deployment (CD)** is **a software development practice where code changes are automatically released into a live production environment after passing predefined automated tests**. 
+
+#### How It Works
+
+- **Code Commit:** Developers push and merge code changes into a shared version control system.
+- **Automated Testing:** The code runs through a series of automated builds, unit tests, integration checks, and security scans.
+- **Direct Release:** If all tests pass, the change moves straight to production automatically—**with zero human or manual approval required**. 
+
+#### Continuous Deployment vs. Continuous Delivery
+
+- **Continuous Delivery:** Code is automatically built, tested, and staged for a release, but a human must **manually click a button** to approve the final deployment to production.
+- **Continuous Deployment:** The entire pipeline is fully automated from commit to production. There is no manual gatekeeper.
 
 ### **5. What are the key stages of a production CI/CD pipeline?**
 **Answer:** 1. Source Trigger (webhook), 2. Static Analysis & Linting (SAST, secret scanning), 3. Build & Compilation, 4. Unit & Integration Testing, 5. Artifact Packaging & Signing (Docker, SBOM, Cosign), 6. Staging Deployment & DAST/E2E Testing, 7. Production Progressive Rollout (Canary/GitOps).
