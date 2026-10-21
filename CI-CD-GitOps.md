@@ -408,7 +408,28 @@ Dark launching is **a software deployment strategy where new features or back-en
 - **Dark Launch:** Focuses on hidden background processing or invisible front-end testing where users do not realize they are part of a test.
 
 ### **19. What is a Feature Flag (Toggle)?**
-**Answer:** A conditional code branch that decouples code deployment from feature release, enabling features to be enabled/disabled instantly via an API or management UI.
+**Answer:** 
+
+A **feature flag** (or **feature toggle**) is **a software development technique that lets teams turn application features on or off remotely at runtime without deploying new code**. By wrapping code inside conditional statements tied to an external configuration, developers can decouple code deployment from feature release. 
+
+#### Common Use Cases
+
+- **Canary Releases:** Gradually roll out a new feature to a small percentage of users before a full launch.
+- **A/B Testing:** Direct different user cohorts to distinct feature variations to measure performance or engagement.
+- **Kill Switches:** Instantly disable a broken or high-load feature in production without rolling back the entire application.
+- **Trunk-Based Development:** Safely merge incomplete or work-in-progress code into the main branch while keeping it hidden from end-users. 
+
+#### Main Types of Flags
+
+- **Release Toggles:** Short-term switches used to roll out a new feature, removed after the release is complete.
+- **Experiment Toggles:** Used for A/B testing and tracking user behavior across different versions.
+- **Ops (Operational) Toggles:** Used to control system behavior, performance thresholds, or emergency kill switches.
+- **Permissioning Toggles:** Permanent or semi-permanent switches that gate features based on user tiers or subscription plans.
+
+#### Benefits and Risks
+
+- **Benefits:** Speeds up deployment cycles, lowers risk via instant rollbacks, and enables granular targeting by region, device, or user ID.
+- **Risks:** Can introduce code complexity, technical debt, and "toggle clutter" if old, expired flags are not regularly cleaned up from the codebase.
 
 ### **20. What is Trunk-Based Development?**
 **Answer:** A branching strategy where developers merge small, frequent commits into a single shared branch (`main`), enabling continuous integration and fast delivery.
