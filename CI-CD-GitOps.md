@@ -342,7 +342,31 @@ Ephemeral or preview environments are **short-lived, fully isolated application 
 - **Lower Infrastructure Costs:** Resources run for minutes or hours instead of sitting idle in permanent staging clusters.
 
 ### **16. What is a Blue-Green Deployment?**
-**Answer:** Running two identical production environments (Blue and Green) where live traffic is routed to Blue while Green is tested, switching traffic instantly via load balancer upon validation.
+**Answer:** 
+
+Blue-green deployment is **a software release strategy that uses two identical production environments (called Blue and Green) to achieve zero-downtime updates**. While Blue runs the live version serving users, Green hosts the new version for testing. Once verified, a router or load balancer shifts all traffic to Green. 
+
+#### How It Works
+
+- **Dual Environments:** You maintain two production setups (Blue and Green) that are as similar as possible in hardware, software, and configuration.
+- **Active vs. Standby:** At any time, only one environment is live and handles user requests.
+- **Safe Testing:** Developers deploy and test the new software version on the idle environment without affecting real users.
+- **Traffic Switch:** A load balancer, proxy, or router switches incoming traffic from the old environment to the new one in an instant.
+- **Instant Rollback:** If a bug appears after the switch, you can point the router right back to the previous environment with no delay. 
+
+#### Key Benefits
+
+- **No Downtime:** Users experience no service interruption while updates go live.
+- **Easy Recovery:** If a critical error happens, rolling back is as simple as flipping the traffic switch back to the original environment.
+- **Real-World Testing:** You can test the exact new build in a true production environment before exposing it to everyone.
+
+#### Common Tools
+
+Many modern cloud platforms and DevOps systems support this model natively or through automation extensions:
+
+- **Cloud Providers:** Use AWS CodeDeploy or Google Cloud Run for built-in traffic shifting.
+- **Container Orchestration:** Manage seamless rollouts in Kubernetes using tools like Argo Rollouts or native service selectors.
+- **CI/CD Pipelines:** Automate testing and deployment handoffs using platforms like **Octopus Deploy**
 
 ### **17. What is a Canary Deployment?**
 **Answer:** Rolling out a release to a small fraction of real users (e.g., 5%), monitoring error rates and latency, and incrementally shifting traffic to 100% if healthy.
