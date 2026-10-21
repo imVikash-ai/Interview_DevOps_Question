@@ -700,7 +700,22 @@ According to **GitHub Docs**, the feature requires specific configuration:
 - You want to persist state, caches, or files across multiple sequential workflow runs.
 
 ### **29. What is Actions Runner Controller (ARC)?**
-**Answer:** A Kubernetes operator that deploys and autoscales ephemeral GitHub Actions runner pods on Kubernetes based on webhook events.
+**Answer:** 
+
+**Actions Runner Controller (ARC)** is **an open-source Kubernetes operator that automatically orchestrates and scales self-hosted runners for GitHub Actions workflows**. Instead of manually maintaining fixed virtual machines or servers to run your CI/CD pipelines, ARC allows teams to dynamically spin up and tear down runner instances as Kubernetes pods inside their own cloud or on-premises infrastructure. 
+
+#### Key Capabilities of ARC
+
+- **Dynamic Autoscaling:** ARC creates **runner scale sets** that monitor your GitHub repository, organization, or enterprise workflow queues. It automatically scales the number of runner pods up during peak demand and scales them down to zero when idle. 
+- **Ephemeral Runner Pods:** Runners can be configured as **short-lived (ephemeral) containers**. Each job runs in a clean, isolated environment, and the pod is immediately deleted upon completion. This enforces high security and prevents artifact pollution between builds. 
+- **Cost Efficiency:** By hosting runners on your own Kubernetes cluster (such as AWS EKS, Google GKE, or Azure AKS), you bypass the build-minute limits and costs associated with GitHub-hosted runners. 
+- **Enterprise Control:** ARC allows you to pass custom Docker images, volume mounts, and network policies to your runners. This is ideal for organizations with strict data residency, security compliance, or internal network dependency requirements. 
+
+#### How It Fits into the GitHub Ecosystem
+
+Originally started as a community-maintained project, ARC was officially **adopted by GitHub** as the recommended reference implementation for scaling self-hosted runners on Kubernetes. GitHub actively develops the modern version, known as **Actions Runner Controller for Autoscaling Runner Sets**, which communicates directly with GitHub's scale set APIs rather than relying on legacy webhook or polling mechanisms. 
+
+Because running ARC requires advanced knowledge of container orchestration, network routing, and Kubernetes API pressure tuning, it is typically managed by dedicated platform or DevOps teams.
 
 ### **30. What is OIDC (OpenID Connect) in CI/CD?**
 **Answer:** Federated authentication allowing CI runners to request short-lived, temporary cloud credentials (AWS STS / GCP IAM) using JWT tokens without static API keys.
