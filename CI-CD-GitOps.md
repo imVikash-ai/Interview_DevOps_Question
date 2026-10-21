@@ -578,7 +578,23 @@ Modern software relies heavily on external code, where up to 80% to 90% of an ap
 - **SCA vs. DAST (Dynamic Application Security Testing):** SCA evaluates code and manifests statically without running the app. DAST attacks a live, running application from the outside to find runtime weaknesses.
 
 ### **25. What is Mutation Testing in CI?**
-**Answer:** Introducing small intentional bugs (mutations) into source code to verify if unit tests fail; if tests pass, test assertions are weak.
+**Answer:** 
+
+Mutation testing in Continuous Integration (CI) is **an automated process that evaluates how well your unit tests catch bugs**. It injects small synthetic errors (mutants) into your source code, runs your test suite against them, and fails the build if too many mutants survive.
+
+#### How It Works in a CI Pipeline
+
+- **Mutant Generation:** Tools like **Stryker Mutator** or PIT modify operators, numbers, or true/false values in your code.
+- **Test Execution:** The CI runner executes your test suite against each mutated file.
+- **Killed vs. Survived:** If a test fails, the mutant is "killed" (good). If all tests pass, the mutant "survived," exposing a weak assertion or missing test case.
+- **Score Calculation:** The pipeline generates a **mutation score** (killed mutants divided by total mutants). 
+
+#### CI Integration Strategies
+
+- **Diff-Mode / Scoped Runs:** Run mutation tests only on changed files or pull requests to save time.
+- **Parallel Execution:** Distribute mutant runs across multiple worker nodes in CI (e.g., GitHub Actions or **CircleCI**)
+- **Threshold Enforcement:** Set a minimum passing mutation score (e.g., 80%) that blocks merging if dropped.
+- **Scheduled Full Runs:** Run deep, full-codebase mutation tests on a nightly or weekly schedule rather than every commit, due to high CPU and time costs.
 
 ### **26. What is Concurrency Control in CI/CD?**
 **Answer:** Canceling obsolete in-progress pipeline runs on pull request branches when a newer commit is pushed (`cancel-in-progress: true`), saving compute resources.
