@@ -2582,7 +2582,7 @@ Long polling activates whenever you set `WaitTimeSeconds` to any value **greater
 
 The core difference between **AWS Elastic Beanstalk** and **AWS App Runner** lies in the level of control versus operational simplicity they offer. **AWS App Runner provides a fully managed, abstract "deploy-and-run" environment for containerized web apps and APIs with zero infrastructure management. AWS Elastic Beanstalk operates as a traditional Platform-as-a-Service (PaaS) that manages deployment but leaves you with full access and control over the underlying AWS resources (like EC2 instances and OS configurations)**.
 
-## Direct Comparison
+#### Direct Comparison
 
 | **Feature** | **AWS App Runner** | **AWS Elastic Beanstalk** |
 |---|---|---|
@@ -3373,7 +3373,7 @@ Review the following:
 
 Use these findings to identify where the connection is failing.
 
-## 4. Common Issues and Solutions
+#### 4. Common Issues and Solutions
 
 | Issue                              | Solution                                              |
 | ---------------------------------- | ----------------------------------------------------- |
@@ -3572,165 +3572,218 @@ If the access is confirmed as unauthorized, I would preserve evidence, revoke co
 
 Finally, I would use GuardDuty, IAM Access Analyzer, AWS Config, and CloudTrail monitoring to identify the root cause and prevent recurrence. I would document the incident and verify that only authorized identities can access the bucket."
 
-### **207. Scenario: What causes high latency in Amazon DynamoDB and how is it fixed?**
+### **116. Scenario: What causes high latency in Amazon DynamoDB and how is it fixed?**
 **Answer:**
-1. **Hot Partitioning:** High read/write activity concentrating on a single partition key. *Fix: Add randomized hash suffixes (salting) to distribute writes.*
-2. **Throttling:** Requests exceed provisioned Read/Write Capacity Units (RCUs/WCUs). *Fix: Switch to On-Demand capacity mode or enable auto-scaling.*
-3. **Inefficient `Scan` Operations:** Application executes full table scans instead of indexed `Query` operations. *Fix: Create Global Secondary Indexes (GSIs).*
 
-### **208. Scenario: How do you achieve 99.999% SLA for static website hosting?**
+#### 1. Understand the Problem:
+
+Amazon DynamoDB is a fully managed NoSQL database designed to provide low-latency performance at scale. However, an application may experience high latency when database requests take longer than expected.
+
+As a DevOps or Cloud Engineer, I would investigate whether the latency originates from DynamoDB capacity limits, inefficient queries, hot partitions, network issues, or application-level problems.
+
+#### 2. Common Causes and Solutions:
+
+**1. Throttling and Insufficient Capacity**
+
+Cause:
+
+- The application exceeds the provisioned read or write capacity.
+- Requests exceed the available capacity for a partition.
+- Traffic suddenly increases beyond what the table can handle.
+
+Solution:
+
+- Enable Auto Scaling for provisioned capacity.
+- Increase read capacity units (RCUs) or write capacity units (WCUs).
+- Consider on-demand capacity for unpredictable workloads.
+- Investigate throttling metrics in Amazon CloudWatch.
+
+Example AWS CLI command:
+
+```
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/DynamoDB \
+  --metric-name ReadThrottleEvents \
+  --dimensions Name=TableName,Value=Orders \
+  --start-time 2026-10-21T10:00:00Z \
+  --end-time 2026-10-21T11:00:00Z \
+  --period 60 \
+  --statistics Sum
+```
+
+**2. Hot Partitions**
+
+Cause:
+
+A hot partition occurs when too many requests target the same partition key, creating an uneven distribution of traffic.
+
+For example, if every order uses the same partition key, such as `STATUS#PENDING`, a large number of requests may concentrate on a small portion of the table.
+
+Solution:
+
+- Design partition keys with high cardinality and even traffic distribution.
+- Avoid concentrating requests on a single partition key.
+- Use write sharding when a single logical key receives exceptionally high traffic.
+- Review throttling and partition-level metrics where available.
+
+**3. Inefficient Queries and Scans**
+
+Cause:
+
+Using `Scan` to retrieve a small subset of records can consume significant read capacity and increase response times, especially for large tables.
+
+Solution:
+
+- Prefer `Query` over `Scan` when possible.
+- Query using the partition key.
+- Create a Global Secondary Index (GSI) for frequently queried attributes when appropriate.
+- Use pagination for large result sets.
+- Apply filter expressions carefully because filtering does not avoid reading the items evaluated by the query or scan.
+
+Example using Python and Boto3:
+
+```
+import boto3dynamodb = boto3.resource("dynamodb")table = dynamodb.Table("Orders")response = table.query(    KeyConditionExpression="customer_id = :customer",    ExpressionAttributeValues={        ":customer": "CUST#101"    })print(response["Items"])
+```
+
+This example assumes `customer_id` is the table's partition key or an appropriate index partition key.
+
+**4. Large Items and Expensive Operations**
+
+Cause:
+
+- DynamoDB items are large.
+- Applications retrieve unnecessary attributes.
+- Transactions involve multiple items or indexes.
+- Strongly consistent reads are used when eventual consistency would be sufficient.
+
+Solution:
+
+- Use `ProjectionExpression` to return only required attributes, reducing response payload size.
+- Keep item sizes reasonable.
+- Use eventual consistency when the application can tolerate it.
+- Optimize transactional operations and avoid unnecessary requests.
+
+Note that a projection can reduce network payload and application processing, but it does not necessarily reduce the read capacity consumed by an item read.
+
+**5. Network Latency and Incorrect Region**
+
+Cause:
+
+- The application runs far from the DynamoDB table's AWS Region.
+- Network routing or connectivity adds latency.
+- The application makes requests through an unnecessarily distant service.
+
+Solution:
+
+- Deploy the application in the same AWS Region as the DynamoDB table where possible.
+- Use appropriate regional AWS endpoints.
+- Check DNS resolution, network connectivity, and VPC endpoint configuration.
+- Use a DynamoDB gateway VPC endpoint when private connectivity from a VPC is required.
+
+A gateway endpoint helps with private routing and avoids requiring a NAT Gateway for DynamoDB access, but it does not automatically eliminate all latency.
+
+**6. Application-Level Bottlenecks**
+
+Cause:
+
+- The application sends requests sequentially when independent requests could run concurrently.
+- SDK retries and backoff increase total request time.
+- Connection setup or application processing adds overhead.
+
+Solution:
+
+- Use AWS SDK connection pooling and reuse clients.
+- Use bounded concurrency for independent operations.
+- Configure retries with exponential backoff and jitter.
+- Use `BatchGetItem` or `BatchWriteItem` where appropriate.
+- Measure database latency separately from total application response time.
+
+#### 3. How I Would Troubleshoot in Production
+
+I would follow this sequence:
+
+Step 1: Identify the Latency
+
+Measure application response time and DynamoDB request latency
+
+Step 2: Check CloudWatch Metrics
+
+ThrottledRequests, ConsumedReadCapacityUnits, ConsumedWriteCapacityUnits, SuccessfulRequestLatency
+
+Step 3: Analyze the Access Pattern
+
+Hot keys, scans, item size, indexes, and capacity mode
+
+Step 4: Check Network and Application
+
+AWS Region, VPC endpoint, SDK retries, and concurrency
+
+Step 5: Apply the Fix and Validate
+
+Compare latency, throttling, and error rates before and after
+
+#### Important CloudWatch metrics
+
+| Metric                       | What I investigate                                                                                   |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `SuccessfulRequestLatency`   | Time DynamoDB takes to process successful requests; it excludes application-side and network latency |
+| `ThrottledRequests`          | Requests rejected because of throughput or other applicable limits                                   |
+| `ReadThrottleEvents`         | Read requests experiencing throttling                                                                |
+| `WriteThrottleEvents`        | Write requests experiencing throttling                                                               |
+| `ConsumedReadCapacityUnits`  | Read capacity consumption                                                                            |
+| `ConsumedWriteCapacityUnits` | Write capacity consumption                                                                           |
+| `SystemErrors`               | Server-side errors that may affect request success and latency                                       |
+
+I would also use DynamoDB Contributor Insights, if enabled, to identify frequently accessed partition keys and potential hot-key patterns.
+
+#### 4. Quick Troubleshooting Reference
+
+| Symptom                                         | Likely cause                        | Recommended fix                                                                  |
+| ----------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------- |
+| Latency increases during traffic spikes         | Insufficient capacity or throttling | Scale capacity or use on-demand mode                                             |
+| A few keys receive most requests                | Hot partitions                      | Redesign keys or implement sharding                                              |
+| Queries are slow on large tables                | Inefficient access patterns         | Use `Query` and suitable indexes                                                 |
+| Database latency is low but API latency is high | Application or network overhead     | Profile application, SDK, and network                                            |
+| Retries increase during peak load               | Throttling or transient errors      | Fix the underlying cause and use backoff with jitter                             |
+| Cross-Region requests are slow                  | Network distance                    | Move the workload closer to the table or evaluate a suitable multi-Region design |
+
+#### Final Interview Answer
+
+"If I observe high latency in Amazon DynamoDB, I would first check CloudWatch metrics such as SuccessfulRequestLatency, ThrottledRequests, ReadThrottleEvents, and WriteThrottleEvents.
+
+If I find throttling, I would review the capacity mode, Auto Scaling configuration, and traffic patterns. If a hot partition is responsible, I would redesign the partition key or use write sharding.
+
+Next, I would review the application queries and replace unnecessary scans with queries using partition keys and appropriate indexes. I would also verify that the application and DynamoDB table are in the same Region and investigate SDK retries, network latency, and application processing time.
+
+Finally, I would implement the appropriate fix and compare the latency, throttling, and error metrics to confirm that performance has improved."
+
+### **117. Scenario: How do you achieve 99.999% SLA for static website hosting?**
 **Answer:**
 Host static assets in **Amazon S3** behind **Amazon CloudFront** with **CloudFront Origin Groups**:
 - Primary Origin: S3 Bucket in Region 1 (`us-east-1`).
 - Secondary Origin: S3 Bucket in Region 2 (`eu-west-1`) synchronized via Cross-Region Replication (CRR).
 - CloudFront automatically fails over to the secondary origin on HTTP 500/502/503/504 errors in under 1 second.
 
-### **209. Scenario: How do you ensure compliance for HIPAA / PCI-DSS data storage in AWS?**
+### **118. Scenario: How do you ensure compliance for HIPAA / PCI-DSS data storage in AWS?**
 **Answer:**
 1. **Encryption at Rest:** Enforce KMS Customer Managed Keys with mandatory key rotation across S3, EBS, and RDS.
 2. **Encryption in Transit:** Enforce TLS 1.3 on all ALBs and API Gateways.
 3. **Audit Trails:** Enable multi-region CloudTrail with log file validation writing to an isolated, WORM-protected Log Archive account.
 4. **Automated Governance:** Deploy AWS Config rules and Security Hub compliance packs to continuously alert on unencrypted resources.
 
-### **210. Scenario: How do you automate the retirement of unused cloud resources across 100 AWS accounts?**
+### **119. Scenario: How do you automate the retirement of unused cloud resources across 100 AWS accounts?**
 **Answer:**
 Deploy **Cloud Custodian** centrally using an EventBridge rule that triggers cross-account IAM roles:
 - Scans for unattached EBS volumes older than 14 days and unattached Elastic IPs.
 - Identifies untagged EC2 instances, sends Slack warnings to owners, and stops instances after 72 hours of inactivity.
 
-### **211. What is AWS Network Access Control List (NACL) Ephemeral Ports?**
-**Answer:** When a client in a private subnet connects to the internet, the return traffic comes back on an ephemeral port (`1024-65535`). NACLs must explicitly allow inbound traffic on ephemeral ports because NACLs are stateless.
 
-### **212. What is AWS Direct Connect Public VIF vs Private VIF vs Transit VIF?**
-**Answer:**
-- **Public VIF:** Accesses public AWS services (S3, DynamoDB) over Direct Connect without public internet routing.
-- **Private VIF:** Connects directly to a specific VPC via a Virtual Private Gateway.
-- **Transit VIF:** Connects to an AWS Transit Gateway to reach hundreds of VPCs over a single 100 Gbps connection.
 
-### **213. What is AWS Local Zones vs AWS Wavelength?**
-**Answer:**
-- **Local Zones:** AWS infrastructure deployed in metropolitan areas for latency-sensitive enterprise apps (video processing, real-time analytics).
-- **Wavelength:** AWS compute/storage deployed directly inside 5G telecom data centers for ultra-low-latency mobile apps.
 
-### **214. What is AWS Snowball Edge Compute Optimized?**
-**Answer:** A ruggedized data device providing 104 vCPUs, 416GB RAM, and an optional GPU to execute ML inference and data analytics in disconnected edge environments (ships, oil rigs).
 
-### **215. What is AWS PrivateLink for Amazon S3?**
-**Answer:** Interface VPC Endpoints for S3 that assign private IPs from your subnet to S3, allowing on-premises data centers to access S3 over Direct Connect without public IPs.
 
-### **216. What is AWS IAM Session Policies?**
-**Answer:** Advanced policies passed when programmatically assuming an IAM role (`sts:AssumeRole`) to further restrict the permissions granted by the role's identity-based policy for that specific session.
 
-### **217. What is AWS KMS Envelope Encryption DEK Lifecycle?**
-**Answer:**
-1. Call KMS `GenerateDataKey` $\rightarrow$ returns plaintext DEK and encrypted DEK.
-2. Encrypt bulk data in application memory with plaintext DEK.
-3. Erase plaintext DEK from memory; store encrypted DEK alongside ciphertext.
-4. To decrypt: Call KMS `Decrypt` on encrypted DEK $\rightarrow$ get plaintext DEK $\rightarrow$ decrypt data in memory.
 
-### **218. What is AWS Secrets Manager Rotation Lambda Architecture?**
-**Answer:** A multi-step Lambda workflow executed during rotation: `createSecret` $\rightarrow$ `setSecret` (updates database password) $\rightarrow$ `testSecret` (verifies new login) $\rightarrow$ `finishSecret` (marks new version as `AWSCURRENT`).
 
-### **219. What is Amazon EBS Elastic Volumes?**
-**Answer:** A feature allowing dynamic modification of volume size, IOPS, and volume type on running EC2 instances with **zero downtime and zero detachment**.
 
-### **220. What is Amazon RDS Multi-AZ vs Multi-Region Deployments?**
-**Answer:**
-- **Multi-AZ:** Synchronous standby replica in a separate AZ within the same region for automated high availability and $< 60$s failover.
-- **Multi-Region:** Asynchronous replication to an independent database in a different geographic region for disaster recovery and local read performance.
-
-### **221. What is Amazon RDS Read Replica Lag?**
-**Answer:** The asynchronous replication delay between the primary database and read replicas, measured via CloudWatch metric `ReplicaLag`.
-
-### **222. What is Amazon ElastiCache Cluster Mode Enabled vs Disabled?**
-**Answer:**
-- **Cluster Mode Disabled:** Single shard with 1 primary writer and up to 5 read replicas (limited to 1 node write throughput).
-- **Cluster Mode Enabled:** Data partitioned across up to 500 shards using consistent hashing, providing horizontal write and read scaling.
-
-### **223. What is Amazon DynamoDB Time to Live (TTL)?**
-**Answer:** A feature that automatically marks items for deletion after a designated timestamp attribute expires, purging expired records within 48 hours at zero capacity unit cost.
-
-### **224. What is Amazon DynamoDB Transactions?**
-**Answer:** Provides ACID transaction guarantees across multiple items within one or more tables (`TransactWriteItems`, `TransactGetItems`) in a single coordinated operation.
-
-### **225. What is Amazon S3 Batch Operations?**
-**Answer:** A managed feature that executes large-scale batch operations (replacing tags, modifying ACLs, copying objects, invoking Lambdas) across billions of S3 objects.
-
-### **226. What is Amazon S3 Storage Lens?**
-**Answer:** An analytics feature that provides organization-wide visibility into object storage usage, cost optimization opportunities, and security protection posture.
-
-### **227. What is Amazon CloudFront Field-Level Encryption?**
-**Answer:** Encrypts sensitive user input fields (credit card numbers) in web forms at the edge location using public key cryptography before forwarding the request to backend origins.
-
-### **228. What is Amazon CloudFront Functions vs Lambda@Edge?**
-**Answer:**
-- **CloudFront Functions:** Lightweight JavaScript functions executing in sub-millisecond runtimes at 450+ edge locations (URL rewrites, header manipulations, token validation).
-- **Lambda@Edge:** Full Node.js/Python runtimes executing complex network calls and database queries at regional edge caches.
-
-### **229. What is AWS Route 53 Traffic Flow?**
-**Answer:** A visual routing policy editor that manages complex routing topologies combining geolocation, latency, and failover routing rules.
-
-### **230. What is AWS Route 53 DNSSEC?**
-**Answer:** Adds cryptographic digital signatures to DNS records in public hosted zones to protect applications from DNS spoofing and cache poisoning attacks.
-
-### **231. What is AWS API Gateway REST API vs HTTP API?**
-**Answer:**
-- **HTTP API:** Modern, lightweight API Gateway optimized for serverless workloads with lower latency and up to **70% cost reduction**.
-- **REST API:** Legacy API Gateway supporting API keys, usage plans, request validation, and WAF integration.
-
-### **232. What is AWS API Gateway WebSocket API?**
-**Answer:** Maintains persistent bidirectional stateful connections between client browsers and backend Lambda/SQS services for real-time applications (chat, live notifications).
-
-### **233. What is AWS Lambda Dead Letter Queue (DLQ)?**
-**Answer:** Directs asynchronous event payloads to an SQS queue or SNS topic after 2 failed Lambda execution retries to prevent data loss.
-
-### **234. What is AWS Lambda Layers?**
-**Answer:** Reusable ZIP archives containing custom runtimes, shared libraries, or dependencies mounted into the `/opt` directory of Lambda execution environments.
-
-### **235. What is AWS Lambda Container Images?**
-**Answer:** Packaging and deploying Lambda functions as OCI container images up to **10GB in size**, enabling large dependencies and custom runtimes.
-
-### **236. What is AWS AppConfig Feature Flags?**
-**Answer:** Enables deploying dynamic configuration settings and boolean/multivariate feature flags with automated validation and alarm-based rollbacks.
-
-### **237. What is AWS Systems Manager Patch Manager?**
-**Answer:** Automates scanning and applying OS security patches across large fleets of Linux and Windows instances according to custom patch baselines.
-
-### **238. What is AWS Systems Manager State Manager?**
-**Answer:** A secure configuration management service that automates maintaining target OS software configurations and agent states.
-
-### **239. What is AWS CloudFormation Stack Policy?**
-**Answer:** A JSON document that prevents accidental updates or deletions of critical cloud resources (RDS databases) during CloudFormation stack updates.
-
-### **240. What is AWS CloudFormation Modules?**
-**Answer:** Packages resource configurations into reusable building blocks that can be shared across teams to enforce organizational infrastructure standards.
-
-### **241. What is AWS IAM Roles Anywhere?**
-**Answer:** Enables workloads running outside AWS (on-premise servers, Kubernetes pods in other clouds) to use X.509 digital certificates to obtain temporary AWS IAM credentials via STS.
-
-### **242. What is AWS VPC Traffic Mirroring?**
-**Answer:** Clones raw network traffic from Elastic Network Interfaces (ENIs) and streams it out-of-band to security appliances for deep packet inspection and intrusion detection.
-
-### **243. What is AWS Verified Access?**
-**Answer:** Provides secure, zero-trust VPN-less access to internal corporate web applications using identity and device security signals.
-
-### **244. What is Amazon GuardDuty EKS Protection?**
-**Answer:** Analyzes Kubernetes control plane audit logs and runtime container behavior to detect compromised pods, privilege escalations, and cryptocurrency mining in EKS.
-
-### **245. What is Amazon Detective?**
-**Answer:** Automatically collects security data from VPC Flow Logs, CloudTrail, and GuardDuty, using machine learning to visualize interactive graph models for root-cause incident investigations.
-
-### **246. What is AWS KMS Asymmetric Keys?**
-**Answer:** KMS keys representing RSA or ECC public/private key pairs used for signing, signature verification, and asymmetric encryption outside AWS.
-
-### **247. What is AWS SQS Deduplication ID?**
-**Answer:** A unique token used by SQS FIFO queues to identify and discard duplicate messages sent within a 5-minute deduplication interval.
-
-### **248. What is AWS EventBridge Pipes?**
-**Answer:** A point-to-point integration service that connects event producers (DynamoDB Streams, SQS, Kinesis) to targets with optional filtering and enrichment steps without writing glue code.
-
-### **249. What is AWS FinOps Cost Allocation Tags?**
-**Answer:** User-defined metadata tags (`Environment`, `Owner`, `CostCenter`, `Project`) activated in the Billing console to organize and track cloud expenditures by business unit.
-
-### **250. What is AWS Well-Architected Sustainability Pillar?**
-**Answer:** Designing cloud architectures to minimize environmental impact by maximizing hardware utilization, adopting ARM Graviton processors, and eliminating idle compute waste.
