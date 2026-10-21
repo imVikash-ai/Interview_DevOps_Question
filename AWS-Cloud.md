@@ -3088,9 +3088,175 @@ My goal is to mitigate malicious traffic at the edge while keeping legitimate AP
 
 ### **204. Scenario: How do you implement Cross-Account IAM access securely without static credentials?**
 **Answer:**
-1. In Account B (Target): Create an IAM Role with a Trust Policy specifying `Principal: { "AWS": "arn:aws:iam::AccountA:root" }` and an `sts:ExternalId` condition to prevent the Confused Deputy problem.
-2. In Account A (Source): Grant the calling IAM User/Role permission to execute `sts:AssumeRole` on the target ARN.
-3. Workload in Account A calls STS `AssumeRole` to receive temporary, 1-hour credentials for Account B.
+
+#### 1. Understand the Scenario
+
+Cross-account access means allowing a user or application in one AWS account to access resources in another AWS account securely.
+
+For example:
+
+- **Account A (Dev Account):** Contains an application running on EC2.
+- **Account B (Production Account):** Contains an S3 bucket.
+- **Requirement:** The EC2 application in Account A must read files from the S3 bucket in Account B without storing permanent AWS access keys.
+
+The best approach is to use **IAM Roles + AWS STS + Temporary Credentials**.
+
+#### 2. Architecture
+
+```text
+         AWS Account A (Dev)
+                  |
+           EC2 Instance
+                  |
+             IAM Role
+                  |
+             sts:AssumeRole
+                  |
+                  v
+               AWS STS
+                  |
+        Temporary Credentials
+                  |
+                  v
+         AWS Account B (Prod)
+                  |
+        Cross-Account IAM Role
+                  |
+                  v
+              Amazon S3
+          Read-Only Access
+```
+
+#### 3. Implementation Steps
+
+**Step 1: Create an IAM Role in Account B**
+
+Create a role named `CrossAccountS3ReadRole` in the target account.
+
+Configure its trust policy to allow only the approved IAM role from Account A to assume it.
+
+**Trust Policy:**
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::111111111111:role/DevEC2Role"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+```
+
+Replace `111111111111` with the source account ID and use the actual source role ARN.
+
+**Why?** The trust policy defines who is allowed to assume the role.
+
+**Step 2: Attach Least-Privilege Permissions**
+
+Attach a permissions policy to the target role that allows read-only access to the required S3 bucket.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::company-data-bucket"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::company-data-bucket/*"
+    }
+  ]
+}
+```
+
+**Why?** This policy defines what the role is allowed to do.
+
+**Step 3: Allow Account A to Assume the Target Role**
+
+Attach the following policy to `DevEC2Role` in Account A.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Resource": "arn:aws:iam::222222222222:role/CrossAccountS3ReadRole"
+    }
+  ]
+}
+```
+
+Replace `222222222222` with the target account ID.
+
+Both the source role's permissions and the target role's trust policy must permit role assumption.
+
+**Step 4: Assume the Role Using AWS STS**
+
+Use the AWS CLI to request temporary credentials:
+
+```bash
+aws sts assume-role \
+  --role-arn arn:aws:iam::222222222222:role/CrossAccountS3ReadRole \
+  --role-session-name DevS3ReadSession
+```
+
+AWS STS returns temporary credentials containing:
+
+- Access key ID
+- Secret access key
+- Session token
+- Expiration time
+
+These credentials expire automatically.
+
+For production applications, I would use AWS SDK credential providers to obtain and refresh temporary credentials automatically instead of manually storing them.
+
+**Step 5: Verify Access**
+
+For an interactive CLI test, configure an AWS CLI profile to assume the target role, then run:
+
+```bash
+aws s3 ls s3://company-data-bucket --profile cross-account
+```
+
+For an EC2 workload, use its attached IAM role as the source identity. The SDK or CLI can then assume the target role without requiring permanent access keys.
+
+#### 4. Security Best Practices
+
+- **No Static Credentials:** Never hardcode permanent AWS access keys in source code or Git repositories.
+- **Least Privilege:** Grant only the permissions required for specific resources.
+- **Restrict Trust:** Trust specific IAM role ARNs whenever practical.
+- **MFA:** Require MFA for human access where appropriate.
+- **External ID:** Use an external ID for third-party cross-account access when appropriate.
+- **CloudTrail:** Audit `AssumeRole` events and subsequent API activity.
+- **Short Sessions:** Configure an appropriate role-session duration.
+- **Additional Controls:** Check S3 bucket policies, KMS key policies, Service Control Policies (SCPs), and explicit denies if access fails.
+
+#### Final Interview Answer
+
+"I would implement cross-account IAM access using IAM roles and AWS STS instead of static access keys. First, I would create a role in the target account with a trust policy that allows only the approved source role to assume it. Then I would attach a least-privilege permissions policy to the target role and allow the source role to call `sts:AssumeRole`.
+
+When the application needs access, it assumes the target role and receives temporary credentials that expire automatically. I would use IAM roles for EC2, ECS, or Lambda workloads and let the AWS SDK manage credential retrieval and refresh.
+
+Finally, I would enforce least privilege, restrict trust relationships, and audit role assumptions through CloudTrail. This approach improves security, reduces credential leakage risks, and provides better auditability."
+
+#### Key Takeaway
+
+**IAM Role + Trust Policy + Permissions Policy + AWS STS + Temporary Credentials + CloudTrail**
+
+This combination provides secure cross-account access without long-term credentials.
+
 
 ### **205. Scenario: EC2 instances in a private subnet cannot download software updates from GitHub. How do you troubleshoot?**
 **Answer:**
