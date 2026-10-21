@@ -552,7 +552,30 @@ SAST tools are built to flag flaws outlined in standards like the OWASP Top 10 a
 - **Commercial:** Burp Suite, Acunetix, Netsparker, IBM AppScan, and Veracode 
 
 ### **24. What is Software Composition Analysis (SCA)?**
-**Answer:** Scanning open-source third-party dependencies against national vulnerability databases (NVD) for known CVEs.
+**Answer:** 
+
+**Software Composition Analysis (SCA)** is **an automated security and management process that identifies open-source software, third-party libraries, and dependencies embedded within an application's codebase**. 
+
+Modern software relies heavily on external code, where up to 80% to 90% of an application's building blocks come from open-source repositories. SCA tools help development and security teams track and protect this supply chain.
+
+#### Core Functions of SCA
+
+- **Vulnerability Scanning:** Scans code, package manifests, and binaries against databases like the National Vulnerability Database (NVD) to flag known Common Vulnerabilities and Exposures (CVEs). 
+- **License Compliance:** Identifies open-source licenses (such as GPL, MIT, or Apache) to ensure legal compliance and prevent intellectual property risks. 
+- **Transitive Dependency Tracking:** Maps out "dependencies of dependencies" that are buried deep within an application's architecture.
+- **Software Bill of Materials (SBOM) Generation:** Produces a comprehensive, machine-readable inventory of every component, library, and module present in the software. 
+
+## How SCA Works
+
+1. **Discovery:** The tool scans project configuration files (like `package.json`, `pom.xml`, or `requirements.txt`), container images, or compiled binaries.
+2. **Comparison:** It matches the discovered components and version numbers against public and proprietary vulnerability databases.
+3. **Prioritization:** It scores and ranks risks using metrics like the Common Vulnerability Scoring System (CVSS).
+4. **Remediation:** It suggests patch versions, automated pull requests, or policy blocks to fix the issue.
+
+#### SCA vs. Other Security Testing
+
+- **SCA vs. SAST (Static Application Security Testing):** SCA focuses strictly on open-source and third-party libraries. SAST analyzes your custom, proprietary source code for logic bugs and coding flaws. 
+- **SCA vs. DAST (Dynamic Application Security Testing):** SCA evaluates code and manifests statically without running the app. DAST attacks a live, running application from the outside to find runtime weaknesses.
 
 ### **25. What is Mutation Testing in CI?**
 **Answer:** Introducing small intentional bugs (mutations) into source code to verify if unit tests fail; if tests pass, test assertions are weak.
