@@ -597,7 +597,46 @@ Mutation testing in Continuous Integration (CI) is **an automated process that e
 - **Scheduled Full Runs:** Run deep, full-codebase mutation tests on a nightly or weekly schedule rather than every commit, due to high CPU and time costs.
 
 ### **26. What is Concurrency Control in CI/CD?**
-**Answer:** Canceling obsolete in-progress pipeline runs on pull request branches when a newer commit is pushed (`cancel-in-progress: true`), saving compute resources.
+**Answer:** 
+
+**Concurrency control in CI/CD** is **the mechanism used to regulate, queue, or cancel simultaneously executing workflows, jobs, or deployments**. Because automated pipelines are frequently triggered by multiple developers pushing code at the same time, concurrency control ensures that these parallel execution streams do not cause race conditions, corrupt shared deployment environments, or exhaust limited build infrastructure. 
+
+#### Core Objectives of Concurrency Control in CI/CD
+
+- **Environment Protection:** It prevents multiple deployments from pushing to the same staging or production environment at the exact same moment, which would cause an unpredictable and broken infrastructure state. 
+- **Sequential Execution:** It ensures that updates are deployed in the precise order they were committed, preventing older code versions from accidentally overwriting newer code. 
+- **Resource Management:** It limits the number of parallel automated runners or containers operating simultaneously, preventing teams from exhausting their cloud infrastructure limits or monthly CI/CD build minutes. 
+
+#### Common Strategies & Implementation Mechanics
+
+Modern platforms—such as **GitHub Actions** and Bitbucket Deployments—handle concurrency using a few primary control models: 
+
+| **Strategy** | **Behavior** | **Best Used For** |
+|---|---|---|
+| **Queuing (FIFO)** | Holds a newly triggered build in a "pending" status until the currently running build finishes completely. | **Critical release jobs** where every single code version must step through validation sequentially. |
+| **Auto-Cancellation (Latest Wins)** | If Build A is running and a developer pushes Build B, the pipeline **cancels Build A mid-execution** and switches resources entirely to Build B. | **Pull Request validations** and feature branch test runs where intermediate commits no longer matter. |
+| **Pessimistic Locking** | Strictly allows only one job per scoped environment at any time; explicitly rejects conflicting deployments with an error. | **Production deployments** or complex data migration workflows where collisions cause severe failures. |
+
+#### Implementation Example (GitHub Actions)
+
+In practice, engineers configure this directly within pipeline configuration files. In GitHub Actions, the `concurrency` block organizes how jobs are grouped and throttled: 
+
+**YAML**
+
+```yaml
+name: Production Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+# Enforce concurrency control at the workflow level
+concurrency:
+  group: production-deploy-${{ github.ref }}
+  cancel-in-progress: true  # Automatically drops previous runs to save build minutes
+```
+
 
 ### **27. What is a Merge Queue in GitHub?**
 **Answer:** An automated system that tests pull requests in an integrated sequential train against the anticipated merge result of prior queued PRs to ensure `main` never breaks.
