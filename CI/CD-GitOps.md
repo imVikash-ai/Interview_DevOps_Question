@@ -167,7 +167,33 @@ A build matrix in CI/CD is **a configuration strategy that automatically runs th
 - **Jenkins:** Uses Groovy-based scripted pipelines or declarative matrix projects to handle multi-axis builds.
 
 ### **9. What is Pipeline Caching vs Artifact Storage?**
-**Answer:** Caching stores temporary dependencies (`node_modules`, Maven caches) to speed up subsequent builds; Artifact Storage persists output binaries and compliance test reports long-term.
+**Answer:** 
+
+Pipeline caching stores reusable dependency files (like `node_modules` or Maven packages) across multiple pipeline runs to speed up future builds. Artifact storage preserves specific build outputs (like compiled binaries, logs, or test reports) to pass between pipeline stages or keep for later inspection. 
+
+#### Key Differences
+
+- **Primary Purpose:**
+  - **Pipeline Caching:** Boosts performance by avoiding repeated downloads.
+  - **Artifact Storage:** Preserves and shares final or intermediate build results. 
+- **Data Type:**
+  - **Pipeline Caching:** External dependencies and tool libraries (e.g., npm cache, pip cache, m2 repository).
+  - **Artifact Storage:** Generated code, Docker images, compiled binaries, and test reports. 
+- **Lifecycle:**
+  - **Pipeline Caching:** Shared and reused across distinct pipeline runs based on a lookup key (often a hash of a lockfile).
+  - **Artifact Storage:** Tied directly to a specific pipeline run and passed to downstream jobs or saved for release. 
+- **Guarantees:**
+  - **Pipeline Caching:** Optional and non-critical; if a cache misses, the pipeline will still succeed by downloading the dependencies fresh.
+  - **Artifact Storage:** Required and critical; if an artifact fails to generate or pass to a deployment stage, the pipeline usually fails. 
+
+## Quick Comparison
+
+| **Feature** | **Pipeline Caching** | **Artifact Storage** |
+|---|---|---|
+| **Goal** | Speed optimization | Output preservation & sharing |
+| **Typical Content** | Package manager caches (`node_modules`, `.m2`) | Binaries, zips, logs, test reports |
+| **Scope** | Across future runs (via keys) | Within or after the current run |
+| **Failure Impact** | Slower build (falls back to download) | Broken pipeline / failed deployment |
 
 ### **10. What is Semantic Versioning (SemVer)?**
 **Answer:** Formatting release versions as `MAJOR.MINOR.PATCH` (e.g., `2.4.1`) where MAJOR indicates breaking changes, MINOR indicates backward-compatible features, and PATCH indicates bug fixes.
