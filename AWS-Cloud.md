@@ -3398,12 +3398,179 @@ Finally, I would review VPC Flow Logs and NAT Gateway CloudWatch metrics to iden
 
 Throughout the process, I would keep the EC2 instance private and avoid assigning it a public IP just to solve the connectivity issue."
 
-### **206. Scenario: An S3 bucket with public access disabled was accessed from an external unauthorized IP. How do you investigate?**
+### **115. Scenario: An S3 bucket with public access disabled was accessed from an external unauthorized IP. How do you investigate?**
 **Answer:**
-1. Query **AWS CloudTrail** logs in Amazon Athena: filter by `eventSource: "s3.amazonaws.com"` and the bucket name.
-2. Identify the `eventName` (`GetObject`), `sourceIPAddress`, and the `userIdentity` that made the call.
-3. Check if an IAM Role had overly permissive Trust Policies or if temporary STS credentials were leaked.
-4. Revoke the compromised IAM session immediately (`aws iam put-role-policy` with an explicit deny).
+#### 1. Understand the Problem
+
+If an S3 bucket has Block Public Access enabled but an unauthorized external IP appears to have accessed it, I would treat this as a potential security incident.
+
+Important: Disabling public access does not automatically prevent every form of external access. A user with valid IAM credentials, a bucket policy granting access, or a presigned URL may still be able to access objects, depending on the configuration.
+
+My goal is to identify who accessed the bucket, which objects were accessed, how access was granted, and whether any data was exposed or modified.
+
+#### 2. Investigation Steps
+
+**Step 1: Check AWS CloudTrail Logs**
+
+I would first check CloudTrail to identify S3 API activity and determine the source of the request.
+
+- Open AWS CloudTrail and review Event history.
+- Filter events by the S3 event source, `s3.amazonaws.com`.
+- Investigate events such as:
+  - `GetObject` — an object was requested.
+  - `PutObject` — an object was uploaded or overwritten.
+  - `DeleteObject` — an object was deleted.
+  - `GetBucketPolicy` — the bucket policy was requested.
+  - `PutBucketPolicy` — the bucket policy was modified.
+  - `PutPublicAccessBlock` — public-access-block settings were changed.
+
+I would examine the following fields:
+
+- `sourceIPAddress` — IP address from which the request originated.
+- `userIdentity` — IAM user, assumed role, or other identity involved.
+- `eventTime` — timestamp of the activity.
+- `eventName` — API operation performed.
+- `requestParameters` — bucket or object involved, when recorded.
+- `userAgent` — client or tool used to make the request.
+- `errorCode` — whether the API request failed.
+
+Important: CloudTrail Event history primarily shows management events. For object-level S3 API activity, I would verify that CloudTrail S3 data events were enabled for the relevant bucket during the incident. They are not automatically recorded in Event history by default.
+
+**Step 2: Verify S3 Public Access Settings**
+
+I would inspect the bucket's Block Public Access configuration at both the bucket and account levels.
+
+Check these four settings:
+
+- `BlockPublicAcls`
+- `IgnorePublicAcls`
+- `BlockPublicPolicy`
+- `RestrictPublicBuckets`
+
+Then review the bucket policy and object ACLs.
+
+Example AWS CLI commands:
+
+```
+# Check bucket-level public access block
+aws s3api get-public-access-block \
+  --bucket my-secure-bucket
+
+# Check bucket policy
+aws s3api get-bucket-policy \
+  --bucket my-secure-bucket
+
+# Check bucket ACL
+aws s3api get-bucket-acl \
+  --bucket my-secure-bucket
+
+# Check account-level public access block
+aws s3control get-public-access-block \
+  --account-id YOUR_AWS_ACCOUNT_ID
+```
+
+I would also review IAM policies, cross-account permissions, access points, and any presigned URLs that might have been issued.
+
+**Step 3: Investigate the Unauthorized IP Address**
+
+I would correlate the IP address with CloudTrail events and any available S3 server access logs.
+
+I would determine:
+
+- Whether the IP belongs to a known corporate network, VPN, or expected service.
+- Whether requests were authenticated or anonymous.
+- Whether the IP accessed one object or many objects.
+- Whether there were repeated requests or unusual activity.
+- Whether the same identity accessed other AWS resources.
+
+An external IP alone does not prove unauthorized access. I would validate the identity, authorization context, and request outcome.
+
+**Step 4: Determine Whether Data Was Actually Accessed**
+
+I would check whether the API request succeeded or was denied.
+
+| Event or evidence                     | What it indicates                               |
+| ------------------------------------- | ----------------------------------------------- |
+| `GetObject` with successful response  | The object was retrieved by the request         |
+| `GetObject` with `AccessDenied`       | The request was denied                          |
+| `ListBucket` with successful response | The requester could list bucket contents        |
+| `PutObject`                           | An object may have been uploaded or overwritten |
+| `DeleteObject`                        | An object may have been deleted                 |
+
+I would correlate timestamps, object keys, request IDs, and response details to establish the actual impact. A request attempt does not necessarily mean data was exposed.
+
+**Step 5: Contain the Incident**
+
+If I confirm suspicious or unauthorized access, I would immediately work to contain it.
+
+- Remove unauthorized bucket-policy statements and ACL grants.
+- Revoke or disable compromised IAM credentials, where appropriate.
+- Invalidate or stop issuing affected presigned URLs as applicable.
+- Restrict access to approved IAM principals and VPC endpoints if the architecture supports it.
+- Preserve CloudTrail logs and other evidence before making changes.
+- Avoid deleting the bucket or logs, because that could destroy important forensic evidence.
+
+I would also check whether sensitive objects were downloaded, overwritten, or deleted.
+
+**Step 6: Use AWS Security Services**
+
+I would use the following services to support the investigation:
+
+| AWS service           | Purpose                                                               |
+| --------------------- | --------------------------------------------------------------------- |
+| CloudTrail            | Investigate API activity and identities                               |
+| GuardDuty             | Detect supported suspicious activity involving S3 and AWS credentials |
+| AWS Config            | Review configuration changes and historical compliance where recorded |
+| CloudWatch            | Monitor relevant metrics and alarms                                   |
+| IAM Access Analyzer   | Identify unintended external access and policy exposure               |
+| S3 server access logs | Examine request-level details if logging was enabled                  |
+
+I would also check whether CloudTrail logs were delivered to a separate, protected logging account and whether log-file integrity validation was enabled.
+
+**Step 7: Fix the Root Cause and Prevent Recurrence**
+
+After containment, I would:
+
+- Enforce S3 Block Public Access at the appropriate account and bucket levels.
+- Apply least-privilege IAM and bucket policies.
+- Enable CloudTrail data events for sensitive buckets.
+- Configure GuardDuty findings and security alerts.
+- Use SSE-KMS encryption where appropriate for sensitive data.
+- Apply organization-level controls through AWS Organizations and service control policies when suitable.
+- Review cross-account access, access points, and presigned URL expiration.
+- Document the incident, affected objects, root cause, and remediation.
+
+Encryption is an additional safeguard, but it does not replace access control.
+
+#### 3. Investigation Flow
+
+Suspicious S3 Access Detected
+
+CloudTrail Investigation
+
+Identity, source IP, event time, API action
+
+Validate Access Controls
+
+Bucket policy, IAM, ACLs, access points, presigned URLs
+
+Determine Actual Impact
+
+Successful reads, writes, deletions, and affected data
+
+Contain, Remediate, and Monitor
+
+#### Final Interview Answer
+
+"If an S3 bucket with public access disabled is accessed from an unauthorized external IP, I would treat it as a potential security incident.
+
+First, I would investigate AWS CloudTrail logs to identify the source IP, user identity, event name, timestamp, and whether the request succeeded. I would check S3 data events because object-level API activity is not automatically included in CloudTrail Event history.
+
+Next, I would review the bucket's Block Public Access settings, bucket policy, ACLs, IAM permissions, cross-account access, and presigned URLs. I would also correlate the IP with S3 server access logs, if available, to determine which objects were accessed.
+
+If the access is confirmed as unauthorized, I would preserve evidence, revoke compromised credentials or permissions, restrict access, and assess whether sensitive data was exposed or modified.
+
+Finally, I would use GuardDuty, IAM Access Analyzer, AWS Config, and CloudTrail monitoring to identify the root cause and prevent recurrence. I would document the incident and verify that only authorized identities can access the bucket."
 
 ### **207. Scenario: What causes high latency in Amazon DynamoDB and how is it fixed?**
 **Answer:**
