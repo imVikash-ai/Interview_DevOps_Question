@@ -101,7 +101,27 @@ A production CI/CD (Continuous Integration and Continuous Delivery/Deployment) p
 - **Monitoring & Feedback:** Post-deployment tools (e.g., Prometheus, Grafana) track performance metrics, logs, and error budgets, triggering automatic rollbacks if anomalies occur.
 
 ### **6. What is an Artifact in CI/CD?**
-**Answer:** The compiled, packaged, immutable deployable unit produced by a build pipeline (Docker image, JAR, NPM package, Helm chart) that is promoted across environments.
+**Answer:** 
+
+In CI/CD, an **artifact** is **any file, binary, package, or document produced during the build, test, or compilation process of a pipeline**. It represents the tangible output of source code—such as a compiled `.jar` file, a Docker container image, or a test report—that moves between pipeline stages or gets deployed to production. 
+
+#### Common Types of Artifacts
+
+- **Compiled binaries and packages:** Java `.jar` or `.war` files, `.exe` installers, `.deb`/`.rpm` Linux packages, or Python `.whl` files.
+- **Container images:** Docker or OCI images ready to run in Kubernetes or cloud servers.
+- **Configuration and infrastructure templates:** Helm charts, Terraform scripts, or CloudFormation templates.
+- **Reports and logs:** JUnit test results, code coverage files, or build logs used for debugging.
+
+#### Why Artifacts Matter in CI/CD
+
+- **Passing data between jobs:** An early CI job builds the code and saves the output as an artifact, which later testing or packaging jobs automatically download and use.
+- **Immutability and consistency:** Using the exact same built artifact across testing, staging, and production guarantees that the code tested is identical to the code released. 
+- **Traceability and rollbacks:** Every artifact ties back to a specific Git commit and build number. If a live release fails, teams can quickly roll back to a previous safe artifact version. 
+
+#### Where Artifacts Live
+
+- **Temporary CI storage:** Built-in storage inside tools like **GitLab CI/CD Job Artifacts** or Jenkins for short-term passing between pipeline steps. 
+- **Dedicated artifact repositories:** Long-term, version-controlled systems like **JetBrains TeamCity Artifact Repositories**, JFrog Artifactory, Nexus, or cloud registries (like Google Artifact Registry) to store, scan, and manage release candidates.
 
 ### **7. What is the "Build Once, Deploy Anywhere" principle?**
 **Answer:** The architectural rule that code is compiled and packaged into an immutable container/binary once during CI, and the exact same binary is deployed to Dev, Staging, and Production by injecting environment-specific configs at runtime.
