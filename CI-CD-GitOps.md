@@ -267,7 +267,22 @@ If a commit introduces an incompatible API change or breaks backward compatibili
 - **Tooling Integration**: Enforced via Git hooks using utilities like **Commitlint** and **Husky** to block improperly formatted commits.
 
 ### **12. What is a Linter and why must it run early?**
-**Answer:** A static analysis tool checking code formatting, syntax errors, and style rules without running code. Running linters first provides sub-minute feedback and saves expensive build compute minutes.
+**Answer:** 
+
+A linter is **a static code analysis tool that scans source code without running it to find syntax errors, bugs, and style violations**. It must run early—during local development or pre-commit hooks—because fixing defects immediately costs less time, prevents bad code from entering the main branch, and stops small style debates during code reviews. 
+
+#### What a Linter Does
+
+- **Analyzes static code:** Inspects code syntax and logic structures without executing the program.
+- **Enforces style:** Ensures uniform indentation, naming conventions, and file formatting across the team.
+- **Flags probable bugs:** Catches common mistakes like unused variables, missing imports, or unreachable code. 
+
+#### Why It Must Run Early
+
+- **Cost of fixing issues:** Bugs found during local coding take seconds to fix, whereas bugs discovered in production require hotfixes, testing, and deployments. 
+- **Prevents merge friction:** Running linters in pre-commit hooks or CI/CD pipelines ensures broken or messy code never reaches the shared repository. 
+- **Cleans up code reviews:** Automating style checks stops human reviewers from wasting time arguing over brackets, spaces, and commas. 
+- **Immediate feedback:** Developers learn best practices in real time as the editor or terminal highlights mistakes immediately after typing.
 
 ### **13. What is Secret Masking in CI/CD?**
 **Answer:** Automatically detecting registered secret strings in pipeline logs and replacing them with `***` to prevent accidental credential leakage in build logs.
