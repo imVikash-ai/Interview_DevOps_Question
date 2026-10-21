@@ -637,9 +637,38 @@ concurrency:
   cancel-in-progress: true  # Automatically drops previous runs to save build minutes
 ```
 
-
 ### **27. What is a Merge Queue in GitHub?**
-**Answer:** An automated system that tests pull requests in an integrated sequential train against the anticipated merge result of prior queued PRs to ensure `main` never breaks.
+**Answer:** 
+
+A **GitHub merge queue** is **an automated workflow tool that stabilizes busy repositories by ensuring pull requests (PRs) pass all required checks when integrated with the latest code before they are formally merged into the target branch**. It acts as a branch traffic controller, sitting directly between the "PR approved" and "PR merged" stages.
+
+#### The Core Problem It Solves
+
+On high-performance, fast-moving teams, multiple engineers often commit to a single branch simultaneously. This introduces a "validation gap": 
+
+1. Developer A and Developer B both branch off the `main` branch.
+2. They both run tests on their independent PRs, and both pass.
+3. Developer A merges their PR into `main`.
+4. Developer B merges their PR immediately after. Even though Developer B’s PR passed tests earlier, it was never tested against Developer A's new changes. 
+
+When combined, their changes might conflict or break the build, leading to a broken `main` branch.
+
+#### How GitHub Merge Queue Works
+
+Instead of allowing developers to merge approved PRs directly into a busy branch, GitHub serializes the process: 
+
+- **Sequential Lineup:** Approved PRs are placed into a First-In, First-Out (FIFO) queue. 
+- **Dynamic Testing Environment:** GitHub creates a temporary branch (using a `gh-readonly-queue/` prefix) that combines the latest `main` branch code, the PRs ahead of it in the queue, and the current PR. 
+- **Pre-Merge Validation:** Continuous Integration (CI) tests run against this combined state.
+- **Automatic Eviction:** If a PR's tests fail or code conflicts occur, GitHub automatically removes that PR from the queue. It then re-tests the subsequent PRs against the corrected branch state, protecting `main` from ever breaking.
+- **Final Merge:** If all status checks pass, the PR is automatically merged into the target branch without manual intervention. 
+
+#### Requirements & Availability
+
+According to **GitHub Docs**, the feature requires specific configuration:
+- **Account Tiers:** It is available for public repositories owned by organizations, or private repositories using GitHub Enterprise Cloud. 
+- **Setup:** A repository administrator must enable the "Require merge queue" option inside the repository's **Branch protection settings**. 
+- **CI Integration:** Your GitHub Actions or CI pipeline must be configured to trigger on the `merge_group` event to run checks while the PR is in the queue.
 
 ### **28. What is Self-Hosted Runner vs Cloud-Hosted Runner?**
 **Answer:** Cloud-hosted runners are fully managed VMs by GitHub/GitLab; Self-hosted runners run in private VPCs with custom hardware, GPUs, and private network access.
