@@ -1145,8 +1145,34 @@ Spinnaker operates as a collection of JVM- and service-based components:
 - **Pros:** Unmatched multi-cloud flexibility, deep control over complex release guardrails, manual judgment gates, and enterprise security features (OAuth, SAML, RBAC).
 - **Cons:** High resource consumption and a steep learning curve for initial setup and maintenance.
 
-### **49. What is Gitleaks?**
-**Answer:** A fast, open-source secret scanning tool used in pre-commit hooks and CI pipelines to detect committed API keys, tokens, and private keys.
+### **46. What is Gitleaks?**
+**Answer:** 
+
+**Gitleaks** is **a free, open-source Static Application Security Testing (SAST) tool used to detect and prevent hardcoded secrets—such as API keys, passwords, tokens, and private keys—in your code repositories**. 
+
+Maintained by **Truffle Security**, it is widely relied upon by developers and security professionals to prevent accidental credential exposure before code is pushed to production or public repositories.
+
+#### How it Works
+
+Gitleaks evaluates code using three core detection methods: 
+
+1. **Regex Pattern Matching:** It scans files against a predefined and highly comprehensive rule configuration targeting over 160 specific secret types (like AWS keys, Stripe keys, and JWTs). 
+2. **Entropy Analysis:** It uses mathematical entropy validation to measure the randomness of text strings. This helps catch generic or custom keys that do not follow standard patterns, flagging strings that "look" like high-entropy secrets. 
+3. **Allowlists:** It allows developers to configure custom exclusions to filter out low-entropy strings or known non-sensitive data, drastically reducing false positives.
+
+#### Key Features
+
+- **Git History Scanning:** Gitleaks does not just scan the active, front-facing codebase; it can scan an entire repository's timeline, uncovering credentials hidden inside historical commits. 
+- **Flexible Scanning Modes:** It features a `git` command for traditional version-controlled repositories, a `dir` command to scan standard unmanaged folders or non-git environments, and an `stdin` mode for checking streaming inputs. 
+- **Highly Customizable:** Teams can customize rules and thresholds by configuring a local `gitleaks.toml` file. 
+- **Robust Reporting:** Findings can be exported into multiple structured developer formats, including JSON, CSV, JUnit, and SARIF.
+
+#### Where is it Integrated?
+
+To intercept secrets early in the software development lifecycle, Gitleaks is commonly inserted directly into modern developer workflows:
+
+- **Local Pre-commit Hooks:** Set up locally via tools like `pre-commit`, Gitleaks automatically stops a `git commit` execution if a developer accidentally attempts to stage a secret.
+- **CI/CD Pipelines:** Automated workflows can run **Gitleaks-Action** on pull requests or commits inside platforms like GitHub and GitLab. If a secret is uncovered, the pipeline fails loudly and blocks the deployment.
 
 ### **50. What is Trivy?**
 **Answer:** A comprehensive vulnerability scanner for container images, filesystems, Git repos, and Kubernetes configurations.
