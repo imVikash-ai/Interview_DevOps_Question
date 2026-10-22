@@ -2305,7 +2305,22 @@ Instead of requiring you to manually create a new Jenkins job every time a devel
 - **Built-in Environment Variables:** Jenkins natively injects variables like `BRANCH_NAME` or `CHANGE_ID` (for pull requests) into the environment, making it easy to tag Docker images or name target deployment environments dynamically.
 
 ### **73. What is Blue Ocean in Jenkins?**
-**Answer:** A modern, visual user interface for Jenkins designed to visualize complex multi-stage pipeline executions and failure points.
+**Answer:** 
+
+**Blue Ocean** is a modern, visual user experience (UI) plugin for Jenkins designed to make Continuous Delivery (CD) pipelines easier to create, read, and troubleshoot. 
+
+#### Key Features
+
+- **Pipeline Visualization:** Displays complex CI/CD pipelines, including parallel stages, in a clean graphical flow that makes it easy to see where a build is running or where it failed. 
+- **Visual Pipeline Editor:** Guides users through creating and editing pipelines step by step through a visual interface rather than writing raw code. 
+- **Branch and PR Integration:** Automatically detects and builds branches and pull requests from platforms like GitHub and Bitbucket. 
+- **Personalized Dashboard:** Lets team members tailor the interface to fit their specific role. 
+
+#### Current Status (Deprecation Notice)
+
+- **Deprecated Status:** Blue Ocean has been officially deprecated since July 2026 and will not receive new feature updates or functional enhancements. 
+- **Maintenance:** It only receives selective patches for critical security issues or major bugs. 
+- **Recommended Alternatives:** For pipeline visualization, the Jenkins community recommends using the **Pipeline Graph View** plugin or the **Pipeline: Stage View** plugin.
 
 ### **74. What is GitLab CI `cache` vs `artifacts`?**
 **Answer:** `cache` is used to speed up subsequent runs by caching project dependencies across pipelines; `artifacts` are files passed between sequential stages within the same pipeline.
