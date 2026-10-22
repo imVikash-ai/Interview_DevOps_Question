@@ -1117,8 +1117,33 @@ Tekton defines its building blocks as Kubernetes Custom Resources (CRDs), meanin
 - **Tekton Hub & Catalog:** Repositories of pre-made, community-contributed tasks and pipelines.
 - **Pipelines-as-Code:** Allows developers to define pipelines directly inside a `.tekton/` folder in their source code repository.
 
-### **48. What is Spinnaker?**
-**Answer:** An open-source multi-cloud continuous delivery platform developed by Netflix for managing complex, multi-stage deployment pipelines across AWS, GCP, and Kubernetes.
+### **45. What is Spinnaker?**
+**Answer:** 
+
+**Spinnaker** is **an open-source, multi-cloud Continuous Delivery (CD) platform** originally created by Netflix and extended by Google (now part of the Continuous Delivery Foundation / Linux Foundation). It automates software releases and application deployments across multiple cloud providers. 
+
+#### Core Capabilities
+
+- **Multi-Cloud Deployments:** Works natively across Amazon Web Services (AWS EC2), Google Cloud Platform (GCP/GKE), Microsoft Azure, Kubernetes, Oracle Cloud, and Cloud Foundry. 
+- **Safe Deployment Strategies:** Supports progressive delivery patterns like **blue/green** (red/black) and **canary** deployments, along with automated rollbacks if a release fails. 
+- **Automated Pipelines:** Lets you build multi-stage workflows triggered by CI tools (such as Jenkins or Travis CI), Git events, Docker registries, or cron schedules. 
+- **Immutable Infrastructure ("Baking"):** Integrates with Packer (Rosco) to create "baked" virtual machine images or container images before deployment. 
+- **Application Management:** Gives you a centralized dashboard ("Deck") to view and manage server groups, clusters, load balancers, and security groups.
+
+#### Key Microservices Architecture
+
+Spinnaker operates as a collection of JVM- and service-based components: 
+- **Deck:** The front-end user interface.
+- **Gate:** The API gateway for UI and external requests.
+- **Orca:** The orchestration engine that runs pipelines and stages.
+- **Clouddriver:** The core module that talks to cloud providers and caches deployed resources.
+- **Front50:** Stores metadata for applications, pipelines, and projects.
+- **Rosco:** The "baker" service that creates machine/VM images.
+
+#### Pros and Cons
+
+- **Pros:** Unmatched multi-cloud flexibility, deep control over complex release guardrails, manual judgment gates, and enterprise security features (OAuth, SAML, RBAC).
+- **Cons:** High resource consumption and a steep learning curve for initial setup and maintenance.
 
 ### **49. What is Gitleaks?**
 **Answer:** A fast, open-source secret scanning tool used in pre-commit hooks and CI pipelines to detect committed API keys, tokens, and private keys.
