@@ -1073,7 +1073,22 @@ Instead of manually deploying applications or using traditional push-based CI/CD
 - **Easy Rollbacks:** Because every change is tied to a Git commit, rolling back an application to a previous working state is as simple as reverting a Git commit.
 
 ### **46. What is FluxCD?**
-**Answer:** A modular, headless Kubernetes GitOps toolkit that automatically synchronizes cluster state from Git repositories and Helm charts.
+**Answer:**
+
+Flux CD is **an open-source, CNCF-graduated GitOps tool for Kubernetes**. It keeps your live cluster state automatically synchronized with configuration files stored in Git repositories, OCI artifacts, or Helm buckets. 
+
+#### Key Components (GitOps Toolkit)
+
+- **Source Controller**: Fetches manifests and artifacts from Git repositories, S3 buckets, or OCI registries.
+- **Kustomize Controller**: Applies Kustomize overlays and plain Kubernetes YAML.
+- **Helm Controller**: Manages Helm chart releases and automated upgrades.
+- **Notification & Image Automation Controllers**: Sends chat alerts and automatically commits new container image tags back to Git.
+
+#### Core Benefits
+
+- **Pull-Based Architecture**: Flux runs inside the cluster and pulls changes, eliminating the need to expose cluster credentials to external CI servers.
+- **Declarative & Auditable**: Every infrastructure or application change goes through a Git pull request history.
+- **Lightweight & Modular**: Built on native Kubernetes custom resource definitions (CRDs), relying directly on standard Kubernetes RBAC.
 
 ### **47. What is Tekton?**
 **Answer:** A cloud-native Kubernetes framework for building flexible, serverless CI/CD execution pipelines using Kubernetes Custom Resource Definitions (Tasks, Pipelines).
