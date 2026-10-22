@@ -736,7 +736,36 @@ OpenID Connect (OIDC) in CI/CD is **a keyless authentication pattern**. It lets 
 - **Fine-Grained Trust:** Access can be locked down to specific branches, tags, or pull requests using claim conditions.
 
 ### **31. What is an SBOM (Software Bill of Materials)?**
-**Answer:** A formal, machine-readable nested inventory of all software packages, libraries, and transitive dependencies bundled inside a software container or binary.
+**Answer:** 
+An **SBOM (Software Bill of Materials)** is **a formal, machine-readable inventory list that details every component, open-source library, third-party module, and dependency used to build a software application**. Think of it as a detailed ingredient list for food packaging or a parts catalog for a manufactured vehicle.
+
+#### What Information Does an SBOM Contain?
+
+An SBOM tracks critical metadata for each element inside a software build: 
+
+- **Supplier name:** Who created or published the component.
+- **Component and product names:** The specific software modules or packages.
+- **Version numbers:** Exact release versions being used.
+- **Unique identifiers:** Universal IDs (such as package URLs or SWID tags).
+- **Dependency relationships:** A tree showing how components rely on one another (including nested or transitive dependencies).
+- **Cryptographic hashes:** Digital fingerprints to verify file integrity.
+- **License information:** Open-source or commercial licenses governing each part.
+
+#### Common SBOM Standards and Formats
+
+SBOMs are typically generated, shared, and stored using standardized, machine-readable file formats: 
+
+- **SPDX (Software Package Data Exchange):** Developed by the Linux Foundation, widely used for auditing and compliance.
+- **CycloneDX:** Created by OWASP, built specifically for application security and DevSecOps workflows.
+- **SWID Tags:** Software Identification tags standardized by ISO/IEC for asset tracking.
+- **File Encodings:** Usually formatted in JSON, XML, or YAML.
+
+#### Why Are SBOMs Important?
+
+- **Vulnerability Management:** When a major zero-day flaw (like the Log4j incident) hits an open-source library, an SBOM helps security teams instantly check if and where that vulnerable component exists across their digital estate. 
+- **Supply Chain Security:** It provides visibility into hidden or transitive dependencies that developers did not directly write or choose, protecting against supply chain attacks. 
+- **Regulatory and Legal Compliance:** Government mandates (such as U.S. Executive Order 14028) and international standards (like the EU Cyber Resilience Act) increasingly require SBOMs for software sold to public or enterprise sectors.
+- **License Auditing:** It prevents legal and intellectual property violations by making open-source license obligations transparent.
 
 ### **32. What is Sigstore Cosign?**
 **Answer:** An open-source tool for cryptographically signing and verifying container images in OCI registries using keyless OIDC tokens.
