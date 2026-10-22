@@ -793,8 +793,29 @@ The framework uses progressive levels of security assurance to help organization
 - **Software Consumers:** To cryptographically verify the origin and safety of third-party packages and dependencies before importing them.
 - **Infrastructure & Platform Providers:** To build native security controls (like automated signing and isolation) directly into CI/CD environments.
 
-### **34. What is Hermetic Build?**
-**Answer:** A build executed in a sandboxed container with zero outbound internet access, ensuring all dependencies are pre-fetched and cryptographically hashed for 100% reproducibility.
+### **33. What is Hermetic Build?**
+**Answer:**
+
+A **hermetic build** is **a software build process that runs in complete isolation from the host system and external network, using only explicitly declared, fixed inputs to produce identical, repeatable outputs**. 
+
+#### Key Characteristics
+
+- **Network Isolation:** The build cannot reach out to the internet or fetch unpinned resources during execution. 
+- **Host Independence:** It ignores libraries, compilers, and utilities installed globally on the local machine, treating tools themselves as managed dependencies. 
+- **Explicit Inputs:** Every source file, compiler, library, and tool version is explicitly declared and pinned—often using cryptographic hashes (like SHA). 
+- **Determinism and Reproducibility:** Running the exact same commit or input set produces the exact same binary artifact regardless of where or when it is built. 
+
+#### Why Hermetic Builds Matter
+
+- **Security:** Blocks supply chain attacks, dependency confusion, and hidden code injections from stray network calls or hijacked host packages.
+- **Reliability:** Eliminates "works on my machine" bugs caused by different local environment setups or floating dependency versions.
+- **Caching & Speed:** Allows safe, reliable caching of intermediate build steps and distributed parallel builds.
+
+#### Common Tools Supporting Hermetic Builds
+
+- **Bazel:** Google's open-source build system designed around strict hermeticity and sandboxing.
+- **Nix:** A functional package manager that builds packages in isolated environments.
+- **Docker / Containers:** Frequently used to wrap build steps in an empty or fixed root filesystem.
 
 ### **35. What is Docker BuildKit layer caching?**
 **Answer:** Caching intermediate container build layers in remote OCI registries, allowing ephemeral CI runners to reuse cached layers across independent builds.
