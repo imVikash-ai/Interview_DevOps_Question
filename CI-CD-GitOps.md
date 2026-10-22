@@ -1002,14 +1002,25 @@ When you request an image, the system checks the local cache first:
 - **Amazon ECR Pull-Through Cache:** Automatically mirrors public or private registries (including Amazon ECR Public, Kubernetes, Docker Hub, and Quay) inside your private AWS ECR registry. 
 - **Self-Hosted Registries:** Tools like **Docker Registry**, **Harbor**, and **Zot** can be configured as local proxy caches via daemon or runtime settings (e.g., updating `daemon.json` in Docker).
 
-### **41. What is Automated Canary Analysis (ACA)?**
-**Answer:** Using automated statistical telemetry queries (Prometheus, Datadog) to compare canary error rates against baseline pods and trigger automatic rollbacks on anomalies.
+### **40. What is Argo Rollouts?**
+**Answer:** 
 
-### **42. What is Flagger?**
-**Answer:** A CNCF progressive delivery Kubernetes operator that automates canary routing and metric analysis using Istio, Linkerd, or Nginx Ingress.
+**Argo Rollouts** is **an open-source Kubernetes controller and Custom Resource Definition (CRD) set that adds advanced progressive delivery and deployment capabilities to Kubernetes**. 
 
-### **43. What is Argo Rollouts?**
-**Answer:** A Kubernetes controller providing advanced deployment capabilities (Canary, Blue-Green, experimentation) with automated metric verification.
+It acts as a drop-in replacement for native Kubernetes `Deployment` objects to provide fine-grained control over how software updates reach production. 
+
+#### Core Deployment Strategies
+
+- **Blue-Green Deployments:** Uses two separate environments or services (an active/blue and a preview/green version) to switch traffic all at once or after validation, keeping downtime to zero. 
+- **Canary Releases:** Sends a small percentage of live production traffic to a new version (e.g., 10%), monitors it, and gradually scales traffic up while scaling the old version down. 
+- **Experimentation (A/B Testing):** Routes traffic to different versions to evaluate metrics or user behavior before a full rollout. 
+
+#### Key Features & Capabilities
+
+- **Automated Rollbacks & Promotions:** Can query external metric providers (such as Prometheus, Datadog, New Relic, or Wavefront) to evaluate Key Performance Indicators (KPIs) in real time. If error rates spike or latency degrades, it automatically aborts and rolls back the release. 
+- **Traffic Shaping:** Integrates with ingress controllers (like NGINX or ALB) and service meshes (like Istio or Linkerd) to precisely control traffic splitting. 
+- **Manual Judgment Gates:** Allows teams to pause a rollout at a specific percentage and require human approval before proceeding. 
+- **GitOps Friendly:** Designed to work smoothly with declarative configurations and GitOps tools like Argo CD.
 
 ### **44. What is GitOps?**
 **Answer:** An operational model where Git repositories serve as the single source of truth for declarative infrastructure and application deployments.
