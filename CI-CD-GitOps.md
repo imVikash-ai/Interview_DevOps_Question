@@ -935,11 +935,50 @@ Though often used interchangeably, they measure different things:
 - **Diminishing returns:** Aiming for 100% coverage across a massive codebase can be costly and lead to brittle, low-value tests; a target of around **80%** is standard for general applications, while safety-critical industries (like avionics or automotive) may require strict 100% compliance. 
 - **Consensus on forum discussions:** As noted by developers on **Stack Overflow**, relying solely on line counts is a trap; true safety requires evaluating condition, branch, and parameter edge cases rather than chasing a raw percentage.
 
-### **38. What is Pipeline as Code?**
-**Answer:** Defining CI/CD workflows, build steps, and environment targets in declarative version-controlled files (`.github/workflows/*.yml`, `.gitlab-ci.yml`, `Jenkinsfile`).
+### **37. What is Pipeline as Code?**
+**Answer:** 
 
-### **39. What is a Monorepo CI Strategy?**
-**Answer:** Using path filtering and change-dependency graph tools (Turborepo, Nx, Bazel) so commits only rebuild and test the specific microservices modified.
+Pipeline as code is **the practice of defining continuous integration and continuous delivery (CI/CD) workflows—such as builds, tests, and deployments—through human-readable configuration files stored in a source control repository rather than manual point-and-click graphical user interfaces (GUIs)**. 
+
+#### How It Works
+
+- **Version Control:** Pipeline definitions (like a `Jenkinsfile`, `.gitlab-ci.yml`, or `.github/workflows/*.yml`) live side-by-side with your application code in Git.
+- **Code Reviews:** Changes to the pipeline go through pull requests and code reviews just like regular software features.
+- **Automation:** Triggered automatically by events like code pushes or pull requests to build, test, and deploy software across environments. 
+
+#### Key Benefits
+
+- **Audit Trails and History:** Every modification is tracked with a clear commit history showing who changed the pipeline and why.
+- **Reproducibility and Rollbacks:** If a pipeline update breaks the build, you can easily roll back to a previous version of the pipeline code.
+- **Branch-Specific Pipelines:** Teams can test experimental pipeline logic on separate branches before merging to production.
+- **No GUI Lock-In:** Eliminates fragile, hand-clicked server configurations that are hard to replicate or back up.
+
+#### Common Tools
+
+- **Jenkins** Uses a Groovy-based DSL or Declarative syntax via a `Jenkinsfile`.
+- **GitLab CI/CD** Uses `.gitlab-ci.yml` files stored inside the project repository.
+- **GitHub Actions:** Uses YAML workflow files located in `.github/workflows/`.
+- **Tekton / Pipelines as Code:** A Kubernetes-native framework for cloud-native pipelines.
+
+### **38. What is a Monorepo CI Strategy?**
+**Answer:**
+
+A **Monorepo CI Strategy** is **a set of engineering practices and tooling used to run Continuous Integration (CI) efficiently when multiple projects, services, and shared libraries live inside a single version-controlled repository**.
+ 
+#### Why It Matters
+
+In a standard multi-repository setup, CI runs isolated tests per project. In a monorepo, a naive CI approach runs the entire test suite and rebuilds every single project on every commit. This causes:
+
+- **Exploding CI costs:** Wasted compute time and money from rebuilding code that did not change.
+- **Long developer wait times:** A single small fix can get blocked behind hours of unrelated tests. 
+
+#### Core Pillars of a Monorepo CI Strategy
+
+- **Affected-Projects Detection:** Using build graph analysis (via tools like **Nx**, Turborepo, or **Bazel** to inspect git diffs, trace dependency trees, and run tests **only** on the specific projects impacted by a change.
+- **Aggressive Caching:** Storing and reusing previously built artifacts, test results, and compiler outputs so unchanged modules skip execution entirely. 
+- **Parallel Execution & Matrix Jobs:** Splitting independent builds and tests across concurrent runner agents to maximize throughput.
+- **Scope-Aware Merge Queues:** Using merge queue systems (such as **Mergify**) to run independent parallel merge lanes per project scope, preventing a frontend PR from waiting behind an unrelated backend migration. 
+- **Path-Based Triggers:** Configuring CI platform rules (like path filters in **GitHub Actions**) to skip or trigger workflows based on the directory or file paths modified in a pull request.
 
 ### **40. What is a Pull-Through Cache?**
 **Answer:** A local container registry (Harbor, AWS ECR Pull Through Cache) that caches public images locally inside the VPC, eliminating external rate limits.
