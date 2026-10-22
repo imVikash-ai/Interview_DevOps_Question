@@ -1387,8 +1387,57 @@ jobs:
       node-version: '20'
 ```
 
-### **54. What is a Composite Action in GitHub Actions?**
-**Answer:** A custom action (`action.yml`) that packages multiple shell commands and action steps into a single reusable step within a job.
+### **51. What is a Composite Action in GitHub Actions?**
+**Answer:** 
+
+A **Composite Action** in GitHub Actions is **a reusable package that groups multiple workflow steps into a single action**. Instead of copying and pasting the same sequence of shell commands or actions across different jobs or repositories, you bundle them together to keep your YAML files clean and dry. 
+
+#### Key Characteristics & Mechanics
+
+- **Step-Level Execution:** Composite actions run exclusively as a step inside a job. They cannot define their own jobs, select runners, or dictate target environments. 
+- **The `using: "composite"` Requirement:** To declare a composite action, you must set the `using: "composite"` parameter within its metadata file. 
+- **Mandatory Shell Declaration:** Unlike standard workflows, every `run` step inside a composite action must explicitly define a `shell` (e.g., `shell: bash` or `shell: pwsh`). 
+- **Inputs & Outputs:** They support customized parameters, allowing you to pass variables (`inputs`) into the action and return generated data (`outputs`) back to the parent workflow. 
+
+#### Structural Example (`action.yml`)
+
+A composite action is managed via an `action.yml` or `action.yaml` metadata file. It looks like this: 
+
+```yaml
+name: 'Setup and Test Application'
+description: 'Bundles environment setup and tests into one step'
+inputs:
+  node-version:
+    description: 'Version of Node to use'
+    required: true
+    default: '20'
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Install Dependencies
+      run: npm ci
+      shell: bash
+
+    - name: Run Tests
+      run: npm test
+      shell: bash
+```
+
+#### Composite Actions vs. Reusable Workflows
+
+While both features aim to reduce duplication, they target different scopes: 
+
+| **Feature** | **Composite Actions** | **Reusable Workflows** |
+|---|---|---|
+| **Scope** | **Steps within a job** | **Entire jobs** (or multiple jobs) |
+| **Invocation** | Called via `uses:` under a job's `steps` | Called directly as a job definition |
+| **Secrets** | Cannot read standard secrets directly; must be passed as `inputs` or env vars | Can inherit or be explicitly passed secrets |
+| **Logging** | Collapses multiple internal steps into a single log entry | Provides distinct, real-time logging for each job and step |
 
 ### **55. How do you share files between jobs in GitHub Actions?**
 **Answer:** Since jobs run on independent virtual machines, files must be uploaded as artifacts using `actions/upload-artifact` in Job A and downloaded using `actions/download-artifact` in Job B.
