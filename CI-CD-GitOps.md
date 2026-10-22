@@ -1502,8 +1502,105 @@ jobs:
 - **Alternative for Performance:** If you are trying to share massive packages or dependencies (like `node_modules` or a compiler cache) to speed up your build rather than actual job outputs, use **actions/cache** instead. Caching is built for raw performance speed, whereas artifacts are optimized for persisting precise data. 
 - **Passing Small Strings:** If you don't need to share an actual file, but just a variable or string output (like a version number or tag), use **Job Outputs** instead of artifacts.
 
-### **56. How do you configure OIDC with AWS in GitHub Actions?**
-**Answer:** Set `permissions: { id-token: write, contents: read }`, then use `aws-actions/configure-aws-credentials@v4` with `role-to-assume` to exchange the GitHub JWT for temporary AWS IAM credentials.
+### **53. How do you configure OIDC with AWS in GitHub Actions?**
+**Answer:** 
+
+Configuring **OpenID Connect (OIDC)** allows your **GitHub Actions** workflows to securely access **Amazon Web Services (AWS)** resources without managing long-lived AWS access keys. 
+
+The configuration requires two primary phases: setting up the identity trust inside AWS and updating your GitHub Actions workflow file.
+
+**Step 1: Configure AWS IAM**
+
+You need to establish GitHub as a trusted Identity Provider (IdP) in your AWS account and create a role that GitHub workflows can assume. 
+
+**A. Create the OIDC Identity Provider**
+
+1. Open the **AWS IAM Console**.
+2. In the left navigation pane, choose **Identity providers**, then click **Add provider**. 
+3. Select **OpenID Connect** and use the following values:
+   - **Provider URL:** `https://token.actions.githubusercontent.com`
+   - **Audience:** `sts.amazonaws.com` 
+4. Click **Add provider**. 
+
+**B. Create the IAM Role and Trust Policy**
+
+Create an IAM role that maps to the OIDC provider you just created. The most crucial part of this role is its **Trust Relationship**, which must restrict access strictly to your specific GitHub repository or organization. 
+
+Use the following trust policy framework (replace `ACCOUNT_ID`, `ORGANIZATION`, and `REPOSITORY` with your actual details): 
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::ACCOUNT_ID:oidc-provider/token.actions.githubusercontent.com"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+        },
+        "StringLike": {
+          "token.actions.githubusercontent.com:sub": "repo:ORGANIZATION/REPOSITORY:*"
+        }
+      }
+    }
+  ]
+}
+```
+
+*Note: The wildcard `:*` at the end of the `sub` claim allows any branch from that repository to assume the role. You can restrict it to a specific branch (e.g., `repo:ORGANIZATION/REPOSITORY:ref:refs/heads/main`) to maximize security.* 
+
+**C. Attach Permissions**
+
+Attach standard AWS IAM policies (e.g., AmazonS3FullAccess or custom least-privilege policies) directly to this role to control exactly what the GitHub runner can build or access.
+
+#### Step 2: Configure the GitHub Actions Workflow
+
+In your repository's workflow file (e.g., `.github/workflows/deploy.yml`), you must configure the workflow to request a JWT token and utilize the official AWS credential action. 
+
+1. **Add `id-token: write` Permissions:** GitHub needs permission to generate an OIDC token.
+2. **Use `aws-actions/configure-aws-credentials`:** Exchange the OIDC token for short-lived AWS session tokens.
+
+Here is a full workflow implementation:
+
+```yaml
+name: Deploy to AWS via OIDC
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  aws-deploy:
+    runs-on: ubuntu-latest
+
+    # Crucial block: permissions must be explicitly set for OIDC to function
+    permissions:
+      id-token: write   # Required to request the JWT token from GitHub
+      contents: read    # Required for actions/checkout
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/YourGitHubActionsIAMRole
+          aws-region: us-east-1 # Change to your target region
+
+      - name: Test AWS Authentication
+        run: |
+          aws sts get-caller-identity
+```
+
+#### Best Practices & Security
+
+- **Never hardcode the Role ARN:** Store your IAM Role ARN securely within **GitHub Secrets** or environment variables rather than typing it directly into your codebase. 
+- **Scrutinize the Sub Claim:** Ensure your AWS Trust Policy strictly checks the `repo:org/repo` pattern. Omitting the condition block could theoretically allow *any* GitHub Actions workflow on the platform to authenticate into your AWS account.
 
 ### **57. What is `needs` in GitHub Actions?**
 **Answer:** An attribute that defines sequential job dependencies (e.g., `needs: [build, test]` ensures the deploy job runs only after both build and test succeed).
