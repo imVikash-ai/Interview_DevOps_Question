@@ -1174,10 +1174,32 @@ To intercept secrets early in the software development lifecycle, Gitleaks is co
 - **Local Pre-commit Hooks:** Set up locally via tools like `pre-commit`, Gitleaks automatically stops a `git commit` execution if a developer accidentally attempts to stage a secret.
 - **CI/CD Pipelines:** Automated workflows can run **Gitleaks-Action** on pull requests or commits inside platforms like GitHub and GitLab. If a secret is uncovered, the pipeline fails loudly and blocks the deployment.
 
-### **50. What is Trivy?**
-**Answer:** A comprehensive vulnerability scanner for container images, filesystems, Git repos, and Kubernetes configurations.
+### **47. What is Trivy?**
+**Answer:** 
 
----
+Trivy is **a comprehensive, open-source security scanner created and maintained by Aqua Security.
+
+#### Key Capabilities
+
+Trivy detects security risks across modern cloud-native environments:
+- **Vulnerability Scanning (CVEs):** Checks OS packages (Alpine, Debian, Ubuntu, RHEL) and application dependencies (npm, PyPI, Maven, Go, NuGet) for known software glitches. 
+- **Misconfiguration Detection:** Identifies security flaws in Infrastructure-as-Code (IaC) files like Terraform, Dockerfiles, and Kubernetes manifests. 
+- **Secret Detection:** Uncovers hardcoded API keys, passwords, and tokens in code or configurations. 
+- **License Analysis:** Checks software licenses for legal and corporate compliance. 
+- **Software Bill of Materials (SBOM):** Generates and analyzes structured inventories of all software components and modules. 
+
+#### Targets
+
+Trivy can scan a wide range of artifacts and deployments: 
+
+- Container images (Docker, Podman)
+- Local filesystems and code repositories (GitHub, GitLab)
+- Kubernetes clusters
+- Virtual machine (VM) images and AWS environments 
+
+#### How It Works
+
+Trivy uses a simple Command Line Interface (CLI) that requires minimal setup. It downloads and caches an internal vulnerability database (`trivy-db`) to match installed packages against known security advisories. It can also be integrated directly into CI/CD pipelines like **GitHub Actions**, GitLab CI, and VS Code.
 
 ## 🟡 **Part 2: GitHub Actions, GitLab CI & Jenkins Deep Dive (Questions 51–100)**
 
