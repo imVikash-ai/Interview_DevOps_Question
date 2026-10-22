@@ -2150,14 +2150,159 @@ pipeline {
 | **Kubernetes CLI Plugin** | Providing `kubectl` and `helm` authentication contexts inside jobs. | Running Kubernetes CLI commands from Jenkins jobs. |
 | **Kubernetes Continuous Deploy** | Applying native manifest files directly to a cluster without needing a local `kubectl` binary. | Legacy freestyle or pipeline deployment steps. |
 
-### **70. What is Jenkins Shared Libraries?**
-**Answer:** A centralized Git repository of reusable Groovy code and pipeline steps that can be imported and executed across multiple independent Jenkinsfiles.
+### **65. What is Jenkins Shared Libraries?**
+**Answer:** 
 
-### **71. How do you prevent credentials leakage in Jenkins logs?**
-**Answer:** Use `withCredentials([string(credentialsId: '...', variable: 'API_TOKEN')]) { ... }` which automatically masks the secret value in console logs.
+A **Jenkins Shared Library** is a collection of reusable Groovy scripts stored in an external version control system (like GitHub) that can be imported and executed across multiple Jenkins Pipelines. It acts as a single source of truth for your CI/CD workflow logic, enforcing the **DRY (Don't Repeat Yourself)** principle at an organizational level. 
 
-### **72. What is Jenkins Multibranch Pipeline?**
-**Answer:** A Jenkins job type that automatically scans a Git repository, creates pipeline jobs for every detected branch with a `Jenkinsfile`, and deletes jobs for merged branches.
+Instead of copy-pasting complex stages or scripts into every individual `Jenkinsfile`, you write the logic once in a shared repository and dynamically call it whenever a build runs. 
+
+#### Directory Structure of a Library
+
+For Jenkins to recognize and load a shared library, the repository must follow a standardized directory structure. 
+
+```text
+(root)
+├── vars/          # Global variables and custom pipeline steps (Most Common)
+│   ├── buildApp.groovy
+│   └── deployApp.groovy
+├── src/           # Standard object-oriented Groovy class files (Advanced)
+│   └── com/mycorp/pipeline/Helper.groovy
+└── resources/     # Non-Groovy static files (JSON configs, Dockerfiles, XML templates)
+```
+
+- **`vars/`**: Contains scripts defining global variables and functions. Each `.groovy` file becomes a custom pipeline step or global variable named after the file itself. 
+- **`src/`**: Houses standard Groovy source code structured as object-oriented packages and classes, ideal for complex backend logic and helper utilities. 
+- **`resources/`**: Stores static files or templates that your custom steps can dynamically load using the `libraryResource` step.
+
+#### How It Works (Setup and Usage):
+
+#### 1. Configure the Library in Jenkins
+
+Administrators configure the library globally by navigating to **Manage Jenkins > System > Global Pipeline Libraries**. You provide a name for the library (e.g., `my-shared-library`), a default version or branch, and the Git repository URL. 
+
+#### 2. Import the Library into a Pipeline
+
+Developers reference the library at the very top of their `Jenkinsfile` using the `@Library` annotation. 
+
+```groovy
+@Library('my-shared-library') _
+
+pipeline {
+    agent any
+    stages {
+        stage('Build & Deploy') {
+            steps {
+                // Call a custom step defined in vars/buildApp.groovy
+                buildApp()
+            }
+        }
+    }
+}
+```
+
+#### Why Use Shared Libraries?
+
+- **Eliminates Code Duplication:** If you manage hundreds of microservices with similar technology stacks (e.g., Maven, Node.js), a shared library allows them to share the same build or deployment steps.
+- **Centralized Maintenance:** If a deployment tool changes or security compliance requires an extra linting step, you modify the code **once** in the shared library repository. Every pipeline using that library can inherit the update according to its configured version.
+- **Enforces Standards:** DevOps teams can mandate unified quality gates, automated testing procedures, and security scanning across all development teams.
+- **Empowers Declarative Pipelines:** While Jenkins Declarative Pipelines offer clean syntax, they restrict where developers can define native Groovy functions or methods inside the pipeline structure. Shared Libraries are the official, supported method to abstract custom logic away from Declarative code.
+
+### **66. How do you prevent credentials leakage in Jenkins logs?**
+**Answer:** 
+
+To prevent credentials leakage in Jenkins build logs, you must **implement a combination of proper string interpolation syntax, centralized secret management, automated scanning, and strict access controls**.
+
+While Jenkins provides built-in credentials masking, it is **only a secondary safeguard** designed to reduce accidental exposure. It is not foolproof and can be bypassed by encoding tricks (e.g., passing a secret through `base64`). 
+
+#### 1. Avoid Groovy String Interpolation (The Single-Quote Rule)
+
+The most common cause of credential leaks is using double quotes (`""`) in shell steps. 
+
+- **The Risk:** Double quotes cause **Groovy** to expand the variable before passing it to the system shell. This can expose the raw secret in process arguments or console logs. 
+- **The Solution:** Prefer **single quotes** (`''`) for shell blocks. This prevents Groovy from interpolating the secret before the command is passed to the shell, allowing the shell to expand the environment variable. However, avoid commands that print secrets or expose them in process arguments. 
+
+#### Bad Example (Potentially Leaks Secrets)
+
+```groovy
+sh "curl -u admin:${PASSWORD} https://example.com"
+```
+
+#### 2. Inject Secrets Using the Correct Helpers
+
+Never hardcode secrets or declare them as plain text inside your `environment` blocks. Store your secrets securely within the **Jenkins Credentials Store** and bind them at runtime. 
+
+- **For Declarative Pipelines:** Use the `credentials()` helper inside your `environment` block.
+- **For Scripted Pipelines:** Wrap execution within a `withCredentials()` block. This keeps the secret's lifecycle as short as possible.
+
+#### Example: Secure Credential Binding
+
+```groovy
+pipeline {
+    agent any
+    stages {
+        stage('Secure Deployment') {
+            steps {
+                withCredentials([string(credentialsId: 'my-api-token', variable: 'API_TOKEN')]) {
+                    // Single quotes ensure the shell expands the variable safely
+                    sh 'curl -H "Authorization: Bearer $API_TOKEN" https://example.com'
+                }
+            }
+        }
+    }
+}
+```
+
+#### 3. Use the Jenkins Secret Guard Plugin
+
+Install the **Jenkins Secret Guard Plugin**.
+
+- It analyzes pipeline configurations and `Jenkinsfile` content to proactively detect hardcoded strings, parameter defaults, and unmasked credential injections.
+- It allows administrators to run manual global audits or block unsafe builds automatically without saving raw sensitive strings to its reports. 
+
+#### 4. Integrate External Secret Managers
+
+For highly secure enterprise environments, consider using dedicated vaults such as HashiCorp Vault or AWS Secrets Manager instead of storing long-lived secrets directly in Jenkins.
+
+- Use plugins like the HashiCorp Vault Plugin.
+- Fetch dynamic, short-lived tokens or credentials only when needed using steps like `withVault`. This reduces the time secrets remain available to the Jenkins controller or build environment.
+
+#### 5. Enforce Console Log Governance
+
+If a secret accidentally bypasses masking, apply additional defensive measures to reduce the risk of exposure:
+
+- **Restrict Access:** Modify permissions so anonymous or unauthorized users cannot view raw build logs or job configurations.
+- **Turn Off Verbose Debugging:** Avoid enabling options like `set -x` or verbose tool logging flags that deliberately print environment states or command arguments to the console.
+- **Immediate Rotation:** Treat masking bypasses as potential security incidents. If a credential appears in a log, **rotate it immediately**, regardless of whether you think it was seen.
+
+### **67. What is Jenkins Multibranch Pipeline?**
+**Answer:**
+
+A **Jenkins Multibranch Pipeline** is a specialized project type that automatically discovers, manages, and executes workflows for multiple branches within a single source control repository (like GitHub, GitLab, or Bitbucket). 
+
+Instead of requiring you to manually create a new Jenkins job every time a developer creates a feature, release, or development branch, a Multibranch Pipeline centralizes all branches into a single project. 
+
+#### How It Works
+
+1. **The Jenkinsfile Requirement:** A Multibranch Pipeline relies on the concept of **Pipeline as Code**. You place a file named `Jenkinsfile` in the root directory of your repository. 
+2. **Repository Scanning:** You point the Jenkins Multibranch project at your repository URL. Jenkins automatically scans the repository.
+3. **Dynamic Job Creation:** For every branch (or pull request) where it detects a `Jenkinsfile`, Jenkins **automatically creates a dedicated sub-pipeline job**. 
+4. **Automatic Cleanup:** If a branch is merged and deleted from your remote repository, Jenkins can clean up or archive its corresponding pipeline job during a subsequent scan, depending on the configured orphaned-item strategy.
+
+#### Standard Pipeline vs. Multibranch Pipeline
+
+| Feature | Standard Pipeline | Multibranch Pipeline |
+|---|---|---|
+| **Scope** | Typically configured to build a particular branch (e.g., `main`). | Manages multiple branches in the repository dynamically. |
+| **Setup Effort** | Separate configuration may be required for each branch. | Automatically discovers branches after the initial repository configuration. |
+| **Pull Request (PR) Tracking** | Often requires additional configuration to track incoming PRs. | Supports PR discovery and validation through compatible branch-source plugins. |
+| **Configuration Location** | Often relies on configuration specified directly in the Jenkins UI or a `Jenkinsfile`. | Uses the `Jenkinsfile` found in each branch. |
+
+#### Core Benefits
+
+- **Environment-Specific Deployments:** You can write a single `Jenkinsfile` that behaves differently depending on the branch name using conditional logic (the `when` directive). For instance, code pushed to `develop` can deploy to a staging server, while code merged to `main` deploys to production. 
+- **Isolated Blast Radii:** Changes made to a `Jenkinsfile` inside a feature branch stay within that branch's pipeline until merged. Developers can safely test pipeline modifications without directly changing the main branch's build configuration.
+- **Built-in Environment Variables:** Jenkins natively injects variables like `BRANCH_NAME` or `CHANGE_ID` (for pull requests) into the environment, making it easy to tag Docker images or name target deployment environments dynamically.
 
 ### **73. What is Blue Ocean in Jenkins?**
 **Answer:** A modern, visual user interface for Jenkins designed to visualize complex multi-stage pipeline executions and failure points.
