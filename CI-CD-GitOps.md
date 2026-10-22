@@ -1439,8 +1439,68 @@ While both features aim to reduce duplication, they target different scopes:
 | **Secrets** | Cannot read standard secrets directly; must be passed as `inputs` or env vars | Can inherit or be explicitly passed secrets |
 | **Logging** | Collapses multiple internal steps into a single log entry | Provides distinct, real-time logging for each job and step |
 
-### **55. How do you share files between jobs in GitHub Actions?**
-**Answer:** Since jobs run on independent virtual machines, files must be uploaded as artifacts using `actions/upload-artifact` in Job A and downloaded using `actions/download-artifact` in Job B.
+### **52. How do you share files between jobs in GitHub Actions?**
+**Answer:** 
+
+To share files between different jobs in GitHub Actions, you must **use workflow artifacts**. Because each job executes on an isolated, completely separate virtual machine, they cannot naturally access the same local filesystem. 
+
+The standard approach uses two official GitHub Actions sequentially: 
+
+1. **`actions/upload-artifact`**: Saves files or directories from the first job. 
+2. **`actions/download-artifact`**: Retrieves those files in a subsequent job.
+
+#### Core Workflow Strategy
+
+To pass files successfully, your second job must explicitly depend on the first job using the **`needs` keyword**. This forces the jobs to run sequentially rather than in parallel.
+
+Here is a complete, production-ready example of how to configure your workflow:
+
+```yaml
+name: Share Files Between Jobs
+
+on: [push]
+
+jobs:
+  # Job 1: Generates the file and uploads it
+  build_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate a build file
+        run: |
+          mkdir -p output
+          echo "Hello from the build job!" > output/result.txt
+
+      - name: Upload the file as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-assets          # Unique name for the artifact
+          path: output/result.txt     # Path to file or directory to upload
+          retention-days: 1           # Optional: clear it quickly to save storage
+
+  # Job 2: Waits for Job 1, downloads the file, and processes it
+  deploy_job:
+    runs-on: ubuntu-latest
+    needs: build_job                  # Essential: waits for build_job to complete
+    steps:
+      - name: Download the uploaded artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-assets          # Must exactly match the upload name
+          path: downloaded-output/    # Destination directory on the new runner
+
+      - name: Verify and use the file
+        run: |
+          cat downloaded-output/result.txt
+```
+
+#### Key Considerations
+
+- **Artifact Lifecycle:** Artifacts are immutable data packets. The download action automatically checks the integrity of the files by calculating and verifying SHA256 hashes against the uploaded version. 
+- **Alternative for Performance:** If you are trying to share massive packages or dependencies (like `node_modules` or a compiler cache) to speed up your build rather than actual job outputs, use **actions/cache** instead. Caching is built for raw performance speed, whereas artifacts are optimized for persisting precise data. 
+- **Passing Small Strings:** If you don't need to share an actual file, but just a variable or string output (like a version number or tag), use **Job Outputs** instead of artifacts.
 
 ### **56. How do you configure OIDC with AWS in GitHub Actions?**
 **Answer:** Set `permissions: { id-token: write, contents: read }`, then use `aws-actions/configure-aws-credentials@v4` with `role-to-assume` to exchange the GitHub JWT for temporary AWS IAM credentials.
