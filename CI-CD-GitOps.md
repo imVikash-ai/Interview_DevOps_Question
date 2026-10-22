@@ -886,8 +886,54 @@ Each project is assigned exactly one quality gate at a time. SonarQube organizes
 - **CI/CD Pipeline Failure:** Pipelines (like Jenkins or GitHub Actions) can intercept the quality gate output via Web APIs or plugins to halt broken code from hitting production.
 - **The "Fudge Factor":** To prevent minor edits from disproportionately tanking a status, SonarQube includes a mechanism that ignores coverage and duplication requirements on small adjustments until a change contains at least 20 new lines.
 
-### **37. What is Code Coverage?**
-**Answer:** The percentage of application source code executed when automated test suites run (measured via tools like JaCoCo, Istanbul, pytest-cov).
+### **36. What is Code Coverage?**
+**Answer:** 
+
+**Code coverage** is **a software testing metric that measures the percentage of source code executed when a test suite runs**. It is a white-box testing technique used to locate untested sections of a program and guide the creation of new tests. 
+
+#### How It Is Calculated
+
+Code coverage is calculated by dividing the number of code elements executed during testing by the total number of code elements, multiplied by 100: 
+
+\[
+\text{Code Coverage}=\left(\frac{\text{Executed Code Elements}}{\text{Total Code Elements}}\right)\times 100
+\]
+
+
+
+#### Common Types of Metrics
+
+Coverage can be tracked across several structural dimensions:
+
+- **Statement Coverage:** The percentage of individual programming statements executed.
+- **Line Coverage:** The percentage of physical source code lines run by the tests.
+- **Branch Coverage:** The percentage of control flow branches (such as `if/else` paths or loops) tested for both true and false outcomes.
+- **Function/Method Coverage:** The percentage of defined functions or methods called during the test run.
+- **Condition Coverage:** The percentage of individual boolean sub-expressions evaluated as both true and false. 
+
+#### Common Tools by Language
+
+Developers use specialized tools and profilers to instrument code and generate coverage reports: 
+
+- **Java:** JaCoCo, Cobertura, Clover
+- **JavaScript / TypeScript:** Istanbul / NYC
+- **Python:** Coverage.py
+- **PHP:** PHPUnit
+- **Ruby:** SimpleCov
+- **C / C++:** Parasoft C/C++test, Coco 
+
+#### Code Coverage vs. Test Coverage
+
+Though often used interchangeably, they measure different things: 
+
+- **Code Coverage:** Measures structural execution of the code (statements, branches, lines).
+- **Test Coverage:** Measures functional behavior against business requirements, user scenarios, and product specifications. 
+
+#### Limitations and Best Practices
+
+- **High coverage does not guarantee bug-free software:** Code can execute without validating that the output or logic is actually correct. 
+- **Diminishing returns:** Aiming for 100% coverage across a massive codebase can be costly and lead to brittle, low-value tests; a target of around **80%** is standard for general applications, while safety-critical industries (like avionics or automotive) may require strict 100% compliance. 
+- **Consensus on forum discussions:** As noted by developers on **Stack Overflow**, relying solely on line counts is a trap; true safety requires evaluating condition, branch, and parameter edge cases rather than chasing a raw percentage.
 
 ### **38. What is Pipeline as Code?**
 **Answer:** Defining CI/CD workflows, build steps, and environment targets in declarative version-controlled files (`.github/workflows/*.yml`, `.gitlab-ci.yml`, `Jenkinsfile`).
