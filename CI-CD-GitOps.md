@@ -1829,11 +1829,82 @@ Behind the scenes, the YAML architecture interfaces with the broader **GitLab Ar
 4. **Runner Execution:** External GitLab Runner agents constantly poll GitLab's API. A runner picks up a pending job, spins up the specified Docker environment (`image:`), clones the code, and runs the `script` arrays.
 5. **Artifact Consolidation:** Any file arrays defined under `artifacts:` are zipped up and shipped to an object storage bucket (like AWS S3 or MinIO) so they can be passed to subsequent jobs.
 
-### **62. What are GitLab CI Stages?**
-**Answer:** Sequential execution blocks (e.g., `stages: [build, test, deploy]`). All jobs within the same stage run concurrently; the next stage starts only after all jobs in the current stage succeed.
-
 ### **63. What is GitLab CI `rules` keyword?**
-**Answer:** A powerful conditional syntax determining whether a job is included in the pipeline based on branch names, commit messages, file changes, or pipeline variables.
+**Answer:** 
+
+In GitLab CI/CD, the **`rules`** keyword is **a powerful feature used to conditionally include or exclude jobs in a pipeline**. It evaluates a list of conditions sequentially, and the first matching rule determines whether the job runs and what properties it has. 
+
+It was introduced to replace the older, more limited `only` and `except` keywords, allowing you to construct complex logic using Git branches, environment variables, pipeline trigger sources, and file modifications.
+
+#### How `rules` Evaluation Works
+
+1. Rules are evaluated **top-to-bottom**. 
+2. Evaluation stops at the **first match**. 
+3. If a match is found, the job is either included or excluded based on the rule's parameters. 
+4. If **no rules match**, the job defaults to `when: never` and is excluded from the pipeline. 
+
+#### Core Clause Keywords
+
+You can build rules using three primary condition clauses. 
+
+- **`if`**: Evaluates conditional expressions using CI/CD variables (e.g., matching a branch name, checking a commit tag, or validating custom environment variables). 
+- **`changes`**: Triggers a job only if specific files or folders have been modified in the commit. 
+- **`exists`**: Triggers a job if specific files exist within the repository.
+
+#### Action Attributes (When a Match Occurs)
+
+When a clause evaluates to true, you can alter the job's behavior using these modifiers.
+
+- **`when`**: Dictates the execution state. Common values include:
+  - `on_success` (Default): Run the job automatically if previous stages succeeded.
+  - `never`: Do not include this job in the pipeline.
+  - `manual`: Require a user to click "Play" in the GitLab UI to start the job.
+  - `always`: Run the job regardless of the status of earlier stages. 
+- **`allow_failure`**: A boolean (`true`/`false`) determining if a failing job should stop the pipeline or let it continue. 
+- **`variables`**: Allows you to override or define specific CI/CD variables *only* if that exact rule matches. 
+
+#### Code Examples:
+
+#### 1. Basic Conditional Execution
+
+This test job runs automatically on Merge Requests, requires manual approval on the `main` branch, and never runs anywhere else.
+
+```yaml
+test-job:
+  stage: test
+  script:
+    - npm run test
+  rules:
+    # 1. If it's a merge request, run automatically
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+
+    # 2. If it's the main branch, make it a manual step
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
+
+    # 3. Fallback: If neither matches, the job is skipped (when: never)
+```
+
+#### 2. Filtering by File Changes
+
+This build job will only run if a file inside the `frontend/` directory changes, or if a user manually forces the pipeline via the GitLab Web UI.
+
+```yaml
+build-frontend:
+  stage: build
+  script:
+    - cd frontend && npm run build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - changes:
+        - "frontend/**/*"
+```
+
+#### Critical Constraints
+
+- **No mixing:** You cannot combine `rules` with `only` or `except` in the same job; attempting to do so will trigger a pipeline syntax linter error.
+- **Workflow Rules:** Beyond individual jobs, you can use `workflow: rules` at the root level of your `.gitlab-ci.yml` file to decide whether the **entire pipeline** should be created or blocked.
 
 ### **64. What is a GitLab Runner?**
 **Answer:** An open-source application that executes pipeline jobs defined in `.gitlab-ci.yml`, supporting Docker, Kubernetes, SSH, and Shell executors.
