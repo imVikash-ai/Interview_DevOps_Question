@@ -1072,7 +1072,7 @@ Instead of manually deploying applications or using traditional push-based CI/CD
 - **Role-Based Access Control (RBAC):** It integrates with SSO (Single Sign-On) providers to control who can view or sync specific applications.
 - **Easy Rollbacks:** Because every change is tied to a Git commit, rolling back an application to a previous working state is as simple as reverting a Git commit.
 
-### **46. What is FluxCD?**
+### **43. What is FluxCD?**
 **Answer:**
 
 Flux CD is **an open-source, CNCF-graduated GitOps tool for Kubernetes**. It keeps your live cluster state automatically synchronized with configuration files stored in Git repositories, OCI artifacts, or Helm buckets. 
@@ -1090,8 +1090,32 @@ Flux CD is **an open-source, CNCF-graduated GitOps tool for Kubernetes**. It kee
 - **Declarative & Auditable**: Every infrastructure or application change goes through a Git pull request history.
 - **Lightweight & Modular**: Built on native Kubernetes custom resource definitions (CRDs), relying directly on standard Kubernetes RBAC.
 
-### **47. What is Tekton?**
-**Answer:** A cloud-native Kubernetes framework for building flexible, serverless CI/CD execution pipelines using Kubernetes Custom Resource Definitions (Tasks, Pipelines).
+### **44. What is Tekton?**
+**Answer:**
+
+**Tekton** is **an open-source, vendor-neutral framework for creating continuous integration and continuous deployment (CI/CD) systems that runs natively on Kubernetes**. Managed by the **Continuous Delivery Foundation (CDF)** and hosted as an incubating project by the Cloud Native Computing Foundation (CNCF), it allows developers to build, test, and deploy applications across multiple cloud providers and on-premises infrastructure.
+
+#### Core Concepts of Tekton (CI/CD Framework)
+
+Tekton defines its building blocks as Kubernetes Custom Resources (CRDs), meaning pipelines are written and managed as standard YAML files inside your cluster:
+
+- **Step:** The smallest, atomic unit of work (e.g., compiling code, running tests, or building a container image). Each step runs inside its own isolated container.
+
+- **Task:** A reusable sequence of one or more steps that perform a specific build job.
+
+- **Pipeline:** A collection of tasks arranged in a specific order to define a full CI/CD workflow.
+
+- **TaskRun & PipelineRun:** The runtime execution instances that trigger and monitor a specific Task or Pipeline.
+
+- **Workspaces:** Shared storage (such as a PersistentVolumeClaim) that allows data to be passed safely between different tasks in a pipeline.
+
+#### Key Ecosystem Components
+
+- **Tekton Triggers:** Listens for external events (like a GitHub pull request or code push) and automatically kicks off pipeline runs.
+- **Tekton CLI (`tkn`):** A command-line tool built on top of `kubectl` to manage Tekton resources.
+- **Tekton Dashboard:** A web-based graphical interface for viewing pipeline runs and logs.
+- **Tekton Hub & Catalog:** Repositories of pre-made, community-contributed tasks and pipelines.
+- **Pipelines-as-Code:** Allows developers to define pipelines directly inside a `.tekton/` folder in their source code repository.
 
 ### **48. What is Spinnaker?**
 **Answer:** An open-source multi-cloud continuous delivery platform developed by Netflix for managing complex, multi-stage deployment pipelines across AWS, GCP, and Kubernetes.
