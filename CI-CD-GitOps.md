@@ -767,11 +767,31 @@ SBOMs are typically generated, shared, and stored using standardized, machine-re
 - **Regulatory and Legal Compliance:** Government mandates (such as U.S. Executive Order 14028) and international standards (like the EU Cyber Resilience Act) increasingly require SBOMs for software sold to public or enterprise sectors.
 - **License Auditing:** It prevents legal and intellectual property violations by making open-source license obligations transparent.
 
-### **32. What is Sigstore Cosign?**
-**Answer:** An open-source tool for cryptographically signing and verifying container images in OCI registries using keyless OIDC tokens.
+### **32. What is the SLSA Framework?**
+**Answer:** 
 
-### **33. What is the SLSA Framework?**
-**Answer:** Supply-chain Levels for Software Artifacts—a security framework defining standards for build platform isolation, non-falsifiable provenance, and source integrity.
+The **SLSA Framework** (pronounced "salsa") stands for **Supply-chain Levels for Software Artifacts**. It is an industry-consensus, open-source security framework maintained by the Open Source Security Foundation (OpenSSF) to improve software supply chain integrity, prevent tampering, and establish trust in software builds.
+
+#### Core Goals
+
+- **Prevent Tampering:** Protect software from unauthorized modifications or injection attacks from source code all the way to deployment.
+- **Ensure Provenance:** Generate and verify tamper-resistant metadata that shows *how*, *where*, and *by whom* a software artifact was built.
+- **Provide a Common Language:** Give software producers, consumers, and security teams a standardized checklist and metric to evaluate supply chain safety.
+
+#### SLSA Build Levels
+
+The framework uses progressive levels of security assurance to help organizations adopt practices incrementally: 
+
+- **Level 0 (No Protection / Ad Hoc):** No guaranteed security controls or automated provenance; builds typically happen on local or unmanaged machines. 
+- **Level 1 (Basic Provenance):** The build platform automatically generates provenance metadata (such as source repository, build steps, and cryptographic hashes) to establish basic traceability. 
+- **Level 2 (Hosted Build Platform & Signed Provenance):** Builds run on a hosted or dedicated CI/CD platform, and provenance is cryptographically signed to make post-build tampering detectable. 
+- **Level 3 (Hardened Builds):** Requires isolated, non-falsifiable, and tamper-resistant build platforms that protect against privilege escalation, credential theft, and pipeline compromise. 
+
+#### Who It Is For
+
+- **Software Producers:** To harden build pipelines, prove artifact integrity, and build customer trust.
+- **Software Consumers:** To cryptographically verify the origin and safety of third-party packages and dependencies before importing them.
+- **Infrastructure & Platform Providers:** To build native security controls (like automated signing and isolation) directly into CI/CD environments.
 
 ### **34. What is Hermetic Build?**
 **Answer:** A build executed in a sandboxed container with zero outbound internet access, ensuring all dependencies are pre-fetched and cryptographically hashed for 100% reproducibility.
