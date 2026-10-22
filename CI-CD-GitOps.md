@@ -1201,10 +1201,65 @@ Trivy can scan a wide range of artifacts and deployments:
 
 Trivy uses a simple Command Line Interface (CLI) that requires minimal setup. It downloads and caches an internal vulnerability database (`trivy-db`) to match installed packages against known security advisories. It can also be integrated directly into CI/CD pipelines like **GitHub Actions**, GitLab CI, and VS Code.
 
-## 🟡 **Part 2: GitHub Actions, GitLab CI & Jenkins Deep Dive (Questions 51–100)**
+### **48. What is a GitHub Actions Workflow?**
+**Answer:**
 
-### **51. What is a GitHub Actions Workflow?**
-**Answer:** An automated process defined in YAML under `.github/workflows/` composed of one or more jobs triggered by events (`push`, `pull_request`, `schedule`).
+A **GitHub Actions workflow** is **a configurable, automated process that executes one or more jobs to automate software development tasks**. It is a core component of **GitHub Actions**, GitHub's built-in Continuous Integration and Continuous Delivery (CI/CD) platform.
+
+Workflows are defined using **YAML files** and must be stored in a specific directory in your repository: `.github/workflows/`.
+
+#### Core Components of a Workflow
+
+To understand how a workflow operates, it helps to look at its core architecture: 
+
+- **Events (Triggers):** The specific activity that kicks off the workflow. This can be an internal GitHub event (like a code `push` or a `pull_request` creation), a cron-based `schedule`, or a manual button click (`workflow_dispatch`).
+- **Jobs:** A set of execution steps. By default, multiple jobs inside a workflow run in parallel, but you can configure them to run sequentially if one depends on another. 
+- **Runners:** The server or virtual machine that executes the jobs. GitHub provides hosted runners (Linux, Windows, macOS), or you can host your own. 
+- **Steps:** Individual tasks within a job that run sequentially. A step can either run a raw shell command or invoke an **Action**. 
+- **Actions:** Pre-built, reusable applications or scripts that perform complex, repetitive tasks (e.g., setting up a specific version of Node.js or checking out code from your repository). You can find thousands of these in the **GitHub Marketplace**.
+
+#### Basic Workflow Example
+
+Below is a simple workflow configuration file (e.g., `ci.yml`) that automatically tests code every time a developer pushes changes to the `main` branch: 
+
+**YAML**
+
+```yaml
+name: Node.js CI
+
+# The event triggering the workflow
+on:
+  push:
+    branches: [ main ]
+
+# The automation tasks
+jobs:
+  test-code:
+    runs-on: ubuntu-latest # The runner environment
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4 # A reusable GitHub Action
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install # Raw command
+
+      - name: Run unit tests
+        run: npm test
+```
+
+#### Common Use Cases
+
+Developers use workflows to move manual processes into autopilot: 
+
+1. **CI/CD Pipelines:** Automatically compiling code, running tests, and deploying applications to production or staging environments upon code merges.
+2. **Code Quality Controls:** Running security scanners (like SAST/DAST) or code linters against Pull Requests to catch errors early. 
+3. **Repository Management:** Automating administrative tasks, such as adding specific labels to newly opened issues or sending Slack notifications when a build fails.
 
 ### **52. What is a GitHub Actions Job vs Step?**
 **Answer:** A Job is a collection of sequential steps executed on the same runner environment. Steps are individual tasks (running shell scripts or actions). Multiple jobs run in parallel by default.
