@@ -1712,11 +1712,60 @@ jobs:
       - run: npm test
 ```
 
-### **59. What are GitHub Actions Environments and Protection Rules?**
-**Answer:** Deployment targets (e.g., `production`) configured with required reviewers, wait timers, and branch protection rules that must be approved before deployment jobs execute.
+### **56. How do you securely pass secrets to Reusable Workflows?**
+**Answer:** 
 
-### **60. How do you securely pass secrets to Reusable Workflows?**
-**Answer:** Use `secrets: inherit` in the calling workflow to pass all caller secrets, or explicitly pass specific secrets via `secrets: { DB_PASSWORD: ${{ secrets.DB_PASS }} }`.
+You can securely pass secrets to GitHub Actions reusable workflows either by **explicitly mapping individual secrets or by using automatic inheritance** (`secrets: inherit`). 
+
+#### Option 1: Explicitly Pass Secrets (Recommended for Security)
+
+Explicitly mapping secrets gives you a narrow contract where only required secrets are shared with the called workflow. 
+
+#### Step 1: Declare Secrets in the Reusable Workflow
+
+In `.github/workflows/reusable.yml`, declare the expected secrets under `on.workflow_call.secrets`.
+
+```yaml
+on:
+  workflow_call:
+    secrets:
+      API_KEY:
+        required: true
+      DATABASE_URL:
+        required: false
+```
+
+#### Step 2: Pass Secrets from the Caller Workflow
+
+Pass the secrets using the `secrets:` keyword within the job block. 
+
+```yaml
+jobs:
+  call-workflow:
+    uses: ./.github/workflows/reusable.yml
+    secrets:
+      API_KEY: ${{ secrets.PROD_API_KEY }}
+      DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+```
+
+#### Option 2: Inherit All Secrets (`secrets: inherit`)
+
+If you want to pass all available secrets from the caller to the reusable workflow automatically without listing them one by one, use the `secrets: inherit` keyword. 
+
+```yaml
+jobs:
+  call-workflow:
+    uses: ./.github/workflows/reusable.yml
+    secrets: inherit
+```
+
+**Note:** Use `secrets: inherit` only when you trust the called workflow to access every secret available in the calling repository.
+
+#### Key Security and Behavior Rules
+
+- **No Automatic Propagation:** Unlike regular environment variables, ordinary secrets are *not* automatically available inside a reusable workflow unless explicitly passed or inherited.
+- **Environment Secrets:** If a job inside a reusable workflow specifies an `environment:`, environment-level secrets can override an identically named secret passed from the caller. The environment name itself must be defined at the job level *inside* the reusable workflow, not the caller job. 
+- **Log Masking:** GitHub Actions automatically masks secret values in workflow logs, provided they remain properly referenced through the `${{ secrets.SECRET_NAME }}` context.
 
 ### **61. What is the `.gitlab-ci.yml` architecture?**
 **Answer:** A declarative configuration file defining stages, jobs, scripts, and artifact handling natively integrated into GitLab repositories and container registries.
