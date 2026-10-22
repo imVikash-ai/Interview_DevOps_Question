@@ -186,7 +186,7 @@ Pipeline caching stores reusable dependency files (like `node_modules` or Maven 
   - **Pipeline Caching:** Optional and non-critical; if a cache misses, the pipeline will still succeed by downloading the dependencies fresh.
   - **Artifact Storage:** Required and critical; if an artifact fails to generate or pass to a deployment stage, the pipeline usually fails. 
 
-## Quick Comparison
+#### Quick Comparison
 
 | **Feature** | **Pipeline Caching** | **Artifact Storage** |
 |---|---|---|
@@ -565,7 +565,7 @@ Modern software relies heavily on external code, where up to 80% to 90% of an ap
 - **Transitive Dependency Tracking:** Maps out "dependencies of dependencies" that are buried deep within an application's architecture.
 - **Software Bill of Materials (SBOM) Generation:** Produces a comprehensive, machine-readable inventory of every component, library, and module present in the software. 
 
-## How SCA Works
+#### How SCA Works
 
 1. **Discovery:** The tool scans project configuration files (like `package.json`, `pom.xml`, or `requirements.txt`), container images, or compiled binaries.
 2. **Comparison:** It matches the discovered components and version numbers against public and proprietary vulnerability databases.
@@ -852,8 +852,39 @@ While related, BuildKit provides two completely different mechanisms to optimize
 | **Primary Use Case** | Skipping entire unchanged processes. | Speeding up compiler caches (`GOCACHE`) or package restorations (`npm install`, `pip`, NuGet). |
 | **Final Image Size** | Cached layers directly build the structure of the final image. | Mount contents are **never committed** to the final image, keeping it clean. |
 
-### **36. What is SonarQube Quality Gate?**
-**Answer:** A policy enforcing code quality thresholds (e.g., coverage $\ge 80\%$, 0 critical vulnerabilities) that blocks PR merges if not satisfied.
+### **35. What is SonarQube Quality Gate?**
+**Answer:**
+
+A **SonarQube Quality Gate** is **a configurable checkpoint that enforces a strict quality policy**, answering one fundamental question before code advances: **"Is my project ready for release?"** It consists of a set of Boolean conditions based on code metrics. If the code meets these thresholds, the project **Passes**; if even a single condition is missed, it **Fails**. 
+
+Integrating Quality Gates into a CI/CD pipeline acts as a circuit breaker, allowing teams to automatically block pull requests or fail build deployments when non-compliant code is detected.
+
+#### Core Components & Key Metrics
+
+Quality gate conditions are evaluated against specific metrics calculated during a scan. These metrics can target either **overall code** or focus purely on **new code**: 
+
+- **Reliability & Security:** Ratings (from A to E) based on the severity of detected bugs or vulnerabilities. 
+- **Maintainability:** Ratings determined by technical debt ratios and code smells. 
+- **Test Coverage:** Ensuring that a sufficient percentage of code lines are backed by automated tests. 
+- **Code Duplication:** Limiting the density of copied or repeated code blocks. 
+- **Security Hotspots:** Tracking the status of reviewed security-sensitive pieces of code. 
+
+#### Built-in vs. Custom Quality Gates
+
+Each project is assigned exactly one quality gate at a time. SonarQube organizes these into two main types: 
+
+1. **Built-in Gates (Read-Only):**
+   - **"Sonar way"**: The platform default. It champions the **"Clean As You Code"** philosophy, enforcing high standards on *new code* (e.g., ≥ 80% coverage, ≤ 3% duplication, and "A" ratings for bugs/vulnerabilities) so developers focus on keeping incremental changes clean rather than drowning in legacy tech debt.
+   - **"Sonar way for AI Code"**: Tailored with specialized validation protocols for projects leveraging generative or agentic AI.
+2. **Custom Quality Gates:**
+
+   With appropriate administrator privileges, organizations can create custom configurations. This is helpful because different technologies have different demands; for example, an internal core Java library might require stricter code coverage criteria than a rapid front-end web project. 
+
+#### Platform Feedback & Automation
+
+- **Pull Request Decoration:** The quality status links back to repository hosting services (like GitHub or GitLab), visually flagging code health before a merge.
+- **CI/CD Pipeline Failure:** Pipelines (like Jenkins or GitHub Actions) can intercept the quality gate output via Web APIs or plugins to halt broken code from hitting production.
+- **The "Fudge Factor":** To prevent minor edits from disproportionately tanking a status, SonarQube includes a mechanism that ignores coverage and duplication requirements on small adjustments until a change contains at least 20 new lines.
 
 ### **37. What is Code Coverage?**
 **Answer:** The percentage of application source code executed when automated test suites run (measured via tools like JaCoCo, Istanbul, pytest-cov).
