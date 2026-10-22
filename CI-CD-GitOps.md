@@ -1829,7 +1829,7 @@ Behind the scenes, the YAML architecture interfaces with the broader **GitLab Ar
 4. **Runner Execution:** External GitLab Runner agents constantly poll GitLab's API. A runner picks up a pending job, spins up the specified Docker environment (`image:`), clones the code, and runs the `script` arrays.
 5. **Artifact Consolidation:** Any file arrays defined under `artifacts:` are zipped up and shipped to an object storage bucket (like AWS S3 or MinIO) so they can be passed to subsequent jobs.
 
-### **63. What is GitLab CI `rules` keyword?**
+### **58. What is GitLab CI `rules` keyword?**
 **Answer:** 
 
 In GitLab CI/CD, the **`rules`** keyword is **a powerful feature used to conditionally include or exclude jobs in a pipeline**. It evaluates a list of conditions sequentially, and the first matching rule determines whether the job runs and what properties it has. 
@@ -1906,8 +1906,38 @@ build-frontend:
 - **No mixing:** You cannot combine `rules` with `only` or `except` in the same job; attempting to do so will trigger a pipeline syntax linter error.
 - **Workflow Rules:** Beyond individual jobs, you can use `workflow: rules` at the root level of your `.gitlab-ci.yml` file to decide whether the **entire pipeline** should be created or blocked.
 
-### **64. What is a GitLab Runner?**
-**Answer:** An open-source application that executes pipeline jobs defined in `.gitlab-ci.yml`, supporting Docker, Kubernetes, SSH, and Shell executors.
+### **59. What is a GitLab Runner?**
+**Answer:** 
+
+A **GitLab Runner** is an open-source, Go-based application that executes the CI/CD (Continuous Integration/Continuous Delivery) pipeline jobs defined in your `.gitlab-ci.yml` configuration files.
+
+#### How It Works
+
+- **The Division of Labor:** GitLab itself does not compile code, run tests, or deploy applications; it stores code, reads pipeline instructions, and displays the UI results. The **GitLab Runner** acts as the worker agent that picks up jobs and executes them. 
+- **Polling Model:** The runner connects to your GitLab instance and actively polls for jobs matching its configuration. 
+- **Execution:** Once assigned a job, the runner clones or downloads your project repository, executes the shell commands or container scripts step by step, and sends the logs and status back to GitLab. 
+
+#### Key Concepts:
+
+#### 1. Executors
+
+An executor defines the environment where a job actually runs. Common executors include:
+
+- **Docker / Docker Windows:** Runs jobs inside isolated containers, making it a popular choice for clean, reproducible environments.
+- **Kubernetes:** Spawns pods across a cluster for large-scale, autoscaling workloads.
+- **Shell:** Runs commands directly on the host machine where the runner is installed.
+- **SSH / VirtualBox / Custom:** Connects to external servers or custom drivers. 
+
+#### 2. Runner Scopes (Access Levels)
+
+- **Instance / Shared Runners:** Available to all projects across a GitLab instance.
+- **Group Runners:** Shared across multiple projects within a specific group.
+- **Project Runners:** Dedicated to a single, specific project. 
+
+#### 3. Host Management
+
+- **GitLab-Hosted (Shared) Runners:** Managed directly by GitLab on cloud infrastructure (Linux, macOS, Windows, GPU) with usage limits.
+- **Self-Managed Runners:** Installed and hosted by you on your own servers, virtual machines, bare-metal hardware, or local Kubernetes clusters for full control, custom hardware (like GPUs), or private network access.
 
 ### **65. What is GitLab Auto DevOps?**
 **Answer:** A pre-configured CI/CD pipeline template that automatically detects programming languages, builds container images, executes security tests, and deploys to Kubernetes without manual pipeline coding.
