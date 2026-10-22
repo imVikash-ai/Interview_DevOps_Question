@@ -2304,7 +2304,7 @@ Instead of requiring you to manually create a new Jenkins job every time a devel
 - **Isolated Blast Radii:** Changes made to a `Jenkinsfile` inside a feature branch stay within that branch's pipeline until merged. Developers can safely test pipeline modifications without directly changing the main branch's build configuration.
 - **Built-in Environment Variables:** Jenkins natively injects variables like `BRANCH_NAME` or `CHANGE_ID` (for pull requests) into the environment, making it easy to tag Docker images or name target deployment environments dynamically.
 
-### **73. What is Blue Ocean in Jenkins?**
+### **68. What is Blue Ocean in Jenkins?**
 **Answer:** 
 
 **Blue Ocean** is a modern, visual user experience (UI) plugin for Jenkins designed to make Continuous Delivery (CD) pipelines easier to create, read, and troubleshoot. 
@@ -2322,105 +2322,701 @@ Instead of requiring you to manually create a new Jenkins job every time a devel
 - **Maintenance:** It only receives selective patches for critical security issues or major bugs. 
 - **Recommended Alternatives:** For pipeline visualization, the Jenkins community recommends using the **Pipeline Graph View** plugin or the **Pipeline: Stage View** plugin.
 
-### **74. What is GitLab CI `cache` vs `artifacts`?**
-**Answer:** `cache` is used to speed up subsequent runs by caching project dependencies across pipelines; `artifacts` are files passed between sequential stages within the same pipeline.
+### **69. What is GitHub Actions `hashFiles()` function?**
+**Answer:** 
 
-### **75. What is GitHub Actions `hashFiles()` function?**
-**Answer:** Computes an MD5/SHA256 hash of matching files (e.g., `hashFiles('**/package-lock.json')`) used as a dynamic cache key to invalidate dependencies when lockfiles change.
+The `hashFiles()` function in GitHub Actions **computes a single, combined SHA-256 hash for one or more files matching a glob pattern in your repository**. 
 
-### **76. What is GitHub Actions `workflow_dispatch`?**
-**Answer:** An event trigger allowing users to trigger workflows manually from the GitHub UI or API with customizable input parameters.
+#### How It Works
 
-### **77. What is GitHub Actions `repository_dispatch`?**
-**Answer:** An HTTP webhook trigger allowing external systems (e.g., third-party webhooks, custom microservices) to trigger a GitHub Actions workflow with a JSON payload.
+- **File Matching:** It accepts file path patterns (such as `**/package-lock.json` or `**/lockfiles`) and finds all matching files relative to the workspace.
+- **Hashing:** It reads the contents of the matched files, hashes them with SHA-256, and combines those hashes into a single resulting string.
+- **Common Use Case:** It is most frequently used with the `actions/cache` action to automatically invalidate and generate a new cache key whenever dependency files (like `package-lock.json`, `requirements.txt`, or `pom.xml`) change.
 
-### **78. How do you debug GitHub Actions workflows in real time?**
-**Answer:** Enable runner diagnostic logging by setting repository secrets `ACTIONS_RUNNER_DEBUG=true` and `ACTIONS_STEP_DEBUG=true`, or use tools like `tmate` for interactive SSH debugging.
+#### Example Usage
 
-### **79. What is a Jenkins Blue-Green deployment plugin?**
-**Answer:** Plugins or custom pipeline scripts that orchestrate swapping load balancer target groups or updating DNS records between Blue and Green environments.
+```yaml
+- name: Cache dependencies
+  uses: actions/cache@v4
+  with:
+    path: ~/.npm
+    key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+    restore-keys: |
+      ${{ runner.os }}-node-
+```
 
-### **80. What is GitLab CI DAG (Directed Acyclic Graph) Pipeline?**
-**Answer:** Using the `needs` keyword in GitLab CI to allow jobs to start immediately once their specific prerequisites complete, regardless of stage ordering.
+#### Important Behaviors to Keep in Mind
 
-### **81. What is GitHub Actions Concurrency Group?**
-**Answer:** A named grouping (`concurrency: ${{ github.workflow }}-${{ github.ref }}`) that limits concurrent execution of workflows, queuing or canceling redundant runs.
+- **Platform Differences:** The function evaluates actual file contents, which means line endings (`CRLF` on Windows vs. `LF` on Linux/macOS) can cause `hashFiles()` to produce different hash values across different operating system runners.
+- **Pattern Support:** You can pass file paths or glob patterns. If multiple files match, their hashes are merged deterministically.
 
-### **82. How do you implement automated semantic releases in GitLab CI?**
-**Answer:** Run the `semantic-release` NPM package in the release stage, which analyzes commit messages, creates Git tags, generates release notes, and publishes packages.
+### **70. What is GitHub Actions `workflow_dispatch`?**
+**Answer:** 
 
-### **83. What is the Jenkins Pipeline `post` section?**
-**Answer:** Directives (`always`, `success`, `failure`, `unstable`, `cleanup`) executed at the completion of a pipeline or stage to send Slack alerts or clean workspace disks.
+In GitHub Actions, **`workflow_dispatch`** is an event trigger that allows you to manually run a workflow on demand, rather than waiting for an automated event like a code push or a pull request. 
 
-### **84. What is a Jenkins Agent vs Controller?**
-**Answer:** The Controller manages the web UI, parses pipeline scripts, and schedules builds; Agents are worker instances that execute the actual build steps.
+It is commonly used for tasks that require human oversight, such as deploying software to production, running database migrations, or executing ad hoc testing. 
 
-### **85. How do you secure Jenkins Controller from malicious agents?**
-**Answer:** Enable Agent-to-Controller Access Control, disable CLI access over remoting, and run build agents in isolated ephemeral containers with minimal host permissions.
+#### Key Features
 
-### **86. What is GitHub Actions `step-security/harden-runner`?**
-**Answer:** A security action that monitors outbound network traffic from GitHub runners, blocks DNS exfiltration, and detects file tampering during CI execution.
+- **Manual Execution:** Once configured, a "Run workflow" dropdown button appears under the **Actions** tab of your repository. 
+- **Branch Selection:** You can choose which branch to run the workflow against at the time of execution. 
+- **Custom Inputs:** You can define custom text fields, dropdown menus, or boolean checkboxes that a user must fill out before running the workflow. 
 
-### **87. What is GitHub Actions Composite Action `using: "composite"`?**
-**Answer:** The declaration in `action.yml` indicating the action is built using composite steps rather than a Docker container or JavaScript runtime.
+#### How to Trigger It
 
-### **88. What is GitLab CI Include keyword?**
-**Answer:** Directives (`include:local`, `include:file`, `include:remote`, `include:template`) allowing pipelines to modularize and import external YAML files.
+You can trigger a `workflow_dispatch` event through three primary channels:
 
-### **89. What is GitHub Actions `runner.temp` vs `runner.workspace`?**
-**Answer:** `runner.temp` is an isolated temporary directory wiped after job completion; `runner.workspace` is the directory where the repository is cloned.
+1. **GitHub Web UI:** Navigate to your repository's **Actions** tab, select the workflow, click **Run workflow**, fill out any inputs, and submit.
+2. **GitHub CLI:** Use the terminal command `gh workflow run <workflow-name>`. 
+3. **GitHub REST API:** Send a `POST` request to the repository's **GitHub Actions API endpoint** to trigger the workflow programmatically from external scripts. 
 
-### **90. How do you manage Docker-in-Docker (dind) securely in GitLab CI?**
-**Answer:** Use rootless Docker or TLS-enabled Docker daemons (`DOCKER_TLS_CERTDIR="/certs"`), or switch to daemonless build tools like **Kaniko**.
+#### Code Example: Basic Manual Trigger
 
-### **91. What is Kaniko and why is it preferred for building containers in Kubernetes?**
-**Answer:** A Google open-source tool that builds container images from a Dockerfile inside a Kubernetes pod **without requiring a Docker daemon or privileged host root access**.
+To enable it, add `workflow_dispatch:` under the `on` key in your workflow's YAML file. 
 
-### **92. What is Buildah?**
-**Answer:** A command-line tool for building OCI container images without requiring a background container daemon or root privileges.
+```yaml
+name: Manual Operations
 
-### **93. What is GitHub Actions Token (`GITHUB_TOKEN`)?**
-**Answer:** An automatically generated, short-lived secret token provided to each workflow run with scoped permissions defined via the `permissions:` block.
+on:
+  workflow_dispatch: # Enables the manual "Run workflow" button
 
-### **94. What is GitHub Actions Least-Privilege Permissions?**
-**Answer:** Explicitly defining `permissions: { contents: read, id-token: write }` at the top of workflows to override overly permissive default repository settings.
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run tasks
+        run: echo "This workflow was triggered manually!"
+```
 
-### **95. How do you run scheduled cron jobs in GitHub Actions?**
-**Answer:** Using the `schedule` trigger: `on: schedule: - cron: '0 2 * * *'` (runs daily at 2:00 AM UTC).
+#### Code Example: With Custom Inputs
 
-### **96. What is GitLab CI Environment Variables Hierarchy?**
-**Answer:** Variables are resolved with precedence: Project Variables $>$ Group Variables $>$ Instance Variables $>$ Pipeline Variables $>$ YAML Variables.
+You can capture configuration details from the user at runtime and access them using the `inputs` context or the `github.event.inputs` context. 
 
-### **97. What is Jenkins Pipeline Syntax Generator?**
-**Answer:** A built-in web tool (`/pipeline-syntax`) that generates accurate Groovy code snippets for specific plugins and steps.
+```yaml
+name: Deploy Application
 
-### **98. What is SonarQube Scanner in CI?**
-**Answer:** A CLI tool that executes static code analysis, uploads AST reports to the SonarQube server, and awaits Quality Gate webhook evaluation.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      deploy_docs:
+        description: 'Deploy documentation?'
+        required: true
+        type: boolean
+        default: false
 
-### **99. What is GitLab Review Apps?**
-**Answer:** Ephemeral dynamic environments spun up automatically per branch in GitLab CI, integrated directly with merge request review pages.
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploying code
+        run: echo "Deploying to ${{ inputs.environment }}"
 
-### **100. What is GitHub Actions `continue-on-error`?**
-**Answer:** A step-level attribute that prevents a job from failing if a non-critical step (e.g., an experimental linter) returns a non-zero exit code.
+      - name: Deploying docs
+        if: ${{ inputs.deploy_docs == true }}
+        run: echo "Updating documentation..."
+```
 
----
+#### Important Requirements
 
-## 🔴 **Part 3: GitOps, Progressive Delivery & Supply Chain Security (Questions 101–200)**
+- **Default Branch Requirement:** For the "Run workflow" button to appear in the GitHub UI, the workflow YAML file **must exist on your repository's default branch** (usually `main` or `master`). Once it exists there, you can run it against another branch.
+- **Permissions:** Users generally need **write access** to the repository to manually trigger a `workflow_dispatch` event.
 
-### **101. What is GitOps?**
-**Answer:** An operational model where Git repositories serve as the single source of truth for declarative infrastructure and application deployments, using automated pull-based reconciliation operators.
+### **71. What is GitHub Actions `repository_dispatch`?**
+**Answer:** 
 
-### **102. What are the Four Principles of GitOps (OpenGitOps)?**
-**Answer:** 1. Declarative Desired State, 2. Versioned and Immutable Storage in Git, 3. Pulled Automatically by In-Cluster Agents, 4. Continuously Reconciled with Automated Drift Correction.
+GitHub Actions `repository_dispatch` is a webhook event that lets you trigger workflows on demand from external systems, scripts, or other repositories using the GitHub REST API. 
 
-### **103. What is ArgoCD?**
-**Answer:** A declarative GitOps continuous delivery operator for Kubernetes that continuously monitors Git repositories and synchronizes live cluster state with desired state.
+#### Core Features
 
-### **104. What is the ArgoCD Application CRD?**
-**Answer:** A Kubernetes Custom Resource defining the source repository, path, target cluster, target namespace, and sync policies for an application.
+- **Custom Event Types:** You define a custom string name (`event_type`) to identify specific triggers (e.g., `my-event` or `deploy-triggered`). 
+- **Client Payload:** You can pass custom JSON data (`client_payload`) with the request and access it inside your workflow using `${{ github.event.client_payload.<key> }}`. 
+- **External Triggers:** Unlike standard push or pull request triggers, it turns GitHub Actions into an API-callable automation platform for Slack bots, CI/CD pipelines, or microservices. 
+- **Default Branch Requirement:** The receiving workflow file must be committed to the **default branch** (e.g., `main` or `master`) to listen for the event. 
 
-### **105. What is an ArgoCD ApplicationSet?**
-**Answer:** A controller that automates the generation and multi-cluster deployment of multiple ArgoCD `Application` resources using List, Cluster, Git Directory, or Matrix generators.
+#### How to Trigger It
+
+You trigger a `repository_dispatch` event by sending an authenticated HTTP **POST** request to the GitHub REST API endpoint. 
+
+```text
+https://api.github.com/repos/{owner}/{repo}/dispatches
+```
+
+#### Example Using `curl`
+
+```bash
+curl -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer YOUR_GITHUB_PAT" \
+  https://api.github.com/repos/{owner}/{repo}/dispatches \
+  -d '{"event_type": "my-event", "client_payload": {"ref": "main", "sha": "abc1234"}}'
+```
+
+#### Workflow Configuration Example
+
+To handle the event in your repository, configure your workflow YAML file. 
+
+```yaml
+name: Repository Dispatch
+
+on:
+  repository_dispatch:
+    types: [my-event]
+
+jobs:
+  myEvent:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Read payload
+        run: echo "Received SHA: ${{ github.event.client_payload.sha }}"
+```
+
+#### `repository_dispatch` vs. `workflow_dispatch`
+
+- **`workflow_dispatch`:** Used to manually run a workflow directly from the GitHub UI, CLI, or API for the current repository.
+- **`repository_dispatch`:** Used to trigger workflows through custom API events coming from **outside GitHub or from a separate repository**.
+
+### **72. How do you debug GitHub Actions workflows in real time?**
+**Answer:** 
+
+To debug **GitHub Actions workflows in real time**, you can either **SSH directly into the live runner container using third-party actions, use the native GitHub Actions Debugger, or trigger verbose live logging**. 
+
+Here is a breakdown of the best ways to troubleshoot your pipelines as they run.
+
+#### 1. Interactive SSH Debugging (Best for Live Troubleshooting)
+
+The most effective way to debug a runner in real time is to pause the workflow and open a secure terminal inside the active GitHub virtual machine. This allows you to inspect environment variables, look at the local filesystem, and manually execute commands. 
+
+You can achieve this by adding a step using **mxschmitt/action-tmate** or **csexton/debugger-action** right where you suspect the failure occurs: 
+
+#### YAML Example
+
+```yaml
+- name: Setup Live Debug Session
+  uses: mxschmitt/action-tmate@v3
+  # Optional: Only run this if a previous step failed
+  if: ${{ failure() }}
+```
+
+#### How it works in real time
+
+1. The workflow executes normally until it reaches this step.
+2. The step registers a secure tunnel and **pauses the workflow run**. 
+3. Go to your live GitHub Action run logs; you will see an `ssh` command generated dynamically (e.g., `ssh xxxx@sfo2.tmate.io`). 
+4. Paste that command into your local terminal to gain direct shell access to the runner. 
+5. To resume or terminate the job, simply type `exit` or create a token file as dictated by the action. 
+
+**Security Warning:** Avoid doing this on public repositories, as malicious actors could potentially access the terminal or view sensitive secrets exposed in your environment. 
+
+#### 2. Native GitHub Actions Debugger
+
+GitHub includes an interactive **Actions Debugger**. This feature provides a secure, built-in way to attach a debugging client to a running job. 
+
+- It allows you to inspect the filesystem state and environment variables in real time. 
+- It provides the capability to **re-run individual steps** sequentially without forcing you to restart the entire workflow from scratch. 
+
+#### 3. Real-Time Verbose Debug Logging
+
+If you don't want to drop into a command line but need highly detailed output printing to your screen as the runner processes steps, you can enable verbose logging: 
+
+- **Quick Toggle:** When clicking **Re-run all jobs** on a failed workflow, check the box that says **Enable debug logging**.
+- **Configured Toggles:** Add these two keys to your Repository Secrets or Variables to force every run to compile live diagnostic data:
+  - `ACTIONS_STEP_DEBUG` = `true` (Shows detailed step-by-step executions).
+  - `ACTIONS_RUNNER_DEBUG` = `true` (Shows internal runner and container process logs). 
+
+#### 4. Inspecting Contexts Dynamically
+
+If your workflow is evaluating conditional statements (`if:`) incorrectly, you can print the entire live environment state directly to the console stream using a `toJson` context dump: 
+
+#### YAML Example
+
+```yaml
+- name: Dump Live Contexts
+  run: |
+    echo "--- GITHUB CONTEXT ---"
+    echo "${{ toJson(github) }}"
+    echo "--- ENV VARIABLES ---"
+    printenv
+```
+
+#### Summary Comparison
+
+| Method | Best Used For | Real-time Interactive? |
+|---|---|---|
+| **Tmate / SSH Actions** | Interacting with files, replicating build commands manually. | **Yes** (Direct terminal) |
+| **GitHub Actions Debugger** | Safe, UI-driven attaching and step-level re-runs. | **Yes** (UI Client) |
+| **Step/Runner Debug Logs** | Finding hidden error tracebacks and verbosity issues. | No (Log stream only) |
+
+### **73. What is a Jenkins Blue-Green deployment plugin?**
+**Answer:** 
+
+**There is no single official "Jenkins Blue-Green Deployment Plugin."** Instead, Jenkins achieves blue-green deployments by combining core automation features, such as **Jenkins Pipeline**, with target-specific cloud, container, or network plugins. 
+
+Because blue-green deployment is a methodology requiring two identical environments where traffic is switched via a load balancer, Jenkins acts as the orchestrator rather than the environment manager.
+
+#### How Jenkins Orchestrates Blue-Green Deployments
+
+Instead of an all-in-one blue-green plugin, Jenkins pipelines utilize specialized plugins depending on your infrastructure:
+
+- **For Kubernetes/Containers:** Pipelines use tools like the **Kubernetes Continuous Deploy Plugin** or native `kubectl` commands to update container images in an idle "green" environment, run automated health tests, and then update a Kubernetes Service definition to shift live user traffic. 
+
+- **For Cloud Platforms (AWS/Azure):** Pipelines use plugins like AWS Pipeline steps or Azure Container Service plugins to deploy to a new staging target group and then instruct a cloud load balancer, such as AWS ALB or Route 53, to switch the live listener. 
+
+- **For Traditional Servers:** Jenkins utilizes execution or configuration management plugins, such as SSH and Ansible, to deploy code to idle standby servers before modifying Nginx or HAProxy configurations to route traffic. 
+
+#### Typical Jenkins Blue-Green Pipeline Flow
+
+Using Jenkins Declarative Pipelines, DevOps teams structure the blue-green workflow into automated stages. 
+
+1. **Identify Environments:** Determine which environment is currently live ("blue") and which is idle ("green"). 
+
+2. **Deploy to Idle:** Push the new software version strictly to the inactive green environment. 
+
+3. **Validate:** Run automated smoke tests, integration tests, or quality gates against the green environment's private endpoint.
+
+4. **Route Traffic:** Automatically trigger the load balancer or router configuration to switch live production traffic from blue to green. 
+
+5. **Monitor & Rollback:** Monitor for post-deployment anomalies. If a health check or metric fails, Jenkins can trigger a rollback by routing traffic back to the stable blue environment.
+
+### **74. What is a Jenkins Agent vs Controller?**
+**Answer:** 
+
+In Jenkins architecture, **the Controller is the central management brain, while an Agent (traditionally called a slave) is a worker machine or container that executes the actual build and test tasks**. 
+
+#### Jenkins Controller
+
+- **Role:** The central coordinating process and web server (`jenkins.war`). 
+
+- **Core Responsibilities:**
+  - Stores global configurations and job definitions.
+  - Loads and manages **Jenkins Plugins**.
+  - Renders the web user interface (UI) and API.
+  - Schedules jobs and assigns tasks to available agents.
+
+- **Resource Note:** It is best practice to set executors on the controller to `0` to prevent heavy builds from overloading the main control plane. 
+
+#### Jenkins Agent
+
+- **Role:** A worker machine, virtual machine, or container that connects to the controller and runs assigned tasks. 
+
+- **Core Responsibilities:**
+  - Executes build scripts, automated tests, and deployment steps.
+  - Hosts specific runtime environments, tools, and operating system variants, such as Linux, Windows, or macOS.
+  - Contains **executors**, which are slots that run concurrent jobs.
+
+- **Connection and Types:**
+  - Connects via SSH, inbound agent connections (traditionally called JNLP), or WebSockets.
+  - Can be **static** (long-lived physical or virtual servers) or **ephemeral** (dynamic cloud or Docker containers created for individual builds). 
+
+#### Key Differences at a Glance
+
+| Feature | Jenkins Controller | Jenkins Agent |
+|---|---|---|
+| **Primary Function** | Administration, scheduling, and UI management | Running builds, tests, and code execution |
+| **Old Terminology** | Master | Slave |
+| **Executors** | Usually set to `0` | Has one or more executors for workloads |
+| **Scaling Impact** | Central point; too many jobs here can cause bottlenecks | Horizontally scalable by adding more worker nodes |
+
+### **75. How do you secure Jenkins Controller from malicious agents?**
+**Answer:** 
+
+Securing a **Jenkins Controller** from malicious or compromised agents is a critical aspect of CI/CD security. By default, Jenkins agents execute arbitrary code, meaning a compromised agent can attempt to pivot and attack the controller to steal credentials or take over the entire pipeline infrastructure. 
+
+To protect your Jenkins Controller, implement the following multi-layered security strategy.
+
+#### 1. Isolate the Controller (Zero Executors)
+
+The most fundamental rule of Jenkins security is to **never execute build jobs directly on the controller**. 
+
+- **Action:** Treat the controller strictly as an orchestrator. Navigate to *Manage Jenkins* → *Nodes* → *Built-In Node* → *Configure*, and set the **Number of executors to `0`**.
+- **Why:** If a build runs on the controller, the build script inherits direct read/write access to the `JENKINS_HOME` directory, including global configuration files and encrypted root secrets. 
+
+#### 2. Enforce Agent-to-Controller Access Control
+
+Jenkins features a built-in **Agent-to-Controller Access Control** system that restricts what a Java agent process can request from the controller. 
+
+- **Action:** Ensure this protection remains enabled. In modern Jenkins versions, this security subsystem is mandatory and cannot be disabled through the UI or kill switches. 
+- **Mechanism:** It uses file path filters and command whitelists to prevent a compromised agent from requesting sensitive configuration files or executing unauthorized commands on the controller. 
+
+#### 3. Implement Strict Network Segmentation
+
+A compromised agent may attempt to probe or attack the controller over the network. Restrict network visibility to reduce this risk.
+- **Disable Unused Ports:** If you are not using inbound TCP agents, disable the global inbound agent TCP port under *Manage Jenkins* → *Security*.
+- **Use Modern Protocols:** When inbound agents are necessary, use a supported secure agent connection protocol or WebSocket transport over HTTPS. WebSocket transport can use standard HTTPS port `443`, avoiding the need to expose an additional agent TCP port.
+- **Firewall Restrictions:** Place the controller behind a firewall or within a VPC. Ensure that agents can communicate with the controller only through the required agent port or standard HTTPS web port, blocking unnecessary lateral traffic. 
+
+#### 4. Restrict Agent Permissions (Role-Based Access)
+
+Do not allow anonymous entities or untrusted agents to connect to your controller without authorization.
+
+- **Matrix Security:** Use the **Project-based Matrix Authorization Strategy** plugin. Ensure that the `Anonymous` user role does not have the **Agent Connect** permission.
+- **Dedicated Accounts:** Every agent connecting to the controller should authenticate using its own distinct, low-privilege credentials. 
+
+#### 5. Categorize Agents by Trust Level
+
+Not all build pipelines carry the same risk.
+
+- **Isolate Untrusted Code:** If your Jenkins cluster processes public open-source pull requests or external code contributions, route those workloads to designated untrusted agents.
+- **Blast Radius Reduction:** Keep trusted release and production agents isolated from environments processing experimental or external code. Do not share workspace directories or reusable tokens across jobs with different trust levels.
+
+#### 6. Practice Least-Privilege Host Security
+
+Secure the underlying operating systems hosting both your controller and agents. 
+
+- **Non-Root Accounts:** Always run the Jenkins controller and agent processes under dedicated, non-root system users, such as the standard `jenkins` user.
+- **Dynamic Agents:** Whenever possible, use ephemeral cloud agents, such as temporary Docker containers or Kubernetes pods. Ephemeral agents are destroyed after a build finishes, reducing the opportunity for attackers to maintain persistence or leave malware behind.
+
+### **76. What is GitHub Actions Composite Action `using: "composite"`?
+**Answer:** 
+
+In GitHub Actions, **`using: "composite"`** is a configuration setting in an `action.yml` metadata file that declares the custom action as a **Composite Action**. This setting tells GitHub to bundle and execute **multiple workflow steps sequentially** inside a single, reusable action component. 
+
+Instead of writing a custom action in JavaScript/TypeScript or packaging it inside a Docker container, `using: "composite"` allows you to write reusable automation purely using standard GitHub Actions YAML syntax. 
+
+#### Key Characteristics & Mechanics
+
+- **Inline Execution:** Unlike **Reusable Workflows**, which run as separate jobs with their own runner configuration, a composite action runs **inline within the job that calls it**. It shares the same runner instance, file system context, and workspace. 
+
+- **Mandatory Shell Declaration:** When writing standard workflow steps, GitHub may select a default shell. However, inside a composite action's `run` steps, you **must explicitly declare the `shell:` configuration** (e.g., `shell: bash` or `shell: pwsh`) for every step that executes a script. 
+
+- **No Job Definitions:** A composite action cannot specify a `jobs` block or choose a runner type using `runs-on: ubuntu-latest`. It operates at the **step level**. 
+
+#### Structure of a Composite Action File
+
+To define a composite action, create an `action.yml` file in either a standalone repository or a local directory, such as `.github/actions/your-action-name/action.yml`. 
+
+#### YAML Example
+
+```yaml
+# action.yml
+name: 'Setup Environment & Build'
+description: 'Bundles installation and building into one step'
+
+inputs:
+  environment:
+    description: 'Target environment'
+    required: true
+    default: 'staging'
+
+runs:
+  using: 'composite' # Declares this as a composite action
+  steps:
+    - name: Print Target Environment
+      run: echo "Configuring for environment: ${{ inputs.environment }}"
+      shell: bash # Required for every run step in a composite action
+
+    - name: Run Build Script
+      run: npm run build
+      shell: bash
+```
+
+#### Direct Comparison: Composite Actions vs. Reusable Workflows
+
+While both solutions help eliminate duplicated CI/CD pipeline logic, they serve different architectural purposes.
+
+| Feature | Composite Actions (`using: "composite"`) | Reusable Workflows |
+|---|---|---|
+| **Hierarchy Level** | Executed as a **step** inside a job | Called at the **job level** |
+| **Execution Context** | Shares the caller's runner and workspace | Defines its own jobs and runner configuration |
+| **Job/Runner Config** | Cannot declare jobs or `runs-on` settings | Can declare jobs and runners |
+| **Secrets Access** | Secrets must be passed explicitly through supported inputs or environment contexts | Can use explicitly passed secrets or inherited secrets where supported |
+| **Marketplace Support** | Can be published to the **GitHub Marketplace** | Cannot be published as a standalone action in the Marketplace |
+
+### **77. What is GitHub Actions Token (`GITHUB_TOKEN`)?**
+**Answer:** 
+
+The **`GITHUB_TOKEN` is an automatically generated security token created by GitHub for every workflow run in GitHub Actions**. It allows your workflow to securely authenticate and interact with your GitHub repository and its APIs without requiring you to manually create, store, or manage personal access tokens (PATs).
+
+Here is a breakdown of how it works, its default behaviors, and how to configure it.
+
+
+#### How It Works
+
+- **Automatic Creation:** GitHub automatically provisions a unique `GITHUB_TOKEN` for each workflow job.
+- **Automatic Expiration:** The token is temporary. It expires when the job finishes or after a maximum of 24 hours, whichever comes first.
+- **Secure Access:** It can be accessed inside workflow files using `${{ secrets.GITHUB_TOKEN }}` or `${{ github.token }}`.
+
+#### Default Permissions
+
+Depending on your GitHub organization or repository settings, the `GITHUB_TOKEN` defaults to one of two permission levels:
+
+1. **Permissive (Read/Write):** The token can have read and write access to repository resources, depending on the configured permissions.
+2. **Restricted (Read-Only):** The token can read permitted repository resources but cannot modify them.
+
+GitHub recommends using the principle of least privilege and granting only the permissions your workflow requires.
+
+#### How to Configure Permissions Manually
+
+To follow the principle of least privilege, you can explicitly define exactly what the token can do within a specific workflow or job using the `permissions` key in your YAML file.
+
+#### YAML Example
+
+```yaml
+name: CI Workflow
+
+on: [push]
+
+# Set permissions for the entire workflow
+permissions:
+  contents: read       # Allows reading repository contents
+  issues: write        # Allows creating or commenting on issues
+  pull-requests: write # Allows interacting with pull requests
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+#### Common Use Cases
+
+You can use the token to automate tasks that interact with your repository, such as:
+
+- **Deploying Code:** Pushing built assets to a `gh-pages` branch.
+- **Managing Releases:** Automatically creating a new release and uploading binaries when a tag is pushed.
+- **Triage:** Labeling, closing, or commenting on issues and pull requests based on automated tests.
+- **Publishing Packages:** Uploading npm packages or Docker containers to GitHub Packages, provided the required permissions are granted.
+
+#### Key Limitation: Preventing Infinite Loops
+
+To prevent accidental infinite loops, **most events caused by actions authenticated with `GITHUB_TOKEN` do not trigger new workflow runs**.
+
+For example, if your workflow uses `GITHUB_TOKEN` to push code back to the repository, that push generally will not trigger another workflow configured with `on: push`.
+
+There are exceptions, including `workflow_dispatch` and `repository_dispatch` events.
+
+If you need an authenticated push or API operation to trigger another workflow, you can use a GitHub App installation token or a personal access token (PAT) with appropriate permissions instead.
+
+### **78. What is GitHub Actions Least-Privilege Permissions?**
+**Answer:**
+
+**GitHub Actions Least-Privilege Permissions** is **a security best practice that involves limiting the automatic `GITHUB_TOKEN` and injected secrets to the absolute minimum access required to complete a specific automation task**. By moving away from broad, default "write all" access, this model narrows the "blast radius" so that if a third-party action or runner is compromised, an attacker cannot easily alter source code, poison a build, or steal sensitive cloud data.
+
+#### Why It Matters
+
+By default, GitHub repositories can be configured to give the automatic `GITHUB_TOKEN` broad read/write access to the repository. If a workflow relies on a compromised third-party dependency, an attacker could abuse that token to push malicious commits, delete files, or harvest secrets. Implementing least privilege ensures a token can only perform the specific tasks assigned to it. 
+
+#### Core Implementation Strategies:
+
+#### 1. Set a Default Read-Only Top-Level Posture
+
+The most secure approach is to restrict the entire workflow by default at the top of your YAML file using `permissions: read-all` or an empty `permissions: {}` block. 
+
+#### YAML Example
+
+```yaml
+name: Secure CI
+
+on: [push]
+
+# Sets repository permissions to read-only
+permissions: read-all
+
+jobs:
+  # Define workflow jobs here
+```
+
+#### 2. Scope Permissions and Elevate Access on a Per-Job Basis
+
+Instead of granting permissions workflow-wide, you should **explicitly define permissions for individual jobs**. For instance, a testing job only needs to read code, while a deployment job might need narrow write access to packages or releases.
+
+#### YAML Example
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # Only needs to read code to run tests
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm test
+
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed if creating a release or tagging
+      packages: write # Needed to publish a package
+    steps:
+      - uses: actions/checkout@v4
+      # Deployment steps here
+```
+
+#### 3. Secure Cloud Connections with OpenID Connect (OIDC)
+
+Instead of storing long-lived, high-privilege cloud credentials, such as AWS keys or Azure secrets, directly in GitHub, use **OpenID Connect (OIDC)**. OIDC allows your workflow to request a short-lived cloud token that is tightly scoped to a specific role, repository, or even an individual Git branch. 
+
+#### 4. Limit Third-Party Risk by Pinning Actions
+
+Least privilege applies to dependencies too. Avoid mutable tags like `@v1` or `@latest`. **Pin third-party actions to a full 40-character SHA-1 commit hash** to help ensure that the code running in your pipeline has not been altered or hijacked through a changed tag. 
+#### YAML Example
+
+```yaml
+steps:
+  # Pinned to a specific commit hash
+  - uses: actions/checkout@eef6142da740b58e06922aa1d3ed5351cdd52da3
+```
+
+#### Summary of Common Scopes
+
+When configuring the `permissions` block, you will typically fine-tune scopes like these: 
+
+- `contents`: `read` or `write` (for source code, commits, and releases)
+- `pull-requests`: `read` or `write` (for interacting with pull requests, such as adding comments)
+- `packages`: `write` (for publishing Docker images or npm packages)
+- `id-token`: `write` (required to use OIDC cloud authentication)
+
+### **79. How do you run scheduled cron jobs in GitHub Actions?**
+**Answer:** 
+
+To run scheduled cron jobs in **GitHub Actions**, you need to use the `schedule` event trigger and define a **POSIX cron expression** within a YAML workflow file placed inside your repository's `.github/workflows/` directory. 
+
+#### 1. Create a Workflow File
+
+Create a new file in your repository at `.github/workflows/scheduled-job.yml`. Below is a complete example of a workflow configured to run **every day at 12:00 AM UTC**. 
+
+#### YAML Example
+
+```yaml
+name: Run Scheduled Cron Job
+
+on:
+  schedule:
+    # This triggers the workflow every day at midnight UTC
+    - cron: '0 0 * * *'
+
+  # Optional: Allows manual triggering via the GitHub UI
+  workflow_dispatch:
+
+jobs:
+  cron-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Run a script or command
+        run: |
+          echo "Starting the scheduled task..."
+          echo "Hello, world!"
+```
+
+#### 2. Understand the Cron Syntax
+
+GitHub Actions uses the standard five-field cron syntax.
+
+```text
+┌───────────── minute (0 - 59)
+│ ┌───────────── hour (0 - 23)
+│ │ ┌───────────── day of the month (1 - 31)
+│ │ │ ┌───────────── month (1 - 12)
+│ │ │ │ ┌───────────── day of the week (0 - 6 or SUN - SAT)
+│ │ │ │ │
+* * * * *
+```
+
+- `*` (Asterisk): Matches any value for that field.
+- `*/5`: An interval operator. For example, `*/5 * * * *` means every five minutes.
+- `,`: A list operator. For example, `0 0 * * 1,3` means every Monday and Wednesday at midnight UTC.
+
+#### 3. Critical Limitations & Best Practices
+
+- **Timezone is strictly UTC:** GitHub Actions evaluates cron schedules against **Coordinated Universal Time (UTC)**. You must manually calculate the shift for your local timezone.
+
+- **Execution Delays:** Scheduled workflows do not always run precisely at the specified minute. High demand on GitHub's infrastructure can delay jobs by several minutes or longer. **Do not use GitHub Actions for time-critical cron jobs.**
+
+- **Minimum Interval:** The shortest allowed interval between scheduled runs is **five minutes**. 
+
+- **Always Add `workflow_dispatch`:** Include `workflow_dispatch:` under the `on:` block. This adds a **Run workflow** button in the GitHub Actions tab, allowing you to test your scripts manually without waiting for the next scheduled run. 
+
+- **Repository Inactivity:** To save resources, GitHub may automatically disable scheduled workflows in public repositories that have had no repository activity for 60 consecutive days.
+
+### **80. What is Jenkins Pipeline Syntax Generator?**
+**Answer:** 
+
+The **Jenkins Pipeline Syntax Generator** (officially known as the **Snippet Generator** or **Pipeline Syntax** tool) is **a built-in interactive utility within the [Jenkins](https://www.jenkins.io/) web UI designed to help users automatically generate correct Groovy code blocks for their `Jenkinsfile`**.
+
+Instead of forcing you to memorize complex arguments or look up extensive documentation, the tool allows you to select options from a graphical form and output code snippets that can be copied and pasted into your pipeline.
+
+#### Key Capabilities
+
+- **Step Generation (Snippet Generator):** You can select a specific build step from a dropdown list (e.g., `git`, `sh`, `archiveArtifacts`, `slackSend`). The tool then populates a form with available parameters for that step based on the plugins installed on your Jenkins controller. Clicking **Generate Pipeline Script** creates the corresponding code snippet. 
+
+- **Declarative Directive Generator:** This component helps you construct high-level Declarative Pipeline elements, such as `agent` environments, `parameters`, `triggers`, and deployment-related configuration.
+
+- **Global Variable Reference:** It provides a built-in reference explaining variables such as `env` (environment details), `params` (user-input parameters), and `currentBuild` (build status metadata). 
+
+#### Why Use It?
+
+1. **Dynamic Plugin Support:** It reads your Jenkins environment. If you install a compatible plugin, its corresponding pipeline steps may become available in the generator. 
+
+2. **Error Prevention:** It helps generate correct syntax, parameter formats, and keyword mappings, reducing errors caused by typos or incorrect arguments. 
+
+3. **Secret Security:** It helps generate syntax for credential-related steps and helpers, such as `credentials()`, reducing the need to hardcode sensitive strings. You must still follow secure credential-handling practices and avoid exposing secrets through Groovy interpolation or build logs. 
+
+#### How to Access It
+
+You can find the tool directly inside your Jenkins instance using two main methods. 
+
+- **Direct URL:** Append `/pipeline-syntax` to the end of your Jenkins base URL. For example:
+
+  ```text
+  http://localhost:8080/pipeline-syntax
+  ```
+
+- **Job Sidebar:** Open an existing Pipeline job and look for the **Pipeline Syntax** link in the left-hand navigation sidebar. The link's location may vary depending on your Jenkins version and configuration.
+
+### **81. What is an ArgoCD ApplicationSet?**
+**Answer:** 
+
+An **ApplicationSet** is an Argo CD controller and custom resource that acts as a "factory" to automatically generate, update, and manage multiple Argo CD `Application` resources from a single manifest. 
+
+Instead of writing and maintaining dozens or hundreds of repetitive `Application` YAML files manually, you define one ApplicationSet using **generators** (data sources) and a **template**. 
+
+#### How It Works
+
+An ApplicationSet consists of two main parts. 
+
+1. **Generators:** Define *where* or *what* to deploy by pulling parameters from sources such as a list of clusters, a Git repository directory structure, or JSON/YAML files.
+
+2. **Template:** Defines the standard Argo CD `Application` blueprint, injecting parameters from the generator into placeholder fields such as `{{path.basename}}` or `{{cluster.name}}`.
+
+The **ApplicationSet controller** watches the ApplicationSet resource and creates, updates, or deletes individual Argo CD `Application` resources as needed. It has been bundled with Argo CD since version 2.3.
+
+#### Common Generators
+
+Argo CD includes several built-in generators. 
+
+- **List Generator:** Targets clusters or environments based on a hardcoded list of key-value pairs. 
+
+- **Cluster Generator:** Automatically targets Kubernetes clusters registered inside Argo CD, responding dynamically when clusters are added or removed. 
+
+- **Git Generator (Directory & File):** Scans a Git repository's directory structure, which is useful for monorepos, or reads configuration files to generate applications. 
+
+- **Matrix & Merge Generators:** Combine or override parameters from two or more generators for complex, multidimensional deployments.
+
+#### Key Use Cases
+
+- **Multi-Cluster Deployments:** Deploy the same microservice or core application across multiple production, staging, and development clusters using a single manifest. 
+
+- **Monorepo Management:** Automatically create a separate Argo CD `Application` for every subdirectory or service inside a large repository. 
+
+- **Standardized Infrastructure:** Automatically roll out baseline cluster tools, such as `cert-manager`, `ingress-nginx`, or `prometheus`, to every newly provisioned Kubernetes cluster.
 
 ### **106. What are ArgoCD Sync Waves?**
 **Answer:** Annotations (`argocd.argoproj.io/sync-wave: "1"`) that control the exact numerical execution order of Kubernetes resources during synchronization (lower/negative numbers apply first).
