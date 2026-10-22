@@ -1316,7 +1316,76 @@ jobs:
 ```
 
 ### **50. What is a Reusable Workflow in GitHub Actions?**
-**Answer:** A workflow triggered by `workflow_call` that can be called from other repositories to enforce standardized organization-wide compliance and deployment pipelines.
+**Answer:** 
+
+A **Reusable Workflow** in GitHub Actions is **a pre-defined YAML configuration file that can be called and executed inside other workflows**. It functions as a modular component, allowing you to centralize repetitive pipeline configurations (like testing, security scans, or deployment scripts) in one location and invoke them across multiple repositories or projects. This design aligns directly with the **DRY (Don’t Repeat Yourself)** principle, dramatically reducing copy-pasted YAML code and simplifying organization-wide CI/CD maintenance. 
+
+#### How It Works
+
+1. **The Called (Reusable) Workflow:** To make a workflow reusable, you define it inside a repository's `.github/workflows` directory and configure it to trigger on the **`workflow_call`** event. You can also declare parameters (`inputs`) and `secrets` that it needs to run.
+2. **The Caller Workflow:** To use the reusable workflow, another pipeline file references it using the **`uses`** keyword at the **job level** (not inside a step).
+
+When triggered, the reusable workflow runs the jobs exactly as if they were natively written inside the caller workflow, executing inside the context of the repository that called it.
+
+#### Key Features & Architecture
+
+- **Nesting Capabilities:** A reusable workflow can call other reusable workflows, allowing up to **10 levels of nesting** (1 top-level caller + 9 called workflows). 
+- **Inputs, Secrets, and Outputs:** You can seamlessly pass runtime variables via `with` and secure credentials via `secrets`. You can also map specific step outputs back up to the caller workflow to pass data downstream. 
+- **Cross-Repository Access:** Depending on your configuration, reusable workflows can be shared locally within the same repository, across public repositories, or internally within a GitHub Organization. 
+- **Real-time Logging:** Each job and individual step within a reusable workflow is logged separately in real-time in the GitHub Action UI, making troubleshooting highly transparent.
+
+#### Reusable Workflows vs. Composite Actions
+
+While both features aim to minimize redundancy, they serve distinct architectural purposes: 
+
+| **Feature** | **Reusable Workflows** | **Composite Actions** |
+|---|---|---|
+| **Execution Level** | Runs at the **Job** level. | Runs as a **Step** inside an existing job. |
+| **Structure** | Can contain **multiple jobs** and configure unique runners (`runs-on`). | Contains a **bundle of steps** running on the caller's pre-configured runner. |
+| **Secrets Management** | Can natively pass or inherit secrets (`secrets: inherit`). | Cannot natively manage secrets; inputs must be explicitly mapped. |
+| **Best Used For...** | Standardizing **entire CI/CD pipelines** across an organization. | Packaging **sequences of shell steps** or local scripts. |
+
+#### Basic Syntax Example
+
+#### 1. The Reusable Workflow (`.github/workflows/reusable-build.yml`)
+
+```yaml
+name: Reusable Build Pipeline
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+      - run: npm ci
+      - run: npm test
+```
+
+#### 2. The Caller Workflow (`.github/workflows/main.yml`)
+
+```yaml
+name: Main Application CI
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  run-global-build:
+    # Syntax: {owner}/{repo}/.github/workflows/{file}@{ref}
+    uses: my-organization/shared-workflows/.github/workflows/reusable-build.yml@main
+    with:
+      node-version: '20'
+```
 
 ### **54. What is a Composite Action in GitHub Actions?**
 **Answer:** A custom action (`action.yml`) that packages multiple shell commands and action steps into a single reusable step within a job.
