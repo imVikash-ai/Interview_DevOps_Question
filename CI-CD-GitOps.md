@@ -964,7 +964,7 @@ Pipeline as code is **the practice of defining continuous integration and contin
 **Answer:**
 
 A **Monorepo CI Strategy** is **a set of engineering practices and tooling used to run Continuous Integration (CI) efficiently when multiple projects, services, and shared libraries live inside a single version-controlled repository**.
- 
+
 #### Why It Matters
 
 In a standard multi-repository setup, CI runs isolated tests per project. In a monorepo, a naive CI approach runs the entire test suite and rebuilds every single project on every commit. This causes:
@@ -980,8 +980,27 @@ In a standard multi-repository setup, CI runs isolated tests per project. In a m
 - **Scope-Aware Merge Queues:** Using merge queue systems (such as **Mergify**) to run independent parallel merge lanes per project scope, preventing a frontend PR from waiting behind an unrelated backend migration. 
 - **Path-Based Triggers:** Configuring CI platform rules (like path filters in **GitHub Actions**) to skip or trigger workflows based on the directory or file paths modified in a pull request.
 
-### **40. What is a Pull-Through Cache?**
-**Answer:** A local container registry (Harbor, AWS ECR Pull Through Cache) that caches public images locally inside the VPC, eliminating external rate limits.
+### **39. What is a Pull-Through Cache?**
+**Answer:** 
+
+A **pull-through cache** is **an on-demand proxy mirror that automatically fetches, saves, and serves external resources—most commonly container images—from an upstream public or private registry**. 
+
+When you request an image, the system checks the local cache first:
+
+- **First request (Cache Miss):** The cache fetches the image directly from the upstream registry (such as Docker Hub, Quay, or registry.k8s.io), saves a local copy, and delivers it to you.
+- **Subsequent requests (Cache Hit):** The image is served directly from your local mirror without reaching out to the external source. 
+
+#### Key Benefits
+
+- **Faster Pull Speeds & Lower Latency:** Images are stored close to your local or cloud workloads (such as AWS EC2, EKS, or Lambda), speeding up deployment and CI/CD build times. 
+- **Mitigation of Rate Limits:** By caching frequently used external images locally, organizations avoid hitting strict rate limits imposed by public registries like Docker Hub.
+- **High Availability & Reliability:** If an upstream public registry goes down or experiences network throttling, your builds can still pull previously cached images.
+- **Enhanced Security & Compliance:** Local mirrors allow teams to scan cached images for vulnerabilities, enforce governance, and maintain control over software dependencies. 
+
+#### Common Implementations
+
+- **Amazon ECR Pull-Through Cache:** Automatically mirrors public or private registries (including Amazon ECR Public, Kubernetes, Docker Hub, and Quay) inside your private AWS ECR registry. 
+- **Self-Hosted Registries:** Tools like **Docker Registry**, **Harbor**, and **Zot** can be configured as local proxy caches via daemon or runtime settings (e.g., updating `daemon.json` in Docker).
 
 ### **41. What is Automated Canary Analysis (ACA)?**
 **Answer:** Using automated statistical telemetry queries (Prometheus, Datadog) to compare canary error rates against baseline pods and trigger automatic rollbacks on anomalies.
