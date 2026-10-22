@@ -1767,8 +1767,67 @@ jobs:
 - **Environment Secrets:** If a job inside a reusable workflow specifies an `environment:`, environment-level secrets can override an identically named secret passed from the caller. The environment name itself must be defined at the job level *inside* the reusable workflow, not the caller job. 
 - **Log Masking:** GitHub Actions automatically masks secret values in workflow logs, provided they remain properly referenced through the `${{ secrets.SECRET_NAME }}` context.
 
-### **61. What is the `.gitlab-ci.yml` architecture?**
-**Answer:** A declarative configuration file defining stages, jobs, scripts, and artifact handling natively integrated into GitLab repositories and container registries.
+### **57. What is the `.gitlab-ci.yml` architecture?**
+**Answer:**
+
+The architecture of a `.gitlab-ci.yml` file **defines how a GitLab CI/CD pipeline is structured, parsed, and executed**. When you commit this file to the root of your repository, GitLab reads it to build a blueprint for your automation workflow. 
+
+Its structural architecture relies on a hierarchy of **global keywords, sequential or logical stages, and individual executable jobs**. 
+
+#### 1. Structural Architecture (The Blueprint)
+
+The internal architecture of the file is broken down into four core building blocks:
+
+```text
+┌────────────────────────────────────────────────────────┐
+│                   Global Settings                      │
+│        (default images, global variables, etc.)        │
+└────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│                        Stages                          │
+│         (build ──► test ──► deploy phases)             │
+└────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│                         Jobs                           │
+│     (Individual blocks bound to specific stages)       │
+└────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│                        Scripts                         │
+│         (Actual terminal commands executed)            │
+└────────────────────────────────────────────────────────┘
+```
+
+- **Global Configurations:** Define settings that apply across the entire pipeline. Examples include global `variables`, `cache` behavior, or `default` parameters (like fallback Docker images). 
+- **Stages (`stages`):** Abstract phases that define *when* things happen. By default, stages run sequentially (e.g., all `build` jobs must finish before any `test` jobs begin). 
+- **Jobs:** The primary configuration elements. Jobs are top-level keys (e.g., `api_test:`) that specify *what* to do. Every job must hook into a stage and is assigned to a **GitLab Runner** for execution. 
+- **Scripts (`script`):** The absolute lowest layer of the file. It is an array of raw shell/terminal commands that run inside the job’s environment.
+
+#### 2. Execution Pipeline Architectures
+
+Depending on how you use keywords within `.gitlab-ci.yml`, the pipeline can morph into four distinct execution topologies. 
+
+| Pipeline Model | Mechanics and Keyword Triggers | Best Used For |
+|---|---|---|
+| **Standard (Linear)** | Jobs are strictly bound to sequential `stages`. If one job in a stage fails, the subsequent stage is blocked. | Small, simple, monolithic codebases. |
+| **Directed Acyclic Graph (DAG)** | Uses the **`needs:`** keyword to allow a job to run immediately after its dependency finishes, bypassing stage ordering. | Complex apps where testing can start before all build artifacts are generated. |
+| **Parent-Child Pipelines** | Uses the **`trigger:include:`** keywords. The main `.gitlab-ci.yml` spins up completely distinct, independent sub-YAML files. | Monorepos with isolated frontend, backend, or infrastructure teams. |
+| **Multi-Project Pipelines** | Uses the **`trigger:project:`** keyword to trigger pipelines residing in completely different GitLab repositories. | Microservices that depend on upstream or downstream services. |
+
+#### 3. Core Architectural Engine (How It Runs)
+
+Behind the scenes, the YAML architecture interfaces with the broader **GitLab Architecture** to execute the following steps:
+
+1. **The Event Trigger:** You push code or open a Merge Request.
+2. **The YAML Processor:** The `CreatePipelineService` in GitLab Rails parses the `.gitlab-ci.yml` file, validates its syntax, evaluates any conditional `rules:`, and transforms it into a graph of job states.
+3. **The Queue:** Jobs are placed in a Redis-backed queue state depending on dependencies (`created`, `pending`).
+4. **Runner Execution:** External GitLab Runner agents constantly poll GitLab's API. A runner picks up a pending job, spins up the specified Docker environment (`image:`), clones the code, and runs the `script` arrays.
+5. **Artifact Consolidation:** Any file arrays defined under `artifacts:` are zipped up and shipped to an object storage bucket (like AWS S3 or MinIO) so they can be passed to subsequent jobs.
 
 ### **62. What are GitLab CI Stages?**
 **Answer:** Sequential execution blocks (e.g., `stages: [build, test, deploy]`). All jobs within the same stage run concurrently; the next stage starts only after all jobs in the current stage succeed.
