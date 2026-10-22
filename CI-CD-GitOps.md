@@ -895,9 +895,9 @@ Each project is assigned exactly one quality gate at a time. SonarQube organizes
 
 Code coverage is calculated by dividing the number of code elements executed during testing by the total number of code elements, multiplied by 100: 
 
-\[
-\text{Code Coverage}=\left(\frac{\text{Executed Code Elements}}{\text{Total Code Elements}}\right)\times 100
-\]
+```math
+Code Coverage = \left(\frac{\text{Executed Code Elements}}{\text{Total Code Elements}}\right) \times 100
+```
 
 
 
