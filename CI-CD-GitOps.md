@@ -1668,8 +1668,49 @@ For example, if `build` generates a specific version number as an output, you ca
 ${{ needs.build.outputs.version_number }}
 ```
 
-### **58. What is `fail-fast` in GitHub Actions Matrix builds?**
-**Answer:** A boolean setting under `strategy:`. If `true` (default), GitHub cancels all running matrix jobs if any single job fails. Setting `fail-fast: false` allows all matrix variations to run to completion.
+### **55. What is `fail-fast` in GitHub Actions Matrix builds?**
+**Answer:**
+
+In GitHub Actions, **`fail-fast` is a strategy setting that automatically cancels all in-progress and queued jobs in a matrix if any single job fails.** 
+
+#### How It Works
+
+By default, GitHub Actions sets `fail-fast: true` for all matrix builds.
+
+- **If `fail-fast: true` (Default):** Imagine you are running a test matrix across 3 operating systems and 3 Node.js versions (9 total jobs). If the very first job fails on Ubuntu/Node 18, GitHub Actions will immediately terminate the remaining 8 jobs. 
+- **If `fail-fast: false`:** If one job fails, GitHub Actions allows all other jobs in the matrix to run to completion regardless. 
+
+#### When to Use Each Strategy
+
+| Setting | Best Used For | Why? |
+|---|---|---|
+| **`fail-fast: true` (Default)** | Pull request validations; production deployments | **Saves CI/CD minutes and money.** If your code is broken on one environment, you usually don't need to waste resources running the others. |
+| **`fail-fast: false`** | Debugging environments; nightly builds / scheduled CRONs; post-commit `main` branch testing | **Provides complete visibility.** It lets you see the full spectrum of failures so you can identify if a bug is language-specific, OS-specific, or universal. |
+
+#### How to Configure It
+
+You define `fail-fast` inside the `strategy` block of your workflow configuration file. 
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      # Disable fail-fast to ensure all matrix combinations run completely
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18, 20, 22]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm test
+```
 
 ### **59. What are GitHub Actions Environments and Protection Rules?**
 **Answer:** Deployment targets (e.g., `production`) configured with required reviewers, wait timers, and branch protection rules that must be approved before deployment jobs execute.
