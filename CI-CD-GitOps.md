@@ -1177,7 +1177,7 @@ To intercept secrets early in the software development lifecycle, Gitleaks is co
 ### **47. What is Trivy?**
 **Answer:** 
 
-Trivy is **a comprehensive, open-source security scanner created and maintained by Aqua Security.
+Trivy is a comprehensive, open-source security scanner created and maintained by Aqua Security.
 
 #### Key Capabilities
 
@@ -1261,10 +1261,61 @@ Developers use workflows to move manual processes into autopilot:
 2. **Code Quality Controls:** Running security scanners (like SAST/DAST) or code linters against Pull Requests to catch errors early. 
 3. **Repository Management:** Automating administrative tasks, such as adding specific labels to newly opened issues or sending Slack notifications when a build fails.
 
-### **52. What is a GitHub Actions Job vs Step?**
-**Answer:** A Job is a collection of sequential steps executed on the same runner environment. Steps are individual tasks (running shell scripts or actions). Multiple jobs run in parallel by default.
+### **49. What is a GitHub Actions Job vs Step?**
+**Answer:** 
 
-### **53. What is a Reusable Workflow in GitHub Actions?**
+In **GitHub Actions**, **a job is an execution environment (a virtual server), while a step is an individual task or command executed inside that environment**.
+
+Think of a **job** as a **kitchen** where a meal is prepared, and **steps** as the **individual recipe instructions** carried out in that kitchen (like chopping onions or boiling water).
+
+#### Direct Comparison
+
+| **Feature** | **Job ⚙️** | **Step 📋** |
+|---|---|---|
+| **What it is** | A collection of steps running on a specific server. | The smallest unit of work (a script or action). |
+| **Execution Order** | Runs in **parallel** by default (can be made sequential). | Runs strictly **sequentially** (one after the other). |
+| **Environment** | Runs on its own **isolated runner** (e.g., Ubuntu, Windows). | Shares the **same runner and file system** as other steps in that job. |
+| **Data Sharing** | Must use artifacts or outputs to pass data to other jobs. | Can natively pass data via the filesystem or variables. |
+
+#### Deep Dive: Jobs
+
+A job is a defined slice of your pipeline that gets assigned to a specific computer called a **runner**. 
+
+- **Isolation:** Every job runs on a brand-new, clean virtual environment. Files created in "Job A" are not visible to "Job B" unless you explicitly save them. 
+- **Parallelization:** If you have a `test` job and a `lint` job, GitHub will run them at the same time on different machines to speed up your pipeline. 
+- **Dependencies:** You can force a job to wait for another using the `needs` keyword (e.g., `deploy` only runs after `build` succeeds).
+
+#### Deep Dive: Steps
+
+Steps are the granular tasks that make up a job. A step cannot exist outside of a job.
+
+- **Sequence:** Steps execute in order, from top to bottom. If Step 2 fails, the job stops, and subsequent steps are skipped. 
+- **Shared State:** Because all steps in a job run on the same machine, Step 2 can easily use a file created by Step 1. 
+- **Types of Steps:** A step can either run a raw command-line script (using `run`) or call a pre-made, reusable block of code (using `uses`). 
+
+#### YAML Example
+
+Here is how they look inside a **GitHub Actions Workflow Syntax** file: 
+
+```yaml
+jobs:
+  # 'build-and-test' is a JOB
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    # Inside this job are multiple STEPS
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4  # Step 1: Uses a pre-made action
+
+      - name: Install dependencies
+        run: npm install            # Step 2: Runs a shell command
+
+      - name: Run test suite
+        run: npm test               # Step 3: Runs a shell command
+```
+
+### **50. What is a Reusable Workflow in GitHub Actions?**
 **Answer:** A workflow triggered by `workflow_call` that can be called from other repositories to enforce standardized organization-wide compliance and deployment pipelines.
 
 ### **54. What is a Composite Action in GitHub Actions?**
