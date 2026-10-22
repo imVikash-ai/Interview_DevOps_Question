@@ -1939,20 +1939,216 @@ An executor defines the environment where a job actually runs. Common executors 
 - **GitLab-Hosted (Shared) Runners:** Managed directly by GitLab on cloud infrastructure (Linux, macOS, Windows, GPU) with usage limits.
 - **Self-Managed Runners:** Installed and hosted by you on your own servers, virtual machines, bare-metal hardware, or local Kubernetes clusters for full control, custom hardware (like GPUs), or private network access.
 
-### **65. What is GitLab Auto DevOps?**
-**Answer:** A pre-configured CI/CD pipeline template that automatically detects programming languages, builds container images, executes security tests, and deploys to Kubernetes without manual pipeline coding.
+### **60. What is GitLab Auto DevOps?**
+**Answer:** 
 
-### **66. What is a Declarative Jenkinsfile?**
-**Answer:** A structured, syntax-checked pipeline format (`pipeline { agent any; stages { ... } }`) with built-in directives for environments, parameters, and post-build actions.
+**GitLab Auto DevOps** is **an integrated feature that automatically builds, tests, secures, deploys, and monitors applications without requiring any manual pipeline configuration**. 
 
-### **67. What is a Scripted Jenkinsfile?**
-**Answer:** A Groovy-based procedural pipeline format (`node { ... }`) offering unlimited programmatic flexibility at the cost of higher maintenance complexity.
+By automatically detecting the project’s programming language and architecture, it sets up a complete Continuous Integration and Continuous Delivery (CI/CD) workflow out of the box. This reduces the need to manually write or maintain a custom `.gitlab-ci.yml` file.
 
-### **68. What is Jenkins Configuration as Code (JCasC)?**
-**Answer:** Defining the entire Jenkins controller configuration (plugins, security realms, credentials, node settings) in declarative YAML files stored in Git.
+#### How Auto DevOps Works (The Pipeline Stages)
 
-### **69. What is the Jenkins Kubernetes Plugin?**
-**Answer:** A plugin that allows the Jenkins controller to dynamically spawn ephemeral agent pods in a Kubernetes cluster to execute build jobs, terminating pods immediately on job completion.
+When a developer commits code, Auto DevOps executes a pre-configured, multi-stage pipeline.
+
+| Stage | What It Does | Underlying Technology |
+|---|---|---|
+| **1. Auto Build** | Detects the programming language and compiles the code into a container image, which is then saved to the GitLab Container Registry. | Cloud Native / Heroku Buildpacks or an existing `Dockerfile`. |
+| **2. Auto Test** | Automatically finds and executes the application's native unit tests. | Herokuish (automatically provisions temporary test databases like PostgreSQL). |
+| **3. Code Quality and Security** | Scans the codebase for code smells, active secrets, open-source license compliance, and security flaws. | Code Climate, SAST tools, Dependency Scanning, and Container Scanning (Trivy). |
+| **4. Auto Review Apps** | Spins up a temporary, ephemeral instance of the application for every merge request, giving stakeholders a live URL to review changes before merging. | Helm and Kubernetes. |
+| **5. Auto Deploy** | Deploys the application to a live environment once code is merged into the main branch. Supports continuous deployment, manual gates, or incremental canary rollouts. | Kubernetes (e.g., GKE, EKS). |
+| **6. Testing and Monitoring** | Runs live black-box vulnerability checks, measures website rendering speeds, and tracks application performance metrics. | DAST (OWASP ZAP), Sitespeed.io, and Prometheus. |
+
+#### Prerequisites and Requirements
+
+To take full advantage of the entire pipeline, especially the deployment and review stages, the following infrastructure is required:
+
+- **A Kubernetes Cluster:** The project must be connected to a cluster to deploy applications. 
+- **Base Domain:** A wildcard DNS domain (e.g., `*.example.com`) must be assigned so GitLab can automatically generate URLs for production and Review Apps. 
+- **GitLab Runners:** Active runners must be configured to use Docker or Kubernetes executors, with privileged mode enabled where required.
+
+### **61. What is a Declarative Jenkinsfile?**
+**Answer:**
+
+A **Declarative Jenkinsfile** is **a text file written in a structured, easy-to-read Domain Specific Language (DSL) that defines a Continuous Integration and Continuous Delivery (CI/CD) pipeline in Jenkins**. 
+
+Unlike older, general-purpose Groovy-based "Scripted" pipelines, a Declarative Jenkinsfile uses a predefined, rigid schema. This allows developers to build, test, and deploy software without needing deep knowledge of Groovy programming. 
+
+#### Core Structure of a Declarative Jenkinsfile
+
+Every valid Declarative pipeline must start with a root `pipeline` block and contain specific, required sections:
+
+```groovy
+pipeline {
+    agent any // Where to execute the pipeline (any available worker/node)
+
+    environment {
+        // Define environment variables here
+        DEPLOY_ENV = 'staging'
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building the application...'
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Running automated tests...'
+                sh 'mvn test'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo "Deploying to ${DEPLOY_ENV}..."
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Cleaning up workspace or sending notifications.'
+        }
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
+```
+
+#### Key Sections and Directives
+
+- **`pipeline`**: The outermost block enclosing the entire definition.
+- **`agent`**: Tells Jenkins where and on what machine or container the pipeline or stage will run (e.g., `agent any`, `agent { label 'linux' }`, or `agent { docker 'node:16' }`).
+- **`stages`**: A container grouping one or more `stage` blocks.
+- **`stage`**: An individual phase of your workflow (e.g., *Build*, *Test*, *Deploy*).
+- **`steps`**: The actual shell commands or actions executed inside a stage.
+- **`post`**: Actions that run automatically after the pipeline or stages finish, based on the result (`always`, `success`, `failure`, `unstable`).
+
+#### Declarative vs. Scripted Syntax
+
+| Feature | Declarative Jenkinsfile | Scripted Jenkinsfile |
+|---|---|---|
+| **Language Basis** | Structured DSL on top of Groovy (no semicolons required) | Pure Groovy-based DSL |
+| **Learning Curve** | Low (predefined blocks and clear structure) | Higher (requires Groovy knowledge) |
+| **Flexibility** | Strict, opinionated structure | High flexibility, imperative control flow (`if/else`, `try/catch`) |
+| **Error Handling** | Built-in via `post` blocks | Manual implementation via Groovy code |
+| **Readability** | High, human-readable | Varies depending on custom scripting |
+
+#### Why Use a Declarative Jenkinsfile?
+
+- **Pipeline as Code:** Stored directly in Git alongside your application source code, enabling pull requests, code reviews, and version history.
+- **Built-in Visualization:** Easily rendered in the Jenkins UI with stage-by-stage status indicators.
+- **Consistency and Maintenance:** Enforces a standard layout across teams so every project's CI/CD pipeline looks and behaves similarly.
+
+### **62. What is a Scripted Jenkinsfile?**
+**Answer:**
+
+A **Scripted Jenkinsfile** is the original, code-based way to define a Jenkins CI/CD pipeline using the Apache Groovy programming language. 
+
+#### Key Characteristics
+
+- **Language and Syntax:** Built on raw Groovy scripting, wrapping execution inside a `node` block rather than a structured `pipeline` block. 
+- **Full Control:** Offers complete imperative programming power, including custom loops (`for`, `while`), conditional statements (`if/else`), and error handling (`try/catch/finally`).
+- **Flexibility vs. Complexity:** It provides maximum extensibility for complex, dynamic, or non-standard workflows, though it demands a stronger grasp of Groovy than a standard Declarative pipeline. 
+
+#### Example Structure
+
+A basic Scripted Jenkinsfile looks like this:
+
+```groovy
+node {
+    stage('Stage 1') {
+        echo 'Hello World'
+    }
+}
+```
+
+#### Scripted vs. Declarative Pipeline
+
+- **Scripted Pipeline:** Uses a `node` block, is written in Groovy, and grants fine-grained, programmatic control over every execution step.
+- **Declarative Pipeline:** Uses a `pipeline` block, provides a simpler and more rigid structure, and is easier for beginners to read and maintain.
+
+### **63. What is Jenkins Configuration as Code (JCasC)?**
+**Answer:** 
+
+**Jenkins Configuration as Code (JCasC)** is a core Jenkins project and plugin that allows administrators to define and manage an entire Jenkins controller's configuration using human-readable YAML files. 
+
+Instead of manually clicking through the web user interface (UI) to configure settings, install plugins, or set up security, JCasC allows you to manage Jenkins configuration like software development. 
+
+#### Key Benefits of JCasC
+
+- **Reproducibility:** You can deploy a brand-new Jenkins instance with a consistent setup in minutes simply by providing it with your configuration file. 
+- **Version Control:** Because configurations are written in plain-text YAML, they can be stored in a Git repository. This provides visibility into who changed what, auditability, and the ability to roll back mistakes easily. 
+- **No Restarts Required:** You can update your YAML configuration and apply the changes via a "Reload" button in the UI or an API call without taking the Jenkins server down. 
+- **Disaster Recovery:** If your Jenkins server crashes, you can use your YAML configuration file and a list of plugins to help rebuild the configuration and restore the infrastructure.
+
+### **64. What is the Jenkins Kubernetes Plugin?**
+**Answer:** 
+
+The **Jenkins Kubernetes Plugin** is an extension that allows a Jenkins controller to dynamically provision ephemeral build agents as Pods inside a Kubernetes cluster. Instead of maintaining a fixed pool of idle virtual machines or bare-metal servers, this plugin automates the scaling of your build infrastructure based on real-time demand. 
+
+You can read the official documentation on the **Jenkins Plugin Marketplace**.
+
+#### How It Works
+
+1. **Trigger:** A Jenkins job or pipeline is triggered and requests an agent with a specific label (e.g., `maven`, `node`). 
+2. **Spin-up:** The plugin connects to the Kubernetes API server and provisions a temporary **Kubernetes Pod** configured specifically for that job. 
+3. **Execution:** The build steps run inside the container(s) within that Pod. 
+4. **Teardown:** Once the build finishes, the plugin automatically **destroys the Pod**, freeing up cluster resources.
+
+#### Key Features and Benefits
+
+- **On-Demand Elastic Scaling:** Eliminates cost bottlenecks from idle, pre-provisioned infrastructure. Your build capacity scales naturally with your team's pull requests. 
+- **Isolated Environments:** Every build runs inside a clean, isolated container environment. This prevents dependency pollution or leftover artifacts between consecutive jobs. 
+- **Multi-Container Pod Templates:** You can define agent Pods with multiple sidecar containers. For example, a single pipeline agent can feature a Maven container to compile Java code and a database container to run integration tests. 
+- **Pipeline-as-Code Integration:** Pod layouts can be defined globally in the Jenkins UI or dynamically written directly into a `Jenkinsfile`. 
+
+#### Example: Dynamic Kubernetes Agent in a Jenkinsfile
+
+```groovy
+// Example of defining a dynamic Kubernetes agent inside a Jenkinsfile
+pipeline {
+    agent {
+        kubernetes {
+            yaml '''
+            apiVersion: v1
+            kind: Pod
+            spec:
+                containers:
+                - name: maven
+                  image: maven:3.8.1-openjdk-11
+                  command: ['sleep']
+                  args: ['99d']
+            '''
+        }
+    }
+    stages {
+        stage('Build') {
+            steps {
+                container('maven') {
+                    sh 'mvn clean install'
+                }
+            }
+        }
+    }
+}
+```
+
+#### Core Differences from Similar Plugins
+
+| Plugin | Primary Purpose | Best Used For |
+|---|---|---|
+| **Jenkins Kubernetes Plugin** | Provisioning build agents inside Kubernetes. | Running builds on elastic, temporary agent Pods. |
+| **Kubernetes CLI Plugin** | Providing `kubectl` and `helm` authentication contexts inside jobs. | Running Kubernetes CLI commands from Jenkins jobs. |
+| **Kubernetes Continuous Deploy** | Applying native manifest files directly to a cluster without needing a local `kubectl` binary. | Legacy freestyle or pipeline deployment steps. |
 
 ### **70. What is Jenkins Shared Libraries?**
 **Answer:** A centralized Git repository of reusable Groovy code and pipeline steps that can be imported and executed across multiple independent Jenkinsfiles.
