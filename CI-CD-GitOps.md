@@ -1602,8 +1602,71 @@ jobs:
 - **Never hardcode the Role ARN:** Store your IAM Role ARN securely within **GitHub Secrets** or environment variables rather than typing it directly into your codebase. 
 - **Scrutinize the Sub Claim:** Ensure your AWS Trust Policy strictly checks the `repo:org/repo` pattern. Omitting the condition block could theoretically allow *any* GitHub Actions workflow on the platform to authenticate into your AWS account.
 
-### **57. What is `needs` in GitHub Actions?**
-**Answer:** An attribute that defines sequential job dependencies (e.g., `needs: [build, test]` ensures the deploy job runs only after both build and test succeed).
+### **54. What is `needs` in GitHub Actions?**
+**Answer:** 
+
+In GitHub Actions, **`needs`** is **a configuration keyword used to identify prerequisite jobs that must complete successfully before the current job can run**. 
+
+By default, jobs in a GitHub Actions workflow **run in parallel** (at the same time) if they do not have dependencies. The `needs` keyword allows you to chain jobs together sequentially, creating a dependency graph or pipeline.
+
+#### How It Works
+
+- **Execution Order:** If `Job B` has `needs: Job A`, GitHub Actions will wait for `Job A` to finish completely and succeed before starting `Job B`. 
+- **Failure Propagation:** If a prerequisite job fails or is skipped, all downstream jobs that depend on it are **automatically skipped**. You can bypass this behavior using conditional logic (like `if: always()`). 
+- **Syntax:** It accepts either a single job ID as a string or a list of multiple job IDs wrapped in an array (`[...]`). 
+
+#### Syntax Examples
+
+#### 1. Single Dependency (Sequential Execution)
+
+In this basic example, the `deploy` job will wait and only run after the `build` job finishes successfully.
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Building the application..."
+
+  deploy:
+    needs: build # Will not start until 'build' succeeds
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deploying the application..."
+```
+
+#### 2. Multiple Dependencies
+
+You can pass an array if a job relies on multiple preceding jobs. Here, the `production-test` job waits for both `linting` and `unit-tests` to pass. 
+
+```yaml
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Linting code..."
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Running tests..."
+
+  production-test:
+    needs: [linting, unit-tests] # Waits for BOTH jobs
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Running production integration tests..."
+```
+
+#### The `needs` Context
+
+Beyond controlling execution order, `needs` is also a **GitHub Actions Context Object**. It allows you to **access outputs and status information** from your prerequisite jobs. 
+
+For example, if `build` generates a specific version number as an output, you can reference it in a dependent job using:
+
+```yaml
+${{ needs.build.outputs.version_number }}
+```
 
 ### **58. What is `fail-fast` in GitHub Actions Matrix builds?**
 **Answer:** A boolean setting under `strategy:`. If `true` (default), GitHub cancels all running matrix jobs if any single job fails. Setting `fail-fast: false` allows all matrix variations to run to completion.
