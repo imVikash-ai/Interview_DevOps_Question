@@ -817,8 +817,40 @@ A **hermetic build** is **a software build process that runs in complete isolati
 - **Nix:** A functional package manager that builds packages in isolated environments.
 - **Docker / Containers:** Frequently used to wrap build steps in an empty or fixed root filesystem.
 
-### **35. What is Docker BuildKit layer caching?**
-**Answer:** Caching intermediate container build layers in remote OCI registries, allowing ephemeral CI runners to reuse cached layers across independent builds.
+### **34. What is Docker BuildKit layer caching?**
+**Answer:** 
+
+**Docker BuildKit layer caching** is **an advanced caching system built into Docker's next-generation build engine, BuildKit, that dramatically speeds up container image builds by reusing unchanged image layers from previous builds**.
+
+Instead of rebuilding every single line in a `Dockerfile` from scratch, BuildKit treats the instructions as a concurrent dependency graph. If a step (and the steps before it) hasn't changed, BuildKit simply skips executing that command and pulls the pre-built layer directly from its cache.
+
+#### How Layer Caching Works
+
+Each instruction in a `Dockerfile` (like `RUN`, `COPY`, or `ADD`) creates a distinct image layer. 
+
+1. **The Chain Effect:** BuildKit checks the cache sequentially from top to bottom. 
+2. **Cache Invalidation:** If you modify a file that is pulled in by a `COPY` instruction, or change the text of a `RUN` command, BuildKit **invalidates the cache** for that specific layer. 
+3. **Downstream Rebuilds:** Once a single layer is invalidated, **all subsequent layers** below it must also be rebuilt from scratch, even if their own code or commands didn't change.
+
+Because of this behavior, it is a best practice to order your `Dockerfile` instructions by placing expensive, rarely-changed steps (like installing system dependencies) at the top, and frequently changed files (like your application source code) at the very bottom. 
+
+#### Key Capabilities of BuildKit Caching
+
+BuildKit significantly improves upon the legacy Docker builder with several advanced features:
+
+- **Remote/External Caching:** Traditional Docker caching only works if the previous build occurred on the exact same machine. BuildKit allows you to export your build cache to remote registries (like Docker Hub or Amazon ECR) or CI providers (like GitHub Actions) using the `--cache-to` and `--cache-from` flags. This means ephemeral CI/CD pipelines can download existing cache layers on the fly rather than starting fresh every time. 
+- **Concurrent Execution:** BuildKit can evaluate independent stages of a multi-stage build simultaneously, optimizing which layers are used or discarded in parallel.
+
+#### Layer Cache vs. Cache Mounts
+
+While related, BuildKit provides two completely different mechanisms to optimize speed, and they are often used together: 
+
+| **Feature** | **Docker Layer Cache** | **BuildKit Cache Mount (`--mount=type=cache`)** |
+|---|---|---|
+| **What is reused** | The final, compiled filesystem result of an entire `Dockerfile` instruction. | Specific files or temporary directories inside a step (e.g., package manager downloads). |
+| **Behavior on change** | If an input changes, the **entire step must re-run** and downstream steps break. | The step will re-run, but the command can **reuse the persisted directory** to skip downloading existing files. |
+| **Primary Use Case** | Skipping entire unchanged processes. | Speeding up compiler caches (`GOCACHE`) or package restorations (`npm install`, `pip`, NuGet). |
+| **Final Image Size** | Cached layers directly build the structure of the final image. | Mount contents are **never committed** to the final image, keeping it clean. |
 
 ### **36. What is SonarQube Quality Gate?**
 **Answer:** A policy enforcing code quality thresholds (e.g., coverage $\ge 80\%$, 0 critical vulnerabilities) that blocks PR merges if not satisfied.
