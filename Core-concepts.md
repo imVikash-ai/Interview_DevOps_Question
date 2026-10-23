@@ -54,7 +54,23 @@ The Three Ways of DevOps are **foundational principles introduced by Gene Kim in
 - **Key Practices:** Run resilience and fault-injection experiments (such as Chaos Engineering), host blameless postmortems, and support ongoing skill development.
 
 ### **3. What is the difference between DevOps and Agile?**
-**Answer:** Agile focuses on iterative software development, rapid customer feedback, and adaptive planning during the coding and product management phases. DevOps extends Agile principles across the entire lifecycle, encompassing build, test, infrastructure provisioning, deployment, monitoring, and live operations.
+**Answer:**
+
+Agile is an iterative software development methodology focused on team collaboration, customer feedback, and small sprints. **DevOps extends Agile by uniting development and operations teams through automation, CI/CD pipelines, and continuous monitoring to deploy and maintain software reliably in production.** 
+
+#### Core Differences
+
+- **Primary Focus:** Agile focuses on software creation, managing requirements, and delivering functional features in short sprints. DevOps focuses on the entire lifecycle, including deployment, infrastructure automation, system reliability, and maintenance.
+
+- **Team Structure:** Agile teams are typically cross-functional product and engineering groups. DevOps breaks down silos specifically between developers (Dev) and IT operations (Ops) engineers. 
+
+- **Key Practices:** Agile uses user stories, daily standups, and backlog grooming. DevOps uses Infrastructure as Code (IaC), automated testing, and continuous monitoring.
+
+- **Release Cadence:** Agile delivers working software at the end of each sprint (typically 1 to 4 weeks). DevOps enables continuous delivery and deployment, pushing updates to production multiple times a day. 
+
+#### How They Work Together
+
+Agile and DevOps are not competing approaches; rather, DevOps builds upon the foundation laid by Agile. While Agile optimizes how code is planned and written, DevOps ensures that code moves smoothly and automatically from a developer's local machine into live production environments.
 
 ### **4. What are DORA Metrics? List all four core metrics.**
 **Answer:**
