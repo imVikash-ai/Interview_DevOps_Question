@@ -757,11 +757,46 @@ Different workloads require different RPO thresholds depending on how critical t
 - **Tier 2 (Internal / Semi-Critical):** 4 to 24 hours (e.g., internal communication logs, office applications). Achieved through scheduled daily or incremental backups.
 - **Tier 3 (Legacy / Archival):** 24+ hours (e.g., historical records, cold storage).
 
-### **72. What is an On-Call Escalation Policy?**
-**Answer:** A predefined workflow in paging systems (PagerDuty, Opsgenie) that routes alerts to a primary on-call engineer, escalating to secondary engineers or engineering managers if unacknowledged within 5–10 minutes.
+### **28. What is an On-Call Escalation Policy?**
+**Answer:** 
 
-### **73. What is an Incident Commander (IC)?**
-**Answer:** The designated leader during a critical production outage responsible for coordinating investigation tasks, assigning roles, managing communications, and making high-level recovery decisions.
+An **on-call escalation policy** is **a structured set of rules that defines who gets notified when an incident or alert occurs, how long they have to respond, and who the alert passes to if they do not answer or resolve the issue**. 
+
+You can read more about setting up these workflows in **Atlassian's Incident Management Guide** or via **Rootly's Escalation Policy Documentation**
+
+#### Core Components of an Escalation Policy
+
+- **Triggers:** The event, threshold, or severity level (such as a server crash or a P1 outage) that starts the policy. 
+- **Tiers (Levels):** The ordered sequence of responders who are contacted.
+  - *Level 1 (Primary):* The first on-call engineer or team.
+  - *Level 2 (Secondary):* Backup engineers or a lead if the primary person is unavailable.
+  - *Level 3+ (Management / Specialists):* Engineering managers, directors, or specific domain experts. 
+- **Timeouts / Delays:** The exact window (for example, 5 to 15 minutes) the current responder has to acknowledge the alert before it automatically moves to the next tier.
+- **Notification Channels:** The methods used to reach responders, including push notifications, SMS text messages, automated phone calls, email, or team chat rooms like Slack and Microsoft Teams.
+
+#### Why It Matters
+
+- **Prevents Missed Alerts:** It stops critical system outages from sitting unnoticed because a single person is asleep, offline, or busy.
+- **Eliminates Chaos:** Teams do not have to guess who is on backup duty or scramble to find a phone number during a crisis.
+- **Reduces Burnout:** Clear handoff rules and time limits help distribute the burden fairly across a rotation rather than leaning on the same individual every time.
+
+### **29. What is an Incident Commander (IC)?**
+**Answer:** 
+
+An **Incident Commander (IC)** is **the single point of authority and accountability responsible for leading, coordinating, and managing all aspects of an emergency or major technical response**. 
+
+#### Key Responsibilities
+
+- **Direct the Response:** Establish clear incident objectives, set priorities, and create the overall action plan. 
+- **Delegate Tasks:** Assign technical specialists or response teams to specific roles rather than performing hands-on technical fixes themselves. 
+- **Manage Communication:** Set up communication channels, act as the central hub of information, and provide status updates to executive leadership or stakeholders. 
+- **Oversee Resources:** Allocate tools, personnel, and financial support required to resolve the crisis.
+- **Conduct Postmortems:** Lead post-incident reviews to document root causes, capture lessons learned, and improve future resilience. 
+
+#### Where the Role Is Used
+
+- **Emergency Services:** Used in public safety, fire departments, and disaster management under the **National Incident Management System (NIMS)** and **Incident Command System (ICS)**.
+- **IT and DevOps:** Adopted by technology companies to manage major system outages, cyberattacks, or data breaches.
 
 ### **74. What is a Runbook (Playbook)?**
 **Answer:** A documented, step-by-step technical guide for on-call engineers describing how to diagnose, triage, and resolve specific alert conditions or system failures.
