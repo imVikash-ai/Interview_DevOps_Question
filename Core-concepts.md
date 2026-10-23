@@ -184,11 +184,69 @@ Configuration drift is **the gradual divergence of system, server, or cloud conf
 
 - **Immutable infrastructure:** Replace outdated servers with fresh instances rather than applying live patches or manual hotfixes.
 
-### **10. What is Immutable Infrastructure?**
-**Answer:** An operational paradigm where servers or containers are never patched or modified in-place. Updates require building a new image/container from scratch, testing it, and terminating the old instance.
+### **8. What is Immutable Infrastructure?**
+**Answer:** 
 
-### **11. What is the "You Build It, You Run It" model?**
-**Answer:** A foundational DevOps organizational model coined by Werner Vogels (CTO of Amazon) where the engineering team that writes a service is also responsible for deploying, operating, and supporting it in production.
+**Immutable infrastructure** is **a DevOps practice where servers, virtual machines, and containers are never modified in place after deployment**. If a security patch, bug fix, or update is needed, a brand-new instance is built from a common image and replaces the old one, which is then destroyed. 
+
+#### Core Concepts
+
+- **Replace, Not Modify:** Instead of logging into a server to patch software or tweak settings, you build a new version and swap it out.
+
+- **Pets vs. Cattle:** Mutable servers are treated like beloved "pets" that get nursed and hand-patched. Immutable servers are treated like "cattle"—interchangeable, disposable units.
+
+- **Configuration Drift Eliminated:** Because no one edits live servers, your test, staging, and production environments stay identical.
+
+- **Common Tools:** Built using **Terraform** for provisioning, Docker for container images, and Kubernetes for automated rolling replacements. 
+
+#### Mutable vs. Immutable Infrastructure
+
+| **Feature** | **Mutable Infrastructure (Pets)** | **Immutable Infrastructure (Cattle)** |
+|---|---|---|
+| **Update Method** | Modify existing servers in place. | Replace servers with new versions. |
+| **Configuration Drift** | High risk; servers diverge over time. | Eliminated; all instances match the base image. |
+| **Rollbacks** | Complex; must undo changes manually. | Simple; switch traffic back to the prior image/version. |
+| **Troubleshooting** | Hard; each server turns into a unique "snowflake". | Easier; recreate issues directly from the base image. |
+
+#### Key Benefits & Challenges
+
+- **Benefits:**
+  - Higher security by reducing the attack surface and unpatched drift.
+  - Predictable, atomic deployments (all-or-nothing changes).
+  - Fast and painless rollbacks by reverting to a previous build. 
+
+- **Challenges:**
+  - Requires external databases or network storage, because local server data is lost when an instance is destroyed.
+  - Demands a strong CI/CD pipeline and automated image-building workflow.
+
+### **9. What is the "You Build It, You Run It" model?**
+**Answer:** 
+
+The **"You Build It, You Run It"** model is **a software development and operations approach where the product team that writes and builds an application also handles its deployment, maintenance, monitoring, and live production support throughout its lifecycle**. 
+
+Originally introduced by Amazon CTO Werner Vogels around 2006, this principle is a foundational pillar of modern **DevOps** cultures. 
+
+#### How It Works vs. Traditional IT
+
+- **Traditional Model ("Plan-Build-Run"):** Development teams write code and "throw it over the wall" to a separate central operations team, whose job is to deploy and manage it. Developers lose contact with the software once it ships. 
+
+- **You Build It, You Run It:** The same team manages the code from inception to decommissioning. If a service breaks in production at night, the team that coded it is on call to fix it. 
+
+#### Core Benefits
+
+- **Higher Code Quality:** Knowing they have to support the software in production forces developers to write more resilient, well-tested code and design for failure early. 
+
+- **Faster Deployment & Recovery:** Eliminates slow handoffs, Change Advisory Board (CAB) delays, and ticket-based communication with a separate ops department. 
+
+- **Direct Customer Feedback:** Developers get immediate insight into how real users interact with their features, leading to faster and more relevant iterations.
+
+#### Common Challenges & Trade-offs
+
+- **Developer Burnout / On-Call Fatigue:** Being responsible for production incidents and routine maintenance can stretch engineering bandwidth if not balanced properly. 
+
+- **Upfront Cultural Friction:** Shifting from an isolated coding mindset to full operational accountability requires strong team buy-in and organizational change. 
+
+- **Platform Support ("Paved Roads"):** Organizations often pair this model with internal platform engineering teams that build automated self-service tools so product teams don't have to reinvent basic infrastructure.
 
 ### **12. What is Shift-Left Security (DevSecOps)?**
 **Answer:** Integrating security testing (SAST, SCA, secret scanning, container scanning) early in the software development lifecycle rather than conducting security reviews as an afterthought before release.
