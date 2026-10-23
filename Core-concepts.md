@@ -352,8 +352,38 @@ You can read the full guide on the **The Twelve-Factor App website**.
 
 - **12. Admin Processes**: Run administrative or management tasks (such as database migrations) as **one-off processes** in an environment identical to the regular app processes.
 
-### **15. What is Trunk-Based Development?**
-**Answer:** A branching strategy where all developers commit small, frequent changes directly to a single shared branch (`main`), avoiding long-lived feature branches and merge conflicts.
+### **13. What is Trunk-Based Development?**
+**Answer:** 
+
+**Trunk-based development (TBD)** is **a version control management practice where developers merge small, frequent code updates directly into a single central branch—known as the "trunk" or "main" branch—rather than working in isolated, long-lived feature branches**. 
+
+It serves as a core foundation for Continuous Integration (CI) and Continuous Delivery (CD).
+
+#### Core Principles
+
+- **Single Source of Truth:** All developers integrate their code into one main branch (frequently called `main`, `master`, or `trunk`).
+
+- **Small, Frequent Commits:** Developers push small, incremental changes at least once a day (or multiple times daily).
+
+- **Short-Lived Branches:** If branches are used at all, they exist only for a few hours or a couple of days maximum before being merged back. 
+
+- **Feature Flags (Toggles):** Incomplete or work-in-progress features are merged into the trunk early, but hidden from end-users using **feature flags** until they are fully ready. 
+
+#### Key Benefits
+
+- **Eliminates "Merge Hell":** Because code is integrated constantly, massive, painful merge conflicts that happen when long-lived branches diverge are largely avoided. 
+
+- **Always-Deployable Code:** The main branch stays in a clean, tested, and releasable state at all times. 
+
+- **Faster Feedback Loops:** Automated testing pipelines run on every small commit, catching bugs and integration issues immediately. 
+
+- **Simpler Code Reviews:** Reviewing small, focused pull requests takes less time and yields higher bug-detection accuracy than reviewing thousands of lines of branched code. 
+
+#### Trunk-Based Development vs. Alternatives
+
+- **Gitflow:** Uses multiple long-lived primary branches (like `develop` and `release`) alongside separate, long-lived feature branches. It suits scheduled release cycles, whereas TBD suits rapid, continuous deployments. 
+
+- **Strict TBD vs. Short-Lived Branches:** Smaller teams may commit directly to the trunk, while larger engineering organizations use short-lived pull-request branches merged daily via automated merge queues. As noted by a **consensus on Reddit**, many teams adopt short-lived feature branches paired with main-branch releases rather than raw direct-to-trunk commits.
 
 ### **16. What is GitFlow and why is it often considered an anti-pattern for CI/CD?**
 **Answer:** GitFlow uses long-lived branches (`develop`, `feature`, `release`, `hotfix`, `master`). It delays integration testing, causes painful merge conflicts ("merge hell"), and slows deployment velocity.
