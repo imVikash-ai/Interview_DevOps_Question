@@ -149,8 +149,40 @@ The four core DevOps Research and Assessment (DORA) metrics define an "Elite" pe
 
 - **Cloud Native / Vendor-Specific:** Tools like AWS CloudFormation, AWS CDK, or Azure ARM Templates and Bicep.
 
-### **9. What is Configuration Drift?**
-**Answer:** The divergence of live infrastructure settings from the declared IaC templates in Git, usually caused by manual emergency changes made directly in cloud consoles or servers.
+### **7. What is Configuration Drift?**
+**Answer:** 
+
+Configuration drift is **the gradual divergence of system, server, or cloud configurations from their intended, documented baseline state over time**. 
+
+#### Main Causes
+
+- **Undocumented manual fixes:** Administrators apply quick "hotfixes" or direct changes to live production servers to solve immediate issues, but forget to document or revert them. 
+
+- **Inconsistent updates and patches:** Operating systems, applications, or firmware update at different times across servers, creating mismatched versions and dependencies. 
+
+- **Flawed automation:** Automated scripts or Infrastructure as Code (IaC) tools run using outdated configuration templates or source-of-truth files. 
+
+- **Environment fragmentation:** Multiple teams or dynamic cloud provisioning cause staging, testing, and production environments to evolve independently.
+
+#### Key Risks
+
+- **Security vulnerabilities:** Temporary firewall openings, disabled encryption (such as modified SSL/TLS settings), or orphaned accounts expose systems to cyberattacks.
+
+- **Performance degradation:** Misconfigured load balancers, caching rules, or resource limits lead to uneven workloads, latency, or application crashes.
+
+- **Compliance failures:** Live systems no longer match the security baselines required by audits or regulatory frameworks like GDPR, NIST, or ISO 27001. 
+
+- **Troubleshooting difficulty:** Discrepancies between servers make bugs hard to replicate, debug, or fix reliably. 
+
+#### How to Prevent and Manage Drift
+
+- **Infrastructure as Code (IaC):** Define your infrastructure using version-controlled templates so a central definition pushes consistent updates everywhere.
+
+- **Configuration management tools:** Use automated tools like Ansible, **Puppet**, or **Chef** to continuously scan and enforce desired states.
+
+- **Continuous monitoring:** Replace periodic audits with real-time observability to spot deviations the moment they happen.
+
+- **Immutable infrastructure:** Replace outdated servers with fresh instances rather than applying live patches or manual hotfixes.
 
 ### **10. What is Immutable Infrastructure?**
 **Answer:** An operational paradigm where servers or containers are never patched or modified in-place. Updates require building a new image/container from scratch, testing it, and terminating the old instance.
