@@ -248,8 +248,32 @@ Originally introduced by Amazon CTO Werner Vogels around 2006, this principle is
 
 - **Platform Support ("Paved Roads"):** Organizations often pair this model with internal platform engineering teams that build automated self-service tools so product teams don't have to reinvent basic infrastructure.
 
-### **12. What is Shift-Left Security (DevSecOps)?**
-**Answer:** Integrating security testing (SAST, SCA, secret scanning, container scanning) early in the software development lifecycle rather than conducting security reviews as an afterthought before release.
+### **10. What is Shift-Left Security (DevSecOps)?**
+**Answer:** 
+
+Shift-Left Security is **the practice of integrating security testing, threat modeling, and compliance checks into the earliest stages of the software development lifecycle (SDLC)—such as planning, designing, and coding—rather than waiting until the end during testing or deployment**. 
+
+Because the SDLC is typically mapped chronologically from left (planning/coding) to right (deployment/maintenance), moving security practices earlier means shifting them to the "left" side of the timeline. 
+
+#### Core Practices
+
+- **Threat Modeling:** Identifying and mitigating system architecture and design flaws during the planning phase using frameworks like STRIDE or MITRE ATT&CK. 
+
+- **Static Application Security Testing (SAST):** Scanning source code for vulnerabilities in Integrated Development Environments (IDEs) or via pre-commit hooks before code is merged. 
+
+- **Software Composition Analysis (SCA):** Checking open-source libraries and third-party dependencies for known vulnerabilities during the build process.
+
+- **Infrastructure as Code (IaC) Scanning:** Validating cloud infrastructure templates and container configurations against security policies automatically. 
+
+- **Dynamic Application Security Testing (DAST):** Simulating real-world external attacks against running applications in staging environments. 
+
+#### Why It Matters (DevSecOps)
+
+- **Shared Responsibility:** Shifting security left turns security from an isolated gatekeeper at the end of a project into a shared responsibility across developers, DevOps, and security teams.
+
+- **Lower Remediation Costs:** Fixing a security bug or vulnerable dependency while a developer is actively writing the code is significantly faster and cheaper than patching it in production. 
+
+- **Faster Release Cycles:** Automated security gates inside CI/CD pipelines prevent last-minute security reviews from becoming major delivery bottlenecks.
 
 ### **13. What is a Monolith vs Microservices Architecture?**
 **Answer:** Monoliths bundle all business logic, database access, and UI into a single codebase and deployment unit. Microservices decompose functionality into autonomous, loosely coupled services communicating over network APIs (REST, gRPC, Kafka).
