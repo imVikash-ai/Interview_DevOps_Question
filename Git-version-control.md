@@ -46,10 +46,59 @@ By utilizing a DAG instead of a linear list, Git makes complex version control o
 
 ### **2. Explain the four core Git Object types in `.git/objects/`.**
 **Answer:**
-1. **Blob:** Stores pure uncompressed file content (data payload) without filename, directory structure, or permissions.
-2. **Tree:** Represents a directory; maps filenames, file permissions (`100644`, `100755`), and directory structures to their corresponding Blob and sub-Tree SHA hashes.
-3. **Commit:** Contains a pointer to the root Tree object, parent commit SHA(s), author/committer metadata with timestamps, and the commit message.
-4. **Annotated Tag:** An independent object pointing to a commit SHA with tagger metadata, timestamp, GPG signature, and tag message.
+
+At its core, Git is a content-addressable key-value store. When you save data, Git compresses the content, hashes it using a 40-character **SHA-1 checksum**, and writes it to the `.git/objects/` directory. The first two characters of the hash become the folder name, and the remaining 38 characters become the filename. 
+
+Git uses exactly **four core object types** to reconstruct your entire repository history and directory structure:
+
+#### 1. Blobs (Binary Large Objects)
+
+A **blob** stores **raw file content exclusively**.
+
+- **What it contains:** Just the raw bytes of a file.
+- **What it lacks:** It completely omits the filename, folder structure, timestamps, or file permissions. 
+- **Key Characteristic:** Blobs are purely content-based. If two different files in your project have identical text, Git stores only a single blob in the database and maps both file paths to it, saving significant disk space.
+
+#### 2. Trees
+
+A **tree** represents the **directory structure** or a folder snapshot within your project.
+
+- **What it contains:** An ordered list of entries. Each entry represents either a file or a subdirectory and records:
+  - The file permissions/mode (e.g., `100644` for normal files, `100755` for executables).
+  - The object type (`blob` or `tree`).
+  - The SHA-1 hash of that object.
+  - The actual filename or directory name. 
+- **Key Characteristic:** Trees tie blobs back to their filenames and bind multiple files and subfolders into a single structural unit. 
+
+#### 3. Commits
+
+A **commit** represents a specific **snapshot of the project in time** combined with historical metadata. 
+
+- **What it contains:**
+  - A pointer to a top-level **root tree** object, which defines the entire state of the project folder at that exact moment.
+  - A pointer to the **parent commit(s)**, the hash of the previous commit, creating the project's history chain.
+  - Metadata: author and committer information, timestamps, and the commit message. 
+
+#### 4. Tags (Annotated Tags)
+
+A **tag** is an explicit, **permanent pointer to a specific Git object**, almost always a commit. 
+
+- **What it contains:** The target object's SHA-1 hash, the type of object it points to, a tag name, the creator's information, a timestamp, and an optional message, often used for signing releases. 
+- **Note:** This applies specifically to *annotated tags*. *Lightweight tags* are not stored as core objects in `.git/objects/`; they are simply plain text references inside `.git/refs/tags/` that hold a commit hash. 
+
+#### Summary: How They Work Together
+
+| **Object Type** | **Analogy** | **Role in Git** |
+|---|---|---|
+| **Blob** | File Content | *What* is inside the file. |
+| **Tree** | Folder / Directory | *Where* the files live and what they are named. |
+| **Commit** | Timeline Snapshot | *Who* changed it, *when*, and *why*. |
+| **Tag** | Milestone Marker | A permanent anchor marking a specific version (e.g., `v1.0.0`). |
+
+To inspect these raw objects yourself in a terminal, you can use the low-level plumbing commands:
+
+- `git cat-file -t <hash>` — to see the object type.
+- `git cat-file -p <hash>` — to pretty-print the contents.
 
 ### **3. Explain the Three Trees (Three Areas) of Git.**
 **Answer:**
