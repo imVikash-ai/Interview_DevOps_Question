@@ -715,71 +715,47 @@ Telemetry in DevOps is **the automated collection, transmission, and processing 
 | **Handling Excess Traffic** | Rejects requests (e.g., `429 Too Many Requests`) | Delays, queues, or slows down requests |
 | **Primary Focus** | Quota enforcement and security | Resource leveling and smoothing spikes |
 | **User Experience** | Blocked until the time window resets | Slower response times during high load |
+ 
+### **26. What is RTO (Recovery Time Objective)?**
+**Answer:** 
 
-## 🟡 **Part 2: Site Reliability Engineering (SRE) & Reliability (Questions 51–100)**
+A Recovery Time Objective (RTO) is **the maximum acceptable amount of time a system, application, or service can remain offline after a disruption or disaster before the impact on business operations becomes unacceptable**. 
 
-### **51. What is an SLI (Service Level Indicator)?**
-**Answer:** A quantifiable metric that measures service performance at a specific moment in time (e.g., Proportion of HTTP requests returning status 200 in $< 200\text{ms}$).
+#### Key Characteristics of RTO
 
-### **52. What is an SLO (Service Level Objective)?**
-**Answer:** An internal reliability target agreed upon between Dev and SRE teams (e.g., 99.9% of requests must meet the SLI over a rolling 30-day window).
+- **Measurement:** Measured in seconds, minutes, hours, or days starting from the moment the failure happens.
+- **Driving Factor:** Dictates your IT architecture, redundancy levels, and recovery strategies (such as cold, warm, or hot standby sites).
+- **Cost vs. Speed:** Lower RTOs (like near-zero) require expensive continuous replication and automated failovers, while higher RTOs cost less but allow longer outages. 
 
-### **53. What is an SLA (Service Level Agreement)?**
-**Answer:** A legally binding contract with customers specifying penalties (financial credits, refunds) if the service fails to meet agreed uptime levels.
+#### RTO vs. RPO
 
-### **54. What is an Error Budget?**
-**Answer:** The exact mathematical inverse of an SLO: $\text{Error Budget} = 100\% - \text{SLO}$. It defines the acceptable headroom of downtime or failures a service can accumulate without breaching user trust.
+- **RTO (Recovery Time Objective):** Focuses on **downtime tolerance**—how fast you must get systems back online.
+- **RPO (Recovery Point Objective):** Focuses on **data loss tolerance**—how much recent data you can afford to lose measured back in time to the last backup. 
 
-### **55. What happens when an Error Budget is exhausted (0%)?**
-**Answer:** Non-critical feature deployments are frozen, and 100% of engineering bandwidth shifts to bug fixing, technical debt reduction, and reliability engineering.
+| **Metric** | **Focus** | **Primary Question** |
+|---|---|---|
+| **RTO** | System Availability & Speed | How long can we afford to be offline? |
+| **RPO** | Data Freshness & Loss | How much data can we afford to lose? |
 
-### **56. What is Toil in SRE?**
-**Answer:** Operational work that is manual, repetitive, automatable, tactical, devoid of enduring engineering value, and scales linearly with service growth.
+### **27. What is RPO (Recovery Point Objective)?**
+**Answer:** 
 
-### **57. What is the Google SRE 50% Rule for Toil?**
-**Answer:** A maximum of 50% of an SRE's time should be spent on operational toil and on-call duties; the remaining 50%+ must be dedicated to software engineering projects that permanently eliminate toil.
+A **Recovery Point Objective (RPO)** is **the maximum acceptable amount of data loss that an organization can tolerate after an unplanned incident or disaster, measured backward in time from the moment of failure**. 
 
-### **58. What are the Four Golden Signals of Monitoring?**
-**Answer:** Latency (time to process requests), Traffic (demand/throughput), Errors (rate of failed requests), and Saturation (how close resources are to full capacity).
+#### Key Aspects of RPO
 
-### **59. What is the RED Method?**
-**Answer:** A monitoring framework for request-driven microservices: **R**ate (req/sec), **E**rrors (failed req/sec), and **D**uration (latency distribution).
+- **Measurement:** It is expressed as a unit of time—such as seconds, minutes, hours, or days—rather than a file size. 
+- **Backup Frequency:** Your RPO directly dictates how often you must back up data or run replication. For example, if your RPO is 1 hour, you must back up your data at least every hour. 
+- **Business Impact:** It helps quantify risk tolerance, balancing the financial and operational cost of frequent backups against the cost of losing recent data. 
 
-### **60. What is the USE Method?**
-**Answer:** A monitoring framework for infrastructure resources: **U**tilization (time resource was busy), **S**aturation (queue depth), and **E**rrors (error counts).
+#### RPO Tiers and Examples
 
-### **61. What is MTTD (Mean Time to Detect)?**
-**Answer:** The average time elapsed between the inception of a system incident and when the engineering team or monitoring system detects it.
+Different workloads require different RPO thresholds depending on how critical they are to daily operations:
 
-### **62. What is MTTR (Mean Time to Resolve / Restore)?**
-**Answer:** The average time taken from detecting a production failure to completely restoring normal system operations for users.
-
-### **63. What is MTBF (Mean Time Between Failures)?**
-**Answer:** The average time elapsed between operational system failures, measuring overall infrastructure stability.
-
-### **64. What is MTTF (Mean Time to Failure)?**
-**Answer:** The expected operating time of a non-repairable system or hardware component before it completely fails.
-
-### **65. What is a Blameless Post-Mortem?**
-**Answer:** A structured, collaborative retrospective conducted after an incident that assumes engineers acted with good intentions, focusing on systemic, architectural, and procedural root causes.
-
-### **66. What are the core sections of a Post-Mortem document?**
-**Answer:** 1. Executive Summary & Impact, 2. UTC Incident Timeline, 3. Root Cause Analysis (5 Whys), 4. What Went Well / Poorly, 5. SMART Action Items with owners.
-
-### **67. What is the 5 Whys technique in root cause analysis?**
-**Answer:** An iterative interrogative technique where you ask "Why?" five consecutive times to drill down past surface symptoms to the fundamental organizational or architectural root cause.
-
-### **68. What is Alert Fatigue and how do you prevent it?**
-**Answer:** Overwhelming on-call engineers with noisy, non-actionable alerts, leading to missed critical incidents. Prevented by alerting strictly on user-facing SLO symptoms and dynamic burn rates.
-
-### **69. What is a Multi-Window Multi-Burn-Rate Alert?**
-**Answer:** Google SRE alerting standard that calculates the consumption speed of an error budget across short (1 hour) and long (6 hours) windows to page engineers only when error budget is rapidly burning.
-
-### **70. What is RTO (Recovery Time Objective)?**
-**Answer:** The maximum acceptable duration of system downtime after a disaster before service is restored (measures downtime duration).
-
-### **71. What is RPO (Recovery Point Objective)?**
-**Answer:** The maximum acceptable amount of data loss measured in time backward from the point of disaster (measures data loss).
+- **Tier 0 (Near-Zero / Mission-Critical):** 0 to 15 minutes (e.g., banking, payment processing, core databases). Achieved through continuous or synchronous data replication.
+- **Tier 1 (Business-Critical):** 1 to 4 hours (e.g., customer relationship management [CRM] systems, electronic health records). Achieved through frequent snapshots or asynchronous replication. 
+- **Tier 2 (Internal / Semi-Critical):** 4 to 24 hours (e.g., internal communication logs, office applications). Achieved through scheduled daily or incremental backups.
+- **Tier 3 (Legacy / Archival):** 24+ hours (e.g., historical records, cold storage).
 
 ### **72. What is an On-Call Escalation Policy?**
 **Answer:** A predefined workflow in paging systems (PagerDuty, Opsgenie) that routes alerts to a primary on-call engineer, escalating to secondary engineers or engineering managers if unacknowledged within 5–10 minutes.
@@ -869,305 +845,3 @@ Telemetry in DevOps is **the automated collection, transmission, and processing 
 **Answer:** Defining Grafana dashboards, Prometheus alerting rules, and OpenTelemetry collector configs in declarative code files versioned in Git.
 
 ---
-
-## 🔴 **Part 3: Platform Engineering, FinOps & Architecture (Questions 101–200)**
-
-### **101. What is Platform Engineering?**
-**Answer:** The discipline of designing and building toolchains and self-service workflows (Internal Developer Platforms) that enable software developers to build, test, deploy, and operate software independently.
-
-### **102. What is "Platform as a Product"?**
-**Answer:** Treating the internal developer platform as a software product where internal developers are the customers, employing product managers to gather feedback, measure adoption, and iterate on Developer Experience (DevEx).
-
-### **103. What is Spotify Backstage?**
-**Answer:** An open-source CNCF framework for building unified developer portals, featuring a centralized Software Catalog, documentation as code (TechDocs), and software templates (Golden Paths).
-
-### **104. What is a Software Template in Platform Engineering?**
-**Answer:** A pre-configured boilerplate repository (scaffolding) that provisions a fully compliant microservice with CI/CD pipelines, Dockerfile, Helm charts, monitoring dashboards, and security scans in 1 click.
-
-### **105. What is Developer Experience (DevEx)?**
-**Answer:** How friction-free, intuitive, and efficient it is for software engineers to write code, run tests, debug services, and deploy changes to production.
-
-### **106. What is Developer Velocity Index (DVI)?**
-**Answer:** A metric framework measuring how effectively an organization's tooling, culture, and practices empower developers to innovate and deliver business value rapidly.
-
-### **107. What is Crossplane?**
-**Answer:** An open-source CNCF project that turns Kubernetes into a universal control plane, allowing platform teams to manage cloud resources (S3, RDS) as Kubernetes Custom Resources (CRDs).
-
-### **108. What is a Composite Resource Definition (XRD) in Crossplane?**
-**Answer:** A custom Kubernetes API defined by a platform team that bundles multiple cloud resources into a single self-service abstraction for developers (e.g., `kind: DatabaseInstance`).
-
-### **109. What is Kratix?**
-**Answer:** A framework for building multi-cloud, multi-cluster platforms on Kubernetes that delivers reusable infrastructure and service "Promises" to development teams.
-
-### **110. What is the Open Feature standard?**
-**Answer:** A vendor-agnostic CNCF standard providing unified SDKs and APIs for feature flag management across languages.
-
-### **111. What is the Score specification in Platform Engineering?**
-**Answer:** A developer-centric, workload-oriented specification that describes how an application runs without needing to know target environment Kubernetes or Terraform details.
-
-### **112. What is FinOps and what are its three core phases?**
-**Answer:** Cloud Financial Operations. The three phases are: **Inform** (visibility and tagging), **Optimize** (rate reduction and right-sizing), and **Operate** (continuous governance).
-
-### **113. What is Cloud Unit Economics?**
-**Answer:** Measuring cloud spend relative to direct business metrics (e.g., *Cost per Active User*, *Cost per Transaction Processed*, *Cost per GB Streamed*).
-
-### **114. What is a Cloud Savings Plan?**
-**Answer:** A flexible pricing model offering up to 72% discount on compute usage (EC2, Fargate, Lambda) in exchange for a 1- or 3-year hourly spend commitment.
-
-### **115. What are Reserved Instances (RIs)?**
-**Answer:** A discount commitment model tied to specific cloud instance families, OS, and regions in exchange for 1- or 3-year term commitments.
-
-### **116. What are Cloud Spot Instances?**
-**Answer:** Spare cloud provider compute capacity offered at up to 90% discount, with the caveat that the provider can reclaim the instance with a 2-minute notification.
-
-### **117. What is Infracost?**
-**Answer:** A FinOps tool that parses Terraform code in CI pull requests to display the exact monthly cost delta of proposed infrastructure changes before deployment.
-
-### **118. What is Cloud Custodian?**
-**Answer:** An open-source rules engine for cloud security and cost management that automatically stops untagged instances, terminates idle databases, and enforces compliance via YAML policies.
-
-### **119. What is Kubernetes Right-Sizing?**
-**Answer:** Adjusting container CPU/memory `requests` and `limits` based on historical usage telemetry to eliminate over-provisioning and minimize cloud waste.
-
-### **120. What is Scale-to-Zero in serverless and Kubernetes?**
-**Answer:** Automatically scaling application pod replicas down to 0 when there is no incoming traffic or queue backlog (via KEDA or Knative), saving 100% of compute cost during idle periods.
-
-### **121. What is Karpenter Node Consolidation?**
-**Answer:** An automated optimization feature where Karpenter identifies underutilized worker nodes, computes an optimal single replacement node, drains pods, and terminates empty nodes.
-
-### **122. What is a Multi-Tenant Kubernetes Cluster?**
-**Answer:** A single physical cluster shared across multiple development teams or external customers, isolated via Namespaces, NetworkPolicies, RBAC, and ResourceQuotas.
-
-### **123. What is `vcluster` (Virtual Cluster)?**
-**Answer:** An open-source tool that runs fully functional, isolated virtual Kubernetes control planes inside namespaces of an underlying host cluster, providing hard multi-tenancy.
-
-### **124. What is Zero Trust Network Architecture (ZTNA)?**
-**Answer:** A security model requiring strict identity verification and encrypted communication (mTLS) for every user, device, and service regardless of whether it resides inside the private VPC.
-
-### **125. What is SPIFFE/SPIRE?**
-**Answer:** Standardized cryptographic workload identity framework that issues short-lived, auto-rotating X.509 certificates to microservices based on kernel and kubelet attestation.
-
-### **126. What is Policy as Code (PaC)?**
-**Answer:** Defining, testing, and enforcing compliance and operational rules using machine-readable code files (Open Policy Agent Rego, Kyverno) across CI/CD and admission controllers.
-
-### **127. What is Open Policy Agent (OPA)?**
-**Answer:** An open-source, general-purpose policy engine that evaluates structured JSON/YAML inputs against declarative logic written in the **Rego** language.
-
-### **128. What is Kyverno?**
-**Answer:** A Kubernetes-native policy engine written 100% in YAML that validates, mutates, and generates Kubernetes resources and verifies container image signatures.
-
-### **129. What is HashiCorp Vault?**
-**Answer:** A secure secrets management system that provides centralized dynamic secrets generation, PKI certificate authority management, and data encryption as a service.
-
-### **130. What is External Secrets Operator (ESO)?**
-**Answer:** A Kubernetes operator that syncs secrets from external enterprise vaults (AWS Secrets Manager, HashiCorp Vault) into native Kubernetes `Secret` objects.
-
-### **131. What is Keyless Signing with Sigstore Cosign?**
-**Answer:** Cryptographically signing container images using short-lived OIDC certificates from Fulcio and transparency logs from Rekor, eliminating static PGP private keys.
-
-### **132. What is an SBOM (Software Bill of Materials)?**
-**Answer:** A machine-readable nested inventory of all software packages, libraries, and transitive dependencies bundled inside a software container or binary (e.g., CycloneDX).
-
-### **133. What is the SLSA Framework (Supply-chain Levels for Software Artifacts)?**
-**Answer:** A security framework establishing standards for software build integrity, hermetic build sandboxing, and non-falsifiable build provenance.
-
-### **134. What is eBPF (Extended Berkeley Packet Filter)?**
-**Answer:** A Linux kernel technology allowing sandboxed programs to execute safely inside the kernel without changing kernel source code, used for high-speed networking (Cilium), observability (Hubble), and runtime security (Falco).
-
-### **135. What is Falco?**
-**Answer:** A CNCF runtime security tool that parses Linux kernel system calls via eBPF probes to detect and alert on unauthorized container activities (spawning shells, reading `/etc/shadow`).
-
-### **136. What is Cilium?**
-**Answer:** An eBPF-based Kubernetes CNI, Service Mesh, and network security plugin providing high-performance Layer 3 to Layer 7 routing and transparent encryption.
-
-### **137. What is the Gateway API in Kubernetes?**
-**Answer:** The modern successor to Kubernetes Ingress providing role-oriented resource separation (`GatewayClass`, `Gateway`, `HTTPRoute`) and native traffic splitting.
-
-### **138. What is KEDA (Kubernetes Event-driven Autoscaling)?**
-**Answer:** An autoscaler that scales Kubernetes workloads from 0 to hundreds based on external event metrics (AWS SQS queue length, Kafka consumer group lag).
-
-### **139. What is Istio Ambient Mesh?**
-**Answer:** A sidecarless service mesh architecture that splits mesh processing into per-node `ztunnel` daemons (Layer 4 mTLS) and optional per-namespace waypoint proxies (Layer 7 routing).
-
-### **140. What is Distributed Consensus (Raft / Paxos)?**
-**Answer:** Algorithms that enable distributed clusters (etcd, Consul, CockroachDB) to agree on data values and state machine logs across independent nodes despite network partitions.
-
-### **141. What is Write-Ahead Logging (WAL)?**
-**Answer:** A database reliability technique where changes are recorded to append-only disk storage before being applied to memory, guaranteeing durability during crashes.
-
-### **142. What is Database Connection Pooling?**
-**Answer:** Reusing a fixed pool of established database connections (via PgBouncer / RDS Proxy) to prevent thousands of client requests from exhausting database memory and thread limits.
-
-### **143. What is Sharding in databases?**
-**Answer:** Horizontally partitioning database rows across multiple independent physical database instances based on a shard key (e.g., `user_id` % 10).
-
-### **144. What is Read-Write Splitting?**
-**Answer:** Routing write operations (`INSERT`, `UPDATE`) to the primary database while directing read queries (`SELECT`) to asynchronous read replicas.
-
-### **145. What is Database Replication Lag?**
-**Answer:** The delay in time between a transaction being committed on a primary database and that transaction being applied on asynchronous read replicas.
-
-### **146. What is Dual-Write Pattern in microservices?**
-**Answer:** The anti-pattern of an application attempting to write to both a database and a message queue in a single transaction, leading to data inconsistency when one write fails.
-
-### **147. What is the Transactional Outbox Pattern?**
-**Answer:** Saving events to an "Outbox" database table within the same ACID transaction as business data, and using a separate change-data-capture (Debezium) process to publish events to Kafka.
-
-### **148. What is the Saga Pattern in distributed transactions?**
-**Answer:** Managing distributed transactions across microservices via a sequence of local transactions, executing compensating transactions (reversals) if a step fails.
-
-### **149. What is Event Sourcing?**
-**Answer:** An architectural pattern where state changes are stored as an append-only sequence of immutable events rather than overwriting current state values in place.
-
-### **150. What is CQRS (Command Query Responsibility Segregation)?**
-**Answer:** Separating read and write operations into distinct data models and databases optimized specifically for high-throughput writes (Commands) or fast reads (Queries).
-
-### **151. What is an Anycast IP Address?**
-**Answer:** Routing client traffic to the topologically closest server among multiple globally distributed servers sharing the exact same IP address via BGP.
-
-### **152. What is a Content Delivery Network (CDN)?**
-**Answer:** A globally distributed network of proxy caching servers that caches web assets close to users to minimize latency and absorb traffic surges.
-
-### **153. What is Head-of-Line (HoL) Blocking?**
-**Answer:** A performance bottleneck where a single dropped or delayed packet in a FIFO queue blocks all subsequent packets from processing (resolved by HTTP/3 QUIC over UDP).
-
-### **154. What is AWS Direct Connect / Azure ExpressRoute?**
-**Answer:** Dedicated private physical fiber connections between an enterprise on-premise data center and a cloud provider, bypassing public internet routing.
-
-### **155. What is AWS Transit Gateway?**
-**Answer:** A centralized hub-and-spoke router connecting hundreds of VPCs, VPNs, and Direct Connect links through a single managed gateway.
-
-### **156. What is AWS PrivateLink (VPC Endpoint)?**
-**Answer:** Private network interfaces connecting VPC subnets to cloud services or SaaS vendors over cloud backbone networks without public internet transit.
-
-### **157. What is Multi-Region Active-Active Architecture?**
-**Answer:** Deploying fully functional infrastructure across multiple geographical cloud regions simultaneously, routing live users to the closest region with real-time data replication.
-
-### **158. What is Disaster Recovery Failover Routing?**
-**Answer:** DNS routing policies (Route 53) that automatically redirect global user traffic to a backup disaster recovery region when primary health check probes fail.
-
-### **159. What is Pilot Light Disaster Recovery?**
-**Answer:** Replicating critical databases continuously to a secondary region while keeping minimal core infrastructure running, provisioning full compute only during a disaster.
-
-### **160. What is Warm Standby Disaster Recovery?**
-**Answer:** Running a scaled-down, fully functional copy of production infrastructure in a secondary region that can be scaled up instantly upon failover.
-
-### **161. What is Cold Start in Serverless?**
-**Answer:** The latency penalty incurred when an incoming request requires the cloud provider to download the container image, provision a microVM, and initialize the language runtime.
-
-### **162. What is AWS Lambda SnapStart?**
-**Answer:** Caching an encrypted Firecracker microVM snapshot of an initialized JVM runtime during deployment, resuming subsequent cold starts in $< 200\text{ms}$.
-
-### **163. What is an API Gateway?**
-**Answer:** An application-layer reverse proxy that manages incoming API traffic, handling authentication, rate limiting, request validation, and analytics.
-
-### **164. What is gRPC vs REST?**
-**Answer:** REST uses HTTP/1.1 with JSON text payloads; gRPC uses HTTP/2 with binary Protocol Buffers (Protobuf), providing multiplexing, bi-directional streaming, and high throughput.
-
-### **165. What is GraphQL vs REST?**
-**Answer:** REST exposes fixed data endpoints; GraphQL allows clients to request the exact fields they need in a single request, eliminating over-fetching and under-fetching.
-
-### **166. What is Webhook Payload Verification (HMAC-SHA256)?**
-**Answer:** Validating that an incoming webhook originated from an authentic sender by comparing the hash of the request body with a shared secret key.
-
-### **167. What is JWT (JSON Web Token) Structure?**
-**Answer:** Encoded string with three parts separated by dots: **Header** (algorithm), **Payload** (claims: `sub`, `exp`), and **Signature** (cryptographic hash).
-
-### **168. What is OAuth 2.0 vs OpenID Connect (OIDC)?**
-**Answer:** OAuth 2.0 is an authorization framework issuing Access Tokens for API permissions; OIDC is an identity layer on top of OAuth 2.0 issuing ID Tokens for user authentication.
-
-### **169. What is Role-Based Access Control (RBAC)?**
-**Answer:** Assigning system permissions to roles rather than individual users, granting users permissions based on role memberships.
-
-### **170. What is Attribute-Based Access Control (ABAC)?**
-**Answer:** Evaluating context attributes (user department, resource tags, time of day, IP address) to determine real-time access authorization.
-
-### **171. What is CloudTrail vs CloudWatch?**
-**Answer:** CloudTrail records every API call made in an AWS account for auditing; CloudWatch monitors operational performance metrics and aggregates logs.
-
-### **172. What is Amazon GuardDuty?**
-**Answer:** Intelligent threat detection analyzing CloudTrail, VPC Flow Logs, and EKS audit logs via machine learning to detect compromised instances.
-
-### **173. What is AWS Security Hub?**
-**Answer:** A centralized dashboard aggregating compliance posture (CIS, PCI-DSS) and security findings across AWS accounts.
-
-### **174. What is Amazon Inspector?**
-**Answer:** Automated vulnerability management scanning EC2 instances, ECR container images, and Lambda functions for software vulnerabilities.
-
-### **175. What is AWS KMS (Key Management Service)?**
-**Answer:** Managed service for creating and controlling cryptographic encryption keys used across cloud storage and applications.
-
-### **176. What is Envelope Encryption?**
-**Answer:** Encrypting high-volume plaintext data with a Data Encryption Key (DEK), and encrypting the DEK with a root KMS Key.
-
-### **177. What is AWS Secrets Manager vs Parameter Store?**
-**Answer:** Secrets Manager supports automated secret rotation and cross-account access; Parameter Store is a simpler, hierarchical key-value configuration store.
-
-### **178. What is Infrastructure Drift Detection?**
-**Answer:** Automatically comparing running cloud resources against IaC state files to detect and alert on unauthorized manual modifications.
-
-### **179. What is Terratest?**
-**Answer:** A Go library for writing automated integration tests that provision real cloud infrastructure via Terraform, validate endpoints, and tear down resources.
-
-### **180. What is Checkov?**
-**Answer:** A static code analysis tool for Infrastructure as Code that scans Terraform, CloudFormation, and Kubernetes manifests for security misconfigurations.
-
-### **181. What is OpenTofu?**
-**Answer:** An open-source, community-governed fork of Terraform (MPL 2.0) maintained by the Linux Foundation.
-
-### **182. What is Prometheus PromQL?**
-**Answer:** A powerful read-only query language for filtering, aggregating, and computing mathematical functions over Prometheus time-series metrics.
-
-### **183. What is Grafana Loki LogQL?**
-**Answer:** A Prometheus-inspired query language for filtering log streams and generating real-time metrics from raw log text.
-
-### **184. What is Grafana Tempo?**
-**Answer:** A distributed tracing backend that stores raw spans directly in cheap cloud object storage without needing Elasticsearch.
-
-### **185. What is OpenTelemetry (OTel) Collector?**
-**Answer:** A proxy pipeline component that receives, processes (batches, redacts, samples), and exports telemetry to multiple backend storage engines.
-
-### **186. What is eBPF Hubble?**
-**Answer:** An observability platform running on eBPF to visualize service-to-service communication dependency graphs and network latency.
-
-### **187. What is Chaos Mesh?**
-**Answer:** A Kubernetes-native chaos engineering operator that injects faults via CRDs to test system resiliency.
-
-### **188. What is DAST (Dynamic Application Security Testing)?**
-**Answer:** Attacking running web applications from the outside to discover runtime misconfigurations, XSS, and SQL injection flaws.
-
-### **189. What is SAST (Static Application Security Testing)?**
-**Answer:** Analyzing uncompiled source code to detect security vulnerabilities, syntax errors, and coding flaws.
-
-### **190. What is SCA (Software Composition Analysis)?**
-**Answer:** Scanning open-source third-party dependencies against national vulnerability databases for known CVEs.
-
-### **191. What is a Container Escape?**
-**Answer:** An exploit where an attacker running code inside a container escapes isolation boundaries to gain control over the host operating system.
-
-### **192. What is Rootless Docker / Podman?**
-**Answer:** Running container daemons and processes inside unprivileged user namespaces, preventing host root compromise during breakouts.
-
-### **193. What is Pod Security Admission (PSA)?**
-**Answer:** Kubernetes built-in admission controller enforcing Privileged, Baseline, or Restricted security standards per namespace.
-
-### **194. What is a Kubernetes Pod Disruption Budget (PDB)?**
-**Answer:** A policy limiting how many pods of a replicated service can be down simultaneously during voluntary disruptions (node drains).
-
-### **195. What is Kubernetes Horizontal Pod Autoscaler (HPA)?**
-**Answer:** Automatically adjusting the number of pod replicas based on observed CPU, memory, or custom external metrics.
-
-### **196. What is Kubernetes Vertical Pod Autoscaler (VPA)?**
-**Answer:** Automatically right-sizing container CPU and memory resource requests/limits based on historical usage analysis.
-
-### **197. What is NodeLocal DNSCache?**
-**Answer:** A DaemonSet caching DNS queries locally on worker nodes to eliminate CoreDNS network bottlenecks and glibc `ndots:5` latency storms.
-
-### **198. What is GitOps Reconciliation Loop?**
-**Answer:** A continuous background process where a GitOps operator compares desired state in Git against live cluster state and automatically auto-heals drift.
-
-### **199. What is Progressive Delivery?**
-**Answer:** An evolution of Continuous Delivery that combines canary deployments, automated metric analysis, and feature flags to roll out features with minimal blast radius.
-
-### **200. What is an SRE Blameless Post-Mortem Creed?**
-**Answer:** The guiding philosophy that human error is the starting point of an incident investigation, not the conclusion, focusing on improving systemic safeguards.
