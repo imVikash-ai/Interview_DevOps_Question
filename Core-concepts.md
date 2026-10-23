@@ -646,49 +646,75 @@ The **Single Source of Truth (SSoT)** principle is **a data management and syste
 
 - **Lowers Costs:** Avoids the high financial toll associated with poor data quality and fragmented silos across the enterprise.
 
-### **37. What is Technical Debt in DevOps?**
-**Answer:** The implied cost of choosing quick, suboptimal workarounds (manual server patches, hardcoded configs) over well-architected solutions, compounding future operational maintenance overhead.
+### **23. What is Zero-Downtime Deployment?**
+**Answer:** 
 
-### **38. What is Zero-Downtime Deployment?**
-**Answer:** Deploying new application versions without interrupting active user requests or causing connection drops (achieved via Rolling Updates, Blue-Green, or Canary deployments).
+**Zero-Downtime Deployment (ZDD)** is **a software release strategy that updates an application or system without interrupting user availability or causing service hiccups**. 
 
-### **39. What is Backward Compatibility in API design?**
-**Answer:** Ensuring that updates to APIs or database schemas do not break older client applications or existing data consumers.
+#### Core Strategies
 
-### **40. What is Semantic Versioning (SemVer)?**
-**Answer:** A standard versioning convention: `MAJOR.MINOR.PATCH` (e.g., `2.1.0`), where MAJOR indicates breaking changes, MINOR indicates backward-compatible features, and PATCH indicates bug fixes.
+- **Blue-Green Deployment:** Maintains two identical production environments (Blue and Green). New code is deployed to the idle environment (e.g., Green), verified, and traffic is switched over instantaneously. 
+- **Rolling Updates:** Replaces or updates application instances sequentially in small batches rather than all at once, using a load balancer to route traffic only to healthy instances.
+- **Canary Releases:** Introduces the new version to a small subset of users (e.g., 5%) first. The rollout expands to 100% only if performance and stability look good. 
+- **Feature Toggles:** Deploys new code to production with the specific features turned off via configuration, allowing developers to activate them later without another deployment. 
 
-### **41. What is Self-Healing Infrastructure?**
-**Answer:** Systems designed to automatically detect and remediate failures without human intervention (e.g., Kubernetes restarting crashed containers or cloud Auto Scaling Groups replacing unhealthy instances).
+#### Key Techniques
 
-### **42. What is a Monorepo vs Polyrepo?**
-**Answer:** Monorepos hold multiple projects/microservices in a single repository; Polyrepos store each microservice in its own independent repository.
+- **Load Balancers & Reverse Proxies:** Distribute incoming traffic away from instances undergoing maintenance. 
+- **Health and Readiness Probes:** Ensure traffic is only sent to new application instances after they have fully booted and passed internal checks. 
+- **Graceful Shutdowns:** Allow running servers to finish processing active user sessions or handle termination signals (`SIGTERM`) before shutting down. 
+- **Database Versioning:** Manages schema changes carefully so older and newer application versions can temporarily share or transition database structures without breaking data integrity.
 
-### **43. What is Shift-Right Testing?**
-**Answer:** Testing software in live production environments under real user traffic using feature flags, canary rollouts, synthetic monitoring, and chaos experiments.
+### **24. What is Telemetry in DevOps?**
+**Answer:** 
 
-### **44. What is Telemetry in DevOps?**
-**Answer:** The automated collection and transmission of operational measurements, performance data, and diagnostics from distributed systems to monitoring tools.
+Telemetry in DevOps is **the automated collection, transmission, and processing of application and infrastructure data to give teams real-time visibility into system behavior**. 
 
-### **45. What is a Blameless Culture?**
-**Answer:** A high-trust workplace culture that treats errors as systemic opportunities to improve tooling and processes rather than punishing individual human mistakes.
+#### Core Components of Telemetry
 
-### **46. What is a GameDay in SRE?**
-**Answer:** A scheduled exercise where engineering teams simulate production outages and disaster recovery failovers to validate monitoring, alerting, and operational runbooks.
+- **Metrics:** Numerical data points measuring performance over time (e.g., CPU utilization, memory pressure, and request response rates).
+- **Logs:** Discrete time-stamped records of events, errors, and state changes within the application or operating system.
+- **Traces:** End-to-end recordings that track a single user request or transaction as it moves across multiple microservices and databases.
+- **Centralized Platform:** A backend destination (such as Prometheus, Grafana, or **BMC Software**) that aggregates, visualizes, and triggers alerts on incoming data streams.
 
-### **47. What is a Dead Letter Queue (DLQ)?**
-**Answer:** A dedicated message queue that isolates unprocessable or malformed messages after repeated retry failures to prevent consumer queue blocking.
+#### How Telemetry Differs from Monitoring
 
-### **48. What is the Bulkhead Pattern?**
-**Answer:** Isolating critical system resources (thread pools, memory, database connections) into distinct compartments so failure of one dependency does not crash the entire application.
+- **Monitoring** tells you *that* something is broken (e.g., a service is down or latency is high).
+- **Telemetry** gives you the raw, structured data to explain *why* it is broken and *where* the bottleneck lives. 
 
-### **49. What is Circuit Breaking?**
-**Answer:** A design pattern that prevents an application from repeatedly executing an operation that is failing, allowing downstream dependencies time to recover.
+#### Key Benefits in the Software Lifecycle
 
-### **50. What is Rate Limiting vs Throttling?**
-**Answer:** Rate limiting restricts how many requests a specific user/IP can make in a given time window; throttling regulates server-side processing speed to match downstream resource capacity.
+- **Proactive Issue Detection:** Catching performance drops or resource leaks in staging or early production before users notice.
+- **Faster Root-Cause Analysis:** Linking production incidents directly to specific code commits, configuration changes, or third-party API failures. 
+- **Pipeline Optimization:** Tracking CI/CD build times, test suite failures, and deployment frequency to improve DORA metrics. 
+- **Standardization via OpenTelemetry:** Using open-source frameworks like OpenTelemetry to instrument code once and route data to any analytics or visualization tool.
 
----
+### **25. What is Rate Limiting vs Throttling?**
+**Answer:** 
+
+**Rate limiting and throttling both control traffic to protect servers, but they handle excess requests differently**.
+
+#### Rate Limiting
+
+- **What it does:** Enforces a hard cap on the number of requests a user or client can make within a specific time window (e.g., 100 requests per minute).
+- **Action on limit:** Outright rejects excess requests, usually returning an `HTTP 429 Too Many Requests` status code.
+- **Common algorithms:** Fixed Window, Sliding Window, and Token Bucket.
+- **Main goal:** Prevent abuse, protect against Denial-of-Service (DoS) attacks, and enforce fair usage quotas. 
+
+#### Throttling
+
+- **What it does:** Controls and shapes the flow of traffic by slowing down or delaying excess requests instead of blocking them immediately.
+- **Action on limit:** Queues, buffers, or paces requests so they process more slowly over time, or returns an error only if the queue overflows.
+- **Common algorithms:** Leaky Bucket or concurrent execution limits.
+- **Main goal:** Smooth out sudden traffic spikes, maintain system stability, and preserve a consistent user experience. 
+
+#### Quick Comparison
+
+| **Feature** | **Rate Limiting** | **Throttling** |
+|---|---|---|
+| **Handling Excess Traffic** | Rejects requests (e.g., `429 Too Many Requests`) | Delays, queues, or slows down requests |
+| **Primary Focus** | Quota enforcement and security | Resource leveling and smoothing spikes |
+| **User Experience** | Blocked until the time window resets | Slower response times during high load |
 
 ## 🟡 **Part 2: Site Reliability Engineering (SRE) & Reliability (Questions 51–100)**
 
