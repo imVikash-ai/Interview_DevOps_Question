@@ -799,7 +799,38 @@ An **Incident Commander (IC)** is **the single point of authority and accountabi
 - **IT and DevOps:** Adopted by technology companies to manage major system outages, cyberattacks, or data breaches.
 
 ### **74. What is a Runbook (Playbook)?**
-**Answer:** A documented, step-by-step technical guide for on-call engineers describing how to diagnose, triage, and resolve specific alert conditions or system failures.
+**Answer:**
+
+A **runbook** is **a detailed, step-by-step operational guide that instructs a person or an automated system on how to execute a specific technical task**, such as restarting a server, deploying code, patching software, or recovering a database. 
+
+A **playbook**, by contrast, is a higher-level strategic framework that outlines decision-making paths, team roles, communication channels, and escalation policies for handling a broader incident or scenario (such as a ransomware attack or major outage). 
+
+#### Key Differences at a Glance
+
+| **Feature** | **Runbook** | **Playbook** |
+|---|---|---|
+| **Scope** | Narrow, tactical, and task-specific | Broad, strategic, and scenario-wide |
+| **Focus** | *"How"* to perform a specific action | *"What to think and decide"* during an event |
+| **Logic** | Linear and sequential (step-by-step) | Conditional and branch-based (decision trees) |
+| **Execution** | Can be manual, semi-automated, or fully automated | Guided for leadership, cross-functional teams, and coordinators |
+| **Relationship** | Often triggered or referenced *inside* a playbook | Coordinates multiple runbooks together |
+
+#### What a Good Runbook Contains
+
+An effective runbook eliminates "tribal knowledge" so any qualified team member or automated system can resolve an issue. It typically includes: 
+
+- **Trigger Conditions:** When and why the runbook should be used (e.g., high CPU usage alert).
+- **Prerequisites & Permissions:** Required access levels, credentials, and tools.
+- **Step-by-Step Instructions:** Exact commands, UI navigation, or API calls.
+- **Verification Steps:** How to confirm the task succeeded.
+- **Rollback / Failure Plan:** What to do if the step fails or breaks the system.
+- **Escalation Criteria:** Who to contact if the fix does not work.
+
+#### Types of Runbooks
+
+1. **Manual Runbooks:** Written guides followed step-by-step by a human operator. Good for preserving knowledge, but prone to human error or documentation drift. 
+2. **Automated Runbooks:** Code-driven scripts executed by software or orchestration tools with zero human intervention. Ideal for repetitive, low-risk tasks. 
+3. **AI-Powered / Agentic Runbooks:** Intelligent workflows where AI agents run diagnostics, suggest actions, and execute steps while routing complex choices through human approval gates.
 
 ### **75. What is Automated Remediation?**
 **Answer:** Using software routines (EventBridge, Lambda, Kubernetes Operators) to detect specific operational failures and execute corrective actions (restarting pods, resizing disks) with zero human intervention.
