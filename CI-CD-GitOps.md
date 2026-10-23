@@ -3018,14 +3018,37 @@ Argo CD includes several built-in generators.
 
 - **Standardized Infrastructure:** Automatically roll out baseline cluster tools, such as `cert-manager`, `ingress-nginx`, or `prometheus`, to every newly provisioned Kubernetes cluster.
 
-### **106. What are ArgoCD Sync Waves?**
-**Answer:** Annotations (`argocd.argoproj.io/sync-wave: "1"`) that control the exact numerical execution order of Kubernetes resources during synchronization (lower/negative numbers apply first).
+### **82. What is ArgoCD Auto-Sync and Self-Healing?**
+**Answer:**
 
-### **107. What are ArgoCD Sync Phases?**
-**Answer:** PreSync $\rightarrow$ Sync $\rightarrow$ PostSync $\rightarrow$ SyncFail. Allows running prerequisite jobs (database migrations) before updating application deployments.
+**Argo CD Auto-Sync** and **Self-Healing** are **core GitOps features that keep your Kubernetes cluster automatically aligned with the declarative configuration stored in your Git repository**. 
 
-### **108. What is ArgoCD Auto-Sync and Self-Healing?**
-**Answer:** Auto-Sync automatically applies new Git commits to the cluster; Self-Healing detects manual out-of-band cluster edits and overwrites them back to the Git source of truth.
+#### 1. Auto-Sync
+
+- **What it does:** Automatically applies updates from your Git repository to your Kubernetes cluster when a change is detected.
+
+- **How it works:** Argo CD continuously monitors your Git source or receives Git webhooks. When a new commit or manifest change is detected, Argo CD marks the application as `OutOfSync` and deploys the new manifests automatically without requiring a human to click the **Sync** button in the UI. 
+
+- **Key Configuration (`spec.syncPolicy.automated`):**
+  - `prune: true`: Automatically deletes resources from the cluster if they are removed from Git.
+  - `allowEmpty: true`: Allows syncing even if the application renders no manifests. Use this carefully because it can permit an application to remove all its managed resources. 
+
+#### 2. Self-Healing
+
+- **What it does:** Automatically corrects manual or out-of-band changes made directly inside the Kubernetes cluster. 
+
+- **How it works:** If someone runs `kubectl edit`, `kubectl scale`, or deletes a resource directly on the live cluster, Argo CD detects a difference between the live cluster state and the Git source of truth. With self-healing enabled, Argo CD automatically reconciles the resource to match the desired configuration stored in Git. 
+
+- **Key Configuration (`spec.syncPolicy.automated.selfHeal: true`):**
+  - Prevents configuration drift caused by manual hotfixes or debugging sessions that bypass Git.
+  - Enforces Git as the source of truth for application and infrastructure configuration. 
+
+#### Comparison at a Glance
+
+| Feature | What Triggers It | What Action Is Taken |
+|---|---|---|
+| **Auto-Sync** | Changes made in **Git** | Deploys or updates manifests from Git in the cluster |
+| **Self-Healing** | Changes made directly in the **cluster**, such as through `kubectl` | Reconciles cluster resources to match Git again |
 
 ### **109. What is ArgoCD Prune?**
 **Answer:** An automated synchronization setting that deletes Kubernetes resources from the cluster when their corresponding manifest files are removed from Git.
