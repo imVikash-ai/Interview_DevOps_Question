@@ -275,8 +275,49 @@ Because the SDLC is typically mapped chronologically from left (planning/coding)
 
 - **Faster Release Cycles:** Automated security gates inside CI/CD pipelines prevent last-minute security reviews from becoming major delivery bottlenecks.
 
-### **13. What is a Monolith vs Microservices Architecture?**
-**Answer:** Monoliths bundle all business logic, database access, and UI into a single codebase and deployment unit. Microservices decompose functionality into autonomous, loosely coupled services communicating over network APIs (REST, gRPC, Kafka).
+### **11. What is a Monolith vs Microservices Architecture?**
+**Answer:**
+
+**A monolithic architecture builds an application as a single, unified codebase and deployable unit, whereas a microservices architecture divides an application into smaller, independent services that focus on specific business capabilities and communicate via APIs or messaging**. 
+
+#### Key Differences
+
+| **Feature** | **Monolithic Architecture** | **Microservices Architecture** |
+|---|---|---|
+| **Structure** | Single, tightly integrated codebase | Multiple smaller, decoupled services |
+| **Deployment** | Entire application is deployed as one unit | Each service can be deployed independently |
+| **Scaling** | Scales the whole application (vertical scaling/duplication) | Individual services scale separately based on demand |
+| **Communication** | Fast, in-process function/method calls | Network protocols like HTTP, gRPC, or message brokers |
+| **Technology Stack** | Usually locked into a single language and framework | Different services can use different tech stacks |
+| **Fault Tolerance** | An error in one module can crash the whole system | Failures are isolated to individual services |
+
+#### Pros and Cons:
+
+#### Monolithic Architecture
+
+- **Pros:**
+  - Simpler to design, develop, and test initially.
+  - Straightforward debugging within a single environment.
+  - No network latency for internal component communication.
+  - Ideal for small teams, startups, and early-stage projects. 
+
+- **Cons:**
+  - Becomes hard to maintain and scale as the codebase grows.
+  - A small bug or update requires retesting and redeploying the entire system.
+  - Limited flexibility to adopt new technologies.
+
+#### Microservices Architecture
+
+- **Pros:**
+  - High scalability and fault isolation (one service going down does not take down the whole app).
+  - Independent teams can build, test, and deploy services faster.
+  - Allows using the best technology or database for each specific task.
+  - Well-suited for large enterprises and high-scale applications. 
+
+- **Cons:**
+  - High upfront complexity and infrastructure overhead.
+  - Difficult distributed debugging and tracing.
+  - Added network latency and eventual consistency challenges.
 
 ### **14. What are the Twelve Factors of the 12-Factor App?**
 **Answer:** 1. Codebase, 2. Dependencies, 3. Config, 4. Backing Services, 5. Build/Release/Run, 6. Processes, 7. Port Binding, 8. Concurrency, 9. Disposability, 10. Dev/Prod Parity, 11. Logs, 12. Admin Processes.
