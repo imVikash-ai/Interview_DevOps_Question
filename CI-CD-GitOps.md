@@ -3146,172 +3146,44 @@ Rather than a high-risk "big bang" release where code goes live to everyone at o
 
 - **Shared Ownership:** Shifts some release control and testing oversight closer to product managers and QA teams rather than leaving it strictly with operations engineers.
 
-### **114. What is Argo Rollouts?**
-**Answer:** A Kubernetes operator replacing standard Deployments with a `Rollout` CRD that coordinates canary traffic splitting and automated metric analysis.
+### **85. What is a Git Pre-Commit Hook?**
+**Answer:** 
 
-### **115. What is an AnalysisTemplate in Argo Rollouts?**
-**Answer:** A declarative template defining Prometheus, Datadog, or CloudWatch queries used to evaluate canary health during progressive rollouts.
+A **Git pre-commit hook** is a script that runs automatically every time you execute the `git commit` command, right before Git prompts you for a commit message or creates the commit object.
 
-### **117. What is Software Supply Chain Security?**
-**Answer:** Protecting against unauthorized modifications, malicious dependency injections, and compromised build systems across the entire software development lifecycle.
+Its primary purpose is to act as a **first line of defense** for code quality. It inspects the snapshot of files you are about to commit. If the script **exits with a non-zero status (fails), Git aborts the commit operation**, forcing you to fix the issues before the code can be saved to your local history. 
 
-### **118. What is the SLSA Framework (Levels 1–3)?**
-**Answer:** Level 1: Scripted build generating provenance; Level 2: Hosted build service with source integrity; Level 3: Isolated, ephemeral, hermetic build platform with cryptographically signed, non-falsifiable provenance.
+#### Common Use Cases
 
-### **119. What is Keyless Signing with Sigstore Cosign?**
-**Answer:** Signing container images using short-lived OIDC tokens exchanged for X.509 certificates from Fulcio, recording signatures in the Rekor transparency log.
+Developers use pre-commit hooks to automate repetitive quality checks, including:
 
-### **120. What is Rekor in Sigstore?**
-**Answer:** An immutable, tamper-evident, append-only transparency log that records signed artifact metadata and proof of provenance.
+- **Linting & Code Formatting:** Automatically checking for syntax errors or enforcing style rules (e.g., using Prettier, ESLint, or Black). 
 
-### **121. What is Fulcio in Sigstore?**
-**Answer:** A free, public Certificate Authority that issues short-lived (10-minute) X.509 certificates bound to OpenID Connect identities (e.g., GitHub Actions workflows).
+- **Secret Detection:** Scanning files to ensure no API keys, private tokens, or passwords are accidentally committed. 
 
-### **122. What is Syft?**
-**Answer:** An open-source CLI tool and library for generating Software Bill of Materials (SBOMs) from container images, filesystems, and archives in CycloneDX and SPDX formats.
+- **Syntax and Sanity Checks:** Catching common mistakes like trailing whitespaces, unresolved merge conflicts, or missing file extensions. 
 
-### **123. What is Grype?**
-**Answer:** An open-source vulnerability scanner specifically designed to scan container images and SBOM files for known security vulnerabilities.
+- **Running Unit Tests:** Executing a quick subset of tests to ensure the changes don't immediately break the existing build.
 
-### **124. What is In-Toto?**
-**Answer:** A framework for cryptographic verification of software supply chain integrity, ensuring every step from commit to build to packaging was performed by authorized actors.
+#### How It Works Locally
 
-### **125. What is Kyverno Image Verification?**
-**Answer:** An admission policy rule that verifies container image cryptographic signatures against Sigstore Cosign before allowing pods to schedule in Kubernetes.
+By default, Git stores these hook scripts locally inside your repository's hidden directory at **`.git/hooks/`**.
 
-### **126. What is Bitnami Sealed Secrets?**
-**Answer:** A GitOps secret management tool where secrets are encrypted client-side with a public key and committed to Git, decrypted inside the cluster by a controller possessing the private key.
+1. If you look inside that folder, you will find several placeholder scripts ending in `.sample` (e.g., `pre-commit.sample`). 
 
-### **127. What is External Secrets Operator (ESO)?**
-**Answer:** A Kubernetes operator that synchronizes secrets from enterprise vaults (AWS Secrets Manager, HashiCorp Vault, Azure Key Vault) into native Kubernetes `Secret` resources.
+2. To activate a custom hook manually, you simply rename the file to remove the extension (`pre-commit`), write your script (using Bash, Python, or Perl), and make it executable:
 
-### **128. What is HashiCorp Vault Agent Sidecar Injector?**
-**Answer:** A Kubernetes mutating webhook that injects a Vault agent container into application pods to dynamically fetch and render secrets into an in-memory volume.
+   ```bash
+   chmod +x .git/hooks/pre-commit
+   ```
 
-### **129. What is Atlantis for Terraform?**
-**Answer:** An open-source application that executes `terraform plan` and `terraform apply` directly inside GitHub/GitLab Pull Request comments with automated state locking.
+#### Managing Hooks with the `pre-commit` Framework
 
-### **130. What is Spacelift?**
-**Answer:** A specialized CI/CD management platform for Infrastructure as Code (Terraform, OpenTofu, Pulumi, CloudFormation, Kubernetes) with policy enforcement via OPA.
+Because files inside the hidden `.git/` folder are not tracked by Git, they cannot easily be shared with a team. To solve this, most developers use an open-source tool called the **pre-commit framework**
 
-### **131. What is GitHub Actions Runner Controller (ARC) Autoscaling?**
-**Answer:** Autoscaling runner pods dynamically based on GitHub API metrics (`workflow_job` queue depth) from 0 to hundreds of instances.
+With this framework, you define your automated checks in a single file called **`.pre-commit-config.yaml`** at the root of your project. This file *is* tracked by **Git**, ensuring everyone on your team runs the exact same quality checks on their machine before committing.
 
-### **132. What is Ephemeral Runner Security?**
-**Answer:** Destroying self-hosted runner pods/VMs immediately after completing a single job to prevent lateral movement, credential theft, and state pollution.
-
-### **133. What is Snyk?**
-**Answer:** A commercial developer security platform scanning source code (SAST), dependencies (SCA), container images, and IaC templates for security vulnerabilities.
-
-### **134. What is SonarQube?**
-**Answer:** A continuous code quality platform evaluating code coverage, duplication, complexity, code smells, and security vulnerabilities.
-
-### **135. What is OWASP ZAP in CI/CD?**
-**Answer:** An open-source web application security scanner used in CI pipelines to execute automated Dynamic Application Security Testing (DAST).
-
-### **136. What is Checkov?**
-**Answer:** A static analysis tool for IaC that scans Terraform, Kubernetes manifests, Helm charts, and Dockerfiles for security misconfigurations.
-
-### **137. What is tfsec?**
-**Answer:** A fast static analysis security scanner for Terraform code, now integrated into Trivy.
-
-### **138. What is Infracost?**
-**Answer:** A FinOps tool that parses Terraform code in pull requests to calculate monthly cloud cost impact before merging code.
-
-### **139. What is Kustomize in GitOps?**
-**Answer:** A template-free configuration manager that customizes Kubernetes YAML manifests using declarative overlays (dev, staging, prod) over a base configuration.
-
-### **140. What is Helm in GitOps?**
-**Answer:** A package manager for Kubernetes that bundles related manifests into reusable Charts, parameterized using `values.yaml` files.
-
-### **141. What is Helmfile?**
-**Answer:** A declarative spec for deploying multiple Helm charts across multiple Kubernetes clusters in dependency order.
-
-### **142. What is Tekton Pipelines?**
-**Answer:** A Kubernetes-native CRD defining a Directed Acyclic Graph (DAG) of Tasks executed sequentially or in parallel inside ephemeral pods.
-
-### **143. What is Spinnaker Automated Canary Analysis (Kayenta)?**
-**Answer:** An automated statistical analysis engine comparing canary metrics against baseline metrics over time to make automated promotion decisions.
-
-### **144. What is Chaos Mesh in CI/CD?**
-**Answer:** Injecting automated network delays, pod failures, and disk stress into staging environments during CI pipeline execution to validate resilience.
-
-### **145. What is Semantic Release?**
-**Answer:** An automated tool that analyzes commit messages to determine the next SemVer version, generates changelogs, creates Git tags, and publishes releases.
-
-### **146. What is Release Please?**
-**Answer:** A Google tool that generates Release PRs containing updated changelogs and version bumps based on conventional commit history.
-
-### **147. What is Dependabot / Renovate?**
-**Answer:** Automated dependency update bots that scan repository manifests, check for new package releases, and automatically open PRs with changelog summaries.
-
-### **148. What is Renovate Bot?**
-**Answer:** A highly configurable, multi-platform dependency update tool supporting automated merging of non-breaking security patches.
-
-### **149. What is a Pull Request Builder Job?**
-**Answer:** An automated CI job that triggers when a PR is created or updated to compile code, run tests, and report status checks back to the PR.
-
-### **150. What is a GitOps Out-of-Sync State?**
-**Answer:** A condition where the live state of Kubernetes cluster resources differs from the declared configuration stored in Git.
-
-### **151. What is GitOps Drift Correction?**
-**Answer:** The automatic overwrite of unauthorized out-of-band manual changes in a cluster back to the version declared in Git.
-
-### **152. What is an ArgoCD PreSync Hook?**
-**Answer:** A Kubernetes resource (Job) executed before any other deployment resources are applied, commonly used for database schema migrations.
-
-### **153. What is an ArgoCD PostSync Hook?**
-**Answer:** A script or notification Job executed only after all deployment resources have successfully become healthy in the cluster.
-
-### **154. What is an ArgoCD SyncFail Hook?**
-**Answer:** A remediation Job executed when an ArgoCD synchronization operation fails.
-
-### **155. What is Secret Masking Bypass Risk?**
-**Answer:** If secrets are base64-encoded or split across multiple strings, CI engines will fail to match the secret string and print it in plain text.
-
-### **156. What is Git Credential Helper in CI?**
-**Answer:** A utility allowing CI/CD runners to authenticate with remote Git repositories using short-lived OAuth tokens instead of hardcoded passwords.
-
-### **157. What is GitHub Actions Reusable Workflow Inheritance?**
-**Answer:** Passing all secrets and context from a caller workflow to a reusable workflow using `secrets: inherit`.
-
-### **158. What is Container Layer Squashing?**
-**Answer:** Merging all intermediate build layers of a container into a single layer to reduce image size and discard temporary files.
-
-### **159. What is Multi-Arch Container Building?**
-**Answer:** Using Docker `buildx` to compile container images for multiple CPU architectures (`linux/amd64`, `linux/arm64`) from a single Dockerfile.
-
-### **160. What is OCI (Open Container Initiative)?**
-**Answer:** An open governance industry standard defining specifications for container image formats (Image Spec) and runtimes (Runtime Spec).
-
-### **161. What is Cosign Attestation?**
-**Answer:** Cryptographically signing metadata predicates (SBOMs, test results, vulnerability scan reports) and attaching them to the container image in the registry.
-
-### **162. What is Kyverno ClusterPolicy vs Policy?**
-**Answer:** `ClusterPolicy` applies to all resources across the entire cluster; `Policy` is scoped strictly to a single namespace.
-
-### **163. What is OPA Gatekeeper ConstraintTemplate?**
-**Answer:** A Custom Resource defining the declarative Rego logic for a policy, instantiated by `Constraint` CRDs.
-
-### **164. What is a Continuous Integration Feedback Loop?**
-**Answer:** The time elapsed from a developer pushing a commit to receiving automated test results; must be $< 10$ minutes to maintain high velocity.
-
-### **165. What is Monorepo Incremental Building?**
-**Answer:** Using cached compilation outputs so that changing one file only recompiles that file and its direct dependents.
-
-### **166. What is Bazel?**
-**Answer:** A fast, scalable, multi-language build system developed by Google that enforces hermetic, reproducible builds and aggressive caching.
-
-### **167. What is Turborepo?**
-**Answer:** A high-performance build system for JavaScript/TypeScript monorepos that caches build and test execution outputs remotely.
-
-### **168. What is Nx?**
-**Answer:** A smart, extensible build framework with advanced dependency graph visualization and distributed task execution for monorepos.
-
-### **169. What is a Git Pre-Commit Hook?**
-**Answer:** A client-side script executed automatically before `git commit` runs, used to lint code, format files, and check for committed secrets locally.
-
-### **170. What is `pre-commit` framework?**
+### **86. What is `pre-commit` framework?**
 **Answer:** A multi-language package manager for managing and maintaining pre-commit hooks via a declarative `.pre-commit-config.yaml` file.
 
 ### **171. What is Trunk-Based Feature Flag Lifecycle?**
