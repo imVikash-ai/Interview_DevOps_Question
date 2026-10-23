@@ -319,8 +319,38 @@ Because the SDLC is typically mapped chronologically from left (planning/coding)
   - Difficult distributed debugging and tracing.
   - Added network latency and eventual consistency challenges.
 
-### **14. What are the Twelve Factors of the 12-Factor App?**
-**Answer:** 1. Codebase, 2. Dependencies, 3. Config, 4. Backing Services, 5. Build/Release/Run, 6. Processes, 7. Port Binding, 8. Concurrency, 9. Disposability, 10. Dev/Prod Parity, 11. Logs, 12. Admin Processes.
+### **12. What are the Twelve Factors of the 12-Factor App?**
+**Answer:**
+
+The Twelve-Factor App is a set of **12 best practices** created by Heroku engineers to build portable, scalable, and cloud-ready Software-as-a-Service (SaaS) applications. 
+
+You can read the full guide on the **The Twelve-Factor App website**.
+
+#### The Twelve Factors
+
+- **1. Codebase**: One single codebase tracked in revision control (such as Git), used for many different deployments (staging, production, etc.).
+
+- **2. Dependencies**: Explicitly declare and isolate all libraries and dependencies rather than relying on system-wide packages.
+
+- **3. Config**: Store configuration data—such as database URLs and API credentials—strictly in **environment variables**, not hardcoded in the code.
+
+- **4. Backing Services**: Treat any data store, cache, or queue (e.g., databases, SMTP services) as an **attached resource** that can be swapped or decoupled without changing the code.
+
+- **5. Build, Release, Run**: Strictly separate the build, release, and run stages into distinct pipelines.
+
+- **6. Processes**: Execute the application as one or more **stateless processes**, where any persistent data is stored in a stateful backing service.
+
+- **7. Port Binding**: Export services and make the app self-contained by listening on a specified port (e.g., via HTTP).
+
+- **8. Concurrency**: Scale out horizontally via independent, individual process models rather than scaling up a single monolith.
+
+- **9. Disposability**: Maximize robustness with **fast startup** and **graceful shutdown** to handle sudden drops or surges in traffic.
+
+- **10. Dev/Prod Parity**: Keep development, staging, and production environments as similar as possible to minimize "it works on my machine" issues.
+
+- **11. Logs**: Treat logs as unbuffered **event streams** (sent to `stdout` / `stderr`), leaving log routing and storage to the execution environment.
+
+- **12. Admin Processes**: Run administrative or management tasks (such as database migrations) as **one-off processes** in an environment identical to the regular app processes.
 
 ### **15. What is Trunk-Based Development?**
 **Answer:** A branching strategy where all developers commit small, frequent changes directly to a single shared branch (`main`), avoiding long-lived feature branches and merge conflicts.
