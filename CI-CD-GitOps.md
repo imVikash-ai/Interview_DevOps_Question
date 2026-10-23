@@ -3184,7 +3184,64 @@ Because files inside the hidden `.git/` folder are not tracked by Git, they cann
 With this framework, you define your automated checks in a single file called **`.pre-commit-config.yaml`** at the root of your project. This file *is* tracked by **Git**, ensuring everyone on your team runs the exact same quality checks on their machine before committing.
 
 ### **86. What is `pre-commit` framework?**
-**Answer:** A multi-language package manager for managing and maintaining pre-commit hooks via a declarative `.pre-commit-config.yaml` file.
+**Answer:** 
+
+**`pre-commit`** is an open-source, multi-language package manager and framework used to manage and maintain Git "pre-commit" hooks.
+
+In Git, hooks are scripts that trigger automatically before or after specific events (like committing or pushing code). The `pre-commit` framework acts as a client-side automation tool that **runs automated checks on your code right after you type `git commit`**, but *before* the commit is actually finalized in your repository history. If any check fails, the framework aborts the commit, giving you a chance to fix the errors.
+
+#### Why Use the Framework?
+
+While Git has native support for hooks, managing them manually involves writing custom shell scripts inside the hidden `.git/hooks/` directory, which is difficult to share and synchronize across a development team. 
+
+The `pre-commit` framework solves this by:
+
+- **Centralizing Configuration:** All hooks are managed via a single, simple text file (`.pre-commit-config.yaml`) in the project root.
+- **Being Language-Agnostic:** It isolates environments for the tools it runs. For example, you can seamlessly run a Ruby-based linter or a Node.js formatter inside a Python or Go project without needing those runtime environments installed globally on every developer's machine.
+- **Providing a Shared Standard:** It guarantees that every engineer on a team executes the exact same automated quality checks before code ever makes it to a code review or a CI/CD pipeline.
+
+
+#### Common Use Cases & Checks
+
+Developers rely on `pre-commit` hooks as a first line of defense to automate repetitive tasks: 
+
+| **Category** | **What it does** | **Examples** |
+|---|---|---|
+| **Code Formatters** | Automatically adjusts code structure to match style guides. | `black`, `prettier`, `rufo` |
+| **Code Linters** | Flags syntax errors, bugs, or anti-patterns. | `ruff`, `eslint`, `flake8` |
+| **Security Scanning** | Scans code blocks to prevent hardcoded credentials or API keys. | `detect-private-key`, `ggshield` (GitGuardian) |
+| **Sanity Checks** | Cleans up basic file formatting issues. | `trailing-whitespace`, `end-of-file-fixer` |
+
+#### Basic Workflow
+
+To get started with the **official pre-commit framework**, developers typically follow these three steps: 
+
+#### 1. Install the Tool
+
+Install the tool on your machine via a package manager like `pip`, `brew`, or `conda`.
+
+#### 2. Create a Configuration File
+
+Create a configuration file named `.pre-commit-config.yaml` in your project repository to define which hooks you want to run. A basic file looks like this: 
+
+```yaml
+repos:
+  - repo: https://github.com
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+```
+
+#### 3. Register the Hooks
+
+Register the hooks with Git by running the setup command in your terminal:
+
+```bash
+pre-commit install
+```
+
+Once activated, every subsequent `git commit` command will run these validations against your staged files.
 
 ### **171. What is Trunk-Based Feature Flag Lifecycle?**
 **Answer:** 1. Create flag $\rightarrow$ 2. Implement logic behind flag $\rightarrow$ 3. Merge to `main` $\rightarrow$ 4. Enable flag in production $\rightarrow$ 5. Clean up flag conditional code.
