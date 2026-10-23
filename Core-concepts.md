@@ -798,7 +798,7 @@ An **Incident Commander (IC)** is **the single point of authority and accountabi
 - **Emergency Services:** Used in public safety, fire departments, and disaster management under the **National Incident Management System (NIMS)** and **Incident Command System (ICS)**.
 - **IT and DevOps:** Adopted by technology companies to manage major system outages, cyberattacks, or data breaches.
 
-### **74. What is a Runbook (Playbook)?**
+### **30. What is a Runbook (Playbook)?**
 **Answer:**
 
 A **runbook** is **a detailed, step-by-step operational guide that instructs a person or an automated system on how to execute a specific technical task**, such as restarting a server, deploying code, patching software, or recovering a database. 
@@ -832,82 +832,26 @@ An effective runbook eliminates "tribal knowledge" so any qualified team member 
 2. **Automated Runbooks:** Code-driven scripts executed by software or orchestration tools with zero human intervention. Ideal for repetitive, low-risk tasks. 
 3. **AI-Powered / Agentic Runbooks:** Intelligent workflows where AI agents run diagnostics, suggest actions, and execute steps while routing complex choices through human approval gates.
 
-### **75. What is Automated Remediation?**
-**Answer:** Using software routines (EventBridge, Lambda, Kubernetes Operators) to detect specific operational failures and execute corrective actions (restarting pods, resizing disks) with zero human intervention.
+### **31. What is Automated Remediation?**
+**Answer:** 
 
-### **76. What is Capacity Planning in SRE?**
-**Answer:** Forecasting future resource demands (compute, memory, storage, database IOPS) based on organic user growth and marketing spikes to ensure systems scale proactively before saturation occurs.
+**Auto-remediation** is **the process of automatically detecting, triaging, and resolving IT, cloud, or cybersecurity incidents without requiring manual human intervention**. 
 
-### **77. What is Load Shedding?**
-**Answer:** Intentionally dropping low-priority background requests when a server approaches 100% CPU/memory saturation to guarantee critical transactions succeed with low latency.
+#### How It Works
 
-### **78. What is Graceful Degradation?**
-**Answer:** Designing applications to remain functional with reduced features when non-essential downstream services fail (e.g., showing static recommendations if the recommendation engine is down).
+- **Detection:** Monitoring tools, security platforms (such as a **Cloud Security Posture Management** or EDR system), or CI/CD pipelines identify an anomaly, policy violation, or vulnerability.
+- **Decision Logic:** The system evaluates the event against predefined rules, playbooks, or AI-driven decision models.
+- **Action (Actuators):** The system executes an automated fix—such as isolating a compromised machine, blocking a malicious IP address, resetting a user password, or scaling up server resources.
+- **Documentation & Validation:** The action is logged for audit trails, and the system verifies that the fix resolved the issue.
 
-### **79. What is the Thundering Herd Problem?**
-**Answer:** A scenario where thousands of clients retry a failed network request simultaneously at the exact same millisecond, overwhelming recovering backend servers. Prevented by **Exponential Backoff with Jitter**.
+#### Key Benefits
 
-### **80. What is Exponential Backoff with Jitter?**
-**Answer:** A retry algorithm where wait intervals double with each attempt ($2^n$) combined with randomized variance (jitter) to desynchronize retry storms across clients.
+- **Reduced MTTR (Mean Time to Resolution):** Issues are fixed in seconds or minutes rather than hours.
+- **Lower Analyst Burnout:** Frees IT and security teams from repetitive Tier-1 tasks and alert fatigue.
+- **Consistency:** Eliminates human error during high-pressure or routine troubleshooting. 
 
-### **81. What is High Availability (HA)?**
-**Answer:** Designing systems with redundant components across multiple fault domains (Availability Zones, regions) to ensure continuous operation without a Single Point of Failure (SPOF).
+#### Common Use Cases
 
-### **82. What does "Three Nines" vs "Four Nines" vs "Five Nines" uptime mean?**
-**Answer:** 99.9% (Three Nines) = max 43.2 min downtime/month; 99.99% (Four Nines) = max 4.32 min downtime/month; 99.999% (Five Nines) = max 25.9 sec downtime/month.
-
-### **83. What is Active-Active vs Active-Passive High Availability?**
-**Answer:** Active-Active runs multiple redundant systems processing live traffic simultaneously; Active-Passive runs a primary active system while a secondary standby system remains idle, ready to take over on failover.
-
-### **84. What is Split-Brain in distributed systems?**
-**Answer:** A state where a network partition isolates nodes in a cluster, causing both sides to believe the other has failed and independently elect leaders, leading to severe data corruption.
-
-### **85. How is Split-Brain prevented?**
-**Answer:** By enforcing a strict quorum consensus requirement ($\lfloor N/2 \rfloor + 1$) on leader election and running odd numbers of master nodes (3, 5, 7).
-
-### **86. What is the CAP Theorem?**
-**Answer:** In a distributed data store with a Network Partition (**P**), you must choose between Consistency (**C** - all nodes see the same data) or Availability (**A** - every request receives a non-error response).
-
-### **87. What is the PACELC Theorem?**
-**Answer:** An extension of CAP: If there is a **P**artition, choose **A**vailability or **C**onsistency; **E**lse (normal state), choose **L**atency or **C**onsistency.
-
-### **88. What is Eventual Consistency?**
-**Answer:** A consistency model where, given no new updates, all replicas across a distributed system will eventually converge and return the latest value.
-
-### **89. What is Distributed Tracing?**
-**Answer:** Tracking the end-to-end flow of a single request across multiple microservices to measure latency contributions and identify bottleneck spans.
-
-### **90. What is Continuous Profiling?**
-**Answer:** Low-overhead, continuous collection of CPU, memory, and thread contention call stacks directly from production workloads using kernel eBPF probes (e.g., Pyroscope).
-
-### **91. What is Blackbox Probing?**
-**Answer:** Pinging external endpoints (HTTP GET, TCP SYN, DNS lookup) from outside the infrastructure to verify user-facing service availability.
-
-### **92. What is Whitebox Monitoring?**
-**Answer:** Inspecting internal application runtime metrics (JVM heap, thread counts, database connection pool stats) emitted from within the code.
-
-### **93. What is High Cardinality in metrics?**
-**Answer:** A metric with a large number of unique label key-value pairs (e.g., tagging Prometheus metrics with `user_id` or `email`), which exhausts time-series database memory.
-
-### **94. What is Synthetic Monitoring?**
-**Answer:** Running automated scripts or headless browser bots that periodically execute user journeys (e.g., searching, adding to cart, checking out) to detect failures before real users encounter them.
-
-### **95. What is Real User Monitoring (RUM)?**
-**Answer:** Telemetry captured directly within end users' client browsers or mobile apps to measure real-world page load times, network latencies, and JavaScript errors.
-
-### **96. What is a Service Dependency Graph?**
-**Answer:** A dynamic visual topology mapping all upstream and downstream network relationships between microservices, databases, and third-party APIs.
-
-### **97. What is Dark Traffic Mirroring (Shadowing)?**
-**Answer:** Duplicating live production HTTP requests and sending an asynchronous copy to a new version without returning responses to users, testing performance under real payloads.
-
-### **98. What is an SRE Error Budget Policy?**
-**Answer:** A formal business contract defining agreed-upon operational restrictions (deployment freezes, focus on reliability) when an error budget reaches zero.
-
-### **99. What is Chaos Mesh?**
-**Answer:** A cloud-native chaos engineering platform for Kubernetes that injects faults (pod failure, network latency, CPU stress, I/O corruption) via Custom Resource Definitions (CRDs).
-
-### **100. What is Observability as Code (OaC)?**
-**Answer:** Defining Grafana dashboards, Prometheus alerting rules, and OpenTelemetry collector configs in declarative code files versioned in Git.
-
----
+- **Cybersecurity & Threat Response:** Quarantining malware-infected endpoints, revoking compromised credentials, or removing phishing emails from inboxes.
+- **Cloud & Infrastructure:** Encrypting open S3 buckets, detaching overly permissive IAM roles, or restarting crashed services.
+- **Software Development (DevSecOps):** Automatically revoking hardcoded secrets pushed to code repositories or pulling dependency security patches.
