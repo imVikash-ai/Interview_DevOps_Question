@@ -540,11 +540,61 @@ A typical pipeline flows through several automated phases according to guides fr
 
 - **Safe Rollbacks:** If a bug slips through, automated testing and canary rollouts let teams revert changes instantly.
 
-### **33. What is a Rollback Strategy?**
-**Answer:** A predefined, automated procedure to revert a system to its previous known stable version when a deployment introduces defects.
+### **19. What is a Rollback Strategy?**
+**Answer:**
 
-### **34. What is Artifact Repository Management?**
-**Answer:** Storing and versioning compiled binaries, container images, Helm charts, and language packages in centralized registries (e.g., Nexus, Artifactory, GitHub Packages).
+A **rollback strategy** is **a documented, pre-planned recovery procedure used to revert a software application, database, or system back to a previous stable state when a new update introduces critical errors, bugs, or performance issues**. 
+
+#### Common Types of Rollback Strategies
+
+- **Blue-Green Deployment:** Uses two identical production environments to instantly switch traffic back to the stable environment if the update fails. 
+
+- **Canary Release:** Deploys updates to a small subset of users first, allowing quick reversion before wider impacts occur. 
+
+- **Feature Flags:** Utilizes runtime toggles to disable misbehaving features instantly without a full code redeployment. 
+
+- **Automated & Manual Rollback:** Automated pipelines revert builds based on live health metrics, whereas manual rollbacks rely on backups or version control but carry higher human error risks.
+
+#### Key Components of a Rollback Plan
+
+- **Trigger & Data Handling:** Defines specific metric thresholds for initiation and manages database schema compatibility.
+
+- **Roles & Communication:** Assigns team responsibilities and outlines stakeholder notification steps.
+
+### **20. What is Artifact Repository Management?**
+**Answer:** 
+
+Artifact Repository Management is **the practice of storing, organizing, versioning, securing, and distributing the build outputs and dependencies generated during the software development lifecycle** (such as compiled binaries, JAR files, Docker container images, npm packages, and Python wheels). 
+
+Unlike Source Code Management (SCM) tools like Git—which store human-readable source code-an artifact repository acts as a centralized "warehouse" for machine-ready build deliverables and external libraries.
+
+#### Core Functions
+
+- **Centralized Storage:** Keeps all compiled code, packages, and container images in a single, reliable location rather than scattering them across local machines or CI/CD runners. 
+
+- **Version Control & Immutability:** Maintains strict version histories so teams can retrieve exact historical builds, roll back problematic deployments, or guarantee that a published binary never changes. 
+
+- **Dependency Management:** Acts as a proxy or cache for third-party libraries and internal modules, ensuring consistent builds and protecting against external source outages. 
+
+- **CI/CD Integration:** Connects automatically with automation pipelines to upload build outputs after compilation and pull them down during testing or production deployment. 
+
+- **Security & Compliance:** Enforces role-based access controls, scans binaries for known vulnerabilities, and generates Software Bills of Materials (SBOMs). 
+
+#### Why It Matters (The "Build Once, Deploy Many" Principle)
+
+- **Reproducibility:** Ensures that the exact artifact tested in staging is the exact artifact deployed to production.
+
+- **Decoupling:** Separates source code repositories from runtime environments, streamlining multi-team collaboration.
+
+- **Supply Chain Safety:** Tracks provenance and prevents unauthorized or unverified code from reaching production.
+
+#### Common Tools
+
+- **JFrog Artifactory**: A universal enterprise repository supporting numerous package formats and deployment stages.
+
+- **Sonatype Nexus Repository:** A widely used repository manager for software components, binaries, and proxy caching.
+
+- **GitHub Packages / AWS CodeArtifact:** Cloud-native package hosting and registry services deeply integrated into cloud or version-control ecosystems.
 
 ### **35. What is Continuous Feedback?**
 **Answer:** Continuously gathering APM metrics, user analytics, error logs, and customer feedback from production and integrating them into product backlogs.
