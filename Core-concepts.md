@@ -1,4 +1,4 @@
-# **Core Concepts - DevOps, SRE & Platform Engineering **
+## Core Concepts - DevOps, SRE & Platform Engineering 
 
 ### **1. What is DevOps and what core problem does it solve?**
 **Answer:**
