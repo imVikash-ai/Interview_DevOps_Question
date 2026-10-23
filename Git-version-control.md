@@ -1,13 +1,48 @@
-# **Git & Version Control - DevOps Interview Questions (150 Questions)**
-
-Welcome to the **Git & Version Control** master collection containing **150 comprehensive interview questions and detailed answers** covering Git Internals (Object Database, Blobs, Trees, Commits), Advanced Branching & Merging, Interactive Rebase, Cherry-Pick, Bisect, Submodules, Disaster Recovery via Reflog, and GitOps Workflows.
-
----
-
-## 🟢 **Part 1: Git Internals & Core Mechanics (Questions 1–50)**
+## Git Internals & Core Mechanics 
 
 ### **1. What is Git and how does its Directed Acyclic Graph (DAG) architecture work?**
-**Answer:** Git is a distributed version control system that stores project history as an immutable Directed Acyclic Graph (DAG) of cryptographically hashed objects. Unlike delta-based VCS (SVN), Git takes snapshots of the entire project directory tree at each commit, linking child commits back to parent commits via SHA1/SHA256 hashes.
+**Answer:** 
+
+**Git** is a distributed version control system designed to track changes in source code during software development. Unlike older version control systems that track history as a linear list of file differences (deltas), Git is a content-addressable filesystem made up of immutable snapshots. 
+
+To manage these snapshots efficiently, Git organizes your repository's history as a **Directed Acyclic Graph (DAG)**. 
+
+#### How the DAG Architecture Works
+
+In computer science, a graph consists of **nodes** (points of data) and **edges** (the connections between them). In Git's DAG architecture, these components are constrained by three specific rules:
+
+| **Component / Rule** | **How it works in Git** |
+|---|---|
+| **Nodes (Commits)** | Each commit represents a complete snapshot of your project at a specific point in time, bundled with metadata (author, timestamp, message). |
+| **Directed (One-Way)** | Every commit node contains an explicit pointer (an edge) back to its **parent commit(s)**. The direction flows backward: a child commit knows its parent, but a parent commit does not know its future children. |
+| **Acyclic (No Loops)** | Because time and development move strictly forward, a child commit cannot link to a parent in a way that creates a loop. You can never follow the arrows in a circle back to where you started. |
+
+#### The Mechanics of Git's DAG
+
+When you use Git, you are interacting with this graph through several core concepts:
+
+```text
+  (A) <-- (B) <-- (C)           <-- [main branch pointer]
+                    ^
+                     \
+                      (D) <-- (E) <-- [feature branch pointer]
+                                ^
+                                |
+                             [HEAD]
+```
+
+- **Commits are Immutable:** Every node gets a unique cryptographic ID (a SHA-1 or SHA-256 hash) computed from its contents, metadata, and parent pointers. If you modify a past commit, its hash changes, creating an entirely new node in the graph rather than overwriting the old one. 
+- **Branches are Just Labels:** In Git, a branch is not a separate folder or silo; it is merely a lightweight, movable pointer to a specific node in the graph. When you make a new commit, Git creates the new node, links it to the previous one, and slides the branch label forward to the new node. 
+- **HEAD is Your Location:** **HEAD** is a special pointer that marks the node or branch you are currently working on. 
+- **Merging & Converging:** When you merge two branches, Git looks backward through the DAG to find their **nearest common ancestor** node. It then combines the changes and creates a special "merge commit" node that has **two parent pointers**, seamlessly tying the divergent graph paths back together.
+
+#### Why This Architecture Makes Git Powerful
+
+By utilizing a DAG instead of a linear list, Git makes complex version control operations trivial: 
+
+1. **Near-Instant Branching:** Creating a branch takes no extra disk space because Git only needs to write a 41-byte text file containing the hash of an existing commit node.
+2. **Safe Context Switching:** Moving between branches via `git checkout` simply shifts your `HEAD` pointer to a different node in the graph and updates your local working files to match that node's snapshot. 
+3. **Fearless History Traversal:** Because every snapshot is preserved as an immutable node in the graph, you can safely "travel back in time" or experiment on alternative timeline paths without breaking the core historical graph.
 
 ### **2. Explain the four core Git Object types in `.git/objects/`.**
 **Answer:**
