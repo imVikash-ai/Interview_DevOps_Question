@@ -3050,29 +3050,107 @@ Argo CD includes several built-in generators.
 | **Auto-Sync** | Changes made in **Git** | Deploys or updates manifests from Git in the cluster |
 | **Self-Healing** | Changes made directly in the **cluster**, such as through `kubectl` | Reconciles cluster resources to match Git again |
 
-### **109. What is ArgoCD Prune?**
-**Answer:** An automated synchronization setting that deletes Kubernetes resources from the cluster when their corresponding manifest files are removed from Git.
+### **83. What is ArgoCD Prune?**
+**Answer:** 
 
-### **110. What is FluxCD?**
-**Answer:** A set of continuous and progressive delivery controllers for Kubernetes (Source Controller, Kustomize Controller, Helm Controller) implementing GitOps.
+In Argo CD, **pruning** is the process of automatically deleting Kubernetes resources from your cluster when they are removed from your Git repository. 
 
-### **111. What is FluxCD Kustomization CRD?**
-**Answer:** A resource defining a pipeline for applying Kustomize overlays from a Git repository to a target Kubernetes cluster with health checking and automated rollback.
+#### How Pruning Works
 
-### **112. What is FluxCD HelmRelease?**
-**Answer:** A declarative resource that manages the lifecycle of Helm chart releases, automatically pulling charts from OCI or HTTP repositories and reconciling values.
+- **Drift Cleanup:** When you delete a manifest file (such as a Deployment or Service) from Git, Argo CD detects the difference and deletes the corresponding live resource from the Kubernetes cluster so your cluster stays in sync with Git. 
+- **Default Behavior:** By default, automated syncs **do not** prune resources automatically as a safety measure. You must enable pruning explicitly. 
 
-### **113. What is Progressive Delivery?**
-**Answer:** Advanced continuous delivery combining canary deployments, traffic routing, feature flags, and automated metric analysis to minimize blast radius during releases.
+#### How to Enable Pruning:
+
+#### 1. Via CLI
+
+Add the `--auto-prune` flag when creating or setting an application:
+
+```bash
+argocd app set <APPNAME> --auto-prune
+```
+
+#### 2. Via Application Manifest (YAML)
+
+Enable `prune: true` under `syncPolicy.automated`:
+
+```yaml
+spec:
+  syncPolicy:
+    automated:
+      prune: true
+```
+
+#### 3. Manual Sync
+
+You can always check the prune option when running a manual sync through the Argo CD UI or CLI:
+
+```bash
+argocd app sync <APPNAME> --prune
+```
+
+#### Key Pruning Options & Settings:
+
+#### 1. Prevent Pruning (Per-Resource)
+
+To protect a specific resource (like a PersistentVolumeClaim) from being deleted even if it leaves Git, add an annotation to that resource's manifest: 
+
+```yaml
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false
+```
+
+#### 2. Prune Last (`PruneLast=true`)
+
+Delays the deletion of stale resources until *after* all new or replacement resources have been successfully deployed and synced. This is useful for zero-downtime rollouts. 
+
+#### 3. Prune Propagation Policy (`PrunePropagationPolicy`)
+
+Controls how Kubernetes handles parent-child resource dependencies during deletion:
+
+- `foreground`: Waits for child resources to be deleted before deleting the parent.
+- `background`: Deletes the parent immediately and lets the Kubernetes garbage collector delete children in the background.
+- `orphan`: Deletes the parent but leaves child resources behind.
+
+#### 4. Allow Empty (`allowEmpty: true`)
+
+A safety guard that prevents Argo CD from pruning an entire application's resources if Git accidentally results in an empty manifest file.
+
+### **84. What is Progressive Delivery?**
+**Answer:** 
+
+**Progressive delivery** is a modern software development and deployment practice that gradually releases new features to a small subset of users before rolling them out to the entire user base. It builds directly on top of Continuous Delivery (CI/CD) by **decoupling code deployment from feature enablement**. 
+
+Rather than a high-risk "big bang" release where code goes live to everyone at once, teams push code safely into production and then control who sees and experiences the change in real time.
+
+#### Core Techniques
+
+- **Feature Flags:** Switches in the code that let teams turn features on or off dynamically for specific users, internal teams, or beta testers without redeploying code. 
+
+- **Canary Releases / Launches:** Routing a small percentage of live traffic (such as 1% to 5%) to a new version of the application to test stability and performance before expanding. 
+
+- **A/B Testing & Experimentation:** Exposing different groups of users to variations of a feature to gather behavioral data and measure impact. 
+
+- **Blue/Green & Ring Deployments:** Running two identical production environments side-by-side or staging rollouts in concentric circles ("rings") from internal staff outward to general users.
+
+- **Observability & Automated Rollbacks:** Monitoring real-time system metrics and user feedback so the system can automatically roll back a change if error rates spike. 
+
+#### Key Benefits
+
+- **Reduced Blast Radius:** Limits bugs, outages, or poor user experiences to a tiny fraction of the audience. 
+
+- **Instant Kill-Switches:** Allows teams to disable a broken feature immediately via feature flags rather than waiting for an emergency hotfix or rollback. 
+
+- **Data-Driven Decisions:** Validates production quality with real-world user interaction and telemetry before a full launch.
+
+- **Shared Ownership:** Shifts some release control and testing oversight closer to product managers and QA teams rather than leaving it strictly with operations engineers.
 
 ### **114. What is Argo Rollouts?**
 **Answer:** A Kubernetes operator replacing standard Deployments with a `Rollout` CRD that coordinates canary traffic splitting and automated metric analysis.
 
 ### **115. What is an AnalysisTemplate in Argo Rollouts?**
 **Answer:** A declarative template defining Prometheus, Datadog, or CloudWatch queries used to evaluate canary health during progressive rollouts.
-
-### **116. What is Flagger?**
-**Answer:** A progressive delivery operator that automates canary releases, A/B testing, and blue-green deployments on Kubernetes using Service Meshes (Istio, Linkerd) and Ingress controllers.
 
 ### **117. What is Software Supply Chain Security?**
 **Answer:** Protecting against unauthorized modifications, malicious dependency injections, and compromised build systems across the entire software development lifecycle.
