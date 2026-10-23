@@ -596,11 +596,55 @@ Unlike Source Code Management (SCM) tools like Git—which store human-readable 
 
 - **GitHub Packages / AWS CodeArtifact:** Cloud-native package hosting and registry services deeply integrated into cloud or version-control ecosystems.
 
-### **35. What is Continuous Feedback?**
-**Answer:** Continuously gathering APM metrics, user analytics, error logs, and customer feedback from production and integrating them into product backlogs.
+### **21. What is Continuous Feedback?**
+**Answer:** 
 
-### **36. What is the Single Source of Truth principle?**
-**Answer:** Storing all application configurations, infrastructure code, and operational policies in a single centralized, version-controlled repository (typically Git).
+Continuous feedback is **an ongoing, real-time process where managers, employees, and peers regularly exchange input, praise, and constructive guidance rather than waiting for annual performance reviews**.
+
+#### Core Characteristics
+
+- **Real-time timing:** Feedback happens immediately or shortly after a specific task, project, or behavior occurs.
+
+- **Ongoing dialogue:** It replaces isolated yearly evaluations with frequent check-ins, weekly or bi-weekly 1:1 meetings, and peer discussions.
+
+- **Forward-looking focus:** It emphasizes future growth, skill-building, and immediate adjustments instead of just critiquing past mistakes.
+
+- **Multi-directional flow:** Input moves not only from managers to employees, but also peer-to-peer and employee-to-manager. 
+
+#### Key Benefits
+
+- **Faster improvement:** Employees fix issues or hone skills on the spot rather than discovering them months later.
+
+- **Reduced anxiety:** It eliminates the high-stress surprise of traditional year-end reviews.
+
+- **Higher engagement:** Regular recognition and transparent coaching build trust, morale, and job satisfaction.
+
+- **Better alignment:** Short-term goals and OKRs (Objectives and Key Results) stay flexible and aligned with changing company priorities.
+
+### **22. What is the Single Source of Truth principle?**
+**Answer:** 
+
+The **Single Source of Truth (SSoT)** principle is **a data management and system architecture practice where each data element is stored, mastered, and updated in one exact, authoritative location**. All other systems, applications, or teams reference this primary source rather than maintaining their own independent copies. 
+
+#### Core Pillars
+
+- **Centralization:** Each data entity (such as a customer profile, product SKU, or financial record) has one canonical home.
+
+- **Consistency:** Updates occur strictly in that primary location; any secondary copies or replicas are read-only.
+
+- **Accessibility:** Authorized teams and downstream services can query or read the data directly without manual exports or duplicate tracking.
+
+- **Zero Redundancy:** It eliminates shadow spreadsheets, side tables, and conflicting versions that drift out of sync.
+
+#### Why It Matters
+
+- **Prevents Discrepancies:** Stops different departments (like sales and marketing) from operating on conflicting figures or metrics.
+
+- **Saves Time:** Eliminates hours spent arguing over or reconciling mismatched data sets.
+
+- **Reduces Software Bugs (in Programming):** Ensures mutable state is kept in one place, preventing bugs caused by out-of-sync copies.
+
+- **Lowers Costs:** Avoids the high financial toll associated with poor data quality and fragmented silos across the enterprise.
 
 ### **37. What is Technical Debt in DevOps?**
 **Answer:** The implied cost of choosing quick, suboptimal workarounds (manual server patches, hardcoded configs) over well-architected solutions, compounding future operational maintenance overhead.
