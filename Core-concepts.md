@@ -114,8 +114,40 @@ The four core DevOps Research and Assessment (DORA) metrics define an "Elite" pe
 
 - **Dynamic Benchmarks:** Performance cluster thresholds shift annually based on global survey data rather than acting as a static maturity checklist.
 
-### **8. What is Infrastructure as Code (IaC)?**
-**Answer:** Managing and provisioning compute, storage, and networking infrastructure via machine-readable definition files (e.g., Terraform HCL, Kubernetes YAML) rather than manual console interaction.
+### **6. What is Infrastructure as Code (IaC)?**
+**Answer:** 
+
+**Infrastructure as Code (IaC)** is **a DevOps practice that manages and provisions IT infrastructure (such as servers, networks, databases, and load balancers) using machine-readable configuration files instead of manual point-and-click console configuration or one-off scripts**. 
+
+#### Core Concepts & How It Works
+
+- **Treating Infrastructure as Software:** You write declarations or scripts that define your infrastructure components and store them in version control systems like Git. 
+
+- **Declarative vs. Imperative Approaches:**
+  - **Declarative (Desired State):** You specify *what* resources and properties you want (e.g., "I need two virtual machines and a database"), and the IaC tool figures out how to build or update them.
+  - **Imperative (Procedural):** You write explicit, step-by-step commands on *how* to create, configure, and assemble the infrastructure in a specific sequence. 
+
+- **Idempotence:** Running the same IaC script multiple times yields the exact same environment without breaking or duplicating resources. 
+
+#### Key Benefits
+
+- **Consistency:** Eliminates "drift" between development, testing, and production environments because every setup is spun up from the exact same codebase.
+
+- **Speed and Scalability:** Automates provisioning so you can spin up or tear down complex cloud architectures in minutes rather than filing manual IT tickets. 
+
+- **Version Control & Auditing:** Because your infrastructure lives as code files, you can review changes via pull requests, track a full history of who changed what, and roll back if something fails. 
+
+- **CI/CD Integration:** Infrastructure changes can flow through the same automated testing and delivery pipelines as application code.
+
+#### Popular IaC Tools
+
+- **Terraform / OpenTofu:** Cloud-agnostic, declarative tools for provisioning multi-cloud and on-premises resources. 
+
+- **Ansible / Puppet / Chef:** Configuration management and automation tools that focus heavily on configuring software and services inside servers. 
+
+- **Pulumi:** Allows you to write infrastructure using general-purpose programming languages like Python, TypeScript, and Go instead of domain-specific languages. 
+
+- **Cloud Native / Vendor-Specific:** Tools like AWS CloudFormation, AWS CDK, or Azure ARM Templates and Bicep.
 
 ### **9. What is Configuration Drift?**
 **Answer:** The divergence of live infrastructure settings from the declared IaC templates in Git, usually caused by manual emergency changes made directly in cloud consoles or servers.
