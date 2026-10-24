@@ -441,7 +441,83 @@ A **Three-Way Merge** (or using `--no-ff`) happens when both branches have new c
 | **Traceability of Features** | Harder to isolate where a feature branch starts and ends in history | Preserves the visual block of the feature branch as a single unit |
 
 ### **9. What is `git cherry-pick` and how does it work?**
-**Answer:** Applies the exact diff introduced by a specific commit from another branch onto your current branch, creating a brand-new commit with a new SHA and timestamp.
+**Answer:** 
+**`git cherry-pick` is a powerful Git command that allows you to apply the changes introduced by a specific, individual commit from one branch onto your current active branch.** Unlike commands like `git merge` or `git rebase` which pull in an entire branch's history, cherry-picking lets you surgically select only the changes you need. 
+
+**How it Works Under the Hood**
+
+When you cherry-pick a commit, Git doesn't actually "move" the original commit. Instead, it follows a 4-step process: 
+
+1. **Identify the Commit:** Git looks up the specific commit using the SHA-1 hash you provided. 
+2. **Generate a Patch (Diff):** Git calculates the exact differences (the "diff") introduced by that commit relative to its original parent commit.
+3. **Replay the Changes:** Git attempts to apply that exact diff directly onto the HEAD (the latest commit) of your current branch. 
+4. **Create a Brand New Commit:** If the changes apply cleanly, Git automatically creates a new commit on your current branch. Because this new commit has a different history and a different parent commit, **it will have a completely new commit hash**, even though the code changes and commit message are identical to the original. 
+
+**Step-by-Step Usage**
+
+**1. Locate the Commit Hash**
+
+First, switch to the branch that contains the commit you want, and look at the history to copy its unique SHA-1 hash: 
+
+**bash**
+```
+git checkout feature-branch
+git log --oneline
+
+```
+
+**2. Switch to the Target Branch**
+
+Switch to the branch where you want to apply the changes: 
+
+**bash**
+```
+git checkout main
+
+```
+
+**3. Run the Cherry-Pick Command**
+
+Execute the command followed by the commit hash: 
+
+**bash**
+```
+git cherry-pick a1b2c3d
+
+```
+
+**Common Use Cases**
+
+- **Bug Hotfixes:** If you discover a bug in a development branch that is also affecting your live production environment, you can write the fix on your development branch, and then cherry-pick just that specific fix commit straight into the production branch without deploying incomplete features. 
+- **Accidental Commits:** If you accidentally committed code to the wrong branch, you can cherry-pick it onto the correct branch, then pull it out of the original branch using a reset.
+- **Salvaging Work:** You can recover valuable parts of an abandoned or stale experimental branch without having to merge the whole messy history. 
+
+**Handling Cherry-Pick Conflicts**
+
+Just like a merge, if the lines of code you are trying to cherry-pick overlap with changes that already exist on your target branch, Git will stop and alert you of a **merge conflict**. When this happens, Git marks the conflicted files, and you have three options to proceed: 
+
+- **Fix and Continue:** Open the conflicted files, manually choose the correct code blocks, stage the files using `git add <file>`, and tell Git to keep going:
+
+  **bash**
+  ```
+  git cherry-pick --continue
+
+  ```
+
+- **Abort entirely:** If the conflicts are too messy and you want to completely undo the cherry-pick attempt and return your branch to exactly how it was before, run:
+
+  **bash**
+  ```
+  git cherry-pick --abort
+
+  ```
+
+- **Skip the commit:** If you are cherry-picking a range of commits and want to completely skip the current conflicting commit, run: 
+
+  **bash**
+  ```
+  git cherry-pick --skip
+  ```
 
 ### **10. What is `git revert` vs `git reset`?**
 **Answer:**
