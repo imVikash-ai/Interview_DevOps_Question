@@ -545,7 +545,7 @@ When you run `git reset <commit-hash>`, you are moving the current branch pointe
 
 1. **`git reset --soft`**: Moves the history pointer back, but keeps all your code changes staged in the Index. (Great for combining multiple local commits into one). 
 2. **`git reset --mixed` (Default)**: Moves the history pointer back and unstages the files, but keeps the raw code in your working directory. 
-3. **`git reset --hard`**: Moves the history pointer back and **permanently deletes** all changes in both your staging area and working directory. *Warning: Any uncommitted work will be permanently lost*
+3. **`git reset --hard`**: Moves the history pointer back and **permanently deletes** all changes in both your staging area and working directory. 
 
 ### **11. Explain `git reset --soft` vs `--mixed` vs `--hard`.**
 **Answer:**
