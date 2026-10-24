@@ -360,8 +360,56 @@ If you switch back to your `main` branch, your new temporary commits will become
 
 ### **7. Compare `git merge` vs `git rebase`.**
 **Answer:**
-- **`git merge`:** Creates a non-destructive 3-way merge commit combining two branch histories. Preserves true historical context and chronological timestamps.
-- **`git rebase`:** Replays commits from the current branch on top of the target base branch, rewriting commit SHAs to produce a clean, linear commit history.
+The primary difference between `git merge` and `git rebase` is **how they manage your project's commit history**. While both commands integrate changes from one branch into another, `git merge` is a non-destructive operation that preserves chronological history by adding a new "merge commit," whereas `git rebase` rewrites history by moving your feature branch commits to the tip of the target branch, creating a completely clean, linear timeline.
+
+**Direct Comparison**
+
+| **Feature**             | **`git merge`**                                                        | **`git rebase`**                                                        |
+| ----------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| **Commit History**      | Preserves the exact, chronological history of both branches.           | Rewrites commit history to create a clean, single line of commits.      |
+| **Structure**           | Non-linear; creates a "diamond-shaped" or branching graph structure.   | Linear; appears as if all work happened sequentially on one branch.     |
+| **Merge Commits**       | **Generates an additional merge commit** to tie the branches together. | Avoids merge commits entirely by replaying individual commits.          |
+| **Commit Hashes**       | Keeps original commit IDs completely intact.                           | **Creates brand new commits** with new hashes (rewrites history).       |
+| **Conflict Resolution** | Handled all at once within the single merge commit.                    | Must be resolved iteratively for each individual commit being replayed. |
+| **Safety**              | High. Safe for public, shared branches.                                | Risky if used incorrectly. 
+
+**How They Work (Conceptual Analogy)**
+
+Imagine you branch off the `main` branch to build a new feature. While you are working, a coworker pushes two new commits to `main`. Your feature branch is now out of date.
+
+**1. Git Merge (The Honest Storyteller)**
+
+When you run `git merge main` into your feature branch, Git looks at the common ancestor, takes the new changes from `main`, and ties them together with your feature changes. 
+
+- **The Result:** It creates a **new merge commit**. Your history shows exactly when the branches diverged and when they came back together. 
+- **Pros:** Non-destructive; no history is lost or faked. 
+- **Cons:** If done frequently, your git log becomes cluttered with "merge commits" and tangled lines.
+
+**2. Git Rebase (The Tidy Story Editor)**
+
+When you run `git rebase main` on your feature branch, Git temporarily lifts your feature commits, moves the starting point (base) of your branch to the very tip of `main`, and replays your commits one by one on top of it. 
+
+- **The Result:** It rewrites history. It looks as though you started building your feature *after* your coworker pushed their changes, resulting in a perfectly straight line. 
+- **Pros:** Clean, readable commit history that is easy to navigate and debug. 
+- **Cons:** It alters reality by creating new commit hashes. If you have already shared those original commits with others, you will break their local repositories.
+
+**The Golden Rule of Rebasing**
+
+> **"Never rebase a public shared branch."**
+
+If you push a feature branch to GitHub, and another developer pulls it down to work on it with you, **do not rebase it**. Because rebasing creates entirely new commit IDs, Git will see the remote branch and your teammate's local branch as completely diverged, resulting in massive conflict headaches for your team. Only rebase local, private commits that exist solely on your machine. 
+
+**When to Use Which?**
+
+- **Use `git merge` when:**
+  - You are working on a shared or public branch where collaboration is happening.
+  - You want to preserve the complete, true chronological context of how the feature evolved.
+  - You want a simple, safe operation without risk of losing work. 
+
+- **Use `git rebase` when:**
+  - You want to update your **local, private feature branch** with the latest changes from `main` before opening a Pull Request.
+  - You want to clean up your local commit history (e.g., using `git rebase -i` to squash messy "fixed typo" commits into a single clean commit) before pushing.
+  - Your team explicitly mandates a strict, linear history workflow
 
 ### **8. What is a Fast-Forward Merge vs Three-Way Merge (`--no-ff`)?**
 **Answer:**
