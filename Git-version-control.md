@@ -521,8 +521,31 @@ Just like a merge, if the lines of code you are trying to cherry-pick overlap wi
 
 ### **10. What is `git revert` vs `git reset`?**
 **Answer:**
-- **`git revert <commit>` (Safe for Public Branches):** Creates a *new* forward commit that applies the exact inverse diff of the target commit, preserving Git history.
-- **`git reset` (Dangerous for Shared Branches):** Moves the branch pointer backward, rewriting history.
+The fundamental difference between the two commands lies in **how they handle commit history**: `git revert` **creates a new commit that undoes changes**, leaving the original history intact, while `git reset` **rewrites history** by moving the branch pointer backward and erasing commits.
+
+| **Feature**        | **`git revert`**                                                  | **`git reset`**                                                        |
+| ------------------ | ----------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **History Impact** | **Preserves history** (adds a new "anti-matter" commit).          | **Rewrites history** (erases or moves past commits).                   |
+| **Best Used For**  | **Public/shared branches** (remote repositories).                 | **Local/private branches** (before pushing code).                      |
+| **Risk Level**     | **Safe.** No risk of losing data or breaking colleagues' history. | **High Risk.** Can destroy uncommitted work or cause remote conflicts. |
+| **Collaboration**  | Safe for teams; requires a normal `git push`.                     | Forces a `git push --force`, which disrupts teammates.                 |
+
+**Deep Dive: `git revert`**
+
+When you run `git revert <commit-hash>`, Git figures out the exact opposite of what that commit did and applies those changes in a brand new commit. 
+
+- **How it looks:** If your history is `A -> B -> C` and you revert `B`, your history becomes `A -> B -> C -> D` (where `D` explicitly cancels out `B`). 
+- **When to use it:** Always use this if the broken code has already been pushed to GitHub, GitLab, or a shared team branch.
+
+**Deep Dive: `git reset`**
+
+When you run `git reset <commit-hash>`, you are moving the current branch pointer backward to an older state. The subsequent commits effectively disappear from the timeline. 
+
+`git reset` can be run in three different modes, depending on what you want to do with your active code: 
+
+1. **`git reset --soft`**: Moves the history pointer back, but keeps all your code changes staged in the Index. (Great for combining multiple local commits into one). 
+2. **`git reset --mixed` (Default)**: Moves the history pointer back and unstages the files, but keeps the raw code in your working directory. 
+3. **`git reset --hard`**: Moves the history pointer back and **permanently deletes** all changes in both your staging area and working directory. *Warning: Any uncommitted work will be permanently lost*
 
 ### **11. Explain `git reset --soft` vs `--mixed` vs `--hard`.**
 **Answer:**
