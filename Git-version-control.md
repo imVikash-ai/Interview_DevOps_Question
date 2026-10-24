@@ -413,8 +413,32 @@ If you push a feature branch to GitHub, and another developer pulls it down to w
 
 ### **8. What is a Fast-Forward Merge vs Three-Way Merge (`--no-ff`)?**
 **Answer:**
-- **Fast-Forward Merge:** If the target branch has no new commits since branching, Git simply moves the branch pointer forward without creating a new merge commit.
-- **Three-Way Merge (`--no-ff`):** Explicitly creates a merge commit with two parent commits, preserving visual branch topology.
+**A Fast-Forward Merge happens when Git simply moves the target branch pointer forward to the tip of the feature branch without creating a new commit**, which is only possible if the target branch has received no new commits since the feature branch diverged. 
+
+A **Three-Way Merge** (or using `--no-ff`) happens when both branches have new commits, or when you force Git to create a dedicated merge commit using the `--no-ff` flag even if a fast-forward would have been possible. 
+
+**Fast-Forward Merge**
+
+- **When it occurs:** The target branch (e.g., `main`) has not changed since the feature branch was created. There is a direct linear path.
+- **How it works:** Git moves the `main` branch pointer directly to the latest commit of the feature branch.
+- **Commit history:** Results in a completely **linear history** with **no merge commit** created.
+- **Command:** `git merge <feature-branch>` (default behavior when no divergence exists).
+
+**Three-Way Merge & `--no-ff`**
+
+- **When it occurs:** Both branches have diverged with their own unique commits, **or** you explicitly pass `--no-ff` to force a merge commit.
+- **How it works:** Git evaluates the two branch tips and their **common ancestor** (three "ways" or commits) to combine the work. It generates a new merge commit that has two parent commits.
+- **Commit history:** Results in a **non-linear, branched history** that explicitly shows the feature branch integration point.
+- **Command:** `git merge --no-ff <feature-branch>` 
+
+**Key Differences**
+
+| **Feature**                  | **Fast-Forward Merge**                                              | **Three-Way Merge / `--no-ff`**                                   |
+| ---------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| **New Commits Created**      | No                                                                  | Yes (a dedicated merge commit)                                    |
+| **Commit History Shape**     | Linear (straight line)                                              | Branched / Graph structure                                        |
+| **Main Branch Requirements** | Must have *no* new commits while the feature was built              | Can have parallel or new commits                                  |
+| **Traceability of Features** | Harder to isolate where a feature branch starts and ends in history | Preserves the visual block of the feature branch as a single unit |
 
 ### **9. What is `git cherry-pick` and how does it work?**
 **Answer:** Applies the exact diff introduced by a specific commit from another branch onto your current branch, creating a brand-new commit with a new SHA and timestamp.
