@@ -222,9 +222,83 @@ When you later run `git commit`, Git reads the pre-packaged mappings inside `.gi
 
 ### **5. How does `git commit` work under the hood?**
 **Answer:**
-1. Writes **Tree objects** representing directories recorded in the Index.
-2. Creates a **Commit object** pointing to the top-level root Tree, parent commit SHA, author metadata, and message.
-3. Moves the current branch ref pointer (`.git/refs/heads/<branch>`) forward to point to the new Commit SHA.
+
+Under the hood, `git commit` does not store file diffs or copy your entire project folder. Instead, Git operates as a **content-addressable key-value store**. 
+
+When you run `git commit`, Git packages your staged files, maps your directory structure, writes a metadata file, and updates a single text reference—all in a fraction of a second. 
+
+Here is exactly how `git commit` builds a snapshot under the hood.
+
+---
+
+#### Phase 1: The Foundation (What Happened During `git add`):
+
+To understand `git commit`, we must look at what `git add` already set up in the `.git/` folder:
+
+1. **Blobs are created:** For every file you staged, Git stripped out the filename, hashed the raw content using a SHA-1 algorithm, compressed it using `zlib`, and saved it in `.git/objects/`. This content-only file is a **Blob**. 
+2. **The Index is updated:** Git logged the filename, permissions, and the Blob's SHA-1 hash into a binary tracking file called the **Index** (the staging area). 
+
+#### Phase 2: The `git commit` Step-by-Step Pipeline:
+
+When you execute `git commit`, the following actions trigger sequentially: 
+
+#### 1. Writing the Tree Objects
+
+Git reads the **Index** file to assemble **Tree objects**. A Tree object represents a directory. It is a plain text file listing the directory’s contents, mapping filenames and subdirectories to their respective SHA-1 hashes. 
+
+- **Deduplication:** If a subdirectory or file has not changed since the last commit, Git simply reuses the existing Tree or Blob hash instead of creating a new one. 
+- **Hashing:** Git hashes and compresses this root Tree object, storing it inside `.git/objects/`. 
+
+Example of a Tree object:
+
+```text
+Root Tree Object (e.g., hash: 9a2b4c...)
+├── 100644 blob 3b7e12...   README.md
+└── 040000 tree e84f91...   src/ (Sub-tree)
+```
+
+#### 2. Assembling the Commit Object
+
+Git generates a text file known as the **Commit object**. It aggregates the structural snapshot with the necessary lineage and author metadata. A typical commit object looks like this internally:
+
+```text
+tree 9a2b4c6d8e...       # Points to the root directory Tree object
+parent 4f7a1b2c3d...     # The SHA-1 hash of the previous commit
+author Linus Torvalds <linus@git.com> 1774358400 -0500
+committer Linus Torvalds <linus@git.com> 1774358400 -0500
+
+Implement the core network interface framework.
+```
+
+- **Parent Pointers:** By including the hash of the previous commit (`parent`), Git links commits together to form your repository's history timeline. The initial commit of a repository has no `parent` line. 
+- **Unique Hashing:** Git hashes the entire commit object's content, including its metadata, to generate the final **commit object ID**. In traditional SHA-1 repositories, this is a 40-character SHA-1 hash. The hash depends on the object's complete content, not just its timestamp. The object is compressed and saved to the object database. 
+
+#### 3. Moving the Branch Pointer
+
+Branches in Git are not heavy folders; they are simply **lightweight, mutable pointers** to a commit. 
+
+If you are on the `main` branch, Git updates the branch reference, commonly stored at `.git/refs/heads/main`, with the newly generated commit hash. Some repositories use packed references or other reference storage mechanisms. 
+
+#### 4. Updating HEAD
+
+The `.git/HEAD` file tracks your current location. Normally, it points to your active branch, for example:
+
+```text
+ref: refs/heads/main
+```
+
+Because the branch pointer was just updated to the new commit, `HEAD` now resolves to the new commit snapshot. 
+
+Finally, Git records the reference movement in the Reflog, commonly stored in `.git/logs/HEAD` and the branch's reflog, so you can track or recover previous pointer positions when needed. 
+
+#### Direct Summary of Component Relationships
+
+| **Git Object** | **Analogy** | **Stores** | **Immutable?** |
+|---|---|---|---|
+| **Blob** | File Contents | Raw data (no filename or metadata) | Yes (tied to hash) |
+| **Tree** | Folder Directory | File names, permissions, and links to Blobs/Trees | Yes (tied to hash) |
+| **Commit** | Snapshot Metadata | Root Tree pointer, Parent pointer, Author, Message | Yes (tied to hash) |
+| **Branch** | Sticky Note Bookmark | A reference to a commit object ID | **No** (moves forward) |
 
 ### **6. What is `HEAD` in Git and what is a "Detached HEAD"?**
 **Answer:**
