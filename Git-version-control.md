@@ -590,8 +590,65 @@ To understand the flags, remember how Git tracks your code:
 - **Best use case:** Your current experimental code is entirely broken, you want to trash everything you've done since your last good commit, and you want a completely blank slate. *Use with extreme caution*
 
 ### **12. What is `git reflog` and how is it used for disaster recovery?**
-**Answer:** A local chronological ledger recording every single time `HEAD` moved in your local repository (commits, checkouts, rebases, hard resets).
-- **Recovery:** If an engineer accidentally ran `git reset --hard HEAD~5`, running `git reflog` identifies the previous commit SHA before the reset. Running `git reset --hard HEAD@{1}` restores all lost commits in 1 second.
+**Answer:** **`git reflog` (reference log) is a local safety mechanism that acts as a "black-box flight recorder" for your repository.** It records the exact chronological history of where your `HEAD` pointer and branch tips have been, logging every single local movement like commits, checkouts, resets, merges, rebases, and stashes. 
+
+Unlike `git log`—which only shows the current visible, linear commit history that you push to remote servers—**`git reflog` is completely private, local to your machine, and shows actions you've rewritten or deleted**. If a commit was once created in your local repository, `git reflog` remembers it, serving as the ultimate tool for disaster recovery. 
+
+#### The Core Disaster Recovery Framework
+
+When a Git mistake occurs, the golden rule is to **stop running destructive commands**. Commits are rarely lost permanently; they usually just lose their "labels" (branches), making them invisible to `git log`. Git keeps these "dangling commits" alive locally for **30 to 90 days** before cleaning them up via garbage collection. 
+
+**1. Open the flight recorder**
+
+Run the basic command to view your recent movement: 
+
+**bash**
+```
+git reflog
+
+```
+
+This outputs a list formatted with commit hashes, positions (`HEAD@{n}`), and the action taken: 
+
+**text**
+```
+c3e6092 HEAD@{0}: reset: moving to HEAD~1
+a8f3b21 HEAD@{1}: commit: Add layout styling
+b65d4ef HEAD@{2}: checkout: moving from main to feature
+
+```
+
+**2. Preview the lost state**
+
+Before pulling the trigger on a recovery command, verify you have the right commit hash or pointer using read-only inspection commands: 
+
+**bash**
+```
+git show HEAD@{1}
+# OR view the log starting from that point
+git log --oneline HEAD@{1}
+
+```
+
+**3. Execute the rescue**
+
+Depending on your exact disaster scenario, pick the corresponding recovery strategy below.
+
+*Always prefer the **"Rescue Branch"** method (Option A) rather than forcing hard resets, as it creates a safe playground without changing your current working tree.* 
+
+** Common Disaster Scenarios & Fixes**
+
+| **The Disaster**                                                          | **The Recovery Command**                                                         | **Why it works**                                                                                              |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Accidental `git reset --hard`** <br>*(You blew away recent commits)*    | `git branch rescue HEAD@{1}` <br>*(Or target the specific hash `a8f3b21`)*       | Creates a new branch named `rescue` pointing exactly to the commit **before** the hard reset occurred.        |
+| **Deleted the wrong branch** <br>*(The branch is gone from `git branch`)* | `git switch -c restored-branch <commit-hash>`                                    | Finds the last commit hash that existed on the tip of the deleted branch and spins a new branch right off it. |
+| **Botched Rebase or Merge** <br>*(Your history is tangled up or broken)*  | `git reset --hard HEAD@{3}` <br>*(Change index to the checkout/pre-merge state)* | Forces your current branch back to the clean state it was in right before you triggered the rebase or merge.  |
+| **Lost changes inside a Stash** <br>*(You cleared or dropped a stash)*    | `git reflog show refs/stash` <br>Followed by: `git stash apply <hash>`           | Reflog tracks stashes too. This isolates your stash history so you can pick out the dropped commit hash.      |
+
+** Crucial Limitations**
+
+- **Local Only:** You cannot recover a teammate's lost work using your reflog. 
+- **Committed Work Only:** `git reflog` only tracks changes that were officially committed or stashed. If you have uncommitted, untracked files in your working directory and run `git reset --hard`, `git reflog` **cannot** save them
 
 ### **13. What is `git stash` and what are `stash pop` vs `stash apply`?**
 **Answer:** Temporarily shelves uncommitted changes (dirty working tree) onto an internal stack (`stash@{0}`):
