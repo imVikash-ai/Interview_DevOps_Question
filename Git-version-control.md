@@ -549,9 +549,45 @@ When you run `git reset <commit-hash>`, you are moving the current branch pointe
 
 ### **11. Explain `git reset --soft` vs `--mixed` vs `--hard`.**
 **Answer:**
-- **`--soft`:** Moves branch `HEAD` backward; leaves Staging Area (Index) and Working Directory unchanged (changes remain staged).
-- **`--mixed` (Default):** Moves `HEAD` backward and un-stages changes in the Index; leaves Working Directory files untouched.
-- **`--hard` (Destructive):** Moves `HEAD` backward and completely wipes all changes in both the Index and Working Directory, discarding uncommitted work.
+The core difference between these flags lies in **how many of Git's three trees (History, Staging Index, and Working Directory) are updated** when you move your branch pointer backward. 
+
+At their core, all three commands move your current branch pointer (`HEAD`) back to a specific commit. What they do with your modified files is what sets them apart. 
+
+**The Three Trees of Git**
+
+To understand the flags, remember how Git tracks your code: 
+
+1. **Commit History (Repository):** Your snapshots that have been committed. 
+2. **Staging Area (Index):** The files you have prepared (`git add`) for your next commit. 
+3. **Working Directory:** The actual files you are editing on your computer right now.
+
+**Quick Comparison Table**
+
+| **Command**                     | **Moves HEAD (History)?** | **Resets Staging Index?**         | **Resets Working Directory?** | **Safety Level**               |
+| ------------------------------- | ------------------------- | --------------------------------- | ----------------------------- | ------------------------------ |
+| `git reset --soft`              | **Yes**                   | No (Changes stay staged)          | No (Files stay intact)        | **Safe** (No code lost)        |
+| `git reset --mixed` *(Default)* | **Yes**                   | **Yes** (Changes become unstaged) | No (Files stay intact)        | **Safe** (No code lost)        |
+| `git reset --hard`              | **Yes**                   | **Yes** (Staged changes wiped)    | **Yes** (Local files wiped)   | **Dangerous** (Permanent loss) |
+
+**Detailed Breakdown**
+
+**1. `git reset --soft <commit>`**
+
+- **What it does:** It rolls back your commit history to the target commit, but **leaves your Staging Area and Working Directory exactly as they were**. 
+- **File Status:** If you run `git status` right after, all the changes from the undone commits will show up in **green** (staged and ready to be committed again). 
+- **Best use case:** You want to squash multiple recent commits into a single clean one, or you accidentally committed your work but realized you need to edit the commit message or add more files before officially saving it. 
+
+**2. `git reset --mixed <commit>`**
+
+- **What it does:** This is the **default mode** if you just type `git reset`. It rolls back your commit history and **clears the Staging Area**, but leaves your Working Directory untouched.
+- **File Status:** Your file changes are perfectly safe on your hard drive, but if you run `git status`, they will show up in **red** (unstaged). You will need to run `git add` to stage them again.
+- **Best use case:** You committed a messy bundle of unrelated files and want to split them up into multiple, distinct, well-organized commits. 
+
+**3. `git reset --hard <commit>`**
+
+- **What it does:** The nuclear option. It rolls back your history, clears your staging area, and **completely overwrites your local files** to match the target commit exactly.
+- **File Status:** Any uncommitted changes in your working directory and all commits after the target commit are completely wiped out.
+- **Best use case:** Your current experimental code is entirely broken, you want to trash everything you've done since your last good commit, and you want a completely blank slate. *Use with extreme caution*
 
 ### **12. What is `git reflog` and how is it used for disaster recovery?**
 **Answer:** A local chronological ledger recording every single time `HEAD` moved in your local repository (commits, checkouts, rebases, hard resets).
