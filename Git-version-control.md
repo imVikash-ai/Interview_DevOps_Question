@@ -679,13 +679,79 @@ The core difference between the two commands lies in **what happens to the stash
 - **Best used when:** You want to apply the same set of changes to **multiple branches**, or you want a safe fallback because you anticipate complex merge conflicts and want to keep your backup intact
 
 ### **14. What is `git bisect` and how does it automate debugging?**
-**Answer:** Uses binary search algorithms to find the exact commit that introduced a regression bug between a known good commit and a known bad commit:
-```bash
-git bisect start
-git bisect bad HEAD
-git bisect good v1.0.0
-# Git checks out middle commit; test and mark 'git bisect good' or 'bad'
-```
+**Answer:** **`git bisect` is a built-in Git debugging tool that uses a binary search algorithm to pinpoint the exact commit that introduced a bug into your codebase.** Instead of manually checking every single commit one by one, `git bisect` systematically halves your commit history until it isolates the problematic change. 
+
+For example, if a bug was introduced somewhere across 100 commits, checking them individually could take all day. With a binary search, `git bisect` narrows the field from 100 to 50, then 25, 13, 7, 4, 2, and finally 1, finding the broken commit in **just about 7 steps**. 
+
+**The Manual Workflow**
+
+To use it manually, you define a search window by giving Git a known "bad" point (usually the current broken state) and a known "good" point (an older version where you know the code worked perfectly). 
+
+1. **Start the process**:
+
+   **bash**
+   ```
+   git bisect start
+
+   ```
+
+2. **Define the boundaries**: 
+
+   **bash**
+   ```
+   git bisect bad                 # Marks the current commit as broken
+   git bisect good <commit-hash>  # Marks an older, stable commit
+
+   ```
+  
+3. **Test the midpoints**: Git will automatically checkout a commit exactly halfway between your good and bad targets. You test the app, and give Git feedback:
+   - If it works: `git bisect good`
+   - If it's broken: `git bisect bad` 
+4. **Finish up**: Git repeats this until it outputs the exact offending commit. You then return your repository to its original state using: 
+   **bash**
+   ```
+   git bisect reset
+
+   ```
+
+**How it Automates Debugging**
+
+The manual approach is highly efficient, but `git bisect` becomes incredibly powerful when you completely **automate the testing phase** using the `git bisect run` command. 
+
+If you have an automated test script (like an integration test, unit test, or a simple custom script) that can flag the bug, Git can execute the binary search entirely on its own. 
+
+**Step-by-Step Automation Example:**
+
+1. **Initialize the boundaries**:
+
+   **bash**
+   ```
+   git bisect start HEAD v1.0.0
+
+   ```
+
+   *(This tells Git that the current `HEAD` is bad, and the tag `v1.0.0` was good.)* 
+2. **Hand off control to Git**:
+
+   **bash**
+   ```
+   git bisect run npm test
+
+   ```
+
+   *(You can replace `npm test` with any script, e.g., `pytest`, `cargo test`, or `./test-error.sh`).* 
+
+**How Git Interprets the Script's Output:**
+
+When you run `git bisect run <command>`, Git automatically checks out a midpoint commit, executes your command, reads the script's **exit code**, and instantly decides what to do next: 
+
+| **Script Exit Code**          | **What it Means to Git**  | **Git's Next Action**                                                                                |
+| ----------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **`0`**                       | **Success / Clean**       | Marks the commit as `good` and searches the newer half.                                              |
+| **`1` to `127`** (except 125) | **Failure / Bug Present** | Marks the commit as `bad` and searches the older half.                                               |
+| **`125`**                     | **Untestable Commit**     | Skips this commit entirely (useful if the code fails to compile or build at this specific snapshot). |
+
+Git will loop through this cycle completely hands-free until it halts and prints out the commit message, author, and diff of the exact change that broke the code
 
 ### **15. What is `git clean`?**
 **Answer:** Removes untracked files from the working directory (`git clean -fd` removes untracked files and directories).
