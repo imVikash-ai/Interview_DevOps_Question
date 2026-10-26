@@ -754,7 +754,32 @@ When you run `git bisect run <command>`, Git automatically checks out a midpoint
 Git will loop through this cycle completely hands-free until it halts and prints out the commit message, author, and diff of the exact change that broke the code
 
 ### **15. What is `git clean`?**
-**Answer:** Removes untracked files from the working directory (`git clean -fd` removes untracked files and directories).
+**Answer:** **`git clean` is a Git command used to remove untracked files from your working directory.**
+
+Unlike tracked files (which Git monitors for changes), untracked files are new files that have been created in your project folder but have not yet been added to the Git staging area via `git add`. Running `git clean` helps you quickly tidy up your repository by deleting build artifacts, compiler outputs, or temporary files that you don't want to keep.
+
+**Critical Safety Check: The Dry Run**
+
+Because `git clean` permanently deletes files from your hard drive (they cannot be recovered via Git), Git prevents you from accidentally running it. By default, running just `git clean` will throw an error unless you specify a flag.
+
+Before deleting anything, you should always perform a **dry run** to see exactly what *would* be deleted:
+
+**bash**
+```
+git clean -n
+
+```
+
+*(The `-n` flag stands for "dry run" or "preview".)*
+
+**Common Configurations and Flags**
+
+Depending on what you want to delete, you will combine `git clean` with different flags:
+
+- **`git clean -f` (Force):** Actually deletes the untracked files. This tells Git, "Yes, I am sure, go ahead and delete them."
+- **`git clean -fd` (Include Directories):** Deletes untracked files *and* untracked folders/directories. By default, `git clean` ignores folders.
+- **`git clean -fx` (Include Ignored Files):** Deletes untracked files, including files that match your `.gitignore` rules (like `node_modules/`, `.env` files, or build binaries).
+- **`git clean -i` (Interactive Mode):** Walks you through the files one by one, allowing you to choose whether to delete or keep each one.
 
 ### **16. What is `.gitignore` and why won't it ignore already tracked files?**
 **Answer:** `.gitignore` specifies untracked files Git should ignore. If a file was already committed to Git history before being added to `.gitignore`, Git continues tracking it. To ignore it, untrack it first: `git rm --cached <file>`.
