@@ -1262,10 +1262,66 @@ When you work with a remote repository, you deal with three distinct versions of
 - `git diff main origin/main`: Compares your local changes against the remote version to see if you are ahead or behind.
 
 ### **29. What is `.git/config` Hierarchy?**
-**Answer:** Three-tiered configuration evaluated with increasing precedence:
-1. **System (`/etc/gitconfig`):** Applied to all OS users.
-2. **Global (`~/.gitconfig`):** Applied to all repos of the current user.
-3. **Local (`.git/config`):** Scoped strictly to the current repository.
+**Answer:** The Git configuration hierarchy **determines how Git reads, applies, and resolves settings across your computer**. Git relies on a **"nearest-wins" precedence rule**, meaning narrower, project-specific settings automatically override broader, system-wide options. 
+
+Here is the breakdown of the hierarchy, ordered from the highest priority (most specific) to the lowest priority (most general):
+
+**The Git Config Precedence Table**
+
+| **Precedence**  | **Level / Scope** | **Target Area**          | **File Path (Unix/macOS)**           | **File Path (Windows)**                     |
+| --------------- | ----------------- | ------------------------ | ------------------------------------ | ------------------------------------------- |
+| **1 (Highest)** | `worktree`        | Specific worktree branch | `.git/worktree/<id>/config.worktree` | `<repo>\.git\worktree\<id>\config.worktree` |
+| **2**           | `local`           | Current repository       | `.git/config`                        | `<repo>\.git\config`                        |
+| **3**           | `global`          | Current user account     | `~/.gitconfig`                       | `C:\Users\<User>\.gitconfig`                |
+| **4 (Lowest)**  | `system`          | All users on the machine | `/etc/gitconfig`                     | `<Git-Install>\etc\gitconfig`               |
+
+**Understanding the Levels**
+
+**1. Worktree (`--worktree`)**
+
+- **What it does:** Used when managing multiple working trees (different checked-out branches simultaneously) linked to the same repository.
+- **Use Case:** Customizing configurations (like specific hooks or third-party tracking scripts) for a single directory layout without affecting the main repository.
+
+**2. Local (`--local` or default)**
+
+- **What it does:** Applies strictly to the **current repository** you are operating in.
+- **Use Case:** Using a specialized company email for a specific corporate repository, while leaving your personal email for everything else. 
+- **Note:** This file is located in the hidden `.git/config` folder at the root of your project. 
+
+**3. Global (`--global`)**
+
+- **What it does:** Applies to **all repositories** managed by your specific operating system user profile.
+- **Use Case:** Setting your universal commit credentials (`user.name` and `user.email`), choosing your preferred text editor (e.g., VS Code or Vim), and declaring personal shorthand aliases. 
+
+**4. System (`--system`)**
+
+- **What it does:** Applies universally to **every user and every repository** across the entire physical computer.
+- **Use Case:** System administrators configuring proxy environments, secure root certificates, or network standards across an entire office fleet or computer lab. Modifying this file usually requires administrator/sudo permissions. 
+
+**Quick Commands for Hierarchy Management**
+
+- **See the effective value:** To see what setting Git is actually executing for a variable, just query it. Git automatically processes the hierarchy and returns the highest priority value:
+
+  **bash**
+  ```
+  git config user.email
+
+  ```
+
+- **Debug the source:** If you are unsure why a specific setting is active, you can track exactly which file in the hierarchy is responsible for it using the `--show-origin` flag:
+
+  **bash**
+  ```
+  git config --list --show-origin
+
+  ```
+
+- **List all configurations:** To view every active configuration across all hierarchy boundaries combined: 
+
+  **bash**
+  ```
+  git config --list
+  ```
 
 ### **30. What is `git remote` and how do you manage remote upstream mirrors?**
 **Answer:**
