@@ -1119,7 +1119,42 @@ Git stores all its data inside the `.git/objects` directory as compressed databa
   Reads a list of object hashes from standard input and dumps their info or contents.
 
 ### **25. What is `git hash-object`?**
-**Answer:** Computes the SHA1/SHA256 hash of a file payload and optionally writes it to `.git/objects/` as a zlib-compressed blob (`git hash-object -w file.txt`).
+**Answer:** **`git hash-object` is a low-level "plumbing" command in Git that calculates a unique ID (hash) for a specific piece of data and can optionally store it in Git's internal database.** By default, the command treats the input data as a "blob" (the object type Git uses to track raw file contents). 
+
+** How It Works Under the Hood**
+
+When you run `git hash-object`, Git doesn't just hash your raw file string. It creates a standardized internal Git object first. 
+
+1. **Prepends a Header:** Git takes the object type (e.g., `blob`), adds a space, the size of the content in bytes, and a null byte terminator (`\0`). 
+2. **Generates the Hash:** It calculates the cryptographic hash (traditionally SHA-1, yielding a 40-character fingerprint) of that combined header and content. 
+
+For example, if you hash the text `"hello"`, Git hashes the string `"blob 5\0hello"`. Because the ID is tied purely to the content, **identical content always yields the exact same hash**, regardless of filenames or timestamps. 
+
+** Common Core Flags**
+
+- `--stdin`: Tells Git to read the content directly from standard input (command line/pipes) instead of looking for a file path. 
+- `-w`: **Write to database.** Without this flag, Git only prints the calculated hash on your screen. With this flag, Git compresses the object and writes it directly into the `.git/objects/` database. 
+- `-t <type>` : Changes the object type from the default `blob` to `tree`, `commit`, or `tag`. 
+
+** Practical Example**
+
+If you want to see the hash of a string without saving it:
+
+**bash**
+```bash
+echo "hello world" | git hash-object --stdin
+# Output: 3b18e512dba79e4c8300dd08aeb37f8e728b8dad
+```
+
+If you want to forcibly inject that object into Git's permanent storage:
+
+**bash**
+```bash
+echo "hello world" | git hash-object -w --stdin
+# Output: 3b18e512dba79e4c8300dd08aeb37f8e728b8dad
+```
+
+If you check `.git/objects/3b/`, you will see a newly generated file named `18e512dba79e4c8300dd08aeb37f8e728b8dad`. Git uses the first two characters of a hash as a subfolder to keep the filesystem organized.
 
 ### **26. What is a Git Reference (`ref`)?**
 **Answer:** A simple text file located under `.git/refs/` containing a 40-character Commit SHA (e.g., `.git/refs/heads/main` points to the tip commit of `main`).
