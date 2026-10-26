@@ -986,7 +986,20 @@ Each line is broken down into specific components:
 - **Ignore whitespace changes:** Use `git blame -w filename.txt` so formatting cleanups don't hide the original author of the logic.
 
 ### **21. What is `git log --graph --oneline --decorate --all`?**
-**Answer:** Displays a visual ASCII graph of branch topologies, merge points, tags, and commits in a compact, readable format.
+**Answer:** The command `git log --graph --oneline --decorate --all` is **a highly popular Git command used to visualize your entire repository's commit history as a clean, text-based tree directly in your terminal**. 
+
+Developers frequently use the mnemonic **"A DOG"** (`--all`, `--decorate`, `--oneline`, `--graph`) to easily remember this exact combination of switches. 
+
+**What Each Flag Does**
+
+To understand why this combination is so powerful, here is a breakdown of what each individual flag contributes to the final output: 
+
+| **Flag**     | **Core Function**                                                                                                                                             | **Why It Matters**                                                                                                                           |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--graph`    | Draws an ASCII text graph (lines, asterisks, and slashes) on the left side of the terminal.                                                                   | Connects the dots to visually map out branches, forks, merges, and parental relationships.                                                   |
+| `--oneline`  | Compresses each commit into a single line containing only a short 7-character hash and the commit subject message.                                            | Prevents the terminal from being overwhelmed by standard, multi-line commit details, letting you see dozens of commits at a glance.          |
+| `--decorate` | Adds color-coded tags indicating branch names (`main`, `feature-xyz`), remote references (`origin/main`), and tags (`v1.0`) next to their respective commits. | Instantly shows you where your local and remote branches are currently pointing in the timeline.                                             |
+| `--all`      | Forces Git to look through every single reference inside the repository.                                                                                      | By default, Git only shows history for your *current* branch. This flag forces it to show every branch, even if they are unmerged or hidden. |
 
 ### **22. What is `git diff` vs `git diff --staged`?**
 **Answer:**
