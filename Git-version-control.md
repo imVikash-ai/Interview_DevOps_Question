@@ -1512,13 +1512,88 @@ This command gives you surgical control over **undoing changes** across your Git
 `git checkout` still works perfectly fine in modern Git for backwards compatibility. However, it remains a "swiss army knife" that is generally less safe and more error-prone for beginners and production workflows
 
 ### **33. What is `git shortlog`?**
-**Answer:** Summarizes `git log` output by grouping commits by author name, displaying commit counts and titles.
+**Answer:** **`git shortlog` is a Git command used to summarize the commit history by grouping commits by author.**
+
+Instead of showing a long, detailed timeline of every change, it aggregates the commits so you can quickly see who has contributed to a repository and what specific work they have done. It is frequently used to generate release notes or changelogs.
+
+**Key Visual Difference**
+
+While a standard `git log` output looks like a long vertical timeline, `git shortlog` outputs a clean, grouped summary:
+
+**text**
+```
+Jane Doe (3):
+      Fix login page styling
+      Update README installation instructions
+      Refactor authentication middleware
+
+John Smith (2):
+      Add database migration for users table
+      Fix broken unit tests for API endpoints
+
+```
+
+**Useful Flags and Use Cases**
+
+You can modify the output of `git shortlog` using various flags to get exactly the summary you need:
+
+- **`git shortlog -s` (or `--summary`)**: **Shows only the commit count** next to each author's name, completely hiding the commit messages. Perfect for getting a quick leaderboard of project contributors.
+- **`git shortlog -n` (or `--numbered`)**: **Sorts the authors by the number of commits** (highest to lowest) rather than alphabetically.
+- **`git shortlog -e` (or `--email`)**: **Displays the author's email address** alongside their name, which helps differentiate contributors with identical names.
+- **`git shortlog HEAD~5..HEAD`**: **Filters by a specific range**. This example shows only the summary for the last 5 commits.
 
 ### **34. What is `git show`?**
-**Answer:** Displays the commit metadata, author, and full unified diff introduced by a specific commit or tag.
+**Answer:** **`git show` is a Git command used to view the details and content changes of specific Git objects, such as commits, tags, trees, or blobs**. Most commonly, developers use it to see exactly what changes were introduced in a specific commit.
+
+**Common Uses of `git show`**
+
+- **View the latest commit:** Running `git show` without any arguments displays the author, date, log message, and textual diff of the very last commit (`HEAD`) made in your current branch.
+- **View a specific commit:** You can inspect a specific commit by passing its hash (or the first few characters of it):
+
+  **bash**
+  ```
+  git show 7a3f1b2
+
+  ```
+ 
+- **View a specific file at a specific commit:** If you only want to see how a single file changed in a past commit, append the file path:
+
+  **bash**
+  ```
+  git show 7a3f1b2 -- path/to/file.txt
+
+  ```
+
+- **View a specific tag:** You can check the details of a release or tag:
+
+  **bash**
+  ```
+  git show v1.0.0
+
+  ```
+
+**What Information Does It Show?**
+
+When run on a commit, the output is broken into two main parts:
+
+1. **Commit Metadata:** The commit hash, author name and email, date and time, and the commit message.
+2. **The Diff:** A detailed list of lines added (marked in green/with a `+`) or removed (marked in red/with a `-`) in that specific commit.
 
 ### **35. What is `git status -s` (Short Format)?**
-**Answer:** Displays repository status in a compact 2-column format (`M` modified, `A` added, `??` untracked).
+**Answer:** The **`git status` command displays the current state of your Git working directory and staging area**. It tells you exactly which changes have been made, which files are ready to be saved (committed), and which files Git isn't tracking yet.
+
+Crucially, running `git status` is completely safe—**it is purely informational** and will not alter your code or repository history.
+
+**Useful Options & Shortcuts**
+
+- **`git status -s` (Short Format):** Prints a highly compressed, single-line-per-file view.
+  - `??` = Untracked file.
+  - `M` (Right column) = File modified but *not* staged.
+  - `M ` (Left column) = File modified and *successfully* staged.
+  - `A ` = Newly staged file.
+
+- **`git status -sb`:** Gives you the short format but includes a quick summary line of what branch you are on.
+- **`git status --ignored`:** Forces Git to display files currently being hidden or skipped by your `.gitignore` configuration
 
 ### **36. What is `git archive`?**
 **Answer:** Exports the project tree at a specific commit or tag into a compressed zip or tarball archive without the `.git` directory (`git archive -o release.zip HEAD`).
