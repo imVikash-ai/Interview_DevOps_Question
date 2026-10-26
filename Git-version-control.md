@@ -1059,9 +1059,64 @@ When you type a single **porcelain** command, Git often executes multiple **plum
 - `git commit` (**Porcelain**) invokes `git write-tree` to capture the project's folder structure, and `git commit-tree` to tie that structure to a commit history object
 
 ### **24. What is `git cat-file`?**
-**Answer:** Plumbing command to inspect raw Git objects in `.git/objects/`:
-- `git cat-file -t <sha>`: Shows object type (`blob`, `tree`, `commit`, `tag`).
-- `git cat-file -p <sha>`: Pretty-prints the uncompressed object content.
+**Answer:** `git cat-file` is **a built-in Git plumbing command used to inspect low-level repository objects (such as commits, trees, blobs, and tags) by their object hash or name**. 
+
+**What It Does**
+
+Git stores all its data inside the `.git/objects` directory as compressed database objects. The `git cat-file` command lets you look inside these raw objects without interacting with them directly. You can use it to: 
+
+- View the contents of a file (blob) or commit.
+- Check the **type** of an object (`commit`, `tree`, `blob`, or `tag`).
+- Check the **size** of an object.
+- Check if an object **exists** in the repository.
+- Process multiple objects in **batch mode** via standard input (`stdin`).
+
+**Common Options and Examples**
+
+- **Pretty-print object contents (`-p`)**:
+
+  **bash**
+  ```bash
+  git cat-file -p <commit-hash>
+  ```
+
+  Displays the human-readable contents of a commit, tree, or blob. For a tree object, it lists file permissions, object types, hashes, and filenames. 
+
+- **Check the object type (`-t`)**:
+
+  **bash**
+  ```bash
+  git cat-file -t <object-hash>
+  ```
+
+  Returns whether the object is a `blob`, `tree`, `commit`, or `tag`. 
+
+- **Check the object size in bytes (`-s`)**:
+
+  **bash**
+  ```bash
+  git cat-file -s <object-hash>
+  ```
+
+  Outputs the size of the object. 
+
+- **Check if an object exists (`-e`)**:
+
+  **bash**
+  ```bash
+  git cat-file -e <object-hash>
+  ```
+
+  Exits with a status of `0` if the object exists in the database.
+
+- **Batch processing (`--batch` or `--batch-check`)**:
+
+  **bash**
+  ```bash
+  git cat-file --batch
+  ```
+
+  Reads a list of object hashes from standard input and dumps their info or contents.
 
 ### **25. What is `git hash-object`?**
 **Answer:** Computes the SHA1/SHA256 hash of a file payload and optionally writes it to `.git/objects/` as a zlib-compressed blob (`git hash-object -w file.txt`).
