@@ -862,7 +862,32 @@ Think of a subtree as a smart copy-paste. It handles third-party code as if it w
 - **Best Used For:** "Vendoring" third-party frameworks, mono-repo setups where developers shouldn't need to know Git subcommands, or when integrating stable code that rarely pushes changes back upstream.
 
 ### **18. What is `git commit --amend`?**
-**Answer:** Combines staged changes with the most recent commit, rewriting its commit message, Tree, and SHA. *Only use on local un-pushed commits.*
+**Answer:** The **`git commit --amend` command is a convenient tool used to modify the most recent commit in your Git history**. It allows you to combine staged changes with the previous commit instead of creating an entirely new one, or simply fix a typo in your last commit message. 
+
+Under the hood, `git commit --amend` does not actually edit the existing commit. Instead, it **creates a brand new commit entity** with a new SHA-1 hash and replaces the tip of your current branch with it, causing the old commit to become unreachable. 
+
+**Common Use Cases & How to Use Them**
+
+**1. Fixing a Typo in the Last Commit Message**
+
+If your code is correct but you made a mistake in the message, you can overwrite it instantly. 
+
+- **Via command line editor:** Run `git commit --amend`. Your default text editor will open, letting you rewrite the message.
+- **Directly in the terminal:** Run `git commit --amend -m "Your new and improved commit message"`. 
+
+**2. Adding Forgotten Changes or Files**
+
+If you committed your work but realized you forgot to include a file or left out a small detail, you can merge those updates directly into that last commit. 
+
+1. Stage the missing files or modifications: `git add forgotten_file.txt`
+2. Keep the exact same commit message without opening an editor: `git commit --amend --no-edit` 
+
+**The Golden Rule: Only Amend Local Commits**
+
+Because `git commit --amend` rewrites Git history, you should **only use it on commits that have not been pushed to a remote repository**. 
+
+- **Why?** If you amend a commit that other team members have already pulled, your local history and the remote history will diverge. 
+- **The Consequence:** To update the remote branch, you would be forced to use `git push --force`, which can overwrite your collaborators' work and cause major merge conflicts
 
 ### **19. What is `git pull` vs `git fetch`?**
 **Answer:**
