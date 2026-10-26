@@ -1973,10 +1973,110 @@ You can easily fix this and achieve the exact same outcome by running `git rm ol
 Regardless of whether you use `git mv` or the manual method, you must still run **`git commit`** afterward to permanently save the change into your repository's version history.
 
 ### **44. What is `git ls-files`?**
-**Answer:** Plumbing command listing all files currently tracked in the Git Index or working directory.
+**Answer:** **`git ls-files` is a plumbing-level Git command used to show information about the files in your Git index (the staging area) and your working directory.** It essentially merges the file list from Git's internal cache with the actual files on your hard drive, allowing you to filter and view different combinations of the two. 
+
+By default, if you run `git ls-files` without any options, it acts as a quick way to **list all currently tracked files** in your repository.
+
+Because it reads directly from Git's indexed cache rather than scanning your physical hard drive directories, it is incredibly fast—even in massive codebases.
+
+**Common Use Cases & Useful Flags**
+
+You can change the behavior of `git ls-files` by passing various flags:
+
+| **Command**                         | **What it displays**                                                                           |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `git ls-files`                      | **All tracked files** in the current repository (same as using the `-c` / `--cached` flag).    |
+| `git ls-files -o` (or `--others`)   | **Untracked files** (files in your directory that haven't been added to Git yet).              |
+| `git ls-files -m` (or `--modified`) | **Modified files** that differ from what is currently in the index.                            |
+| `git ls-files -d` (or `--deleted`)  | **Deleted files** that are still expected by the index.                                        |
+| `git ls-files -i` (or `--ignored`)  | **Ignored files** (shows files matching your `.gitignore` rules; usually paired with `-o`).    |
+| `git ls-files -s` (or `--stage`)    | **Staged file metadata**, showing the file's mode bits, object hash (SHA-1), and stage number. |
+
+**Advanced Tricks**
+
+- **Check if a specific folder has changes:** You can combine flags to see if a directory has any modified or new files:
+
+  **bash**
+  ```
+  git ls-files --others --modified --error-unmatch path/to/folder/
+
+  ```
+
+- **Output for scripting (`-z`):** If you are piping this command into another script (like `xargs`), use `git ls-files -z`. This separates filenames with a NUL byte instead of a newline, preventing issues with filenames that contain spaces or special characters. 
+- **Custom formatting:** You can extract specific metadata using the `--format` option. For example, to list all tracked files alongside their internal Git object hashes: 
+
+  **bash**
+  ```
+  git ls-files --format='%(objectname) %(path)'
+  ```
 
 ### **45. What is `git ls-tree`?**
-**Answer:** Plumbing command listing the contents (mode, type, SHA, name) of a Tree object (`git ls-tree HEAD`).
+**Answer:** **`git ls-tree` is a plumbing command in Git used to list the contents of a specific tree object (like a commit, branch, or tag) directly from Git's internal object database.** It acts similarly to the standard terminal `/bin/ls` command, but instead of looking at your local filesystem, it peers inside a historical snapshot of your repository without needing to check it out. 
+
+**Basic Syntax**
+
+**bash**
+```
+git ls-tree <tree-ish> [<path>...]
+
+```
+
+The `<tree-ish>` can be a commit hash, a branch name, a tag, or references like `HEAD`. 
+
+**Default Output Format**
+
+When run on a commit (e.g., `git ls-tree HEAD`), Git outputs entries line-by-line using this layout: 
+
+**text**
+```
+<file_mode> <object_type> <object_hash>    <file_path>
+100644      blob          e69de29bb2d1d...  README.md
+040000      tree          7cc711bc32d30...  src
+
+```
+
+- **File Mode:** Unix-style file permissions (e.g., `100644` for regular files, `100755` for executables).
+- **Object Type:** Can be a `blob` (a file) or a `tree` (a subdirectory). 
+- **Object Hash:** The unique SHA-1 hash assigned to that item in Git's database.
+- **File Path:** The file or directory name. 
+
+**Common Practical Examples**
+
+- **List everything recursively (including subfolders):**
+  By default, `git ls-tree` only shows the top-level directory. Use the `-r` flag to dive into subdirectories:
+
+  **bash**
+  ```
+  git ls-tree -r HEAD
+
+  ```
+  
+- **Get just the file names:**
+  If you only want a clean list of filenames (ideal for scripting), use `--name-only`:
+
+  **bash**
+  ```
+  git ls-tree --name-only -r HEAD
+
+  ```
+
+- **Inspect a specific subdirectory in a historical commit:** 
+
+  **bash**
+  ```
+  git ls-tree <commit-hash> path/to/folder/
+
+  ```
+
+**`git ls-tree` vs. `git ls-files`**
+
+While they sound identical, they look at two completely different parts of Git:
+
+| **Feature**          | **`git ls-tree`**                                        | **`git ls-files`**                                          |
+| -------------------- | -------------------------------------------------------- | ----------------------------------------------------------- |
+| **Data Source**      | Reads straight from the **Git object database**.         | Reads from the **Staging Index**.                           |
+| **Historical Check** | Can view files from **any commit or branch** in history. | Limited to the **current checked-out state**.               |
+| **Staged Changes**   | Ignores uncommitted staged changes.                      | Includes local files that are staged but not yet committed. |
 
 ### **46. What is `git write-tree`?**
 **Answer:** Plumbing command that creates a Tree object from the current contents of the Index and writes it to `.git/objects/`.
