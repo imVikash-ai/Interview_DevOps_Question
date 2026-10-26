@@ -651,9 +651,32 @@ Depending on your exact disaster scenario, pick the corresponding recovery strat
 - **Committed Work Only:** `git reflog` only tracks changes that were officially committed or stashed. If you have uncommitted, untracked files in your working directory and run `git reset --hard`, `git reflog` **cannot** save them
 
 ### **13. What is `git stash` and what are `stash pop` vs `stash apply`?**
-**Answer:** Temporarily shelves uncommitted changes (dirty working tree) onto an internal stack (`stash@{0}`):
-- **`git stash pop`:** Applies stashed changes and removes them from the stash stack.
-- **`git stash apply`:** Applies stashed changes but preserves the entry on the stash stack.
+**Answer:** **`git stash`** is a Git command used to **temporarily save your uncommitted changes (both staged and unstaged)** so you can work on something else without committing incomplete code. It restores your working directory to a clean state, acting like a "temporary drawer" for your unfinished work. 
+
+Once you are ready to resume, you can bring those changes back using either `git stash pop` or `git stash apply`.
+
+**The Main Difference: `pop` vs `apply`**
+
+The core difference between the two commands lies in **what happens to the stash entry after it is brought back**. 
+
+| **Command**           | **What it does to your files**                       | **What it does to the stash list**                                 |
+| --------------------- | ---------------------------------------------------- | ------------------------------------------------------------------ |
+| **`git stash pop`**   | Applies the saved changes to your working directory. | **Deletes** the stash from your history (if applied successfully). |
+| **`git stash apply`** | Applies the saved changes to your working directory. | **Keeps** the stash entry in your history for future reuse.        |
+
+**Detailed Breakdown**
+
+** `git stash pop`**
+
+- **How it works:** It takes the most recent stash (or a specific one if specified), merges those changes into your current branch, and then **permanently deletes** that stash from your stack. 
+- **The Catch (Conflicts):** If your stashed changes conflict with new changes on your current branch, **Git will not delete the stash**. It leaves the stash intact so you don't accidentally lose your work while resolving the merge conflict. 
+- **Best used when:** You just want to pause what you are doing for a moment (e.g., to quickly fix a bug on another branch) and then immediately resume and throw away the temporary wrapper. 
+
+** `git stash apply`**
+
+- **How it works:** It copies the changes from the stash into your working directory but leaves the original stash safely tucked away in your stash history. 
+- **Equivalent logic:** `git stash pop` is effectively the exact same thing as running `git stash apply` followed by manually running `git stash drop`.
+- **Best used when:** You want to apply the same set of changes to **multiple branches**, or you want a safe fallback because you anticipate complex merge conflicts and want to keep your backup intact
 
 ### **14. What is `git bisect` and how does it automate debugging?**
 **Answer:** Uses binary search algorithms to find the exact commit that introduced a regression bug between a known good commit and a known bad commit:
