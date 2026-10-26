@@ -939,7 +939,51 @@ git merge origin/main
 *(Note: If you prefer `git pull` but want to keep your git history clean and linear without creating a messy "merge commit," you can use `git pull --rebase`)*
 
 ### **20. What is `git blame`?**
-**Answer:** Annotates each line of a file with the commit hash, author name, and timestamp of the last revision that modified that line.
+**Answer:** **`git blame` is a Git command used to examine the history of a file and show line-by-line who last modified it and when.** It helps track down which commit introduced a specific line of code or bug.
+
+** Why Use It?**
+
+- **Identify the author:** Find out exactly who wrote a specific line of code so you know who to ask for context.
+- **Find the commit hash:** Locate the exact commit that introduced a change, allowing you to read the commit message and understand *why* the change was made.
+- **Track the date:** See how recently a line of code was updated.
+
+** How It Works**
+
+When you run the command, it outputs the contents of the file with metadata prefixed to each line.
+
+**Basic Command:**
+
+**bash**
+```
+git blame filename.txt
+
+```
+
+**Example Output:**
+
+**text**
+```
+a1b2c3d4 (John Doe   2026-10-15 14:32:01 -0500 1)  def calculate_total(price, tax):
+a1b2c3d4 (John Doe   2026-10-15 14:32:01 -0500 2)      return price * (1 + tax)
+e5f6g7h8 (Jane Smith 2026-10-20 09:15:43 -0500 3)  print(calculate_total(100, 0.05))
+
+```
+
+** Reading the Output**
+
+Each line is broken down into specific components:
+
+- **`a1b2c3d4`**: The commit hash (ID) where the change happened.
+- **`John Doe`**: The name of the person who made the commit.
+- **`2026-10-15...`**: The date and time of the modification.
+- **`1)`**: The line number in the file.
+- **`def calculate_total...`**: The actual line of code.
+
+** Useful Variations**
+
+- **Show email instead of name:** Use `git blame -e filename.txt`.
+- **Look at specific lines:** Use `git blame -L 10,20 filename.txt` to only inspect lines 10 through 20.
+- **Ignore whitespace changes:** Use `git blame -w filename.txt` so formatting cleanups don't hide the original author of the logic.
 
 ### **21. What is `git log --graph --oneline --decorate --all`?**
 **Answer:** Displays a visual ASCII graph of branch topologies, merge points, tags, and commits in a compact, readable format.
