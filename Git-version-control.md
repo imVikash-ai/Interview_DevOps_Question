@@ -2078,37 +2078,91 @@ While they sound identical, they look at two completely different parts of Git:
 | **Historical Check** | Can view files from **any commit or branch** in history. | Limited to the **current checked-out state**.               |
 | **Staged Changes**   | Ignores uncommitted staged changes.                      | Includes local files that are staged but not yet committed. |
 
-### **46. What is `git write-tree`?**
-**Answer:** Plumbing command that creates a Tree object from the current contents of the Index and writes it to `.git/objects/`.
-
-### **47. What is `git commit-tree`?**
-**Answer:** Plumbing command that creates a Commit object given a Tree SHA, parent commit SHAs, and a commit message.
-
-### **48. What is `git pack-objects` and Packfiles (`.pack` / `.idx`)?**
-**Answer:** Git compresses loose individual object files into single packfiles using delta compression algorithms, generating index files (`.idx`) for fast binary searching.
-
-### **49. What is `git unpack-objects`?**
-**Answer:** Extracts individual loose object files from a packed `.pack` archive file.
-
-### **50. What is `git count-objects`?**
-**Answer:** Counts loose and packed objects in `.git/` and reports total disk space consumed by the repository.
-
----
-
-## 🟡 **Part 2: Advanced Branching, Rebasing & Merge Conflict Mastery (Questions 51–100)**
-
-### **51. How do you execute an Interactive Rebase (`git rebase -i`)?**
+### **46. How do you execute an Interactive Rebase (`git rebase -i`)?**
 **Answer:**
+
+To do an interactive rebase in Git, you use the `git rebase -i` command followed by a target commit or reference. This opens an interactive text editor allowing you to pick, reword, squash, or drop commits to rewrite your local history.
+
+##  The Golden Rule
+
+Only rebase local commits that you haven’t pushed to a shared remote repository. Rewriting shared history can cause serious synchronization issues for your teammates.
+
+#### Step-by-Step Guide:
+
+#### Step 1: Start the Rebase
+
+Open your terminal and target the parent commit before the ones you want to modify.
+
+**By count:** To modify the last 3 commits on your current branch:
+
 ```bash
-git rebase -i HEAD~4
+git rebase -i HEAD~3
 ```
-Opens an editor with options:
-- `pick`: Use commit as-is.
-- `reword`: Change commit message.
-- `edit`: Pause to amend files.
-- `squash`: Meld commit into previous commit and combine messages.
-- `fixup`: Meld commit into previous commit and discard message.
-- `drop`: Delete the commit.
+
+**By commit hash:** To start from a specific commit:
+
+```bash
+git rebase -i <commit-hash>
+```
+
+**Against a base branch:** To clean up your feature branch relative to the main branch:
+
+```bash
+git rebase -i main
+```
+
+#### Step 2: Choose Your Actions in the Editor
+
+Your default text editor (usually Vim or Nano) will open a list of your commits.
+
+**Note:** Unlike `git log`, these commits are listed in chronological order from oldest (top) to newest (bottom).
+
+Every line starts with the word `pick`. Change `pick` to the command (or shorthand letter) for the action you want:
+
+| Command | Short | What it does |
+|---|---|---|
+| `pick` | `p` | Keeps the commit exactly as it is. |
+| `reword` | `r` | Pauses to let you edit the commit message. |
+| `edit` | `e` | Pauses to let you add, remove, or modify files in that commit. |
+| `squash` | `s` | Combines this commit into the one above it and merges their messages. |
+| `fixup` | `f` | Combines this commit into the one above it but discards this one's message. |
+| `drop` | `d` | Completely deletes the commit and its changes. |
+
+To reorder commits, simply rearrange the rows in the text editor.
+
+#### Step 3: Save and Close
+
+Save the file and exit the editor (in Vim, press `Esc`, type `:wq`, and hit Enter). Git will begin executing the actions top-to-bottom.
+
+#### Step 4: Handle Pauses (If Applicable)
+
+Depending on the actions you chose, Git will pause:
+
+- **For `reword` or `squash`:** A new editor window opens automatically asking you to update the commit message(s). Modify the text, save, and close.
+- **For `edit`:** Git drops you back into the terminal. Make your file changes, stage them with `git add <file>`, run `git commit --amend`, and then continue.
+- **For conflicts:** If Git encounters a conflict, it will pause. Open the affected files, resolve the conflicts manually, stage the fixes using `git add`, and continue.
+
+Whenever Git pauses, resume the process by running:
+
+```bash
+git rebase --continue
+```
+
+#### Step 5: Push Your Changes
+
+If you haven't pushed this branch before, a standard `git push` works perfectly. If you are updating a personal feature branch that was previously pushed, you will need to force push safely:
+
+```bash
+git push --force-with-lease
+```
+
+#### Emergency Commands
+
+If anything goes wrong or you get confused during the process, you can safely undo everything and return your branch to exactly how it was before you started:
+
+```bash
+git rebase --abort
+```
 
 ### **52. How do you resolve a complex Git Merge Conflict?**
 **Answer:**
