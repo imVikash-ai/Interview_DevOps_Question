@@ -1003,8 +1003,37 @@ To understand why this combination is so powerful, here is a breakdown of what e
 
 ### **22. What is `git diff` vs `git diff --staged`?**
 **Answer:**
-- **`git diff`:** Shows changes between your Working Directory and the Staging Area (unstaged changes).
-- **`git diff --staged` (or `--cached`):** Shows changes between the Staging Area and your last commit (`HEAD`).
+The core difference between the two commands comes down to **which areas of your Git workflow you are comparing**.
+
+- `git diff` shows the changes you have made in your **Working Directory** that have **not yet been staged** for a commit. 
+- `git diff --staged` shows the changes you have **already added to the Staging Area** that are ready to be committed.
+**Direct Comparison**
+
+| **Command**             | **Compares From**    | **Compares To**      | **Answers the Question...**                                         |
+| ----------------------- | -------------------- | -------------------- | ------------------------------------------------------------------- |
+| **`git diff`**          | Staging Area (Index) | Working Directory    | *"What have I changed in my files since I last ran `git add`?"*     |
+| **`git diff --staged`** | Last Commit (HEAD)   | Staging Area (Index) | *"What exactly will be recorded if I type `git commit` right now?"* |
+
+*(Note: `git diff --cached` is an exact synonym for `git diff --staged` and behaves identically).* 
+
+**A Real-World Example**
+
+Imagine you have a file called `notes.txt` that originally contains the text: `"Version 1"`. 
+
+1. You edit the file in your code editor to say `"Version 2"`.
+   - Running `git diff` will show: `+ Version 2` (because the change is only in your working directory).
+   - Running `git diff --staged` will show **nothing** (because nothing is staged yet). 
+2. You stage the change by running `git add notes.txt`.
+   - Running `git diff` will now show **nothing** (because your working directory matches your staging area).
+   - Running `git diff --staged` will show: `+ Version 2` (because the change is now in the staging area waiting to be committed).
+3. You go back to your editor and add another line: `"Version 3"`.
+   - Running `git diff` will show: `+ Version 3` (comparing your unsaved editor changes against the staged `"Version 2"`).
+   - Running `git diff --staged` will still show: `+ Version 2` (comparing the staged snapshot against your last commit).
+
+**Summary of Best Practices**
+
+- Use **`git diff`** while actively coding to see what you are currently working on. 
+- Use **`git diff --staged`** as a final "sanity check" right before you commit to make sure no unwanted debugging lines or hard-coded keys slip into your version history
 
 ### **23. What is a Git Plumbing vs Porcelain Command?**
 **Answer:**
