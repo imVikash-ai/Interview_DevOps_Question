@@ -16,10 +16,94 @@
 
 ### **2. Compare Declarative vs Imperative IaC with concrete examples.**
 **Answer:**
-- **Declarative (e.g., Terraform, OpenTofu, Kubernetes YAML):** Declares **WHAT** the eventual infrastructure state should be. The engine computes dependencies and executes CRUD operations to match that state (`resource "aws_s3_bucket" "b" { ... }`).
-- **Imperative (e.g., AWS CLI, Bash scripts, Python Boto3):** Specifies **HOW** to reach the state via sequential commands (`aws s3api create-bucket ...`). Re-running imperative scripts fails without explicit custom idempotency logic.
 
-### **3. What is Terraform State and why is it necessary?**
+Declarative Infrastructure as Code (IaC) defines what end-state resources you want, while Imperative IaC defines how to build them using explicit, step-by-step commands.
+
+#### Core Differences
+
+| Feature | Declarative IaC | Imperative IaC |
+|---|---|---|
+| Focus | Desired end state ("what") | Step-by-step procedure ("how") |
+| Idempotency | High (automatically converges state) | Low (requires custom check logic to avoid errors on re-run) |
+| Configuration Drift | Automatically detected and fixed | Harder to track; manual scripts must be re-run |
+| Control & Flexibility | Lower fine-grained procedural control | High fine-grained control over execution flow |
+| Common Tools | Terraform, AWS CloudFormation, Puppet | Chef, AWS SDK/Boto3 scripts, bash scripts |
+
+#### Concrete Examples:
+
+#### 1. Declarative Example (Terraform)
+
+You declare that you want an AWS EC2 instance with a specific AMI and type. Terraform figures out the API calls needed to create, update, or destroy it.
+
+```hcl
+# What you want: A single EC2 instance
+resource "aws_instance" "web" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "DeclarativeServer"
+  }
+}
+```
+
+#### 2. Imperative Example (Python / AWS SDK / Boto3)
+
+You explicitly code the exact sequence of commands to check conditions, invoke the `run-instances` API, and handle tags step by step.
+
+```python
+import boto3
+
+ec2 = boto3.client("ec2")
+
+# Step 1: Explicitly issue the command to run an instance
+response = ec2.run_instances(
+    ImageId="ami-0c55b159cbfafe1f0",
+    InstanceType="t2.micro",
+    MinCount=1,
+    MaxCount=1,
+)
+
+instance_id = response["Instances"][0]["InstanceId"]
+
+# Step 2: Explicitly issue a second command to add a tag
+ec2.create_tags(
+    Resources=[instance_id], Tags=[{"Key": "Name", "Value": "ImperativeServer"}]
+)
+```
+
+#### Key Trade-Offs:
+
+#### Declarative (e.g., Terraform)
+
+- **Pros:** Easier to read, predictable, self-documenting end-state, handles state comparison safely.
+- **Cons:** Can feel like a "black box" when complex conditional logic or exact execution sequencing is required.
+
+#### Imperative (e.g., Chef or custom scripts)
+
+- **Pros:** Full control over order of operations, great for one-off procedural automation or legacy systems.
+- **Cons:** Prone to human error, harder to test drift, and requires maintaining procedural script logic.
+
+### **3. What is Terraform?**
+**Answer:**
+
+Terraform is **an Infrastructure as Code (IaC) tool created by HashiCorp that lets you define, provision, and manage cloud and on-premises infrastructure using human-readable configuration files**. 
+
+#### Key Features
+
+- **Declarative Language:** You write what you want your infrastructure to look like using **HashiCorp Configuration Language (HCL)** rather than manual step-by-step commands. 
+- **Cloud-Agnostic:** It works across multiple platforms like AWS, Microsoft Azure, Google Cloud Platform (GCP), and Kubernetes with a single workflow. 
+- **State Management:** It tracks real-world resources using a state file (`terraform.tfstate`) to compare your code against live infrastructure before making changes. 
+- **Modules:** You can package code into reusable modules to share common architecture patterns across different teams. 
+
+#### Standard Workflow
+
+1. **Write:** Create or update configuration files (`.tf`).
+2. **Initialize:** Run `terraform init` to download necessary provider plugins.
+3. **Plan:** Run `terraform plan` to preview changes before applying them.
+4. **Apply:** Run `terraform apply` to build or modify the infrastructure.
+
+### **4. What is Terraform State and why is it necessary?**
 **Answer:** The Terraform state file (`terraform.tfstate`) is a JSON document that maps your declarative HCL configuration to real-world cloud resource IDs and attributes. It tracks resource dependencies, caches metadata for plan performance, and coordinates concurrent execution via state locking.
 
 ### **4. Explain the core Terraform CLI workflow commands.**
