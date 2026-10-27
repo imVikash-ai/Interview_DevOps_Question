@@ -2379,204 +2379,57 @@ This safely pushes your current branch commits along with any annotated tags ass
 | **Push all local tags** | `git push origin --tags` |
 | **Delete a remote tag** | `git push origin --delete <tag_name>` |
 
-### **81. What is `git tag -d <tag>` and `git push origin :refs/tags/<tag>`?**
-**Answer:** Deletes a tag locally and removes it from the remote repository.
-
-### **82. What is `git config --global pull.rebase true`?**
-**Answer:** Configures `git pull` to execute a rebase instead of creating a merge commit, maintaining a linear commit history.
-
-### **83. What is `git config --global init.defaultBranch main`?**
-**Answer:** Sets `main` as the default branch name for newly initialized repositories.
-
-### **84. What is `git config --global core.autocrlf`?**
+### **52. Scenario: An engineer accidentally committed AWS secrets to a public GitHub repo 10 commits ago. Walk through the complete remediation.**
 **Answer:**
-- `true` (Windows): Converts LF to CRLF on checkout, converts CRLF to LF on commit.
-- `input` (Linux/macOS): Converts CRLF to LF on commit.
 
-### **85. What is `.gitattributes` and `eol=lf`?**
-**Answer:** Declares repository-wide line ending and binary file handling rules committed to Git to enforce consistent LF endings across operating systems.
+**Immediately revoke the compromised AWS access keys in the IAM console, scan AWS CloudTrail logs for unauthorized activity, purge the secret from your Git history, and force-push the clean history.** 
 
-### **86. What is `.gitattributes` `diff=nodiff`?**
-**Answer:** Marks generated files (minified JS, lockfiles) so `git diff` does not clutter reviews with massive text diffs.
+#### Step 1: Containment & Revocation (0–5 Minutes)
 
-### **87. What is `git stash branch <branch>`?**
-**Answer:** Creates and checks out a new branch starting from the commit where the stash was created, then applies and drops the stash.
+- **Deactivate or Delete the Key:** Go to the AWS IAM console, locate the exposed access key, and deactivate or delete it immediately. Do not delete the IAM user if you need to generate a replacement key, but cut off the leaked key right away. 
+- **Generate a Replacement Key (If Needed):** Create a new IAM access key for your application or service, and safely update your configuration files or secrets manager. 
+- **Assess Blast Radius (CloudTrail):** Check AWS CloudTrail logs for the region and timeframe after the commit to see if attackers already used the keys to spin up unauthorized resources (such as EC2 crypto-mining instances).
+- **Check Other Credentials:** If an `.env` file or configuration file contained database passwords, third-party API tokens, or private keys alongside AWS secrets, rotate those immediately as well.
 
-### **88. What is `git stash push -m "message"`?**
-**Answer:** Saves a stash with a descriptive label for easy identification in `git stash list`.
+#### Step 2: Clean the Git History (5–15 Minutes)
 
-### **89. What is `git stash show -p`?**
-**Answer:** Displays the full unified diff of changes stored inside a stash.
+A simple `git commit` or `git revert` leaves the secret sitting in the underlying Git commit history, where scraper bots can still read it. You must rewrite history to scrub the file or string: 
 
-### **90. What is `git stash drop stash@{N}`?**
-**Answer:** Permanently deletes a specific stash entry from the stack.
+- **Use a History-Scrubbing Tool:** Run **BFG Repo-Cleaner** or `git filter-repo` to remove the sensitive file or text pattern across all past commits.
+  - **Example using `git filter-repo`:**
 
-### **91. What is `git stash clear`?**
-**Answer:** Deletes all stashes in the repository.
+    ```bash
+    git filter-repo --path-match "path/to/secrets.env" --invert-paths
+    ```
 
-### **92. What is `git bisect run <script.sh>`?**
-**Answer:** Automates bisecting by executing a script that tests code and returns exit code 0 (good) or non-zero (bad), finding the broken commit in seconds.
+  - **Example using BFG:** 
 
-### **93. What is `git bisect reset`?**
-**Answer:** Terminates the bisect session and returns the working directory to the original branch `HEAD`.
+    ```bash
+    bfg --delete-files secrets.env
+    ```
 
-### **94. What is `git cherry-pick --abort`?**
-**Answer:** Cancels an in-progress cherry-pick operation and restores the repository state prior to the command.
+- **Force-Push the Clean Repository:** Push the rewritten history back to GitHub, overwriting the tainted remote branches:
 
-### **95. What is `git rebase --abort` vs `--skip`?**
-**Answer:**
-- `--abort`: Cancels the rebase and resets to the original pre-rebase state.
-- `--skip`: Discards the current conflicting commit entirely and continues rebasing remaining commits.
+  ```bash
+  git push origin --force --all
+  git push origin --force --tags
+  ```
 
-### **96. What is `git merge --abort`?**
-**Answer:** Cancels a conflicted merge and restores the pre-merge state cleanly.
+- **Request a Cache Purge (Optional):** Contact GitHub Support if you need help clearing cached views or fork references of the exposed commits. 
 
-### **97. What is `git log -S "string"` (Pickaxe)?**
-**Answer:** Searches commit history for commits that added or deleted occurrences of the specified text string.
+#### Step 3: Prevent Future Leaks
 
-### **98. What is `git log -G "regex"`?**
-**Answer:** Searches commit history for commits whose patch diffs match the specified regular expression.
-
-### **99. What is `git log --follow <file>`?**
-**Answer:** Tracks file history across historical file renames and moves.
-
-### **100. What is `git format-patch -1 <sha>`?**
-**Answer:** Generates an emailable patch file representing a single specific commit.
-
----
-
-## 🔴 **Part 3: GitOps Integration & Enterprise Scenarios (Questions 101–150)**
-
-### **101. Scenario: An engineer accidentally committed AWS secrets to a public GitHub repo 10 commits ago. Walk through the complete remediation.**
-**Answer:**
-1. **Rotate Keys Immediately:** Invalidate and delete the AWS access key in AWS IAM within 60 seconds.
-2. **Purge Git History:**
-   ```bash
-   git-filter-repo --path-match "secrets.env" --invert-paths
-   git push origin --force --all
-   ```
-3. **Contact GitHub Support:** Request manual cache purge of cached commit views.
+- **Install Pre-Commit Hooks:** Integrate local scanning tools like **Gitleaks** or `detect-secrets` into your development workflow to block secrets before they are ever committed. 
+- **Enable Secret Scanning:** Turn on GitHub Secret Scanning and Push Protection in your repository settings.
+- **Adopt a Secrets Manager:** Move hardcoded credentials out of code and config files into AWS Secrets Manager, HashiCorp Vault, or environment variables injected securely at runtime.
 
 ### **102. Scenario: A developer accidentally ran `git reset --hard` and lost 3 days of uncommitted and committed work. How do you recover?**
 **Answer:**
 - **For Committed Work:** Run `git reflog` to locate the commit hash before the reset, then run `git checkout -b recovery_branch <commit_hash>`.
 - **For Uncommitted Staged Work:** Run `git fsck --lost-found`, inspect recovered dangling blobs in `.git/lost-found/other/` using `git cat-file -p <blob_sha>`.
 
-### **103. What is Git Sparse Checkout?**
-**Answer:** Allows cloning massive enterprise monorepos while checking out only specific subdirectories onto your local disk, saving gigabytes of disk space and build time.
-
-### **104. What is Git Shallow Clone (`git clone --depth 1`)?**
-**Answer:** Clones only the single most recent commit without downloading historical commit history, drastically speeding up CI/CD pipeline checkout times.
-
-### **105. What is Git Worktree?**
-**Answer:** Allows checking out multiple branches of the same repository simultaneously into different local directory folders on disk without cloning multiple repos (`git worktree add ../hotfix hotfix-branch`).
-
-### **106. What is Git LFS (Large File Storage)?**
-**Answer:** Replaces large binary files (videos, dataset models, zip archives) with lightweight pointer files inside the Git repository, storing real large binary payloads on remote LFS servers.
-
-### **107. What is Git Merge Strategy (Recursive, Ort, Resolve, Octupus)?**
-**Answer:**
-- **Ort (Default in Git 2.34+):** Modern rewrite of the recursive merge strategy; vastly faster with superior conflict detection and automatic rename handling.
-- **Octopus:** Merges more than two parent branches in a single merge commit.
-
-### **108. What is Git Bare Repository (`git init --bare`)?**
-**Answer:** A repository containing *only* the `.git` database with zero working directory files, used exclusively as remote central server hubs.
-
-### **109. What is Git Patch (`git format-patch` and `git am`)?**
-**Answer:** Generates email-compatible plaintext patch files containing commit diffs and metadata, applied onto target branches using `git am`.
-
-### **110. What is an Enterprise GitOps Repository Architecture?**
-**Answer:**
-- **App Repo:** Contains application source code, Dockerfiles, unit tests. CI builds container images and pushes to OCI registry.
-- **GitOps Config Repo (Separate):** Contains declarative Helm/Kustomize environment manifests (dev, staging, prod) monitored by ArgoCD, enforcing strict PR reviews and separation of concerns.
-
-### **111. What is Git Pre-Receive Hook vs Post-Receive Hook?**
-**Answer:**
-- `pre-receive`: Runs on the remote server before refs are updated; can reject pushes that violate branch protection or contain un-signed commits.
-- `post-receive`: Runs after push completes, triggering CI/CD webhooks.
-
-### **112. What is Git Commit Hook (`commit-msg`)?**
-**Answer:** Validates commit message structure locally before commit creation (enforces Conventional Commits: `feat:`, `fix:`).
-
-### **113. What is `git maintenance`?**
-**Answer:** Runs background optimization tasks (prefetching remotes, loose object packing, commit-graph writing) to keep large repositories fast.
-
-### **114. What is Git Commit-Graph (`.git/objects/info/commit-graph`)?**
-**Answer:** Binary cache file of DAG commit graph structures, speeding up `git log --graph` by over 10x in massive repos.
-
-### **115. What is Git Multi-Pack Index (MIDX)?**
-**Answer:** Indexes multiple `.pack` packfiles into a single index structure, accelerating object lookups across gigabyte repositories.
-
-### **116. What is Git Server-Side Object Quotas?**
-**Answer:** Server-side hooks rejecting commits pushing individual files exceeding size thresholds (e.g., $> 100\text{MB}$).
-
-### **117. What is GitHub Merge Queue?**
-**Answer:** Automated train that tests and merges PRs sequentially to prevent broken `main` branches caused by overlapping PR merges.
-
-### **118. What is GitHub Branch Protection Required Reviewers?**
-**Answer:** Enforces that PRs must have approval from at least $N$ designated code owners (`CODEOWNERS`) before merge.
-
-### **119. What is `CODEOWNERS` File?**
-**Answer:** Declares which teams or users own specific paths and files in a repository, automatically adding them as required PR reviewers.
-
-### **120. What is GitHub Dependabot Automated Pull Requests?**
-**Answer:** Automatically opens PRs with dependency version bumps when security vulnerabilities are detected.
-
-### **121. What is Renovate Bot Configuration (`renovate.json`)?**
-**Answer:** Declarative dependency automation tool supporting regex managers, auto-merging non-breaking patch releases, and custom schedules.
-
-### **122. What is Semantic Release Automated Versioning?**
-**Answer:** Parses Conventional Commit messages in CI to determine SemVer bumps (`feat:` $\rightarrow$ MINOR, `fix:` $\rightarrow$ PATCH, `BREAKING CHANGE:` $\rightarrow$ MAJOR) and publishes GitHub releases automatically.
-
-### **123. What is Release Please?**
-**Answer:** Google release tool that maintains a perpetual "Release PR" containing changelog updates and version bumps based on commit history.
-
-### **124. What is Git GPG Key Expiration and Renewal?**
-**Answer:** Updating the expiration date on your GPG key (`gpg --edit-key <KEY_ID> expire`) and re-uploading public keys to GitHub to maintain verified commit badges.
-
-### **125. What is SSH Commit Signing in Git 2.34+?**
-**Answer:** Using your existing SSH key pair (`git config gpg.format ssh`) to sign commits cryptographically without configuring GPG keys.
-
 ### **126. What is Git Credential Manager (GCM)?**
-**Answer:** Secure credential helper storing OAuth tokens in OS credential stores (Windows Credential Manager, macOS Keychain) with 2FA/SSO support.
-
-### **127. What is Git Interactive Add (`git add -p`)?**
-**Answer:** Allows staging individual hunks of changed files interactively, crafting atomic commits.
-
-### **128. What is Git Patch Mode (`git checkout -p` / `git reset -p`)?**
-**Answer:** Interactively discard or un-stage individual code hunks without modifying the rest of the file.
-
-### **129. What is Git Commit `--no-verify` Flag?**
-**Answer:** Bypasses local pre-commit and commit-msg hooks (`git commit -m "msg" --no-verify`). *Use with extreme caution.*
-
-### **130. What is Git Push `--no-verify` Flag?**
-**Answer:** Bypasses local pre-push hooks during push.
-
-### **131. What is Git Refspec (`refs/heads/*:refs/remotes/origin/*`)?**
-**Answer:** Maps remote references to local tracking references in `.git/config`.
-
-### **132. What is Git Force Push Lease Failure (`stale info`)?**
-**Answer:** Occurs when another engineer pushed to the remote branch after your last fetch; `--force-with-lease` blocks the push to prevent overwriting their work.
-
-### **133. What is Git Dangling Blob vs Unreachable Commit?**
-**Answer:**
-- **Dangling Blob:** A blob created via `git add` that was never referenced in any commit.
-- **Unreachable Commit:** A commit that is no longer reachable from any branch tip or tag (e.g., after `git reset --hard`).
-
-### **134. What is Git Object Pruning Expiry (`git gc --prune=now`)?**
-**Answer:** Forcibly purges all unreachable loose objects from disk immediately rather than waiting for the default 14-day grace period.
-
-### **135. What is Git Reflog Expiry (`git reflog expire --expire=now --all`)?**
-**Answer:** Clears all reflog history immediately, making unreferenced commits eligible for instant garbage collection.
-
-### **136. What is Git Submodule Deinit (`git submodule deinit -f <path>`)?**
-**Answer:** Unregisters a submodule and wipes its working directory files without deleting `.gitmodules`.
-
-### **137. What is Git Submodule Sync (`git submodule sync`)?**
-**Answer:** Synchronizes submodule remote URL changes declared in `.gitmodules` into `.git/config`.
-
-### **138. What is Git Subtree Split (`git subtree split --prefix=<path> -b <branch>`)?**
-**Answer:** Extracts the complete historical commit history of a subdirectory in a monorepo into an independent standalone branch.
+**Answer:** Secure credential helper storing OAuth tokens in OS credential stores (Windows Credential Manager, macOS Keychain) with 2FA/SSO supp
 
 ### **139. What is Git Remote Rename (`git remote rename origin old-origin`)?**
 **Answer:** Renames a remote handle and updates all associated remote-tracking branches.
@@ -2587,35 +2440,5 @@ This safely pushes your current branch commits along with any annotated tags ass
 ### **141. What is Git Config `--show-origin`?**
 **Answer:** Displays the exact configuration file on disk where each git config setting is defined.
 
-### **142. What is Git Safe Directory (`safe.directory`)?**
-**Answer:** Security setting in Git 2.35.2+ preventing execution in repositories owned by different OS user accounts to stop privilege escalation.
 
-### **143. What is Git Credential Helper Store vs Cache?**
-**Answer:**
-- `store`: Persists plain text credentials unencrypted in `~/.git-credentials`.
-- `cache`: Caches credentials in memory for a configurable duration (default: 15 minutes).
 
-### **144. What is Git Environment Variable `GIT_DIR`?**
-**Answer:** Overrides the location of the `.git` metadata repository directory.
-
-### **145. What is Git Environment Variable `GIT_WORK_TREE`?**
-**Answer:** Overrides the root directory of the working tree.
-
-### **146. What is Git Environment Variable `GIT_AUTHOR_NAME` and `GIT_COMMITTER_NAME`?**
-**Answer:** Overrides author and committer identity metadata during commit creation in CI scripts.
-
-### **147. What is Git Environment Variable `GIT_SSH_COMMAND`?**
-**Answer:** Specifies custom SSH parameters or private key files (`GIT_SSH_COMMAND="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"`).
-
-### **148. What is Git Protocol v2?**
-**Answer:** Modern server communication protocol allowing client filtering of refs, reducing bandwidth during `git fetch` in massive repos with millions of tags.
-
-### **149. What is Git Hook Directory Customization (`core.hooksPath`)?**
-**Answer:** Redirects Git hooks from `.git/hooks/` to a version-controlled repository folder (`.husky/` or `.githooks/`), sharing hooks across team members.
-
-### **150. What is an Enterprise Version Control Branching & Release Strategy?**
-**Answer:**
-1. **Trunk-Based Development:** Short-lived feature branches ($< 1$ day) merged to `main` via PRs with mandatory CI tests.
-2. **Automated Semantic Releases:** Conventional Commits generate SemVer tags and changelogs.
-3. **Signed Commits:** Cryptographic verification enforced on protected branches.
-4. **GitOps Promotion:** Separate GitOps config repositories drive continuous deployment to Kubernetes via ArgoCD.
