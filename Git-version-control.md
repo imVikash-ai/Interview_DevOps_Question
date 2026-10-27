@@ -2166,13 +2166,12 @@ git rebase --abort
 
 ### **47. How do you resolve a complex Git Merge Conflict?**
 **Answer:**
-# How to Resolve Complex Git Merge Conflicts
 
 To resolve a complex Git merge conflict, you need to transition from basic marker editing to a structured, analytical workflow using three-way diffs, visualization tools, and logical step-by-step isolation. When conflicts span dozens of files, involve semantic changes, or mix formatting differences with logic updates, blindly deleting markers will break your application.
 
 Here is the professional workflow to confidently isolate, analyze, and resolve highly complex Git conflicts.
 
-## 1. Enable the diff3 Conflict Style (Crucial)
+#### 1. Enable the diff3 Conflict Style (Crucial)
 
 By default, Git only shows you your changes (HEAD) and the incoming changes. For complex conflicts, you need to know what the code looked like before both branches modified it.
 
@@ -2194,7 +2193,7 @@ Their rewritten search and sort utility
 >>>>>>> feature-branch
 ```
 
-## 2. Isolate and Audit the Damage
+#### 2. Isolate and Audit the Damage
 
 Before changing a single line of code, understand the scope of the conflict.
 
@@ -2211,7 +2210,7 @@ Before changing a single line of code, understand the scope of the conflict.
   git merge --abort
   ```
 
-## 3. Use a 3-Way Visual Merge Tool
+#### 3. Use a 3-Way Visual Merge Tool
 
 For multi-file or highly intricate structural conflicts, standard text editors fall short. Launch a dedicated visual tool using Git's built-in hooks:
 
@@ -2225,7 +2224,7 @@ This command will trigger your configured IDE or diffing utility. Excellent visu
 - **Beyond Compare / KDiff3 / Meld:** Dedicated software that isolates the base, local, and remote files, showing a real-time preview of the compiled file at the bottom.
 - **Vim (Meld/GVdiffsplit):** For terminal power-users, running a three-way split enables buffer navigation to surgically inject blocks from either branch.
 
-## 4. Code Resolution and Semantic Review
+#### 4. Code Resolution and Semantic Review
 
 When resolving structural conflicts, do not simply choose one branch over the other. Walk through the code block-by-block:
 
@@ -2233,7 +2232,7 @@ When resolving structural conflicts, do not simply choose one branch over the ot
 2. **Clean up markers entirely:** Ensure that all instances of `<<<<<<<`, `|||||||`, `=======`, and `>>>>>>>` are completely erased from the codebase. Leaving even one behind introduces syntax errors.
 3. **Handle file deletions:** If a file was modified on your branch but deleted on the incoming branch, Git will ask you if you want to keep it or delete it. Use `git add <file>` to keep your modified version, or `git rm <file>` to accept their deletion.
 
-## 5. Validate and Finalize the Merge
+#### 5. Validate and Finalize the Merge
 
 Never assume a conflict resolution works just because the conflict markers are gone.
 
@@ -2250,37 +2249,38 @@ Never assume a conflict resolution works just because the conflict markers are g
    git commit -m "Merge branch-b and resolve architectural conflicts"
    ```
 
-## How to Prevent This in the Future
+#### How to Prevent This in the Future
 
 According to a consensus of developers on r/webdev (Reddit), the best way to deal with complex merge conflicts is to prevent them from becoming complex in the first place.
 
 - **Keep Pull Requests small:** Break large features down into smaller, highly decoupled PRs so they can be merged quickly.
 - **Pull/Rebase frequently:** Pull the main branch into your working branch daily. Resolving two small conflicts every day is significantly easier than resolving 50 conflicts at the end of a two-week sprint.
 
-### **53. What is `git rerere` (Reuse Recorded Resolution)?**
-**Answer:** Automatically records how you resolved a merge conflict. When the exact same merge conflict occurs in the future (during rebases or branch updates), Git resolves it automatically using the recorded solution. Enable via `git config --global rerere.enabled true`.
+### **48. What is a Git Hook (`pre-commit`, `commit-msg`, `pre-push`)?**
+**Answer:** 
 
-### **54. What is Trunk-Based Development vs GitFlow?**
-**Answer:**
-- **Trunk-Based:** Developers merge small, frequent commits into a single shared branch (`main`) multiple times a day, enabling CI/CD.
-- **GitFlow:** Heavy model with long-lived branches (`develop`, `feature`, `release`, `hotfix`, `master`) that delays integration and causes merge hell.
+**Git Hooks are automated, custom scripts that Git executes when specific events occur in your repository's lifecycle.** They live locally inside your project's hidden `.git/hooks` directory. When a hook script exits with a non-zero status (like `exit 1`), Git halts the current operation, effectively serving as a local quality-control gate before your code or text ever reaches a remote server. 
 
-### **55. What is `git push --force-with-lease` vs `--force`?**
-**Answer:**
-- **`--force`:** Unconditionally overwrites the remote branch, potentially destroying teammates' commits pushed in the interim.
-- **`--force-with-lease`:** Rejects the push if the remote branch reference has changed since your last fetch, protecting against overwriting un-fetched remote work.
+A direct breakdown of the three major client-side hooks explains their distinct responsibilities:
 
-### **56. What is `git gc` (Garbage Collection)?**
-**Answer:** Optimizes repository storage by packing loose objects into compressed packfiles (`.pack`), removing orphaned unreachable objects, and pruning old reflog entries.
+| **Git Hook** | **When it Executes** | **Common Use Cases** |
+|---|---|---|
+| **`pre-commit`** | Runs first when you type `git commit`, before you are even asked for a commit message. | Running linters (e.g., ESLint, Black) to ensure style consistency. Scanning code for accidentally exposed API keys or secrets. Blocking oversized files from entering the history. |
+| **`commit-msg`** | Runs after you type or save your commit message, but before the commit is officially created. | Enforcing naming rules like Conventional Commits (e.g., `feat: add login`). Ensuring a Jira or GitHub issue ticket number is present. Checking basic formatting, like maximum line length. |
+| **`pre-push`** | Runs when you execute `git push`, right before the data is uploaded to a remote server. | Running the full unit test suite to prevent breaking the remote build. Ensuring you do not accidentally push directly to critical branches like `main` or `production`. |
 
-### **57. What is `git fsck`?**
-**Answer:** File System Consistency Check that verifies the cryptographic connectivity and integrity of objects in the Git database, identifying dangling blobs and commits.
+#### How to Use Them
 
-### **58. What is `git-filter-repo` (BFG Repo-Cleaner)?**
-**Answer:** High-performance tools for permanently stripping sensitive files (leaked passwords, large binaries) from entire Git commit history across all branches and tags.
+By default, Git populates your `.git/hooks` folder with disabled template files ending in `.sample`. To activate one manually:
 
-### **59. What is a Git Hook (`pre-commit`, `commit-msg`, `pre-push`)?**
-**Answer:** Scripts placed in `.git/hooks/` that execute automatically at key lifecycle points (e.g., `pre-commit` runs linters and secret scanners before creating a commit).
+1. Navigate to `.git/hooks/`.
+2. Rename the file to remove the extension (e.g., rename `pre-commit.sample` to `pre-commit`).
+3. Write your automation script (Bash, Python, Node.js, etc.) inside it.
+4. Make the file executable in your terminal using:
+
+   ```bash
+   chmod +x .git/hooks/pre-commit
+   ```
 
 ### **60. What is Git Signed Commits (GPG / SSH)?**
 **Answer:** Signing commits with a private cryptographic key (`git commit -S -m "msg"`). GitHub displays a "Verified" badge, proving commit authenticity and author identity.
