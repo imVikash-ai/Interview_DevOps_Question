@@ -2539,7 +2539,50 @@ git config --global credential.helper
 ```
 
 ### **139. What is Git Remote Rename (`git remote rename origin old-origin`)?**
-**Answer:** Renames a remote handle and updates all associated remote-tracking branches.
+**Answer:** 
+
+The command `git remote rename origin old-origin` **changes the alias of your remote repository from its current name (`origin`) to a new name (`old-origin`)**.
+
+It modifies your local Git configuration so you can reassign the default `origin` label to a different repository while keeping the historical one handy.
+
+#### How It Works Behind the Scenes
+
+When you execute this command:
+
+- **Updates tracking branches:** All your remote-tracking branches (e.g., `origin/main`) are automatically updated to match the new name (e.g., `old-origin/main`). 
+- **Preserves configuration:** Your existing local branch configurations (`branch.<name>.remote` and `branch.<name>.pushRemote`) automatically update to point to the renamed remote. You do not need to re-link or manually adjust your upstream branches. 
+
+#### Common Use Case
+
+This command is highly useful when **migrating your project to a new Git host** (such as moving from GitLab to GitHub). The sequence typically looks like this:
+
+**1. Rename the Legacy Repository Tracking**
+
+```bash
+git remote rename origin old-origin
+```
+
+**2. Add Your New Repository as the Primary Target**
+
+```bash
+git remote add origin https://github.com
+```
+
+**3. Push Your Code to the New Destination**
+
+```bash
+git push -u origin main
+```
+
+**Verifying the Change**
+
+To check if the rename was successful, run the verification command outlined in the **GitHub Documentation**:
+
+```bash
+git remote -v
+```
+
+Your output will show the fetch and push URLs now mapped to `old-origin` instead of `origin`.
 
 ### **140. What is Git Remote Set-URL (`git remote set-url origin <new-url>`)?**
 **Answer:** Updates the fetch and push URL of a configured remote.
