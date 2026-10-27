@@ -2342,8 +2342,42 @@ git push origin --delete <branch>
 - **Delete a remote branch:** `git push origin --delete <branch>` (or `git push origin :<branch>`)
 - **Delete a local branch:** `git branch -d <branch>`
 
-### **80. What is `git push origin --tags`?**
-**Answer:** Pushes all local tags to the remote repository.
+### **51. What is `git push origin --tags`?**
+**Answer:** 
+
+The command **`git push origin --tags`** is used to **upload all of your local Git tags to a remote repository** (usually named `origin`).
+
+By default, running a standard `git push` only transfers your commits and branches; **it does not automatically send your tags** to the remote server. This command fixes that by explicitly pushing every tag you have created locally that doesn't yet exist on the remote.
+
+#### Why Use It?
+
+In Git, tags are typically used to mark specific points in your project's history as important, such as production releases (e.g., `v1.0.0`, `v2.1.0`). Using this command ensures that your team members or deployment pipelines can see and use those release points.
+
+#### Breakdown of the Command
+
+- **`git push`**: The core command used to upload local repository content to a remote repository. 
+- **`origin`**: The default alias name for the remote repository you cloned from or are tracking. 
+- **`--tags`**: The flag that tells Git to find all local tags (found in `refs/tags/`) and push them. 
+
+#### A Better Alternative: `--follow-tags`
+
+While `git push origin --tags` works well, it will blindly push **all** local tags—even old, messy, or accidental ones you haven't cleaned up.
+
+If you only want to push tags that are relevant to the commits you are currently pushing, use:
+
+```bash id="5x8rjd"
+git push --follow-tags
+```
+
+This safely pushes your current branch commits along with any annotated tags associated with those specific commits. 
+
+#### Quick Cheat Sheet
+
+| **Action** | **Command** |
+|---|---|
+| **Push a single tag** | `git push origin <tag_name>` |
+| **Push all local tags** | `git push origin --tags` |
+| **Delete a remote tag** | `git push origin --delete <tag_name>` |
 
 ### **81. What is `git tag -d <tag>` and `git push origin :refs/tags/<tag>`?**
 **Answer:** Deletes a tag locally and removes it from the remote repository.
