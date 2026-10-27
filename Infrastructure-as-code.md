@@ -1,13 +1,18 @@
-# **Infrastructure as Code (IaC) - DevOps Interview Questions (200 Questions)**
-
-Welcome to the **Infrastructure as Code (IaC)** master collection containing **200 comprehensive interview questions and detailed answers** covering Terraform, OpenTofu, Terragrunt, Crossplane, Pulumi, Ansible, State Management, Drift Detection, Policy as Code, and Automated Testing.
-
----
-
-## 🟢 **Part 1: IaC Fundamentals & Terraform / OpenTofu Core (Questions 1–60)**
+## **Infrastructure as Code (IaC) - DevOps Interview Questions **
 
 ### **1. What is Infrastructure as Code (IaC) and what core problems does it solve?**
-**Answer:** Infrastructure as Code (IaC) is the practice of provisioning, configuring, managing, and versioning compute, storage, and networking resources using machine-readable definition files rather than manual console clicks. It eliminates human configuration errors, eradicates "Snowflake Servers," enforces version control, and allows tearing down and recreating entire production environments in minutes.
+**Answer:** # Infrastructure as Code (IaC)
+
+**Infrastructure as Code (IaC)** is **a modern DevOps practice where cloud and IT infrastructure—such as virtual machines, networks, load balancers, and databases—is automatically provisioned, configured, and managed using machine-readable configuration files (like YAML, JSON, or domain-specific languages) rather than manual processes or physical hardware setup**.
+
+#### Core Problems IaC Solves
+
+- **Configuration Drift ("Snowflake" Environments):** Without IaC, teams manually tweak settings in staging or production, making each environment a unique, non-reproducible "snowflake". IaC ensures that environments are built from the exact same codebase every time. 
+- **Human Error and Manual Bottlenecks:** Manual server setups, OS installations, and network configurations take weeks and lead to typos, missed dependencies, or forgotten steps. IaC cuts provisioning times down to minutes with automated execution.
+- **Lack of Visibility and Auditing:** Traditional infrastructure changes are rarely tracked or documented. IaC files are stored in version control systems (like Git), allowing teams to review pull requests, track who made changes, and audit history just like application code. 
+- **Environment Inconsistency ("It Works on My Machine"):** Discrepancies between local development, testing, and production lead to runtime bugs. IaC makes it easy to duplicate identical environments across the entire software development lifecycle. 
+- **Slow Disaster Recovery:** Recovering from an outage manually can cause extended downtime. IaC allows organizations to completely wipe and recreate an entire data center or cloud architecture from source code in a fraction of the time. 
+- **High Operational Costs:** Leaving cloud resources running unintentionally wastes money. IaC lets teams spin up resources on-demand and tear them down automatically when they are no longer needed.
 
 ### **2. Compare Declarative vs Imperative IaC with concrete examples.**
 **Answer:**
