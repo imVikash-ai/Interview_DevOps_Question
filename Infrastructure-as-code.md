@@ -336,8 +336,33 @@ State locking restricts access so that only one process or person can modify the
 - **Avoids State Corruption:** A partially overwritten or scrambled state file breaks the mapping between your configuration files and real cloud resources. This often leads to orphaned resources, duplicate infrastructure, or accidental resource deletion.
 - **How It Works in Practice:** When an operation like `apply` or `plan` (if it writes state) starts, Terraform acquires a lock (via a tool like AWS DynamoDB or S3 native lockfiles). If another process tries to run simultaneously, it is blocked and safely waits or fails until the first run releases the lock.
 
-### **9. What is OpenTofu and why was it created?**
-**Answer:** In August 2023, HashiCorp switched Terraform's license from open-source MPL 2.0 to the Business Source License (BSL 1.1). OpenTofu was created by the Linux Foundation and community as a 100% open-source, backward-compatible fork of Terraform.
+### **10. What is OpenTofu and why was it created?**
+**Answer:** 
+
+**OpenTofu** is an **open-source Infrastructure as Code (IaC) tool that lets you define, provision, and manage cloud and on-premises infrastructure using declarative configuration files**.
+
+
+#### Why OpenTofu Was Created:
+
+**1. HashiCorp License Change**
+
+- In August 2023, HashiCorp changed Terraform’s license from the open-source Mozilla Public License (MPL 2.0) to the more restrictive Business Source License (BUSL 1.1).
+- This change raised concerns among users and organizations that relied on Terraform as an open-source tool.
+
+**2. Preserving Open-Source Integrity**
+
+- Industry stakeholders and engineers reacted by introducing the OpenTofu Manifesto.
+- They called for a truly open-source alternative governed independently of any single vendor.
+
+**3. The Fork**
+
+- When HashiCorp did not reverse its licensing decision, a coalition of companies—including Gruntwork, Spacelift, Harness, env0, and Scalr—forked the last MPL-licensed version of Terraform, **v1.5**.
+- This fork became the foundation of OpenTofu.
+
+**4. Linux Foundation Governance**
+
+- The project was adopted by the **Linux Foundation** in September 2023.
+- This governance model aims to keep OpenTofu community-driven, independent, and permanently open-source under the Mozilla Public License 2.0 (MPL 2.0).
 
 ### **10. What is Configuration Drift in IaC and how is it resolved?**
 **Answer:** Discrepancies between declared IaC code and actual live cloud resources caused by manual console edits. Resolved by running automated scheduled drift detection (`terraform plan -detailed-exitcode`) and applying code to reconcile drift.
