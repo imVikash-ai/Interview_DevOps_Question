@@ -212,7 +212,42 @@ When you use `count` with a list of names, Terraform binds the infrastructure to
 - Use **`for_each`** when you are provisioning resources from a **list or map of distinct configurations** (e.g., creating subnets with different CIDR blocks, or IAM users with unique names).
 
 ### **7. What is a Terraform Module and how does it enforce DRY principles?**
-**Answer:** A container for multiple resources used together. Modules package reusable, standardized infrastructure components (VPCs, EKS clusters) with input variables and outputs, avoiding code duplication across environments.
+**Answer:**
+
+A **Terraform module** is a collection of standard configuration files (`.tf`) grouped together in a single directory that acts as a reusable building block for managing infrastructure. Instead of defining individual cloud resources line-by-line across multiple files, a module packages related infrastructure components (like a VPC, an EC2 instance, and associated security groups) into a single logical unit.
+
+Modules enforce the **DRY (Don't Repeat Yourself)** principle-a software development practice aimed at reducing logic duplication through abstraction. Without modules, engineers often copy and paste the same blocks of infrastructure code to set up environments like Development, Staging, and Production, resulting in high maintenance complexity and configuration drift. 
+
+#### How Terraform Modules Enforce DRY Principles
+
+| **Feature** | **How It Reduces Duplication** | **DRY Benefit** |
+|---|---|---|
+| **Write Once, Instantiate Many** | Code logic is stored in a central "child module". The main "root module" calls it multiple times using a `source` block. | Eliminates manual copy-pasting of resource declarations across different directories. |
+| **Input Parameterization** | Modules use `variables.tf` to accept dynamic inputs. This allows the same exact block of code to adapt to different scenarios. | A single module can provision a small `t3.micro` instance in Dev and a large `m5.large` instance in Prod without changing the underlying architecture code. |
+| **Centralized Maintenance** | Any update, bug fix, or compliance change is modified strictly inside the target module's directory. | Updates automatically propagate everywhere the module is invoked, preventing developers from having to hunt down and fix code in multiple locations. |
+| **Output Abstraction** | Modules utilize `outputs.tf` to expose only necessary resource attributes to other parts of the infrastructure. | Prevents the repetition of complex data-fetching queries or hardcoded resource dependencies between separate stacks. |
+
+#### High-Level Architectural Example
+
+Instead of maintaining hundreds of lines of code for individual environments, a DRY approach using modules looks like this in your root configuration:
+
+```hcl
+# Dev Environment Configuration
+module "dev_network" {
+  source      = "git::https://github.com"
+  environment = "dev"
+  cidr_block  = "10.0.0.0/16"
+}
+
+# Prod Environment Configuration
+module "prod_network" {
+  source      = "git::https://github.com"
+  environment = "prod"
+  cidr_block  = "10.1.0.0/16"
+}
+```
+
+By changing only the input parameters (`environment` and `cidr_block`), the entire underlying network architecture is replicated perfectly across environments without duplicating the resource definitions themselves.
 
 ### **7. Compare Terraform Variables, Locals, and Outputs.**
 **Answer:**
