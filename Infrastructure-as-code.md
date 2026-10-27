@@ -176,12 +176,42 @@ While not part of the strict four-step lifecycle, these two commands are univers
   terraform fmt
   ```
 
-### **5. Compare Terraform `count` vs `for_each`.**
+### **6. Compare Terraform `count` vs `for_each`.**
 **Answer:**
-- **`count`:** Creates resources indexed by an integer list (`[0, 1, 2]`). Removing an item from the middle causes Terraform to reindex and force-recreate all subsequent resources.
-- **`for_each`:** Creates resources keyed by unique map or set strings (`["web", "api", "db"]`). Adding or removing an item affects *only* that specific key without destroying others.
 
-### **6. What is a Terraform Module and how does it enforce DRY principles?**
+Terraform uses `count` and `for_each` to create multiple instances of a resource, module, or data source. **The primary difference is that `count` is index-based (using integers), while `for_each` is key-based (using strings or maps).**
+
+#### Direct Comparison
+
+| **Feature** | **`count`** | **`for_each`** |
+|---|---|---|
+| **Data Type Accepted** | Integers (e.g., `3`) or lists | Maps or sets of strings |
+| **Addressing Method** | Index-based (e.g., `aws_instance.web[0]`) | Key-based (e.g., `aws_instance.web["prod"]`) |
+| **Impact of Item Removal** | Shifts subsequent items, causing unintended recreations | Removes only the specific item without impacting others |
+| **Accessing Values** | `count.index` | `each.key` and `each.value` |
+| **Best Used For** | Identical copies or simple toggle switches | Distinct configurations with unique identifiers |
+
+#### Critical Trade-offs
+
+#### 1. The "Shift" Problem (Why `for_each` Is Safer for Lists)
+
+When you use `count` with a list of names, Terraform binds the infrastructure to the list's index numbers.
+
+- **The Risk:** If you have a list `["a", "b", "c"]` and delete `"a"`, `"b"` shifts to index `0` and `"c"` shifts to index `1`. Terraform will see this as a modification or destruction/recreation of the remaining resources.
+- **The Solution:** `for_each` binds the infrastructure directly to the string key. Deleting `"a"` only destroys `"a"`, leaving `"b"` and `"c"` completely untouched.
+
+#### 2. Conditional Creation (Why `count` Is Better for Toggles)
+
+`count` is the cleanest way to turn a resource on or off based on a boolean variable.
+
+- Setting `count = var.create_resource ? 1 : 0` is simpler than constructing an empty map for `for_each`.
+
+#### Actionable Recommendations
+
+- Use **`count`** when you need a specific number of **identical resources** (e.g., 3 identical web servers) or when creating a **conditional resource toggle** (0 or 1).
+- Use **`for_each`** when you are provisioning resources from a **list or map of distinct configurations** (e.g., creating subnets with different CIDR blocks, or IAM users with unique names).
+
+### **7. What is a Terraform Module and how does it enforce DRY principles?**
 **Answer:** A container for multiple resources used together. Modules package reusable, standardized infrastructure components (VPCs, EKS clusters) with input variables and outputs, avoiding code duplication across environments.
 
 ### **7. Compare Terraform Variables, Locals, and Outputs.**
