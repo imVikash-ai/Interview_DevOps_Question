@@ -2423,13 +2423,120 @@ A simple `git commit` or `git revert` leaves the secret sitting in the underlyin
 - **Enable Secret Scanning:** Turn on GitHub Secret Scanning and Push Protection in your repository settings.
 - **Adopt a Secrets Manager:** Move hardcoded credentials out of code and config files into AWS Secrets Manager, HashiCorp Vault, or environment variables injected securely at runtime.
 
-### **102. Scenario: A developer accidentally ran `git reset --hard` and lost 3 days of uncommitted and committed work. How do you recover?**
+### **53. Scenario: A developer accidentally ran `git reset --hard` and lost 3 days of uncommitted and committed work. How do you recover?**
 **Answer:**
-- **For Committed Work:** Run `git reflog` to locate the commit hash before the reset, then run `git checkout -b recovery_branch <commit_hash>`.
-- **For Uncommitted Staged Work:** Run `git fsck --lost-found`, inspect recovered dangling blobs in `.git/lost-found/other/` using `git cat-file -p <blob_sha>`.
 
-### **126. What is Git Credential Manager (GCM)?**
-**Answer:** Secure credential helper storing OAuth tokens in OS credential stores (Windows Credential Manager, macOS Keychain) with 2FA/SSO supp
+**You can fully recover the committed work using `git reflog`, but completely unstaged/uncommitted work is permanently lost to Git.** However, if you staged any uncommitted files using `git add` prior to the hard reset, those files can still be rescued. 
+
+Here is the exact step-by-step breakdown to recover what is salvageable.
+
+#### Step 1: Recover the Committed Work (100% Recoverable)
+
+Git never deletes a commit immediately, even after a hard reset. It stores them in a local history log called the **Reflog**.
+
+#### 1. Open the Reflog
+
+Run the following command in your terminal to see a history of every action you have taken: 
+
+```bash
+git reflog
+```
+
+#### 2. Locate the Pre-Reset State
+
+Look through the output list. You will see a history that looks like this:
+
+```text
+a1b2c3d HEAD@{0}: reset: moving to HEAD~3
+e4f5g6h HEAD@{1}: commit: Added database migration
+i7j8k9l HEAD@{2}: commit: Fixed authentication bug
+```
+
+Find the entry right **before** you accidentally ran the reset (in this example, `HEAD@{1}` or commit `e4f5g6h`). 
+
+#### 3. Restore the Commits
+
+The safest approach is to create a new recovery branch pointing to that commit so you don't overwrite your current state:
+
+```bash
+git branch recovery-branch e4f5g6h
+git checkout recovery-branch
+```
+
+*(Alternatively, if you are certain, you can force your current branch back to that commit using `git reset --hard e4f5g6h`.)* 
+
+#### Step 2: Recover Staged (but Uncommitted) Work (Partially Recoverable)
+
+If you ran `git add` on any files but never committed them, Git generated loose "dangling blobs" in its database before the hard reset wiped your working directory. 
+
+#### 1. Search for Dangling Blobs
+
+Run the filesystem check to find orphaned content:
+
+```bash
+git fsck --lost-found
+```
+
+This will output a list of unique SHA-1 hashes matching files that were once staged.
+
+#### 2. Inspect and Extract the Files
+
+You can view the contents of each hash to identify what the file was:
+
+```bash
+git cat-file -p <blob-hash>
+```
+
+If it is a file you need, redirect the output to recreate it: 
+
+```bash
+git cat-file -p <blob-hash> > recovered_file.js
+```
+
+#### Step 3: Recover Unstaged & Uncommitted Work (The Last Resorts)
+
+**Git has no record of these files.** If you never ran `git add` or `git commit`, Git cannot help you. You must look outside of Git:
+
+- **IDE / Text Editor History:** Editors like **VS Code** (Local History feature), **IntelliJ / WebStorm** (Local History), and **Eclipse** keep independent timelines of file edits. Right-click your project folders or files within your IDE and check for local history timelines to restore them.
+- **OS Backups:** Check if cloud sync clients (**OneDrive, Dropbox, iCloud**) or system utilities (**Time Machine** on macOS or **File History** on Windows) grabbed a snapshot of the workspace folder within the last 3 days.
+
+### **54. What is Git Credential Manager (GCM)?**
+**Answer:** 
+
+**Git Credential Manager (GCM)** is **an open-source, cross-platform credential helper that automates and secures your authentication when interacting with remote Git repositories over HTTPS**. Built on .NET by the Git Ecosystem team, it eliminates the need to repeatedly type usernames, passwords, or personal access tokens during Git operations like `git push` or `git pull`. 
+
+#### Core Functions: What GCM Does
+
+- **Intercepts Auth Requests:** Triggers automatically during operations like `git clone` if credentials are missing or expired. 
+- **Modern Login Flows:** Launches secure browser-based logins, OAuth, multi-factor authentication (MFA), and Personal Access Token (PAT) generation. 
+- **Secure OS Storage:** Encrypts and saves tokens using your operating system's native secure storage (e.g., Windows Credential Manager or macOS Keychain) instead of plain text.
+
+#### Supported Hosting Platforms
+
+GCM provides deep integration with major Git providers to handle complex authentication requirements: 
+
+| **Provider** | **Supported Authentication Features** |
+|---|---|
+| **GitHub** | Web-browser OAuth, 2FA/MFA support, automatic PAT generation |
+| **GitLab** | Personal Access Tokens, OAuth flows |
+| **Bitbucket** | App passwords, OAuth integration |
+| **Azure DevOps** | Microsoft Entra ID tokens, Microsoft accounts, enterprise policies |
+
+#### How to Check and Verify GCM
+
+On Windows, GCM is typically included by default with the Git for Windows Installer. You can verify its status via your terminal: 
+
+**1. Check if GCM is installed**
+
+```bash id="b8v7xq"
+git credential-manager --version
+```
+
+**2. Verify Git is actively using it**
+
+```bash id="n8p4zl"
+git config --global credential.helper
+```
 
 ### **139. What is Git Remote Rename (`git remote rename origin old-origin`)?**
 **Answer:** Renames a remote handle and updates all associated remote-tracking branches.
