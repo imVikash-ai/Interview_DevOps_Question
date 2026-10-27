@@ -249,11 +249,73 @@ module "prod_network" {
 
 By changing only the input parameters (`environment` and `cidr_block`), the entire underlying network architecture is replicated perfectly across environments without duplicating the resource definitions themselves.
 
-### **7. Compare Terraform Variables, Locals, and Outputs.**
+### **8. Compare Terraform Variables, Locals, and Outputs.**
 **Answer:**
-- **Variables (`variable`):** Input parameters passed into modules to customize behavior.
-- **Locals (`locals`):** Internal reusable constants or computed expressions scoped strictly to the current module.
-- **Outputs (`output`):** Return values exposed by a module to the root module or CLI stdout.
+
+In Terraform, managing data effectively depends on understanding how information flows through your infrastructure code. Think of **Variables as inputs**, **Locals as internal logic**, and **Outputs as return values**. 
+
+#### Quick Comparison
+
+| **Feature** | **Input Variables (`variable`)** | **Local Values (`locals`)** | **Output Values (`output`)** |
+|---|---|---|---|
+| **Direction** | **Inbound** (Parameters passed into the module) | **Internal** (Private to the module) | **Outbound** (Exposed to CLI or other modules) |
+| **Purpose** | Parameterize code for multiple environments | Reduce repetition (DRY) and compute values | Share resource attributes or print deployment details |
+| **Overridable?** | **Yes** (Via CLI, `.tfvars`, or env vars) | **No** (Static or derived at runtime) | **No** (Read-only reflections of state data) |
+| **Syntax Prefix** | `var.<NAME>` | `local.<NAME>` | N/A (Defined as a block, queried via remote state) |
+
+#### 1. Input Variables (`variable`)
+
+Variables act as the public API or function arguments for your Terraform configuration. They allow the same code to be reused across different environments (like Dev, Staging, and Prod) simply by injecting different values. 
+
+- **Best Used For:** Values that change depending on who or what is deploying the code (e.g., `environment_name`, `aws_region`, `instance_size`). 
+- **Key Behavior:** You cannot perform complex evaluations inside a variable block; they accept static assignments from external sources. 
+
+**Example Syntax:**
+
+```hcl
+variable "instance_type" {
+  type        = string
+  default     = "t3.micro"
+  description = "The size of the EC2 instance"
+}
+```
+
+#### 2. Local Values (`locals`)
+
+Locals act like private, internal constants or intermediate variables within a programming language. They capture complex calculations, expressions, or strings in one place so you don't have to copy-paste them across your configuration. 
+
+- **Best Used For:** Standardized naming conventions, combining multiple variables together, or filtering tags. 
+- **Key Behavior:** External users cannot modify or override local values. If a configuration rule shouldn't be touched by the person running `terraform apply`, make it a local. 
+
+**Example Syntax:**
+
+```hcl
+locals {
+  # Derived once, used everywhere
+  resource_prefix = "${var.project_name}-${var.environment}"
+
+  common_tags = {
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
+}
+```
+
+#### 3. Output Values (`output`)
+
+Outputs are the return values of your Terraform execution. Once Terraform finishes creating your infrastructure, outputs expose specific data points either to your terminal or to other codebases. 
+
+- **Best Used For:** Printing a resource's dynamically generated data (like a database connection string or a load balancer URL) or passing data from a child module up to a parent module.
+- **Key Behavior:** Outputs only become available *after* resources are computed and created during a `terraform apply` run.
+
+**Example Syntax:** 
+
+```hcl
+output "public_ip" {
+  value       = aws_instance.web_server.public_ip
+  description = "The public IP address of the main web server."
+}
+```
 
 ### **8. What is a Remote Backend and why is State Locking mandatory?**
 **Answer:** A remote storage location (e.g., AWS S3 + DynamoDB / Terraform Cloud) for state files. State locking prevents race conditions and corrupted state files by ensuring only one engineer or pipeline can execute `apply` at any time.
