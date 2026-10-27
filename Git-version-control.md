@@ -229,8 +229,6 @@ When you run `git commit`, Git packages your staged files, maps your directory s
 
 Here is exactly how `git commit` builds a snapshot under the hood.
 
----
-
 #### Phase 1: The Foundation (What Happened During `git add`):
 
 To understand `git commit`, we must look at what `git add` already set up in the `.git/` folder:
@@ -2282,75 +2280,67 @@ By default, Git populates your `.git/hooks` folder with disabled template files 
    chmod +x .git/hooks/pre-commit
    ```
 
-### **60. What is Git Signed Commits (GPG / SSH)?**
-**Answer:** Signing commits with a private cryptographic key (`git commit -S -m "msg"`). GitHub displays a "Verified" badge, proving commit authenticity and author identity.
+### **49. What is `git remote prune origin`?**
+**Answer:** 
 
-### **61. What is `git rebase --onto`?**
-**Answer:** Replants a branch topic that was branched off an old feature onto a completely different base branch: `git rebase --onto main old_feature client_branch`.
+**`git remote prune origin` deletes local tracking references to branches that have already been deleted from the remote repository (`origin`).** 
 
-### **62. What is `git cherry-pick -n` (No Commit)?**
-**Answer:** Applies the diff from the target commit to your working directory and staging area without creating a commit, allowing you to batch multiple cherry-picks.
+When teammates delete branches on GitHub, GitLab, or Bitbucket after merging a Pull Request, your local Git configuration still remembers them as `origin/branch-name`. Running this command safely sweeps away those "ghost" or stale remote-tracking references without affecting any of your actual local work.
 
-### **63. What is `git merge --squash`?**
-**Answer:** Combines all commits from a feature branch into a single set of staged changes on the target branch without creating a merge commit, ready to be committed as one clean commit.
+#### Dry Run: Preview Before Deleting
 
-### **64. What is `git diff` Three-Dot (`...`) vs Two-Dot (`..`)?**
-**Answer:**
-- `git diff branchA..branchB`: Shows direct diff between the tips of branchA and branchB.
-- `git diff branchA...branchB`: Shows the diff introduced on branchB since its common merge-base ancestor with branchA.
+If you want to see what the command will delete before actually running it, add the `--dry-run` flag: 
 
-### **65. What is `git log` Three-Dot (`...`) vs Two-Dot (`..`)?**
-**Answer:**
-- `git log master..feature`: Shows commits present on `feature` but missing from `master`.
-- `git log master...feature`: Shows commits present on either branch, excluding commits common to both (symmetric difference).
+```bash
+git remote prune origin --dry-run
+```
 
-### **66. What is `git notes`?**
-**Answer:** Attaches arbitrary metadata, code review comments, or build URLs to existing commits without modifying commit SHAs.
+#### `git remote prune origin` vs. `git fetch --prune origin`
 
-### **67. What is `git worktree`?**
-**Answer:** Allows checking out and developing on multiple branches simultaneously in separate directory folders on disk from a single cloned repository.
+While both clean up your stale remote-tracking branches, they differ in how they interact with the remote server: 
 
-### **68. What is `git submodule update --init --recursive`?**
-**Answer:** Initializes, clones, and checks out all nested submodules declared in `.gitmodules`.
+| **Command** | **Deletes Stale References?** | **Fetches New Data?** |
+|---|---|---|
+| **`git remote prune origin`** | **Yes** | **No** (Fast, purely internal cleanup) |
+| **`git fetch --prune origin`** | **Yes** | **Yes** (Downloads new commits and branches) |
 
-### **69. What is `git sparse-checkout`?**
-**Answer:** Configures the working directory to populate only specified subfolders of a large monorepo, leaving all other files unmaterialized on disk.
+#### How to Automate It
 
-### **70. What is `git replace`?**
-**Answer:** Creates replacement refs allowing you to graft historical repositories or alter commit history view without modifying underlying commit objects.
+Instead of running this manually, you can tell Git to automatically prune stale branches every time you run a standard `git fetch` or `git pull` by configuring it globally using the official **Git Documentation**:
 
-### **71. What is `git shallow clone` (`--depth=N`)?**
-**Answer:** Clones only the most recent $N$ commits, creating a truncated history to optimize pipeline checkout speeds.
+```bash
+git config --global fetch.prune true
+```
 
-### **72. What is `git blobless clone` (`--filter=blob:none`)?**
-**Answer:** Clones all commit trees and history while downloading file blobs on-demand only when checking out files, saving gigabytes in massive monorepos.
+### **50. What is `git push origin :<branch>`?**
+**Answer:**# Delete a Remote Branch in Git
 
-### **73. What is `git treeless clone` (`--filter=tree:0`)?**
-**Answer:** Clones only commit objects, downloading trees and blobs on-demand during checkout.
+**`git push origin :<branch>` deletes a remote branch** from your repository on GitHub, GitLab, or whichever hosting service you are using.
 
-### **74. What is `git commit --fixup` and `git rebase --autosquash`?**
-**Answer:**
-- `git commit --fixup <sha>`: Creates a fixup commit targeting a prior commit.
-- `git rebase -i --autosquash`: Automatically reorders and marks all fixup commits to squash into their target parents automatically.
+The key to understanding this command is the **colon (`:`)** right before the branch name.
 
-### **75. What is `git checkout -b <branch> --track <remote>/<branch>`?**
-**Answer:** Creates a new local branch and configures upstream remote tracking in a single command.
+#### How It Works
 
-### **76. What is `git branch -D` vs `-d`?**
-**Answer:**
-- `-d` (Safe): Deletes branch only if it has already been fully merged into upstream.
-- `-D` (Force): Forcibly deletes branch regardless of merge status.
+The standard syntax for pushing a branch is:
 
-### **77. What is `git remote prune origin`?**
-**Answer:** Cleans up stale local tracking branches under `refs/remotes/origin/` that have been deleted on the remote GitHub server.
+```bash
+git push origin <local-branch>:<remote-branch>
+```
 
-### **78. What is `git branch --merged` vs `--no-merged`?**
-**Answer:**
-- `--merged`: Lists local branches that have been merged into `HEAD` (safe to delete).
-- `--no-merged`: Lists branches containing unmerged commits.
+This tells Git to take your local branch and push it to the remote branch. When you type a colon with **nothing before it**, you are telling Git to push "nothing" into the remote branch, which effectively deletes it.
 
-### **79. What is `git push origin :<branch>`?**
-**Answer:** Legacy syntax to delete a remote branch on the server (equivalent to `git push origin --delete <branch>`).
+#### The Modern Alternative
+
+While the colon syntax still works, Git introduced a much more readable and intuitive command for this. Instead of using the colon, you should ideally use:
+
+```bash
+git push origin --delete <branch>
+```
+
+#### Quick Reference
+
+- **Delete a remote branch:** `git push origin --delete <branch>` (or `git push origin :<branch>`)
+- **Delete a local branch:** `git branch -d <branch>`
 
 ### **80. What is `git push origin --tags`?**
 **Answer:** Pushes all local tags to the remote repository.
