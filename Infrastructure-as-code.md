@@ -118,11 +118,63 @@ Terraform State is **a record that maps your Infrastructure-as-Code (HCL configu
 
 ### **5. Explain the core Terraform CLI workflow commands.**
 **Answer:**
-1. `terraform init`: Initializes working directory, downloads provider plugins/modules, and configures remote backends.
-2. `terraform validate`: Validates syntax and internal consistency of HCL files without cloud API calls.
-3. `terraform plan`: Computes the execution plan by comparing code against state and live infrastructure.
-4. `terraform apply`: Executes the changes required to reach desired state.
-5. `terraform destroy`: Destroys all remote objects managed by the state file.
+
+The **core Terraform CLI workflow** consists of four primary commands that guide your infrastructure from initialization to decommission. This loop is often summarized as **Write → Init → Plan → Apply**.
+
+#### 1. `terraform init`
+
+- **Purpose:** **Prepares the working directory** so Terraform can understand your configuration. 
+- **What it does:** Downloads and installs the necessary cloud provider plugins (like AWS, Azure, or GCP) and modules. It also sets up the backend for storing your state file. 
+- **When to run:** Run this first when creating a new project, cloning existing code, or adding new providers/modules. 
+
+```bash
+terraform init
+```
+
+#### 2. `terraform plan`
+
+- **Purpose:** Serves as a **dry run** to preview infrastructure changes before they happen. 
+- **What it does:** Compares your local configuration files with the real-world infrastructure (via cloud APIs) and the existing state file. It outputs a detailed blueprint showing exactly which resources will be created (`+`), modified (`~`), or destroyed (`-`).
+- **When to run:** Run this constantly during development to catch errors and review proposed modifications safely. 
+
+```bash
+terraform plan
+```
+
+#### 3. `terraform apply`
+
+- **Purpose:** **Executes the changes** to provision or update your infrastructure.
+- **What it does:** Generates the execution plan one final time and prompts you for a manual `yes` confirmation. Once confirmed, it makes real API calls to your cloud providers to reach the desired state, then updates the `terraform.tfstate` file.
+- **When to run:** Run this when your plan looks correct and you are ready to make your infrastructure changes live. 
+
+```bash
+terraform apply
+```
+
+#### 4. `terraform destroy`
+
+- **Purpose:** **Removes all infrastructure** managed by the current configuration.
+- **What it does:** Checks your state file, creates a destruction plan, asks for confirmation, and cleanly tears down every resource associated with the project.
+- **When to run:** Run this when decommissioning temporary testing environments or tearing down a stack you no longer need. 
+```bash
+terraform destroy
+```
+
+#### Supporting Quality-Control Commands
+
+While not part of the strict four-step lifecycle, these two commands are universally embedded into the workflow to maintain code quality:
+
+- **`terraform validate`**: **Checks for syntax errors**, invalid references, and internal consistency without connecting to cloud APIs. Run this right after writing code.
+
+  ```bash
+  terraform validate
+  ```
+
+- **`terraform fmt`**: Automatically **reformats your configuration files** to follow canonical HashiCorp formatting rules (such as aligning equals signs and adjusting indentation). Run this before committing code to Git.
+
+  ```bash
+  terraform fmt
+  ```
 
 ### **5. Compare Terraform `count` vs `for_each`.**
 **Answer:**
