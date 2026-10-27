@@ -2538,7 +2538,7 @@ git credential-manager --version
 git config --global credential.helper
 ```
 
-### **139. What is Git Remote Rename (`git remote rename origin old-origin`)?**
+### **55. What is Git Remote Rename (`git remote rename origin old-origin`)?**
 **Answer:** 
 
 The command `git remote rename origin old-origin` **changes the alias of your remote repository from its current name (`origin`) to a new name (`old-origin`)**.
@@ -2584,8 +2584,60 @@ git remote -v
 
 Your output will show the fetch and push URLs now mapped to `old-origin` instead of `origin`.
 
-### **140. What is Git Remote Set-URL (`git remote set-url origin <new-url>`)?**
-**Answer:** Updates the fetch and push URL of a configured remote.
+### **56. What is Git Remote Set-URL (`git remote set-url origin <new-url>`)?**
+**Answer:**
+
+The command `git remote set-url origin <new-url>` is **used to change the URL of an existing remote Git repository without modifying your local code or repository history**. 
+
+When you clone a repository, Git automatically names the default server connection **`origin`**. If that server moves to a new hosting provider, switches from HTTPS to SSH, or the repository is renamed, this command updates where Git points to send and receive code. 
+
+#### Common Use Cases
+
+- **Moving Hosting Providers:** Shifting a repository from Bitbucket to **GitHub**
+- **Changing Protocol:** Switching the connection method from `https://` to `git@github.com:...` (SSH) for passwordless authentication. 
+- **Repository Renaming:** Updating the link after changing the project name on a server. 
+
+####  How to Use It (Step-by-Step):
+
+#### 1. Check Your Current Remote URL
+
+Before changing anything, view the current path that `origin` is pointing to:
+
+```bash
+git remote -v
+```
+
+*This will output something like:*
+
+```text
+origin  https://github.com (fetch)
+origin  https://github.com (push)
+```
+
+#### 2. Update the URL
+
+Run the `set-url` command, swapping out `<new-url>` with your updated repository path: 
+
+```bash
+git remote set-url origin https://github.com
+```
+
+#### 3. Verify the Change
+
+Run the verification check again to ensure it updated successfully:
+
+```bash
+git remote -v
+```
+
+#### `git remote add` vs. `git remote set-url`
+
+It is common to confuse these two commands, but they serve completely different purposes: 
+
+| **Command** | **Purpose** | **When to use** |
+|---|---|---|
+| **`git remote add origin <url>`** | Links a **brand new** remote nickname to a URL. | When initializing a local project for the first time. |
+| **`git remote set-url origin <url>`** | Modifies an **already existing** remote nickname. | When the server path changes but the local project is already linked. |
 
 ### **141. What is Git Config `--show-origin`?**
 **Answer:** Displays the exact configuration file on disk where each git config setting is defined.
