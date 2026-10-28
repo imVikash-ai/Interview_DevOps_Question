@@ -401,7 +401,64 @@ Once drift is identified, teams typically choose one of two paths:
 - **Automated CI/CD Workflows:** Schedule regular automated drift-detection checks (e.g., cron jobs running `terraform plan -detailed-exitcode` or CloudFormation drift detection) that alert via Slack or auto-remediate.
 
 ### **12. What is the `import {}` block in Terraform 1.5+?**
-**Answer:** A declarative block that imports existing cloud resources into Terraform state natively in code, generating configuration templates automatically via `terraform plan -generate-config-out=generated.tf`.
+**Answer:** The **`import {}` block** introduced in Terraform 1.5 is **a declarative, config-driven way to bring existing infrastructure into Terraform management**. 
+It replaces the old, imperative `terraform import` CLI command. Instead of running one-off CLI commands that immediately modify state without a review process, you now write the import operations directly inside your code. 
+
+**Key Benefits**
+
+- **Safe Previewing:** Imports are now a plannable operation. When you run `terraform plan`, Terraform previews exactly what will be imported before modifying your state file. 
+- **Automatic Code Generation:** Terraform can look at the existing infrastructure and automatically generate the necessary HCL code for you. 
+- **CI/CD & Code Review Friendly:** Because imports are written in code, you can version-control them, run them in bulk via CI/CD pipelines, and have teammates review them via pull requests.
+
+**Syntax and Structure**
+
+The block requires two primary arguments: 
+
+- **`to`**: The exact resource address (type and name) you want to assign to it inside your Terraform code. 
+- **`id`**: The provider-specific unique identifier of the real-world resource (e.g., an AWS EC2 instance ID or an S3 bucket name). 
+
+**hcl**
+
+```hcl
+import {
+  to = aws_s3_bucket.my_imported_bucket
+  id = "my-existing-cloud-bucket-name"
+}
+```
+
+**How to Use the `import` Block Workflow**
+
+**Step 1: Add the import block**
+
+Identify your existing cloud infrastructure and place the `import` block anywhere in your configuration (often in a temporary `imports.tf` file). 
+
+**Step 2: Generate the resource configuration automatically**
+
+Instead of manually typing out all the attributes for the imported resource, run `terraform plan` with the `-generate-config-out` flag. 
+
+**bash**
+
+```bash
+terraform plan -generate-config-out=generated_resources.tf
+```
+
+Terraform will connect to your cloud provider, fetch all the parameters of that asset, and write the matching `resource "aws_s3_bucket" "my_imported_bucket" {}` code block straight into the new `generated_resources.tf` file. 
+
+**Step 3: Review and Apply**
+
+Review the generated file, clean up any hardcoded default configurations you don't want to track, and execute the standard apply command: 
+
+**bash**
+
+```bash
+terraform apply
+```
+
+This syncs the physical infrastructure into your `terraform.tfstate` file.
+
+**Step 4: Cleanup**
+
+Once the import is complete and successful, you can **safely delete the `import {}` block** from your files. Keeping the generated `resource` block is all you need to manage it moving forward.
 
 ### **13. What are Terraform Custom Preconditions and Postconditions?**
 **Answer:** Declarative validation rules defined inside `lifecycle` blocks that validate assertions before or after resource provisioning:
