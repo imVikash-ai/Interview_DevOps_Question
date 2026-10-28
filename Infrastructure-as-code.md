@@ -364,17 +364,41 @@ State locking restricts access so that only one process or person can modify the
 - The project was adopted by the **Linux Foundation** in September 2023.
 - This governance model aims to keep OpenTofu community-driven, independent, and permanently open-source under the Mozilla Public License 2.0 (MPL 2.0).
 
-### **10. What is Configuration Drift in IaC and how is it resolved?**
-**Answer:** Discrepancies between declared IaC code and actual live cloud resources caused by manual console edits. Resolved by running automated scheduled drift detection (`terraform plan -detailed-exitcode`) and applying code to reconcile drift.
+### **11. What is Configuration Drift in IaC and how is it resolved?**
+**Answer:** **Configuration drift** in Infrastructure as Code (IaC) is **the gradual divergence between the live, running cloud/IT infrastructure and the intended baseline configuration defined in your version-controlled IaC code**. It happens when changes—such as manual hotfixes via a cloud console, emergency scaling, or unrecorded patches—are made directly to the live environment without updating the source code. 
 
-### **11. What is the `moved` block in Terraform?**
-**Answer:** Allows refactoring resources (renaming or moving into child modules) without destroying and recreating live cloud resources:
-```hcl
-moved {
-  from = aws_instance.web
-  to   = module.compute.aws_instance.web
-}
-```
+**Key Causes**
+
+- **Manual Interventions:** Engineers making direct edits in the cloud console (e.g., modifying S3 bucket permissions or security groups).
+- **Emergency Hotfixes:** Quick production tweaks that bypass the standard pull-request and CI/CD workflow.
+- **Automated Patching:** Background updates or external scripts modifying server parameters. 
+
+**Risks & Impacts**
+
+- **Security Vulnerabilities:** Unintended open ports, weakened IAM roles, or disabled security features (like versioning).
+- **Compliance Failures:** Audits failing because live systems no longer match approved, documented baselines.
+- **Unreliable Deployments:** Future IaC pipelines failing or overwriting critical production settings unexpectedly.
+
+**How Configuration Drift is Resolved**
+
+**1. Detection (Finding the Discrepancy)**
+
+- **IaC Plan Commands:** Running tools like `terraform plan` compares the live state (stored in a state file) against your declared `.tf` configuration files to highlight differences. 
+- **Drift-Aware Change Sets:** Using native cloud tools like **AWS CloudFormation** to run a three-way diff between the template, last-deployed state, and actual infrastructure.
+- **Dedicated Scanning Tools:** Utilizing platforms like **Snyk IaC**, Driftctl, or Firefly to continuously monitor and alert on unmanaged resources or unauthorized changes. 
+
+**2. Remediation (Fixing the Divergence)**
+
+Once drift is identified, teams typically choose one of two paths:
+
+- **Enforce IaC as Source of Truth (Revert to Code):**
+  - Re-apply the IaC configuration using commands like `terraform apply` or via automated CI/CD pipelines (such as GitHub Actions) to overwrite manual changes and force the live environment back into compliance with the code. 
+- **Update the Code (Adopt the Change):**
+  - If the manual change was a legitimate, approved hotfix, you update the IaC templates and state files to match the new live reality so future deployments don't accidentally roll it back. 
+**3. Prevention**
+
+- **Strict Access Control:** Lock down cloud consoles so engineers cannot make manual changes outside of the IaC pipeline.
+- **Automated CI/CD Workflows:** Schedule regular automated drift-detection checks (e.g., cron jobs running `terraform plan -detailed-exitcode` or CloudFormation drift detection) that alert via Slack or auto-remediate.
 
 ### **12. What is the `import {}` block in Terraform 1.5+?**
 **Answer:** A declarative block that imports existing cloud resources into Terraform state natively in code, generating configuration templates automatically via `terraform plan -generate-config-out=generated.tf`.
