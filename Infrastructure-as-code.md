@@ -461,15 +461,69 @@ This syncs the physical infrastructure into your `terraform.tfstate` file.
 Once the import is complete and successful, you can **safely delete the `import {}` block** from your files. Keeping the generated `resource` block is all you need to manage it moving forward.
 
 ### **13. What are Terraform Custom Preconditions and Postconditions?**
-**Answer:** Declarative validation rules defined inside `lifecycle` blocks that validate assertions before or after resource provisioning:
+**Answer:** 
+
+**Terraform custom preconditions and postconditions** are validation features built into the resource `lifecycle` block that allow you to enforce specific rules and assumptions on your configuration. If any condition evaluates to false, Terraform halts execution immediately and prevents potentially destructive or malformed infrastructure deployments.
+
+**Key Differences At a Glance**
+
+| **Feature** | **Precondition** | **Postcondition** |
+|---|---|---|
+| **When it runs** | **Before** evaluating or applying the resource. | **After** creating or evaluating the resource. |
+| **Primary Purpose** | Validates incoming inputs or configuration logic. | Guarantees the actual state or attributes returned by the cloud. |
+| **Self Reference** | Cannot use the `self` object (the resource does not exist yet). | Can use the `self` object to inspect its own freshly-minted attributes. |
+| **Supported In** | `resource`, `data`, and `output` blocks. | `resource` and `data` blocks (not supported in outputs). |
+
+**1. Preconditions**
+
+Preconditions define **assumptions** that must be met before an operation can safely proceed. They typically evaluate variables, constants, or references to existing infrastructure. 
+
+- **Analogy:** Checking if you have a valid driver's license before you turn the key to start a rental car.
+- **Example Use Case:** Restricting allowed AWS EC2 instance sizes in a shared company module to prevent expensive deployments. 
+
+**hcl**
+
 ```hcl
-lifecycle {
-  precondition {
-    condition     = data.aws_ami.ubuntu.architecture == "x86_64"
-    error_message = "Selected AMI must be x86_64."
+resource "aws_instance" "app_server" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = var.instance_type
+
+  lifecycle {
+    precondition {
+      condition     = contains(["t3.micro", "t3.small"], var.instance_type)
+      error_message = "Invalid instance type! Only t3.micro and t3.small are allowed for budget compliance."
+    }
   }
 }
 ```
+
+**2. Postconditions**
+
+Postconditions define **guarantees** about the infrastructure state after it is provisioned or read. They are crucial for checking properties that the cloud provider determines dynamically during the apply phase. 
+
+- **Analogy:** Renting a car, driving it out of the lot, and validating that the trunk actually contains a spare tire before hitting the highway.
+- **Example Use Case:** Ensuring an S3 bucket has server-side encryption enabled automatically by checking its final state via the `self` keyword. 
+
+**hcl**
+
+```hcl
+resource "aws_s3_bucket" "secure_bucket" {
+  bucket = "my-company-secure-data-bucket"
+
+  lifecycle {
+    postcondition {
+      condition     = self.server_side_encryption_configuration != null
+      error_message = "Security Violation: The created S3 bucket must have encryption enabled."
+    }
+  }
+}
+```
+
+Use code with caution.
+
+**Contrast with Check Blocks**
+
+Introduced alongside these lifecycle conditions, a `check` block works independently. While failing a precondition or postcondition **blocks** Terraform from finishing the current operation, failing a `check` block will only issue a warning message, allowing execution to complete uninterrupted.
 
 ### **14. What is Terragrunt and what problems does it solve?**
 **Answer:** A thin wrapper for Terraform/OpenTofu providing DRY remote state backend definitions, automated module dependency execution (`terragrunt run-all apply`), and mock outputs for plan evaluations.
