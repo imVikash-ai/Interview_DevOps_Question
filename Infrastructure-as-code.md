@@ -526,7 +526,14 @@ Use code with caution.
 Introduced alongside these lifecycle conditions, a `check` block works independently. While failing a precondition or postcondition **blocks** Terraform from finishing the current operation, failing a `check` block will only issue a warning message, allowing execution to complete uninterrupted.
 
 ### **14. What is Terragrunt and what problems does it solve?**
-**Answer:** A thin wrapper for Terraform/OpenTofu providing DRY remote state backend definitions, automated module dependency execution (`terragrunt run-all apply`), and mock outputs for plan evaluations.
+**Answer:** **Terragrunt** is **a lightweight, open-source wrapper tool created by Gruntwork that runs on top of Terraform and OpenTofu**. It adds an orchestration and abstraction layer to help manage Infrastructure as Code (IaC) at enterprise scale.
+
+**What Problems Does Terragrunt Solve?**
+
+- **Code Duplication (DRY Configuration):** Plain Terraform does not allow variables or dynamic logic inside `backend` or `provider` blocks. Teams are often forced to copy and paste the same backend configurations, provider blocks, and variables across dozens of folders and environments. Terragrunt uses hierarchical inheritance (`terragrunt.hcl`) to define these blocks once at the root level and share or override them down the folder tree. 
+- **Remote State Management & Drift:** Managing remote state files (like S3 buckets or DynamoDB locks) manually across multiple environments often leads to human error and state drift. Terragrunt automatically generates and standardizes backend state configurations and locking conventions for each module and environment.
+- **Multi-Environment & Multi-Account Complexity:** Scaling infrastructure across numerous environments (such as dev, staging, and prod) or cloud accounts (like multiple AWS accounts or GCP projects) can become a maintenance challenge. Terragrunt separates reusable, versioned infrastructure modules from live, environment-specific configuration folders. 
+- **Module Dependencies and Run Order:** In plain Terraform, managing execution order between separate components (such as making sure a VPC or database is created before an application stack) requires manual runbooks or complex scripting. Terragrunt provides explicit `dependency` blocks to build a dependency graph and orchestrate deployments in the correct order.
 
 ### **15. What are Terraform Dynamic Blocks?**
 **Answer:** Constructs repeatable nested configuration blocks (e.g., multiple `ingress` rules inside an `aws_security_group`) dynamically from a list or map variable.
