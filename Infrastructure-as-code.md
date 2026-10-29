@@ -637,7 +637,75 @@ When you execute `terraform apply`, Terraform creates the real-world infrastruct
 - **Best Practice:** Never keep this file locally or commit it to Git. Store it using a secure remote backend that supports state locking (e.g., S3 + DynamoDB) to prevent concurrent runs from corrupting your architecture data.
 
 ### **17. How do you protect sensitive values in Terraform?**
-**Answer:** Mark variables/outputs with `sensitive = true` to prevent display in CLI stdout or CI logs. *Caveat: State files still contain plain text sensitive values and must be stored in KMS-encrypted S3 backends with restricted IAM.*
+**Answer:** To protect sensitive values in Terraform, you must address two separate layers of exposure: **preventing secrets from leaking into CLI outputs/logs, and securing secrets stored in the underlying state file**. 
+
+Because the `sensitive = true` flag only masks console output and does **not** encrypt data inside the state file, a layered defense strategy is required.
+
+**1. Masking Output in Console and Logs**
+
+To prevent API keys, passwords, or PII from printing to your screen during a `terraform plan` or `terraform apply`, use native masking features.
+
+- **Sensitive Input Variables:** Add the `sensitive = true` argument to your variable blocks. Any resource attribute or expression that references this variable will automatically inherit the sensitive status and be redacted in the CLI. 
+
+  **hcl**
+
+  ```hcl
+  variable "database_password" {
+    type      = string
+    sensitive = true
+  }
+  ```
+
+- **Sensitive Outputs:** If you pass a value to a child module or bubble an output back to the root module, you must also explicitly flag that output block as sensitive. 
+
+  **hcl**
+
+  ```hcl
+  output "db_connection" {
+    value     = aws_db_instance.main.endpoint
+    sensitive = true
+  }
+  ```
+
+- **The `sensitive()` Function:** For local blocks or inline values retrieved from external text files, you can wrap the value dynamically: 
+
+  **hcl**
+
+  ```hcl
+  locals {
+    api_payload = sensitive(file("${path.module}/secret.txt"))
+  }
+  ```
+
+**2. Securing the Terraform State File**
+
+The state file (`terraform.tfstate`) records everything in plain text, including variables masked with `sensitive = true`. Secure your state with these steps:
+
+- **Use an Encrypted Remote Backend:** Never store state files locally or commit them to Git. Migrate your state to a secure remote storage system like **HCP Terraform**, AWS S3, or Azure Blob Storage. 
+- **Enable At-Rest Encryption & ACLs:** Ensure your storage bucket uses server-side encryption (e.g., AWS KMS keys) and strictly limits access using Identity and Access Management (IAM) roles.
+- **Restrict Developer State Permissions:** Limit who can download or read raw state files. On **Stack Overflow**, engineers highlight that managing granular Role-Based Access Control (RBAC) in cloud providers or team platforms is vital to keep developers from pulling secrets using commands like `terraform console` or custom code. 
+
+**3. Injecting Secrets Externally (Best Practices)**
+
+Do not hardcode sensitive data directly inside `.tf` files. Instead, dynamically feed them into Terraform at runtime:
+
+- **Environment Variables:** Pass variables via your terminal environment. Terraform automatically picks up any variable prefixed with `TF_VAR_`.
+
+  **bash**
+
+  ```bash
+  export TF_VAR_database_password="super-secret-password"
+  ```
+
+- **Excluded Var Files:** Store local test secrets in a `secret.tfvars` file and add `*.tfvars` to your `.gitignore` so they are never committed to your repository.
+- **Dynamic Cloud Secrets Managers:** Instead of passing raw credentials through Terraform, keep them in a native secrets vault like **HashiCorp Vault**, AWS Secrets Manager, or Azure Key Vault. Fetch references dynamically inside your infrastructure blocks. 
+
+**4. Advanced: Eliminating Secrets from State Completely**
+
+Recent iterations of Terraform offer patterns to handle sensitive data without ever persisting it inside your state history:
+
+- **Ephemeral Resources:** If a provider supports them, ephemeral resources allow you to query an external API token or object for a run without caching that specific sensitive object into your plan or state files.
+- **Write-Only Attributes:** Utilizing specific data source structures (like `write_only` block plugins) ensures that write-only parameters are sent straight to the destination API rather than tracked inside the JSON architecture of your state record.
 
 ### **18. What is Terratest?**
 **Answer:** A Go library developed by Gruntwork that provisions real cloud infrastructure via Terraform, executes integration tests against live endpoints, and tears down resources.
