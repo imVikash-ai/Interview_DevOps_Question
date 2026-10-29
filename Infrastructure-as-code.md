@@ -536,7 +536,72 @@ Introduced alongside these lifecycle conditions, a `check` block works independe
 - **Module Dependencies and Run Order:** In plain Terraform, managing execution order between separate components (such as making sure a VPC or database is created before an application stack) requires manual runbooks or complex scripting. Terragrunt provides explicit `dependency` blocks to build a dependency graph and orchestrate deployments in the correct order.
 
 ### **15. What are Terraform Dynamic Blocks?**
-**Answer:** Constructs repeatable nested configuration blocks (e.g., multiple `ingress` rules inside an `aws_security_group`) dynamically from a list or map variable.
+**Answer:** **Terraform dynamic blocks** are **a configuration feature used to programmatically generate repeatable nested blocks within a resource, data source, provider, or provisioner**. They allow you to apply the "Don't Repeat Yourself" (DRY) principle to your Infrastructure as Code (IaC) by iterating over a collection (like a list or map) instead of hardcoding multiple identical nested block structures.
+
+**Why Use Dynamic Blocks?**
+
+In standard Terraform syntax, top-level arguments like `count` or `for_each` loop over entire resources to create multiple independent resource instances. However, they cannot loop over configurations *inside* a single resource. 
+
+For example, if you need to configure an AWS Security Group with 10 different inbound rules, a standard static configuration forces you to copy and paste the `ingress { ... }` block 10 times. If a port changes, you have to find and modify it manually. A **dynamic block** solves this by letting you define the `ingress` block once and loop it over a variable array. 
+
+**Core Anatomy of a Dynamic Block**
+
+A dynamic block consists of the `dynamic` keyword followed by the target block label, a `for_each` loop, an optional `iterator`, and a `content` block:
+
+**hcl**
+
+```hcl
+dynamic "label_name" {
+  for_each = var.collection_to_iterate
+  iterator = optional_custom_name   # Defaults to the block label if omitted
+  content {
+    # The actual arguments expected by the nested block schema
+    attribute = optional_custom_name.value
+  }
+}
+```
+
+- **`dynamic "label"`**: Specifies the exact type of nested block you want to generate (e.g., `ingress`, `egress`, `setting`, `tag`). 
+- **`for_each`**: The complex value (list, set, or map) containing the data you want to loop over. 
+- **`iterator` (Optional)**: Provides a temporary variable name to represent the current item in the loop. If omitted, it automatically defaults to the block's label. 
+- **`content`**: The body of the block where you map your resource values. You access data using `iterator.value` (or `iterator.key` for map keys). 
+
+**Real-World Example: AWS Security Group**
+
+Here is how you can use a dynamic block to elegantly map multiple ports using a local variable list:
+
+**hcl**
+
+```hcl
+locals {
+  inbound_ports = [22, 80, 443, 8080]
+}
+
+resource "aws_security_group" "web_sg" {
+  name        = "web-traffic-security-group"
+  description = "Dynamically allow web traffic ports"
+
+  # The dynamic block generates an "ingress" block for every port in local.inbound_ports
+  dynamic "ingress" {
+    for_each = local.inbound_ports
+    content {
+      from_port   = ingress.value   # Accesses the current port number in the loop
+      to_port     = ingress.value
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+}
+```
+
+**Capabilities and Constraints**
+
+| **Rule / Feature** | **Details** |
+|---|---|
+| **Supported Blocks** | Can be used inside `resource`, `data`, `provider`, and `provisioner` configurations. |
+| **Multi-Level Nesting** | You can nest a dynamic block inside the `content` block of another dynamic block if the provider schema requires it. |
+| **Meta-Arguments Exclusion** | You **cannot** use dynamic blocks to generate top-level meta-arguments like `lifecycle`, `count`, `for_each`, or `depends_on`. |
+| **Readability Trade-off** | Overusing dynamic blocks makes your HCL configurations abstract and harder to read for team members. If the block count is fixed and small, literal/static blocks are preferred. |
 
 ### **16. Compare `.terraform.lock.hcl` vs `terraform.tfstate`.**
 **Answer:**
