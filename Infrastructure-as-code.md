@@ -758,7 +758,26 @@ Originally created by Upbound and now a project of the Cloud Native Computing Fo
   - **Engine & Stacks:** The engine computes the difference between your code and the live cloud state, while **Stacks** isolate different environments (such as `dev`, `staging`, and `production`).
 
 ### **21. What is Ansible and how does its agentless architecture work?**
-**Answer:** An open-source automation and configuration management tool that connects to target nodes over standard SSH (Linux) or WinRM (Windows) without installing daemons or agents on managed nodes.
+**Answer:** Ansible is **an open-source, push-based IT automation engine used for configuration management, application deployment, cloud provisioning, and orchestration**.
+
+**How the Agentless Architecture Works**
+
+Unlike traditional automation tools (like Puppet or Chef) that require a permanent daemon or background agent running on every target server, Ansible uses an **agentless push model**. 
+
+The workflow runs as follows:
+
+- **Control Node:** You write automation tasks in human-readable **YAML playbooks** and execute them from a central machine called the **Control Node**.
+- **SSH / WinRM Connection:** When you run a playbook, Ansible connects to the target servers (**Managed Nodes**) over standard secure channels—using SSH for Linux/Unix or WinRM for Windows. The target nodes need no pre-installed Ansible software or background services. 
+- **Pushing Modules:** Ansible temporarily copies small programs called **modules** over to the managed node.
+- **Execution:** The module executes locally on the target node (typically using Python) to enforce the desired state.
+- **Returning Results & Cleanup:** The module sends the execution output back to the control node in JSON format, and then automatically deletes itself from the target node. 
+- **Closing Connection:** The SSH session terminates, leaving zero permanent Ansible processes or open background ports behind on the server. 
+
+**Core Benefits**
+
+- **No Agent Overhead:** You do not need to patch, update, or troubleshoot resident agent daemons on your remote servers.
+- **Idempotency:** Playbooks are designed to be idempotent—meaning running them repeatedly only changes the system if it does not already match the desired state.
+- **Security:** It relies on standard system security protocols like OpenSSH keys rather than custom client-server trust chains.
 
 ### **22. What is Ansible Idempotency?**
 **Answer:** The property of an Ansible playbook where executing it once or multiple times produces the exact same end state without unintended side effects.
