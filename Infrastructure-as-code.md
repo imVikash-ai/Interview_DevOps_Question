@@ -984,7 +984,62 @@ While local CLI workspaces are perfect for spinning up quick, identical environm
 Because CLI workspaces share the exact same backend configurations and access credentials, a developer with permissions to run a plan in `dev` could easily run a catastrophic command in `prod` by simply forgetting to switch workspaces. For robust production isolation, it is safer to use a directory-based file structure (folders) or separate **HCP Terraform workspaces**.
 
 ### **28. What is `terraform fmt`?**
-**Answer:** Automatically rewrites all `.tf` files in the directory to conform to canonical Terraform style and indentation standards.
+**Answer:** `terraform fmt` is a command-line tool that automatically rewrites Terraform configuration files (`.tf`) to match HashiCorp's canonical style and formatting standards.
+
+It fixes indentation, alignment, and spacing issues, ensuring consistency across team codebases. It does **not** validate syntax or check provider schemas; it is strictly for code styling.
+**How to Use `terraform fmt`**
+
+Run the command in your terminal inside your Terraform project directory.
+
+**1. Format the Current Directory**
+
+**bash**
+```bash
+terraform fmt
+```
+
+- Scans all `.tf` files in your current folder and rewrites them to the standard format. It prints the names of any files it updates. 
+
+**2. Format a Specific File**
+
+**bash**
+```bash
+terraform fmt <filename.tf>
+```
+
+- Formats only the target file you specify (e.g., `terraform fmt main.tf`). 
+
+**3. Format Subdirectories Recursively**
+
+**bash**
+```bash
+terraform fmt -recursive
+```
+
+- Formats all `.tf` files in the current directory and all of its subdirectories. 
+
+**4. Check Formatting (CI/CD Pipelines)**
+
+**bash**
+```bash
+terraform fmt -check
+```
+
+- Checks if any files deviate from the canonical style.
+- Exits with status `0` if all files are properly formatted.
+- Exits with a non-zero status and prints the names of unformatted files if changes are needed. (Commonly used in automated pre-commit hooks or CI/CD pipelines). 
+
+**5. Preview Changes Without Writing**
+
+**bash**
+```bash
+terraform fmt -write=false -diff
+```
+
+Use code with caution.
+
+- `-write=false` prevents saving changes to the files.
+- `-diff` displays a line-by-line diff of what formatting changes would be made.
 
 ### **29. What is `terraform graph`?**
 **Answer:** Generates a visual Directed Acyclic Graph (DAG) of all resource dependencies in DOT format for graphviz visualization.
