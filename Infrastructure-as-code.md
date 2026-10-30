@@ -883,7 +883,50 @@ While `terraform apply -refresh-only` is the preferred modern method, the underl
 - You want to ensure your state file is perfectly accurate before running a complex `terraform target` operation.
 
 ### **25. What is a Terraform Data Source?**
-**Answer:** A read-only query that fetches attributes from external cloud resources defined outside the current configuration (e.g., querying the latest official Ubuntu AMI ID).
+**Answer:** A **Terraform Data Source** is **a built-in configuration block used to fetch information from external systems or existing cloud infrastructure without managing their lifecycles**. Unlike standard resources that create, update, or delete infrastructure, data sources provide a **read-only view** into data or resources that already exist outside of your current Terraform workspace.
+
+By using data sources, you can dynamically query data (like the latest cloud machine image, an existing subnet ID, or API responses) and inject those values directly into your other infrastructure code, ensuring your configurations stay flexible and adaptive. 
+
+**Key Characteristics**
+
+- **Read-Only Operations:** They only fetch information and will never create, modify, or destroy real-world infrastructure. 
+- **External Reference:** They allow independent teams to share infrastructure resources securely. For example, a DevOps engineer can query a central network team's existing Virtual Network instead of spinning up a duplicate. 
+- **Dynamic Lifecycle:** Terraform executes data source queries during its refresh and planning phases to ensure you are always building against real-time data.
+
+**Syntax Example**
+
+A data source block is defined with the `data` keyword. Below is a common workflow where a data source queries the AWS cloud for a specific subnet by its name tag, and a standard resource block uses that information to launch a server: 
+
+**hcl**
+```hcl
+# 1. Fetch data about an existing subnet using filters
+data "aws_subnet" "primary_network" {
+  filter {
+    name   = "tag:Name"
+    values = ["production-subnet-a"]
+  }
+}
+
+# 2. Reference the fetched data inside a managed resource
+resource "aws_instance" "web_server" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+  
+  # Interpolating the ID retrieved by the data source
+  subnet_id     = data.aws_subnet.primary_network.id 
+}
+```
+
+**Direct Comparison: Resource vs. Data Source**
+
+The table below contrasts how resources and data sources behave in a configuration script: 
+
+| **Feature** | **Managed Resource (`resource`)** | **Data Source (`data`)** |
+|---|---|---|
+| **Primary Purpose** | Creates and manages infrastructure lifecycles. | Queries and references existing info. |
+| **Permissions** | Requires write permissions on the target system. | Only requires read permissions on the target system. |
+| **State Management** | Tracks state and mutates objects via `apply`. | Fetches data dynamically; doesn't track lifecycle state. |
+| **Common Use Case** | Provisioning a new database or virtual machine. | Fetching the latest AMI ID or default VPC settings. |
 
 ### **26. What is `terraform taint` vs `terraform apply -replace`?**
 **Answer:** `terraform taint` is legacy; `terraform apply -replace="aws_instance.web"` forces recreation of a specific resource in a single step without modifying state beforehand.
