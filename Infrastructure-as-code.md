@@ -929,7 +929,23 @@ The table below contrasts how resources and data sources behave in a configurati
 | **Common Use Case** | Provisioning a new database or virtual machine. | Fetching the latest AMI ID or default VPC settings. |
 
 ### **26. What is `terraform taint` vs `terraform apply -replace`?**
-**Answer:** `terraform taint` is legacy; `terraform apply -replace="aws_instance.web"` forces recreation of a specific resource in a single step without modifying state beforehand.
+**Answer:****`terraform taint` is a command used to manually mark a resource in the Terraform state file as "degraded" or "damaged," forcing Terraform to destroy and recreate that specific resource during the next deployment cycle.** 
+
+It allows you to force a clean-slate rebuild of a resource without altering any of your actual infrastructure-as-code configuration files. 
+
+**How It Works**
+
+1. **Marking the Resource**: When you run the command, Terraform does not immediately change your real-world cloud infrastructure. It simply updates your local or remote state file, adding a `"status": "tainted"` flag to that resource's metadata. 
+2. **The Next Execution**: When you subsequently run `terraform plan` or `terraform apply`, Terraform checks the state file, sees the flag, and automatically generates a plan to **destroy the existing resource** and **provision a fresh one** in its place. 
+
+**bash**
+```bash
+# Basic syntax
+terraform taint <RESOURCE_TYPE>.<RESOURCE_NAME>
+
+# Example: Tainting a specific AWS instance
+terraform taint aws_instance.web_server
+```
 
 ### **27. What are Terraform Workspaces?**
 **Answer:** Separate state files managed from a single working directory (`terraform workspace select staging`). Best for ephemeral feature branches; directory-based layouts are preferred for production isolation.
