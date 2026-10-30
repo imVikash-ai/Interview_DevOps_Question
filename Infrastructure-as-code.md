@@ -948,7 +948,40 @@ terraform taint aws_instance.web_server
 ```
 
 ### **27. What are Terraform Workspaces?**
-**Answer:** Separate state files managed from a single working directory (`terraform workspace select staging`). Best for ephemeral feature branches; directory-based layouts are preferred for production isolation.
+**Answer:**A **Terraform workspace** is **a feature that allows you to manage multiple, separate environments using the exact same Terraform configuration codebase**. 
+
+By default, every Terraform directory has a single workspace named `default`. When you create additional custom workspaces (like `dev`, `staging`, or `prod`), **Terraform isolates the state data** for each one. This means you can deploy identical infrastructure stacks to different environments or regions without duplicating your code. 
+
+** Key Concepts**
+
+- **State Isolation:** Each workspace maintains its own independent state file. Modifying resources in your `dev` workspace will not touch or conflict with your `prod` workspace. 
+- **Code Reusability:** You write the infrastructure code once. You then use variables and the built-in interpolation variable `${terraform.workspace}` to dynamically change resource names, sizes, or tags depending on which workspace is currently active.
+- **No Resource Sharing:** Workspaces cannot natively share resources with one another because their state files are completely separated. 
+
+** Essential CLI Commands**
+
+You can manage workspaces directly from the **Terraform CLI** using the following commands: 
+
+- `terraform workspace list` — Lists all available workspaces in the directory.
+- `terraform workspace new <name>` — Creates a new workspace and automatically switches to it.
+- `terraform workspace select <name>` — Switches your active context to a different workspace.
+- `terraform workspace show` — Displays the name of the workspace you are currently using.
+- `terraform workspace delete <name>` — Deletes an existing workspace (it must be empty of managed infrastructure first).
+** A Crucial Distinction: CLI vs. HCP Terraform**
+
+The term "workspace" means slightly different things depending on whether you are using the open-source CLI locally or HashiCorp's cloud platform: 
+
+| **Feature** | **Terraform CLI Workspaces** | **HCP Terraform / Enterprise Workspaces** |
+|---|---|---|
+| **Primary Purpose** | Alternates between separate state files within the **same** configuration directory. | Functions as entirely separate working directories for organizational infrastructure. |
+| **Data Stored** | State file allocations only. | State files, specific variables, VCS connections, and run histories. |
+| **Access Control** | Shares the same credentials and backend settings across all workspaces. | Allows unique RBAC, service accounts, and API tokens per workspace. |
+
+** When *Not* to Use CLI Workspaces**
+
+While local CLI workspaces are perfect for spinning up quick, identical environments (like a testing branch or a temporary regional copy), they are **not recommended** for separating dev and production environments in mature enterprise systems. 
+
+Because CLI workspaces share the exact same backend configurations and access credentials, a developer with permissions to run a plan in `dev` could easily run a catastrophic command in `prod` by simply forgetting to switch workspaces. For robust production isolation, it is safer to use a directory-based file structure (folders) or separate **HCP Terraform workspaces**.
 
 ### **28. What is `terraform fmt`?**
 **Answer:** Automatically rewrites all `.tf` files in the directory to conform to canonical Terraform style and indentation standards.
