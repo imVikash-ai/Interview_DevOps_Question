@@ -744,7 +744,18 @@ Originally created by Upbound and now a project of the Cloud Native Computing Fo
 - **Self-Service:** Platform teams can expose Crossplane via native Kubernetes role-based access control (RBAC) and custom APIs so developers can self-serve infrastructure using `kubectl`
 
 ### **20. What is Pulumi?**
-**Answer:** An open-source IaC engine that allows defining cloud infrastructure using general-purpose programming languages (**TypeScript, Python, Go, C#**) with full IDE auto-complete and unit test support.
+**Answer:** **Pulumi** is **an open-source Infrastructure as Code (IaC) platform that allows you to create, deploy, and manage cloud infrastructure using general-purpose programming languages rather than specialized configuration languages**. 
+
+**Key Features**
+
+- **Real Programming Languages:** Unlike traditional IaC tools that rely on domain-specific languages (DSLs) like HashiCorp Configuration Language (HCL) or YAML/JSON, Pulumi lets you write infrastructure code in Python, TypeScript, JavaScript, Go, C# (.NET), Java, and YAML. 
+- **Standard Language Features:** You can use loops, conditionals, classes, functions, and standard package managers (like `npm` or `PyPI`) to structure and reuse your infrastructure code. 
+- **Multi-Cloud & Provider Support:** Pulumi supports major cloud providers including Amazon Web Services (AWS), Microsoft Azure, Google Cloud Platform (GCP), Kubernetes, and hundreds of other third-party services. 
+- **Testing & Tooling:** Because it uses real code, you can run unit tests, use IDE autocompletion, apply type checkers, and use linters directly on your infrastructure definitions.
+- **Core Components:**
+  - **CLI:** Used to scaffold projects, preview updates, and deploy changes using commands like `pulumi up` and `pulumi destroy`.
+  - **SDK & Libraries:** Language-specific packages that translate your code into desired cloud states.
+  - **Engine & Stacks:** The engine computes the difference between your code and the live cloud state, while **Stacks** isolate different environments (such as `dev`, `staging`, and `production`).
 
 ### **21. What is Ansible and how does its agentless architecture work?**
 **Answer:** An open-source automation and configuration management tool that connects to target nodes over standard SSH (Linux) or WinRM (Windows) without installing daemons or agents on managed nodes.
