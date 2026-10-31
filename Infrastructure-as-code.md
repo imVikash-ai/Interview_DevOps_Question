@@ -1151,8 +1151,31 @@ The core magic of Atlantis lies in moving the infrastructure lifecycle into stan
 - **Cost-Efficient Collaboration:** As a free, open-source CNCF Sandbox project, it provides the collaborative, GUI-like workflows of commercial platforms (like HCP Terraform or Spacelift) without the resource-based licensing costs.
 - **Highly Flexible:** Because it executes native binaries, it easily supports extensions and wrappers like OpenTofu, Terragrunt, or custom pre-workflow validation scripts
 
-### **34. What is HashiCorp Cloud Platform (HCP) Terraform / Terraform Cloud?**
-**Answer:** A managed collaborative platform providing remote execution runners, centralized state locking, private module registries, cost estimation, and Sentinel policy enforcement.
+### **33. What is HashiCorp Cloud Platform (HCP) Terraform / Terraform Cloud?**
+**Answer:** **HCP Terraform** (formerly known as **Terraform Cloud** until April 2024) is **HashiCorp's hosted, managed Software-as-a-Service (SaaS) application that runs and automates Terraform outside of your local machine**.
+
+It builds upon open-source or standard Terraform by shifting execution, state management, and team collaboration into a centralized cloud platform. 
+
+#### Core Definition & Relationship
+
+- **Terraform (CLI):** An open-source Infrastructure as Code (IaC) tool used to write declarative configuration files and provision cloud/on-prem resources. Running it locally means you manage your own state files, access keys, and CI/CD pipelines. 
+- **HCP Terraform (Terraform Cloud):** The hosted control plane that runs your Terraform commands, stores your state safely in the cloud, manages secrets, and gives teams a web interface and API to collaborate. 
+
+#### Key Features & Capabilities
+
+- **Remote State Management:** Automatically stores and locks Terraform state files remotely, removing the need to configure manual remote backends (like AWS S3 with DynamoDB locking) and preventing concurrent-run corruption. 
+- **Managed Execution:** Runs `terraform plan` and `terraform apply` on HashiCorp-managed secure workers instead of local developer laptops or custom CI/CD agents.
+- **Team Collaboration & Access Control:** Organizes work into **Organizations**, **Projects**, and **Workspaces** (mapped to environments like dev, staging, and production) with fine-grained user permissions and role-based access control (RBAC). 
+- **Version Control System (VCS) Integration:** Connects directly to GitHub, GitLab, or Bitbucket to automatically trigger plans when pull requests or commits are made. 
+- **Private Module Registry:** Allows teams to publish, share, and reuse internal Terraform modules across the organization privately. 
+- **Drift Detection & Continuous Validation:** Periodically checks your live cloud infrastructure against your state file to spot manual changes or configuration drift. 
+- **Governance & Policies:** Supports policy-as-code frameworks (such as Sentinel or OPA) to enforce security and compliance rules before changes are applied. 
+
+#### Deployment & Pricing Tiers
+
+- **Free Tier:** Available for small teams and individual users (supporting up to a set number of managed resources or users, such as up to 5 users).
+- **Paid Tiers:** Offer advanced team collaboration, SSO, audit logging, and strict governance controls.
+- **Terraform Enterprise:** The self-hosted, on-premises or private-cloud equivalent for organizations with strict air-gapped or data-residency requirements.
 
 ### **35. What is Spacelift?**
 **Answer:** A collaborative infrastructure orchestration platform for Terraform, OpenTofu, Pulumi, and CloudFormation with built-in OPA policy enforcement and drift detection.
