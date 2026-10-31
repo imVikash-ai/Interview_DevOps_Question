@@ -1128,8 +1128,28 @@ Instead of forcing engineers to manually consult vendor pricing calculators, **I
 - **CI/CD Pipelines:** It runs automatically during **GitHub Actions, GitLab CI, or Azure DevOps** runs. When a developer submits a pull request (PR), Infracost posts a breakdown comment directly on the code review page. 
 - **Policy Guardrails:** Organizations can write custom FinOps compliance checks. For example, the tool can trigger warnings if a developer provisions an expensive legacy resource when a cheaper alternative is recommended by cloud framework standards
 
-### **33. What is Atlantis for Terraform?**
-**Answer:** A self-hosted application that executes `terraform plan` on PR creation, posts the diff, locks state, and applies changes only when authorized reviewers comment `atlantis apply`.
+### **32. What is Atlantis for Terraform?**
+**Answer:** **Atlantis is an open-source, self-hosted DevOps tool designed to automate Terraform workflows directly through your Git pull requests (PRs)**. Instead of engineers running Terraform commands locally from their laptops or navigating a separate CI/CD dashboard, Atlantis converts Git platforms like GitHub, GitLab, Bitbucket, and Azure DevOps into the control plane for your infrastructure. 
+
+It acts as a self-hosted server that listens for webhooks from your code repositories, executing standard `terraform plan` and `terraform apply` commands based on code changes and PR comments. 
+
+**How the Atlantis Workflow Works**
+
+The core magic of Atlantis lies in moving the infrastructure lifecycle into standard code-review threads: 
+
+1. **The PR is Opened:** A developer writes or modifies Terraform code and opens a pull request in Git. 
+2. **Automated Planning:** The Git platform triggers a webhook to your self-hosted Atlantis server, which automatically runs `terraform plan` on the changes. 
+3. **PR Visibility:** Atlantis comments the exact command-line output of that plan back onto the pull request thread, allowing everyone to see exactly what infrastructure will be added, changed, or destroyed. 
+4. **State Locking:** To ensure safety, Atlantis automatically locks the Terraform state for that specific directory, preventing other developers from running concurrent updates that could corrupt the state.
+5. **Apply via Comment:** Once peers review and approve the code changes, an authorized user comments `atlantis apply` directly on the PR. Atlantis runs the apply sequence in the background, prints the confirmation log as a final comment, and the PR is ready to merge.
+
+**Key Benefits of Using Atlantis**
+
+- **Enhanced Security:** Developers no longer need highly privileged cloud provider credentials configured on their local machines. The credentials stay locked down securely inside the server environment where Atlantis runs.
+- **Instant Auditing:** Because every single plan output, approval, and execution event happens inside the PR thread, the Git version history serves as a permanent compliance and audit log.
+- **Environment Consistency:** It completely eliminates the "works on my machine" issue by standardizing the exact version of the Terraform binary and environment variables on a central server.
+- **Cost-Efficient Collaboration:** As a free, open-source CNCF Sandbox project, it provides the collaborative, GUI-like workflows of commercial platforms (like HCP Terraform or Spacelift) without the resource-based licensing costs.
+- **Highly Flexible:** Because it executes native binaries, it easily supports extensions and wrappers like OpenTofu, Terragrunt, or custom pre-workflow validation scripts
 
 ### **34. What is HashiCorp Cloud Platform (HCP) Terraform / Terraform Cloud?**
 **Answer:** A managed collaborative platform providing remote execution runners, centralized state locking, private module registries, cost estimation, and Sentinel policy enforcement.
