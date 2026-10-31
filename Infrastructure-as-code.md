@@ -1251,8 +1251,35 @@ resource "launchdarkly_feature_flag" "example" {
 - **HCL Changes are Ignored Too:** If you list an attribute in `ignore_changes` and then try to update that same attribute later directly inside your `.tf` files, **Terraform will still ignore it**. You must temporarily remove the attribute from the `ignore_changes` list to push your code change.
 - **Use `all` with Caution:** Sweeping your state under the rug with `ignore_changes = all` means Terraform will no longer track drift for that resource, which can lead to untracked structural changes
 
-### **37. What is `create_before_destroy` lifecycle rule?**
-**Answer:** Inverts Terraform's default replacement behavior by creating the replacement resource *first* before destroying the old resource, minimizing service downtime.
+### **36. What is `create_before_destroy` lifecycle rule?**
+**Answer:** The `create_before_destroy` rule is **a lifecycle meta-argument in Terraform that reverses Terraform's default replacement order to prevent service downtime**. 
+
+**How It Works**
+
+- **Default Behavior:** When Terraform needs to replace a resource (because an attribute change forces a recreation), it destroys the old resource first and then creates the new one. This causes a temporary service outage. 
+- **With `create_before_destroy = true`:** Terraform creates the new replacement resource *first*, attaches or updates dependencies, and then safely destroys the old resource. 
+
+**Example Usage**
+
+**hcl**
+```hcl
+resource "aws_db_instance" "main" {
+  identifier_prefix = "prod-db-"
+  engine            = "postgres"
+  instance_class    = "db.t3.micro"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+```
+
+**Key Considerations**
+
+- **Zero Downtime:** It is widely used for resources that serve live traffic or hold critical dependencies—such as database instances, security groups, load balancers, or virtual machines.
+- **Naming Conflicts:** Because both the old and new resources exist at the same time during the transition, you should use dynamic names like `name_prefix` or `identifier_prefix` rather than fixed, hardcoded names to avoid naming collisions. 
+- **Cascading Effects:** This rule automatically cascades down to dependent resources. 
+- **Conflict with `prevent_destroy`:** You cannot use `create_before_destroy = true` and `prevent_destroy = true` together on the same resource because `prevent_destroy` blocks any deletion, which conflicts with destroying the old resource
 
 ### **38. What is `prevent_destroy` lifecycle rule?**
 **Answer:** Causes Terraform to reject any execution plan that would destroy the annotated critical resource (e.g., production database).
