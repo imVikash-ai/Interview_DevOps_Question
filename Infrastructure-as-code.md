@@ -1073,7 +1073,41 @@ terraform graph | dot -Tpng > infrastructure_graph.png
 If you don't have Graphviz locally on your machine, simply run terraform graph, copy the output block, and paste it into a browser tool like GraphvizOnline to construct the map instantly
 
 ### **31. What is tfsec / Trivy for IaC?**
-**Answer:** Fast static security scanners that parse HCL code and flag security risks (unencrypted storage, public S3 buckets, open security groups) before deployment.
+**Answer:** **tfsec** was **an open-source static analysis security scanner built specifically to find security misconfigurations and best-practice violations in Terraform code**. 
+
+**Trivy**, developed by Aqua Security, is a comprehensive, all-in-one open-source security scanner. Aqua Security has **merged and consolidated tfsec directly into Trivy**. 
+
+**Key Relationship & Transition**
+
+- **The Merger:** Aqua Security moved all active engineering focus from `tfsec` into `Trivy`. The core Terraform scanning engine and rules from `tfsec` were folded into Trivy’s IaC (Infrastructure as Code) scanning capabilities.
+- **Current Status:** `tfsec` is deprecated and no longer receives active feature updates, though the binary/tool remains available for legacy use. Users are officially encouraged to migrate to `Trivy`. 
+- **Where to learn more:** You can review the transition details and community notices on the official **tfsec GitHub Repository** or check out the broader multi-purpose capabilities on the **Trivy Official Website**
+
+**What Trivy Does for IaC**
+
+Instead of just scanning Terraform files, Trivy acts as a unified CLI tool that handles multiple security layers: 
+
+- **IaC & Misconfiguration Scanning:** Scans Terraform, CloudFormation, Dockerfiles, Kubernetes manifests, and Helm charts against cloud security best practices (using `trivy config`).
+- **Terraform Plan Scanning:** Supports checking compiled `tfplan.json` outputs before changes are applied to real cloud infrastructure.
+- **Broader Security Scope:** Beyond pure IaC misconfigurations, Trivy also scans container images, filesystem vulnerabilities (CVEs), exposed secrets, and software bill of materials (SBOM) generation.
+
+---
+
+**Basic Usage Comparison**
+
+- **Old way (`tfsec`):**
+
+  **bash**
+  ```bash
+  tfsec .
+  ```
+
+- **New way (`Trivy` for IaC):**
+
+  **bash**
+  ```bash
+  trivy config .
+  ```
 
 ### **32. What is Infracost?**
 **Answer:** A CLI tool that parses Terraform code in CI/CD pull requests, calculates the exact monthly cost delta of proposed infrastructure changes, and posts an interactive breakdown comment onto the PR.
