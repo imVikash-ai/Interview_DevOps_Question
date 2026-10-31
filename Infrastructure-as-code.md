@@ -1447,8 +1447,57 @@ While these CLI commands are great for one-off sandbox fixes, they alter shared 
 - **Instead of `state mv`:** Use a **`moved`**block** in your code. It allows you to define renames inside the code so the changes can be planned, reviewed, and cleanly applied across team environments.
 - **Instead of `state rm`:** Use a **`removed`** **block** with `destroy = false`. This safely tells Terraform to drop the resource from state during the next normal `apply` lifecycle.
 
-### **42. What is Terraform Provider Mirroring?**
-**Answer:** Configuring CLI config (`.terraformrc`) to read pre-downloaded provider binaries from local disk or private registries in air-gapped environments without internet access.
+### **41. What is Terraform Provider Mirroring?**
+**Answer:** **Terraform Provider Mirroring** is **a feature that allows you to host and distribute Terraform provider plugins from a local filesystem or an internal network server rather than downloading them directly from the public upstream Terraform Registry**. 
+
+This is an essential infrastructure practice for enterprise environments to enable **offline/air-gapped operations, improve security control, and increase deployment speed** by caching immutable provider binaries.
+
+#### Core Mirroring Strategies
+
+Terraform supports two main types of provider mirrors depending on your network architecture: 
+
+- **Filesystem Mirror:** Placed directly on the local machine in a specific nested folder structure matching the provider source. Highly effective for fully offline or air-gapped CI/CD runners.
+- **Network Mirror:** An HTTP/HTTPS server (or tools like JFrog Artifactory) that implements Terraform's JSON index and plugin download protocol. It functions as an internal registry for multiple teams. 
+
+#### How it Works: The CLI Subcommand
+
+You can easily bootstrap a mirror using the built-in **Terraform Providers Mirror Command**
+
+When you run the command below, Terraform analyzes your configuration, pulls the exact `.zip` provider binaries from the public registry, and organizes them along with the required `index.json` files:
+
+**bash**
+```bash
+terraform providers mirror -platform=linux_amd64 /path/to/my-mirror
+```
+
+Running this subsequently will safely update or merge new versions into the single JSON directory structure without wiping out existing downloads. 
+
+#### Example Configuration (`.terraformrc`)
+
+To force Terraform to read from your mirror instead of reaching out to the internet, you declare a `provider_installation` block inside your CLI configuration file (`.terraformrc` or `terraform.rc`): 
+
+**hcl**
+```hcl
+# ~/.terraformrc
+provider_installation {
+  # Directs traffic to your internal secure repository
+  network_mirror {
+    url = "https://terraform-mirror.company.internal/"
+    include = ["registry.terraform.io/hashicorp/*", "registry.terraform.io/DataDog/*"]
+  }
+  
+  # Optional: Fall back to direct internet downloads for everything else
+  direct {
+    exclude = ["registry.terraform.io/hashicorp/*", "registry.terraform.io/DataDog/*"]
+  }
+}
+```
+
+#### Key Organizational Benefits
+
+- **Supply Chain Control:** Teams can inspect and approve specific provider versions before they are hosted internally, preventing malicious code injection. 
+- **High Availability:** Avoid builds breaking when upstream registries experience outages or rate limits. 
+- **Performance:** Drastically cuts down execution times during `terraform init` since binaries are fetched over high-speed local networks.
 
 ### **43. What is Terraform Blast Radius and how do you minimize it?**
 **Answer:** The maximum potential damage from a failed apply. Minimized by breaking monolithic state files into layered, decoupled state files (Networking $\rightarrow$ Data $\rightarrow$ Compute $\rightarrow$ App).
