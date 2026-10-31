@@ -1177,8 +1177,17 @@ It builds upon open-source or standard Terraform by shifting execution, state ma
 - **Paid Tiers:** Offer advanced team collaboration, SSO, audit logging, and strict governance controls.
 - **Terraform Enterprise:** The self-hosted, on-premises or private-cloud equivalent for organizations with strict air-gapped or data-residency requirements.
 
-### **35. What is Spacelift?**
-**Answer:** A collaborative infrastructure orchestration platform for Terraform, OpenTofu, Pulumi, and CloudFormation with built-in OPA policy enforcement and drift detection.
+### **34. What is Spacelift?**
+**Answer:** **Spacelift** is **an infrastructure orchestration and CI/CD platform for Infrastructure as Code (IaC) that helps platform and DevOps teams provision, configure, and govern cloud resources from a single control plane**. 
+
+**Core Features and Capabilities**
+
+- **Multi-IaC Support:** Works natively with Terraform, OpenTofu, Pulumi, CloudFormation, Terragrunt, Ansible, and Kubernetes. 
+- **GitOps & Automation:** Automates plans, applies, and previews when code is committed to version control systems (VCS) like GitHub, GitLab, or Bitbucket. 
+- **State Management:** Securely handles state files and dynamic cloud credentials without needing manual storage setups like S3 buckets or DynamoDB locks. 
+- **Policy-as-Code (OPA):** Uses the Open Policy Agent to enforce security, compliance, login rules, and cost-control guardrails automatically before changes are applied.
+- **Drift Detection:** Continuously monitors your live cloud infrastructure to spot and flag or automatically correct changes made outside your IaC code. 
+- **Spacelift Intelligence & Intent:** Includes AI-assisted deployment features and natural-language infrastructure querying/requests while keeping enterprise governance intact
 
 ### **36. What is the `ignore_changes` lifecycle rule in Terraform?**
 **Answer:** Instructs Terraform to ignore updates to specific resource attributes caused by external systems or autoscaling (e.g., `lifecycle { ignore_changes = [tags, desired_capacity] }`).
