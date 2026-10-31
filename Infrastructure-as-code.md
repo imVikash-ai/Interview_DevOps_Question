@@ -1385,10 +1385,29 @@ Child modules automatically inherit the parent module's *default* provider confi
    }
    ```
 
-### **40. What is Terraform Variable Precedence?**
-**Answer:** Evaluated with increasing priority: Environment variables (`TF_VAR_name`) $\rightarrow$ `terraform.tfvars` $\rightarrow$ `terraform.tfvars.json` $\rightarrow$ `*.auto.tfvars` $\rightarrow$ CLI flags (`-var`).
+### **39. What is Terraform Variable Precedence?**
+**Answer:** **Terraform variable precedence** is **the strict order of priority Terraform uses to choose a single value for an input variable when it is defined in multiple places**. 
 
-### **41. What is `terraform state rm` vs `terraform state mv`?**
+If a conflict occurs, **the last loaded source wins and overrides any values set by lower-priority sources**. 
+
+#### The Order of Precedence (Lowest to Highest)
+
+The hierarchy determines which variable value takes effect during execution, ranked from **weakest (1)** to **strongest (6)**: 
+
+| **Priority**    | **Source**                                  | **Details & Behavioral Rules**                                                                                                                                                          |
+| --------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1 (Lowest)**  | **Default Block Value**                     | The fallback value defined inside the `variable` block (e.g., in `variables.tf`). It is only used if no other value is provided.                                                        |
+| **2**           | **Environment Variables**                   | Any environment variable prefixed with `TF_VAR_` (e.g., `export TF_VAR_region="us-east-1"`).                                                                                            |
+| **3**           | **`terraform.tfvars`**                      | The standard variable definition file automatically loaded by Terraform if present.                                                                                                     |
+| **4**           | **`terraform.tfvars.json`**                 | The JSON version of the standard variable file, which overrides its `.tfvars` equivalent.                                                                                               |
+| **5**           | **`*.auto.tfvars` or `*.auto.tfvars.json`** | Files ending in `.auto.tfvars` are automatically loaded. If there are multiple, they are processed in **alphabetical order** by filename.                                               |
+| **6 (Highest)** | **CLI Flags (`-var` or `-var-file`)**       | Values explicitly passed at the command line (e.g., `terraform apply -var="region=us-west-2"`). If multiple flags are passed, they are evaluated in the **exact order they are typed**. |
+
+**Special Scenario: HCP Terraform (Cloud)**
+
+When using **HCP Terraform (formerly Terraform Cloud)**, the workflow introduces "Variable Sets". Within the cloud platform, **Priority Variable Sets** hold a special status: they are designed to enforce organization-wide governance and will override even the workspace-scoped or command-line parameters to maintain compliance.
+
+### **40. What is `terraform state rm` vs `terraform state mv`?**
 **Answer:**
 - **`state rm`:** Removes a resource from state; live cloud resource is **not deleted**, Terraform simply stops managing it.
 - **`state mv`:** Renames or moves a resource within state without destroying or recreating it.
