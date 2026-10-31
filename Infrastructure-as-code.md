@@ -1281,8 +1281,30 @@ resource "aws_db_instance" "main" {
 - **Cascading Effects:** This rule automatically cascades down to dependent resources. 
 - **Conflict with `prevent_destroy`:** You cannot use `create_before_destroy = true` and `prevent_destroy = true` together on the same resource because `prevent_destroy` blocks any deletion, which conflicts with destroying the old resource
 
-### **38. What is `prevent_destroy` lifecycle rule?**
-**Answer:** Causes Terraform to reject any execution plan that would destroy the annotated critical resource (e.g., production database).
+### **37. What is `prevent_destroy` lifecycle rule?**
+**Answer:** The `prevent_destroy` lifecycle rule is **a meta-argument in Terraform that stops Terraform from deleting or replacing a managed infrastructure resource**. 
+
+**How It Works**
+
+- **Error on Destruction:** If a `terraform plan` or `terraform apply` attempts to destroy or recreate the resource (for example, via `terraform destroy` or an attribute change that forces replacement), Terraform rejects the plan and returns an error.
+- **Syntax:** You add it inside a `lifecycle` block directly inside a resource definition:
+
+  **hcl**
+  ```hcl id="k3pn8a"
+  resource "aws_db_instance" "database" {
+    # ... configuration properties ...
+
+    lifecycle {
+      prevent_destroy = true
+    }
+  }
+  ```
+
+**Key Behaviors & Limitations**
+
+- **Protects Critical Resources:** Use it as a safeguard for stateful or high-value infrastructure—such as production databases, S3 storage buckets, or KMS keys—to prevent accidental data loss.
+- **Does Not Protect Against Code Deletion:** If you completely delete the resource block from your `.tf` configuration file and run `terraform apply`, Terraform does *not* look at the `prevent_destroy` rule inside the removed block; instead, it will try to remove it from state or destroy it unless handled manually. 
+- **Requires Removing to Destroy:** If you genuinely want to destroy or replace a resource with `prevent_destroy = true`, you must first edit your code to set `prevent_destroy = false` (or remove the block), run `terraform apply`, and then execute the deletion
 
 ### **39. What is a Terraform Provider Alias?**
 **Answer:** Allows configuring multiple instances of the same provider (e.g., deploying resources across multiple AWS regions or accounts in a single configuration) using `alias = "west"`.
