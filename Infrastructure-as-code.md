@@ -1072,7 +1072,7 @@ terraform graph | dot -Tpng > infrastructure_graph.png
 
 If you don't have Graphviz locally on your machine, simply run terraform graph, copy the output block, and paste it into a browser tool like GraphvizOnline to construct the map instantly
 
-### **31. What is tfsec / Trivy for IaC?**
+### **30. What is tfsec / Trivy for IaC?**
 **Answer:** **tfsec** was **an open-source static analysis security scanner built specifically to find security misconfigurations and best-practice violations in Terraform code**. 
 
 **Trivy**, developed by Aqua Security, is a comprehensive, all-in-one open-source security scanner. Aqua Security has **merged and consolidated tfsec directly into Trivy**. 
@@ -1109,8 +1109,24 @@ Instead of just scanning Terraform files, Trivy acts as a unified CLI tool that 
   trivy config .
   ```
 
-### **32. What is Infracost?**
-**Answer:** A CLI tool that parses Terraform code in CI/CD pull requests, calculates the exact monthly cost delta of proposed infrastructure changes, and posts an interactive breakdown comment onto the PR.
+### **31. What is Infracost?**
+**Answer:****Infracost** is **a cloud cost intelligence and estimation tool designed for DevOps engineers, platform managers, and FinOps teams**. It sits directly inside the software development workflow to calculate the exact cost impact of infrastructure changes **before they are actually deployed to the cloud**. 
+
+By analyzing code rather than waiting for post-deployment monthly invoices, it embodies a "shift-left" approach to cloud financial operations (FinOps), catching expensive mistakes early. 
+
+**Core Functionality**
+
+- **Infrastructure as Code (IaC) Parsing:** It reads framework files like **Terraform, Terragrunt, AWS CDK, and CloudFormation**.
+- **Real-Time Cost Breakdowns:** The tool maps the code to a Cloud Pricing API to fetch up-to-date pricing for major providers like **AWS, Microsoft Azure, and Google Cloud Platform (GCP)**. 
+- **Diff Adjustments:** When a developer modifies code, it provides a comparative output showing the cost difference between the current infrastructure and the proposed changes (e.g., *"+$150/month"* or *'-$45/month'*). 
+
+**Where It Integrates**
+
+Instead of forcing engineers to manually consult vendor pricing calculators, **Infracost** embeds directly into existing tech stacks: 
+
+- **IDE & Coding Agents:** Developers see live pricing hints inside editors like **VS Code, JetBrains, and Cursor**, or via modern AI assistants like **Claude Code**. 
+- **CI/CD Pipelines:** It runs automatically during **GitHub Actions, GitLab CI, or Azure DevOps** runs. When a developer submits a pull request (PR), Infracost posts a breakdown comment directly on the code review page. 
+- **Policy Guardrails:** Organizations can write custom FinOps compliance checks. For example, the tool can trigger warnings if a developer provisions an expensive legacy resource when a cheaper alternative is recommended by cloud framework standards
 
 ### **33. What is Atlantis for Terraform?**
 **Answer:** A self-hosted application that executes `terraform plan` on PR creation, posts the diff, locks state, and applies changes only when authorized reviewers comment `atlantis apply`.
