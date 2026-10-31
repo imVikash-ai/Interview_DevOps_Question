@@ -1189,8 +1189,67 @@ It builds upon open-source or standard Terraform by shifting execution, state ma
 - **Drift Detection:** Continuously monitors your live cloud infrastructure to spot and flag or automatically correct changes made outside your IaC code. 
 - **Spacelift Intelligence & Intent:** Includes AI-assisted deployment features and natural-language infrastructure querying/requests while keeping enterprise governance intact
 
-### **36. What is the `ignore_changes` lifecycle rule in Terraform?**
-**Answer:** Instructs Terraform to ignore updates to specific resource attributes caused by external systems or autoscaling (e.g., `lifecycle { ignore_changes = [tags, desired_capacity] }`).
+### **35. What is the `ignore_changes` lifecycle rule in Terraform?**
+**Answer:** The **`ignore_changes` lifecycle rule tells Terraform to ignore modifications to specific resource attributes when planning updates**, allowing you to prevent Terraform from overwriting changes made outside of your configuration. 
+
+By default, Terraform expects your configuration files to be the absolute source of truth. If someone modifies a cloud resource manually or via another tool, Terraform will detect that "drift" during the next `terraform plan` and attempt to revert the resource back to your defined code. 
+
+**How it Works**
+
+- **Creation:** Terraform **does not** ignore attributes when a resource is first created. It uses whatever values you provided in the initial code block.
+- **Updates:** On all subsequent runs (`terraform plan` and `terraform apply`), Terraform will bypass comparison checks for the attributes listed in the rule, preventing any unexpected updates or destructions due to those specific fields. 
+
+**Common Use Cases**
+
+1. **External Management:** When another team, tool, or an auto-scaling policy modifies a specific attribute (e.g., Kubernetes replicas, Azure App Settings, or dynamically updated user lists). 
+2. **Dynamic Cloud Defaults:** When cloud providers automatically append settings or default parameters upon creation that you don't necessarily want to track or continuously revert in your code. 
+3. **External Tagging Systems:** When third-party security or budgeting tools automatically apply system tags to your infrastructure. 
+
+#### Syntax Examples
+
+**1. Ignoring Specific Attributes**
+
+You place the `ignore_changes` argument inside a nested `lifecycle` block. Pass the attributes you want to ignore as a list of names: 
+
+**hcl**
+```hcl
+resource "aws_instance" "web_server" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "WebServer"
+  }
+
+  lifecycle {
+    # Terraform will ignore any manual changes or external updates to the tags map
+    ignore_changes = [tags]
+  }
+}
+```
+
+**2. Ignoring Everything after Creation**
+
+If you want to use Terraform strictly to provision a resource initially and then hand full configuration control over to an external system or UI, you can use the special **`all`** keyword. 
+
+**hcl**
+```hcl
+resource "launchdarkly_feature_flag" "example" {
+  project_key = "example-project"
+  key         = "example-flag"
+  # ... initial configuration ...
+
+  lifecycle {
+    # Ignores changes to ALL attributes during subsequent updates
+    ignore_changes = all
+  }
+}
+```
+
+#### Important Things to Remember
+
+- **HCL Changes are Ignored Too:** If you list an attribute in `ignore_changes` and then try to update that same attribute later directly inside your `.tf` files, **Terraform will still ignore it**. You must temporarily remove the attribute from the `ignore_changes` list to push your code change.
+- **Use `all` with Caution:** Sweeping your state under the rug with `ignore_changes = all` means Terraform will no longer track drift for that resource, which can lead to untracked structural changes
 
 ### **37. What is `create_before_destroy` lifecycle rule?**
 **Answer:** Inverts Terraform's default replacement behavior by creating the replacement resource *first* before destroying the old resource, minimizing service downtime.
