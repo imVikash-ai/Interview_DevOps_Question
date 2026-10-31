@@ -1042,10 +1042,35 @@ Use code with caution.
 - `-diff` displays a line-by-line diff of what formatting changes would be made.
 
 ### **29. What is `terraform graph`?**
-**Answer:** Generates a visual Directed Acyclic Graph (DAG) of all resource dependencies in DOT format for graphviz visualization.
+**Answer:**
+`terraform graph` is a built-in command used to generate a visual representation of your infrastructure's dependency mappings. It parses your configuration files and outputs a text-based description of your resources in the DOT language format. This blueprint mapping reveals exactly how resources relate to one another and the sequence Terraform will follow to create, update, or destroy them.
 
-### **30. What is Checkov?**
-**Answer:** A static code analysis tool scanning Terraform, CloudFormation, and Kubernetes manifests in CI pipelines for security misconfigurations and compliance violations.
+**How It Works Under the Hood**
+
+Terraform doesn't execute configuration blocks linearly based on their placement inside .tf files. Instead, it builds a Directed Acyclic Graph (DAG) by evaluating implicit and explicit references. 
+
+- Nodes represent the resources, modules, or provider configurations.
+- Edges (Arrows) indicate the direction of dependencies. If a resource points to another, it means it must wait for that dependency to be provisioned first. 
+
+**Common Use Cases**
+
+- Architecture Visualization: It serves as a visual layout to help teams or stakeholders quickly understand complex infrastructure design. 
+- Debugging Dependency Cycles: If your code suffers from circular loops (Resource A needs Resource B, which needs Resource A), terraform graph helps isolate where the logic is tangled. 
+- Blast Radius Evaluation: By passing the -type=plan-destroy flag, you can audit the reverse-destruction chain to determine what downstream resources will fall if a specific piece is modified or deleted. 
+
+**Rendering the Output**
+
+Running terraform graph natively prints raw text configuration onto your terminal. To turn this text into a readable image format, you usually combine it with Graphviz or an open-source interpreter: 
+
+1. Command-Line Rendering (Requires Graphviz Installed)
+
+```bash
+terraform graph | dot -Tpng > infrastructure_graph.png
+```
+
+2. Web-Based Rendering (No Installation Required)
+
+If you don't have Graphviz locally on your machine, simply run terraform graph, copy the output block, and paste it into a browser tool like GraphvizOnline to construct the map instantly
 
 ### **31. What is tfsec / Trivy for IaC?**
 **Answer:** Fast static security scanners that parse HCL code and flag security risks (unencrypted storage, public S3 buckets, open security groups) before deployment.
