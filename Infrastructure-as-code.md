@@ -1752,8 +1752,84 @@ While highly flexible, opinions on using `terraform_remote_state` can vary. On *
 | **Speed** | **Fast.** Instantly pulls values straight from a state snapshot file without API throttling. | **Slower.** Must run continuous live API queries against the cloud provider. |
 | **Coupling** | **Tight.** The target configuration must run through Terraform and adhere strictly to output contracts. | **Loose.** Works regardless of how or who created the target resource. |
 
-### **54. What is Terraform `templatefile()` function?**
-**Answer:** Renders an external template file with dynamic variable interpolation (e.g., rendering `user_data.sh` scripts).
+### **49. What is Terraform `templatefile()` function?**
+**Answer:**The **`templatefile()` function in Terraform is a built-in utility that reads a file at a given path, renders its contents as a template, and returns the result as a string.**
+
+It is widely used to dynamically generate configuration files (like shell scripts, cloud-init configs, or application environment files) by injecting Terraform variables directly into them.
+
+**Why Use `templatefile()`?**
+
+- **Keeps code clean:** It allows you to separate complex scripts or configurations from your main Terraform files (`.tf`).
+- **Safe interpolation:** It handles formatting and escaping automatically, reducing syntax errors in the generated files.
+- **Replaces the deprecated `template_file` data source:** It is executed during the expression evaluation phase, making it faster and easier to use than the old data source method.
+
+**Syntax**
+
+**hcl**
+```hcl id="g7m2vp"
+templatefile(path, vars)
+```
+
+- **`path`**: The relative or absolute path to the template file.
+- **`vars`**: A map of variables and their values to pass into the template.
+
+**Code Example**
+
+**1. Create the Template File (`script.tftpl`)**
+
+Create a file containing your script or configuration. Use the `${var_name}` syntax where you want Terraform to inject data.
+
+**bash**
+```bash id="c9w3lk"
+#!/bin/bash
+echo "Deploying to the ${environment} environment..."
+echo "Database host is: ${db_host}"
+```
+
+**2. Call the Function in Your Terraform Code (`main.tf`)**
+
+Pass the file path and a map of the required variables into the function.
+
+**hcl**
+```hcl id="p2x8vn"
+resource "aws_instance" "web" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+
+  # Render the template and pass it as user_data
+  user_data = templatefile("${path.module}/script.tftpl", {
+    environment = "production"
+    db_host     = "://example.com"
+  })
+}
+```
+
+**Advanced Logic Within Templates**
+
+The function supports directives like **loops** and **conditionals** directly inside the template file using Terraform's expression syntax.
+
+- **Conditional (`if` / `else`):**
+
+  **text**
+  ```text id="v6k2qm"
+  %{~ if approved ~}
+  status: active
+  %{~ else ~}
+  status: pending
+  %{~ endif ~}
+  ```
+
+- **Looping (`for`):**
+
+  **text**
+  ```text id="r4n8yt"
+  Authorized keys:
+  %{~ for key in ssh_keys ~}
+  ssh-rsa ${key}
+  %{~ endfor ~}
+  ```
+
+  *(Note: The `~` symbol strips unnecessary whitespaces and newlines around the markers).*
 
 ### **55. What is Terraform `null_resource` vs `terraform_data`?**
 **Answer:**
