@@ -2108,7 +2108,7 @@ Audit your code for manual `depends_on` declarations. If Terraform already track
 
 If you have cyclic module dependencies, flatten or refactor the shared values into a lower-level base module (e.g., creating a dedicated networking or core identity layer) so that upper modules depend downward rather than circularly
 
-### **63. How do you implement Zero-Downtime AMI updates in Auto Scaling Groups using Terraform?**
+### **57. How do you implement Zero-Downtime AMI updates in Auto Scaling Groups using Terraform?**
 **Answer:**
 To implement **Zero-Downtime AMI updates** in AWS Auto Scaling Groups (ASGs) using Terraform, you can use two primary approaches: **ASG Native Instance Refresh (a rolling update approach) or an ASG Blue-Green Switch (replacing the entire group)**. 
 
@@ -2143,11 +2143,82 @@ If you want to completely replace the ASG itself rather than doing a rolling upd
 | **Terraform Wait Behavior** | **Asynchronous**. Terraform finishes the apply instantly; AWS processes the rollout in the background. | **Synchronous**. Terraform blocks the terminal until the new ASG is 100% healthy. |
 | **Best Used For**           | Production microservices, CI/CD pipelines, and large scale clusters.                                   | Immutable architecture paradigms where you want total clean-slates.               |
 
-### **64. What is the difference between `lookup()`, `try()`, and `can()` functions in HCL?**
+### **58. What is the difference between `lookup()`, `try()`, and `can()` functions in HCL?**
 **Answer:**
-- **`lookup(map, key, default)`:** Retrieves value from a map with a fallback default.
-- **`try(expr1, expr2, ...)`:** Evaluates expressions sequentially, returning the first one that does not produce an error.
-- **`can(expr)`:** Evaluates an expression and returns `true` if it succeeds without errors, or `false` otherwise.
+In HashiCorp Configuration Language (HCL), **`lookup()`**, **`try()`**, and **`can()`** are all used to handle dynamic data and prevent errors when referencing values that might not exist, but they operate differently.
+
+Here is the direct comparison of how they behave:
+
+| **Function**   | **Core Purpose**                                                                                | **Return Value**                                                       | **Common Use Case**                                             |
+| -------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------- |
+| **`lookup()`** | Retrieves a value from a **map** using a key.                                                   | The value of the key, or a **default value** if the key doesn't exist. | Reading optional configuration arguments from a map.            |
+| **`try()`**    | Evaluates a series of expressions and returns the **first one that succeeds** without an error. | The result of the first valid expression.                              | Handling deeply nested optional attributes or mixed data types. |
+| **`can()`**    | Tests if an expression evaluates **without an error**.                                          | A boolean value (**`true`** or **`false`**).                           | Validating variable inputs or creating conditional flags.       |
+
+#### 1. `lookup()`
+
+The `lookup()` function is strictly designed for **flat maps**. It searches for a specific key and safely returns a fallback default value if that key is missing, preventing Terraform from throwing a "key not found" error.
+
+- **Syntax:** `lookup(map, key, default_value)`
+- **Example:**
+
+  **hcl**
+  ```hcl
+  variable "tags" {
+    default = {
+      Environment = "Production"
+    }
+  }
+
+  # Returns "Production"
+  env = lookup(var.tags, "Environment", "Development")
+
+  # Returns "Global" (fallback because "Project" key doesn't exist)
+  project = lookup(var.tags, "Project", "Global")
+  ```
+
+#### 2. `try()`
+
+The `try()` function evaluates multiple expressions sequentially and returns the first one that does not cause an error. It is incredibly useful for **nested maps, objects, or blocks** where a key or a parent attribute might be completely null or missing.
+
+- **Syntax:** `try(expression1, expression2, ..., fallback_value)`
+- **Example:**
+
+  **hcl**
+  ```hcl
+  variable "project_settings" {
+    default = {
+      network = {
+        # subnet_id is missing here
+      }
+    }
+  }
+
+  # lookup() would fail here because 'network' is an object, not a flat map.
+  # try() handles it gracefully and returns "subnet-default"
+  subnet = try(var.project_settings.network.subnet_id, "subnet-default")
+  ```
+
+#### 3. `can()`
+
+The `can()` function evaluates an expression and tells you whether it's valid or if it blows up. It does not return the data itself; it only returns a **boolean**. It is frequently paired with variable `validation` blocks.
+
+- **Syntax:** `can(expression)`
+- **Example:**
+
+  **hcl**
+  ```hcl
+  variable "ami_id" {
+    type        = string
+    description = "Must be a valid AMI string starting with ami-"
+
+    validation {
+      # Returns true if regex matches, false if regex throws an error (e.g., if input is null)
+      condition     = can(regex("^ami-", var.ami_id))
+      error_message = "The ami_id value must start with \"ami-\"."
+    }
+  }
+  ```
 
 ### **69. How do you implement automated Terraform Drift Detection in CI/CD?**
 **Answer:**
