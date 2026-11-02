@@ -1614,8 +1614,29 @@ A **dynamic inventory** is generated in real-time by querying external APIs or d
 | **Maintenance** | Prone to drift / stale data | Always fresh and synchronized |
 | **Complexity** | Low | Moderate to high |
 
-### **46. What is Ansible Vault?**
-**Answer:** Encrypts sensitive variables, files, or playbooks with AES-256 (`ansible-vault encrypt secrets.yml`).
+### **45. What is Ansible Vault?**
+**Answer:** **Ansible Vault** is **a built-in feature of Ansible that allows you to encrypt sensitive data**-such as passwords, API keys, private keys, and certificates—so you can safely store them in plain-text version control systems (like Git) without exposing raw secrets. 
+
+#### How It Works
+
+- **Encryption at Rest:** It uses **AES-256 encryption** to lock entire files or individual inline strings into non-human-readable ciphertext. 
+- **Transparent Runtime Decryption:** When you execute an **Ansible Playbook** or task, Ansible automatically decrypts the vaulted data on-the-fly as long as you provide the correct password. 
+- **File vs. String Granularity:** You can either encrypt an entire file (like `secrets.yml`) or use inline encryption (`ansible-vault encrypt_string`) to lock just a specific variable inside an otherwise normal file.
+
+**Common Commands**
+
+- **Create a new encrypted file:** `ansible-vault create filename.yml`
+- **Encrypt an existing file:** `ansible-vault encrypt filename.yml`
+- **Edit an encrypted file:** `ansible-vault edit filename.yml`
+- **View an encrypted file without editing:** `ansible-vault view filename.yml`
+- **Decrypt a file back to plain text:** `ansible-vault decrypt filename.yml`
+- **Change the password (rekey):** `ansible-vault rekey filename.yml`
+- **Run a playbook with a password prompt:** `ansible-playbook playbook.yml --ask-vault-pass`
+- **Run a playbook using a password file:** `ansible-playbook playbook.yml --vault-password-file secrets.txt` 
+
+**Important Security Note**
+
+Ansible Vault only protects your data **at rest** (while stored on disk or in a repository). Once Ansible reads and decrypts the value during a playbook run, the secret exists in memory and can still be accidentally printed if you use verbose mode (`-v`) or debug tasks without the `no_log: true` option
 
 ### **47. What is OpenTofu State Encryption?**
 **Answer:** A native OpenTofu feature allowing state files and plan files to be encrypted end-to-end at the client level using AES-GCM or AWS KMS before being transmitted to remote backends.
