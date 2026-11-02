@@ -1638,17 +1638,30 @@ A **dynamic inventory** is generated in real-time by querying external APIs or d
 
 Ansible Vault only protects your data **at rest** (while stored on disk or in a repository). Once Ansible reads and decrypts the value during a playbook run, the secret exists in memory and can still be accidentally printed if you use verbose mode (`-v`) or debug tasks without the `no_log: true` option
 
-### **47. What is OpenTofu State Encryption?**
-**Answer:** A native OpenTofu feature allowing state files and plan files to be encrypted end-to-end at the client level using AES-GCM or AWS KMS before being transmitted to remote backends.
-
-### **48. What is Terraform Plugin Framework (v6)?**
-**Answer:** Modern Go SDK for authoring Terraform providers with native support for structured types, nested object attributes, and gRPC protocol buffers.
-
-### **49. What is Crossplane Composite Resource (XR) vs Claim (XRC)?**
+### **46. What is Crossplane Composite Resource (XR) vs Claim (XRC)?**
 **Answer:**
-- **XRD:** Platform team defines the abstract schema (`kind: DatabaseInstance`).
-- **Composition:** Binds XRD to concrete cloud resources (RDS, Security Group, KMS Key).
-- **Claim:** Developers request a database via a simple 5-line Kubernetes manifest without knowing AWS details.
+In **Crossplane**, a **Composite Resource (XR)** and a **Composite Resource Claim (XRC or Claim)** **represent different layers of abstraction and access control for managing infrastructure**.
+
+**Composite Resource (XR)**
+
+- **What it is:** A concrete, cluster-scoped instance of a composite infrastructure API defined by an XRD (Composite Resource Definition) and a Composition.
+- **Scope & Access:** Typically **cluster-scoped** (though Crossplane v2 introduces optional namespace-scoping capabilities). Direct access to create or manage XRs is usually restricted to platform engineers, SREs, or system admins. 
+- **Purpose:** It aggregates multiple underlying Managed Resources (MRs)—like a cloud database, a VPC, and subnets—into a single unified object.
+
+**Composite Resource Claim (XRC / Claim)**
+
+- **What it is:** A lightweight, namespace-scoped proxy or "front-end" interface that developers use to request an XR.
+- **Scope & Access:** **Namespace-scoped**. Developers create claims inside their application namespaces without needing cluster-wide privileges or direct visibility into low-level infrastructure details. 
+- **Purpose:** It decouples application teams from platform operations. When a developer applies a Claim, Crossplane provisions (or binds to) the corresponding XR behind the scenes.
+
+**Key Differences at a Glance**
+
+| **Feature** | **Composite Resource (XR)** | **Claim (XRC)** |
+|---|---|---|
+| **Primary Audience** | Platform Engineers / SREs | Application Developers |
+| **Kubernetes Scope** | Cluster-scoped (traditionally) | Namespace-scoped |
+| **Permission Level** | Higher / Admin privileges required | Lower / Namespace-level permissions |
+| **Role in Workflow** | The actual composite infrastructure instance that manages cloud/external resources | A user-friendly request object that maps/binds to an XR |
 
 ### **50. What is HashiCorp Sentinel?**
 **Answer:** A proprietary Policy as Code framework embedded in Terraform Cloud that enforces compliance rules (e.g., blocking non-whitelisted EC2 instance types) before apply.
