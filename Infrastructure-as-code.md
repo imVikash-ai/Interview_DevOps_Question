@@ -2222,13 +2222,124 @@ The `can()` function evaluates an expression and tells you whether it's valid or
 
 ### **69. How do you implement automated Terraform Drift Detection in CI/CD?**
 **Answer:**
-A scheduled cron pipeline executing:
-```bash
-terraform plan -detailed-exitcode -no-color
+To implement automated Terraform Drift Detection in a CI/CD pipeline, you must routinely compare your live cloud infrastructure against your defined Terraform configuration code.
+
+The industry standard approach uses a scheduled cron trigger to execute terraform plan with a specific exit code flag, parsing that result to alert engineers or trigger auto-remediation.
+
+#### The Core Mechanism: Detailed Exit Codes
+
+By default, terraform plan exits with a 0 whether there are pending changes or not. To automate detection, you must append the `-detailed-exitcode` flag. This tells Terraform to return specific integer exit codes based on what it finds:
+
+| Exit Code | Meaning | Pipeline Status |
+|---|---|---|
+| 0 | Succeeded with no changes (No drift) | ✅ Success |
+| 1 | Error occurred during the plan/execution | ❌ Fail (Pipeline breakdown) |
+| 2 | Succeeded with changes present (Drift Detected!) | ⚠️ Alert or Trigger Remediate |
+
+#### Implementation: Reference GitHub Actions Architecture
+
+The following complete, production-ready GitHub Actions workflow runs on a daily schedule and leverages the `-detailed-exitcode` logic to catch drift:
+
+```yaml
+name: "Scheduled Terraform Drift Detection"
+
+on:
+  schedule:
+    # Runs every day at 02:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allows manual execution
+
+permissions:
+  id-token: write  # Required for AWS OIDC authentication
+  contents: read
+  issues: write    # Allows pipeline to create alerts via GitHub Issues
+
+jobs:
+  drift-detection:
+    name: "Detect & Report Drift"
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/github-actions-tf-drift
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false # Crucial to capture raw exit codes accurately
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Check for Drift
+        id: tf-plan
+        # Continue on error so code '2' doesn't abruptly kill the step before we can act
+        continue-on-error: true 
+        run: |
+          terraform plan -detailed-exitcode -no-color -out=tfdrift.plan
+          echo "tf_exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Evaluate Clean State
+        if: steps.tf-plan.outputs.tf_exit_code == '0'
+        run: echo "No drift detected. Infrastructure matches code."
+
+      - name: Evaluate Pipeline Error
+        if: steps.tf-plan.outputs.tf_exit_code == '1'
+        run: |
+          echo "The terraform plan failed due to a system or syntax error."
+          exit 1
+
+      - name: Handle Detected Drift (Alert & Log)
+        if: steps.tf-plan.outputs.tf_exit_code == '2'
+        run: |
+          echo "⚠️ DRIFT DETECTED!"
+          # Format output and generate report or notify team
+          terraform show tfdrift.plan > drift-report.txt
+          cat drift-report.txt
 ```
-- Exit 0: Succeeded, no differences.
-- Exit 1: Malformed configuration or API error.
-- Exit 2: Succeeded with non-empty diff (Drift Detected $\rightarrow$ alerts Slack).
+
+#### Post-Detection Strategies: Alerting vs. Remediation
+
+Once the workflow registers an exit code of 2, your pipeline should follow one of two strategies based on your organizational environment guidelines:
+
+**Strategy A: Alerting & Visibility (Recommended for Production)**
+
+Do not automatically overwrite live resources in production. Instead, route the pipeline failure to a communication endpoint:
+
+- **GitHub Issues:** Automatically open an issue with the `drift-report.txt` logs embedded inside it so an engineer can audit the manual change.
+- **ChatOps Alerts:** Push an adaptive payload containing the affected resources to a Slack or Microsoft Teams webhook.
+
+**Strategy B: Automated Remediation (Dev / Staging Environments)**
+
+For non-critical sandboxes where consistency takes precedence over careful human audits, you can design the pipeline to instantly correct the issue by calling an automated apply step:
+
+```yaml
+      - name: Auto-Remediate Drift (Non-Prod Only)
+        if: steps.tf-plan.outputs.tf_exit_code == '2'
+        run: |
+          echo "Reverting manual infrastructure changes..."
+          terraform apply -auto-approve tfdrift.plan
+```
+
+####  Minimizing False Positives
+
+Frequent pipeline failures due to benign state updates can create alert fatigue. Mitigate them with these practices:
+
+1. **Utilize `ignore_changes`:** For resources that dynamically alter attributes at runtime (e.g., auto-scaling groups modifying instance capacity or external cloud services adjusting object tags), isolate them inside your block configuration:
+
+   ```hcl
+   lifecycle {
+     ignore_changes = [ tags["LastScanned"], desired_capacity ]
+   }
+   ```
+
+2. **Keep Providers Updated:** Buggy or out-of-date cloud provider plugins frequently read legitimate data models as drifted states. Maintain a pipeline update cadence for your `.providers.tf` block.
 
 ### **70. How do you test Terraform modules with Terratest in Go?**
 **Answer:**
