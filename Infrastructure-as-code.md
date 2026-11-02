@@ -1985,8 +1985,30 @@ module "vpc" {
 
 When you execute `terraform init`, the Terraform CLI automatically communicates with the target registry endpoint, queries the metadata protocol, resolves the version, and downloads the exact distribution bundle into your local project environment.
 
-### **60. What is `terraform force-unlock`?**
-**Answer:** Releases a stuck remote state lock in DynamoDB/Consul when a previous run crashed unexpectedly: `terraform force-unlock <LOCK-ID>`.
+### **54. What is `terraform force-unlock`?**
+**Answer:** The `terraform force-unlock` command **manually removes a stuck state lock from a Terraform backend when a previous process crashes or is interrupted without releasing it**. 
+
+**How State Locking Works**
+
+- **Prevention:** Terraform automatically locks the state file before any operation (like `plan` or `apply`) that writes to it. This stops two processes or teammates from updating the state at the same time. 
+- **Stuck Locks:** If a command is killed, a CI/CD job times out, or a machine crashes mid-operation, the lock can remain stuck in the backend (such as Amazon S3 with DynamoDB, Azure Blob Storage, or Google Cloud Storage).
+- **Error Message:** When you try to run Terraform while a lock is active, it fails and displays an error message containing a unique **Lock ID** along with metadata (`who` acquired it and `when`). 
+
+**Command Syntax and Usage**
+
+**bash**
+```bash
+terraform force-unlock [options] LOCK_ID
+```
+
+- **`LOCK_ID`:** The unique string identifier provided inside the lock-failure error message.
+- **`-force`**: An optional flag that skips the interactive confirmation prompt (useful in automated scripts, though it should be used with extreme caution). 
+
+**Important Safety Rules**
+
+- **Verify the Process First:** Before running `force-unlock`, confirm with your team or check your CI/CD pipelines to ensure no Terraform process is actively running. 
+- **Risk of Corruption:** If you force-unlock a state while another process is actively writing to it, you can cause race conditions and corrupt your state file. 
+- **HCP Terraform / Enterprise Exception:** If you use HCP Terraform or Terraform Enterprise, state locking is managed through their web UI or API rather than the CLI `force-unlock` command
 
 ---
 
