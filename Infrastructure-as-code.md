@@ -2149,18 +2149,6 @@ If you want to completely replace the ASG itself rather than doing a rolling upd
 - **`try(expr1, expr2, ...)`:** Evaluates expressions sequentially, returning the first one that does not produce an error.
 - **`can(expr)`:** Evaluates an expression and returns `true` if it succeeds without errors, or `false` otherwise.
 
-### **65. What is OpenTofu Early Evaluation of Variables?**
-**Answer:** An OpenTofu feature allowing variables and locals to be evaluated during backend configuration blocks, eliminating hardcoded backend S3 bucket names.
-
-### **66. What is Terragrunt `read_terragrunt_config()`?**
-**Answer:** Imports helper HCL files into a Terragrunt configuration, allowing centralized sharing of environment variables, AWS account IDs, and common tags.
-
-### **67. What is Terragrunt `dependency` Block?**
-**Answer:** Declares a dependency on another module, automatically resolving remote outputs and establishing execution order (`terragrunt run-all apply`).
-
-### **68. What are Terragrunt `mock_outputs`?**
-**Answer:** Supplies mock return values during `terragrunt plan` when an upstream dependency module has not yet been applied, preventing plan failures.
-
 ### **69. How do you implement automated Terraform Drift Detection in CI/CD?**
 **Answer:**
 A scheduled cron pipeline executing:
@@ -2198,9 +2186,6 @@ deny[msg] {
     msg := "S3 buckets must have server-side encryption enabled!"
 }
 ```
-
-### **72. What is OpenTofu Provider Plugin Signing and Verification?**
-**Answer:** OpenTofu verifies cryptographic PGP signatures and SHA256 checksums of all downloaded provider binaries against registry public keys before loading them into memory.
 
 ### **73. What is Terraform Module Semantic Versioning?**
 **Answer:** Pinning module sources to specific SemVer versions (`source = "terraform-aws-modules/vpc/aws?version=5.1.0"`) to prevent untested breaking changes from being applied automatically.
@@ -2290,9 +2275,6 @@ Configure Terraform with the **HashiCorp Vault Dynamic Secrets Provider** (`data
 ### **89. What is Terraform `replace_triggered_by`?**
 **Answer:** A lifecycle attribute that forces a resource to be replaced whenever another specified resource changes (e.g., replacing an EC2 instance whenever a security group changes).
 
-### **90. What is OpenTofu Client-Side State Encryption Key Rotation?**
-**Answer:** Rotating state encryption keys by declaring the new key in the OpenTofu configuration and running `tofu apply`, which re-encrypts the state file transparently.
-
 ### **91. What is Ansible Asynchronous Actions (`async` and `poll`)?**
 **Answer:** Running long-running tasks (e.g., database backups) asynchronously in the background while polling for status periodically.
 
@@ -2326,12 +2308,6 @@ Configure Terraform with the **HashiCorp Vault Dynamic Secrets Provider** (`data
 ### **101. What is Terraform JSON Syntax (`*.tf.json`)?**
 **Answer:** Allowing Terraform configurations to be written in standard JSON rather than HCL, useful for machine-generated infrastructure templates.
 
-### **102. What is Pulumi Automation API?**
-**Answer:** An SDK that embeds Pulumi infrastructure provisioning directly inside application code (e.g., a SaaS app provisioning tenant databases programmatically in Go).
-
-### **103. What is Crossplane Environment Config?**
-**Answer:** Injecting shared global configuration variables (AWS Account IDs, environment names) dynamically into Crossplane Compositions.
-
 ### **104. What is Ansible Fact Gathering (`setup` module)?**
 **Answer:** Automatically discovering hardware, OS, network, and disk facts from target hosts upon playbook execution and storing them in `ansible_facts`.
 
@@ -2341,32 +2317,11 @@ Configure Terraform with the **HashiCorp Vault Dynamic Secrets Provider** (`data
 ### **106. What is Terraform Provider Source Address?**
 **Answer:** The fully qualified global namespace of a provider: `registry.terraform.io/hashicorp/aws`.
 
-### **107. What is OpenTofu Registry?**
-**Answer:** An open-source, community-operated public registry (`get.opentofu.org`) hosting verified providers and modules for OpenTofu.
-
-### **108. What is Terragrunt Run-All?**
-**Answer:** Recursively executes Terraform commands across all subdirectories in DAG dependency order (`terragrunt run-all plan`).
-
 ### **109. What is Terraform Remote State Locking Mechanism in DynamoDB?**
 **Answer:** Uses an MD5 hash of the state file and a unique lock ID written to a DynamoDB table with strong consistency to prevent concurrent applies.
 
-### **110. What is Infracost FinOps Shift-Left?**
-**Answer:** Posting automated cloud cost delta comments on GitHub Pull Requests to make developers financially aware before merging infrastructure changes.
-
-### **111. What is Trivy IaC Scanning?**
-**Answer:** Scanning Terraform, CloudFormation, and Dockerfile code for over 1,000 built-in security misconfiguration checks.
-
-### **112. What is Checkov Custom Rego Policies?**
-**Answer:** Writing custom organizational compliance rules in Rego that Checkov evaluates against Terraform AST structures in CI.
-
 ### **113. What is Ansible Galaxy?**
 **Answer:** The public community repository for discovering, downloading, and sharing Ansible roles and collections.
-
-### **114. What is Pulumi Secrets Provider?**
-**Answer:** Encrypting sensitive configuration values at rest in state using cloud KMS (AWS KMS, Azure Key Vault, HashiCorp Vault).
-
-### **115. What is Crossplane Package Manager?**
-**Answer:** Distributing and installing Providers and Configurations as OCI artifacts packaged and versioned in standard container registries.
 
 ### **116. What is Terraform State Inspect (`terraform state show`)?**
 **Answer:** Prints the exact attributes and current live state of a single specific resource managed by Terraform.
@@ -2404,11 +2359,6 @@ variable "environment" {
 ### **124. What is Terraform Enterprise Private Module Registry?**
 **Answer:** An internal organization module registry with built-in versioning, documentation generation, and access control.
 
-### **125. What is Terragrunt Scaffold?**
-**Answer:** A CLI command that automatically generates boilerplate Terragrunt configuration files from a source Terraform module.
-
-### **126. What is OpenTofu State Migration?**
-**Answer:** OpenTofu natively reads and writes existing Terraform state files with 100% backward compatibility.
 
 ### **127. What is Ansible Jinja2 Templating?**
 **Answer:** Dynamically generating configuration files (`template` module) with variable substitution and loops using Jinja2 syntax.
@@ -2419,11 +2369,6 @@ variable "environment" {
 ### **129. What is Ansible Check Mode (`--check`)?**
 **Answer:** Dry-run execution that reports what changes would be made without actually modifying managed target servers.
 
-### **130. What is Pulumi Policy as Code (CrossGuard)?**
-**Answer:** Enforcing organizational compliance rules across Pulumi stacks written in TypeScript or Python before resources are provisioned.
-
-### **131. What is Crossplane Provider AWS vs Upjet AWS?**
-**Answer:** Upjet generates Crossplane providers automatically from Terraform provider schemas, ensuring 100% cloud resource coverage.
 
 ### **132. What is Terraform Cloud Agent?**
 **Answer:** Self-hosted worker processes deployed in private VPCs to execute Terraform Cloud runs against internal private resources.
@@ -2449,20 +2394,12 @@ variable "environment" {
 ### **139. What is Terraform Provider Alias in Child Modules?**
 **Answer:** Passing custom provider configurations into child modules via the `providers` map block.
 
-### **140. What is OpenTofu Early Backend Evaluation?**
-**Answer:** Evaluating variables and functions inside backend configuration blocks natively in OpenTofu.
-
 ### **141. What is Ansible Delegate_To?**
 **Answer:** Executing a specific task on a different host (e.g., taking an instance out of a load balancer on the control node) during a host playbook.
 
 ### **142. What is Ansible Local_Action?**
 **Answer:** Shorthand syntax for delegating a task to execute locally on the Ansible control machine.
-
-### **143. What is Pulumi Resource Transformation?**
-**Answer:** Intercepting and programmatically modifying resource arguments across all resources in a Pulumi stack (e.g., auto-tagging all resources).
-
-### **144. What is Crossplane Connection Secret?**
-**Answer:** Writing database passwords and endpoint URLs generated by cloud providers directly into Kubernetes Secret objects for application consumption.
+application consumption.
 
 ### **145. What is Terraform S3 Backend Key Naming Convention?**
 **Answer:** Storing state files in structured S3 paths: `env://prod/network/terraform.tfstate`.
@@ -2476,11 +2413,6 @@ variable "environment" {
 ### **148. What is Terraform Custom Function in Provider Framework?**
 **Answer:** User-defined HCL functions exposed by modern provider plugins to execute specialized string/crypto transformations.
 
-### **149. What is Terragrunt Hooks?**
-**Answer:** Executing custom scripts or CLI commands before or after Terraform execution (`before_hook`, `after_hook`).
-
-### **150. What is OpenTofu Registry Mirroring?**
-**Answer:** Redirecting provider and module downloads to private enterprise mirrors in air-gapped environments.
 
 ### **151. What is Ansible Meta Dependencies (`meta/main.yml`)?**
 **Answer:** Declaring prerequisite roles that must be executed automatically before the parent role runs.
@@ -2488,11 +2420,6 @@ variable "environment" {
 ### **152. What is Ansible Custom Filter Plugin?**
 **Answer:** Writing custom Python functions to extend Jinja2 template transformations inside playbooks.
 
-### **153. What is Pulumi ComponentResource?**
-**Answer:** A higher-level logical resource that aggregates multiple primitive cloud resources into a single reusable component.
-
-### **154. What is Crossplane Provider Config?**
-**Answer:** A Kubernetes CRD defining authentication credentials and assume-role configurations for a specific cloud provider in Crossplane.
 
 ### **155. What is Terraform Flatten Function (`flatten()`)?**
 **Answer:** Flattens nested lists of lists into a single flat list, commonly used with nested dynamic block collections.
@@ -2509,23 +2436,13 @@ variable "environment" {
 ### **159. What is Terraform One Function (`one()`)?**
 **Answer:** Converts a zero- or one-element list into a scalar value or `null`, failing if the list contains multiple elements.
 
-### **160. What is OpenTofu State Encryption Key Derivation?**
-**Answer:** Using PBKDF2 with SHA256 to derive encryption keys from passphrases for local and remote state encryption.
-
-### **161. What is Terragrunt Auto-Init?**
-**Answer:** Terragrunt automatically executes `terraform init` when backend settings or provider configurations change.
-
 ### **162. What is Ansible Lookups (`lookup()`)?**
 **Answer:** Querying external data sources (environment variables, HashiCorp Vault, AWS SSM) dynamically during playbook execution.
 
 ### **163. What is Ansible Lineinfile Module?**
 **Answer:** Ensuring a specific line of text exists or is modified in a file using regex matching.
 
-### **164. What is Pulumi Stack Output Reference?**
-**Answer:** Reading exported output values from another Pulumi stack (`new StackReference("org/proj/prod")`).
 
-### **165. What is Crossplane Management Policies?**
-**Answer:** Granularly controlling which CRUD operations Crossplane is allowed to perform on a cloud resource (`ObserveOnly`, `Create`, `Update`, `Delete`).
 
 ### **166. What is Terraform Module Git Source Syntax?**
 **Answer:** Referencing modules in Git with tags: `source = "git::https://github.com/org/repo.git?ref=v1.2.0"`.
@@ -2539,11 +2456,6 @@ variable "environment" {
 ### **169. What is Terraform Cloud Workspace VCS Integration?**
 **Answer:** Automatically triggering `terraform plan` and `terraform apply` on Git commits to specific branches in GitHub/GitLab.
 
-### **170. What is OpenTofu Test Framework (`tofu test`)?**
-**Answer:** Native testing framework evaluating HCL assertion blocks against ephemeral infrastructure without third-party test engines.
-
-### **171. What is Terragrunt Include Block?**
-**Answer:** Inheriting configuration from a parent `terragrunt.hcl` file into child environment directories.
 
 ### **172. What is Ansible Become (`become: true`)?**
 **Answer:** Privilege escalation system executing tasks with `sudo` or root permissions on target nodes.
@@ -2551,11 +2463,7 @@ variable "environment" {
 ### **173. What is Ansible Tags (`--tags`)?**
 **Answer:** Executing a subset of tasks in a playbook marked with specific tag labels.
 
-### **174. What is Pulumi Cloud Provider Dynamic Providers?**
-**Answer:** Authoring custom providers in TypeScript/Python implementing CRUD methods for bespoke REST APIs.
 
-### **175. What is Crossplane Composition Patching?**
-**Answer:** Mapping fields from an abstract Claim manifest (e.g., storage size) into underlying concrete cloud resources (e.g., EBS volume spec).
 
 ### **176. What is Terraform State Refresh Only (`terraform apply -refresh-only`)?**
 **Answer:** Updates the state file to reflect live cloud attributes without modifying any live cloud resources.
@@ -2581,9 +2489,6 @@ variable "environment" {
 ### **183. What is Pulumi Dynamic Secrets?**
 **Answer:** Integrating Pulumi with HashiCorp Vault to issue short-lived credentials dynamically during cloud provisioning.
 
-### **184. What is Crossplane Reconcile Rate Limit?**
-**Answer:** Configuring controller reconcile intervals to prevent hitting cloud provider API rate limits.
-
 ### **185. What is Terraform State Lock ID?**
 **Answer:** A unique UUID generated when an operation begins, recorded in the lock store to identify the locking process.
 
@@ -2593,23 +2498,13 @@ variable "environment" {
 ### **187. What is Terraform Debug Logging (`TF_LOG=DEBUG`)?**
 **Answer:** Enables verbose internal debugging logs printing raw cloud API HTTP requests and response payloads.
 
-### **188. What is OpenTofu Migration Guide from Terraform 1.6+?**
-**Answer:** OpenTofu provides drop-in CLI replacement for Terraform configs and state files.
-
-### **189. What is Terragrunt Dry-Run?**
-**Answer:** Validating configuration inheritance without executing underlying Terraform binaries.
-
 ### **190. What is Ansible Vault Rekey (`ansible-vault rekey`)?**
 **Answer:** Changing the encryption password of an existing Ansible Vault encrypted file.
 
 ### **191. What is Ansible Facts Cache?**
 **Answer:** Persisting gathered host facts across playbook runs using Redis or JSON files to speed up execution.
 
-### **192. What is Pulumi Native Providers?**
-**Answer:** Auto-generated providers derived directly from cloud provider OpenAPI specs (e.g., `pulumi-aws-native`), providing zero-day support for new cloud APIs.
 
-### **193. What is Crossplane Provider-Kubernetes?**
-**Answer:** Managing arbitrary Kubernetes resources in target clusters using Crossplane CRDs.
 
 ### **194. What is Terraform Workspace Delete (`terraform workspace delete`)?**
 **Answer:** Deletes an empty workspace; fails if resources are still tracked in the workspace state.
@@ -2617,17 +2512,7 @@ variable "environment" {
 ### **195. What is Terraform Output JSON Format (`terraform output -json`)?**
 **Answer:** Emits all module output values in machine-readable JSON format for scripting.
 
-### **196. What is OpenTofu Registry Authentication?**
-**Answer:** Configuring access tokens in CLI config to authenticate to private OpenTofu module registries.
-
-### **197. What is Terragrunt Local Inputs?**
-**Answer:** Passing environment-specific variables directly into Terraform modules from `terragrunt.hcl`.
 
 ### **198. What is Ansible Galaxy Requirements (`requirements.yml`)?**
 **Answer:** Declaring third-party roles and collections to be downloaded automatically before playbook execution.
 
-### **199. What is Pulumi Policy as Code Enforcement Level (`mandatory` vs `advisory`)?**
-**Answer:** `advisory` prints warnings; `mandatory` blocks stack updates if compliance rules are violated.
-
-### **200. What is Crossplane Health Status (`Ready: True`)?**
-**Answer:** Kubernetes condition indicating that the underlying live cloud resource has been successfully provisioned, initialized, and is fully functional.
