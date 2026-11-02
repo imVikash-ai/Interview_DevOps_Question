@@ -2010,17 +2010,49 @@ terraform force-unlock [options] LOCK_ID
 - **Risk of Corruption:** If you force-unlock a state while another process is actively writing to it, you can cause race conditions and corrupt your state file. 
 - **HCP Terraform / Enterprise Exception:** If you use HCP Terraform or Terraform Enterprise, state locking is managed through their web UI or API rather than the CLI `force-unlock` command
 
----
-
-## 🟡 **Part 2: Advanced Terraform, OpenTofu & Terragrunt (Questions 61–130)**
-
-### **61. Explain the step-by-step lifecycle of `terraform plan`.**
+### **55. Explain the step-by-step lifecycle of `terraform plan`.**
 **Answer:**
-1. Loads configuration files and builds the Dependency Graph (DAG).
-2. Reads the current state file from the remote backend.
-3. Refreshes state: Queries cloud APIs to fetch current live resource attributes.
-4. Compares live state against declared code to determine CRUD deltas (Add, Change, Destroy).
-5. Outputs the execution plan diff.
+The **`terraform plan` lifecycle consists of five core phases**: **initialization validation, locking the state, refreshing the existing state via provider APIs, calculating the diff against your configuration, and generating the execution plan**. 
+
+The step-by-step breakdown details exactly what happens behind the scenes when you run the command:
+
+**1. Pre-Execution & Working Directory Check**
+
+Before Terraform evaluates your resources, it validates the local environment: 
+
+- **Verification:** It confirms the directory has been initialized via `terraform init`.
+- **Plugin Check:** It verifies that the required cloud provider plugins (like AWS, Azure, or GCP) are present in the `.terraform` directory.
+
+**2. Backend Initialization & State Locking**
+
+Terraform secures the infrastructure state file to prevent parallel executions from causing conflicts:
+
+- **Locking:** It places a lock on the state file (whether stored locally or in a remote backend like an S3 bucket or HashiCorp Cloud Platform). 
+- **Concurrent Prevention:** If another team member is running an apply, the process halts here to prevent state corruption. 
+
+**3. State Refreshing (Detecting Drift)**
+
+Terraform captures the actual reality of your infrastructure rather than relying blindly on past records:
+
+- **API Ingestion:** It reads your existing state file and makes real-time API calls to your cloud providers to fetch the live status of those resources. 
+- **Drift Detection:** It notes any manual updates made directly in the cloud console that diverge from your files. (Note: You can skip this phase using the `-refresh=false` flag).
+
+**4. Graph Construction & Diff Calculation**
+
+Terraform builds a dependency graph to determine the correct order of operations. It contrasts three datasets: the live cloud infrastructure, the state file, and your target `.tf` configuration files. It looks for discrepancies and maps out actions using specific symbols: 
+
+- **`+ create`**: The resource is missing from the cloud and will be provisioned.
+- **`~ update in-place`**: The resource exists but an attribute needs adjustment without destroying the resource.
+- **`- destroy`**: The resource exists in the state/cloud but has been removed from the `.tf` files.
+- **`-/+ replace`**: An attribute change forces the resource to be completely destroyed and recreated.
+
+**5. Execution Plan Generation**
+
+The final stage compiles the proposed changes into a human-readable and machine-scannable report: 
+
+- **Output Preview:** It prints a summary of actions to the terminal console (e.g., `Plan: 2 to add, 1 to change, 0 to destroy`).
+- **Artifact Saving (Optional):** If you pass the `-out=filename.tfplan` flag, Terraform serializes this exact execution plan into a secure file. This locks down the operations so that a subsequent `terraform apply` executes *exactly* what you reviewed without recalculating the state.
+- **State Unlock:** The state lock is released, concluding the `terraform plan` lifecycle
 
 ### **62. What is Terraform Graph Cycle and how is it resolved?**
 **Answer:** A circular dependency error where Resource A depends on Resource B, and Resource B depends on Resource A. Resolved by decomposing circular references (e.g., creating security groups first, defining `aws_security_group_rule` as independent resources).
