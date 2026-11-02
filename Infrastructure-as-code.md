@@ -1663,14 +1663,29 @@ In **Crossplane**, a **Composite Resource (XR)** and a **Composite Resource Clai
 | **Permission Level** | Higher / Admin privileges required | Lower / Namespace-level permissions |
 | **Role in Workflow** | The actual composite infrastructure instance that manages cloud/external resources | A user-friendly request object that maps/binds to an XR |
 
-### **50. What is HashiCorp Sentinel?**
-**Answer:** A proprietary Policy as Code framework embedded in Terraform Cloud that enforces compliance rules (e.g., blocking non-whitelisted EC2 instance types) before apply.
+### **47. What is HashiCorp Sentinel?**
+**Answer:** HashiCorp Sentinel is **an embeddable policy-as-code framework and language created by HashiCorp to enforce fine-grained, logic-based rules and security guardrails across enterprise workflows**. 
+
+**Core Purpose**
+
+Sentinel transforms traditional compliance and security checklists (stored in wikis or documents) into automated, testable code. It acts as a gatekeeper in your automation pipeline to prevent risky configurations, unapproved cloud resources, or non-compliant deployments before they happen. 
+
+**Key Features**
+
+- **Policy as Code:** Write policies using a human-readable, high-level language that supports complex conditional logic and version control via Git. 
+- **Enforcement Levels:** Policies can be configured with three distinct enforcement outcomes:
+  - *Advisory:* Logs a warning if a policy fails, but allows the workflow to continue.
+  - *Soft-Mandatory:* Fails the policy check, but permits authorized users to override the failure.
+  - *Hard-Mandatory:* Fails the policy check and strictly blocks the action from proceeding until fixed. 
+- **Testing & Version Control:** Includes a built-in CLI testing framework so you can validate policies locally before committing them. 
+- **Enterprise Integration:** Deeply embedded into HashiCorp's enterprise and HCP (HashiCorp Cloud Platform) products:
+  - **HCP Terraform / Terraform Enterprise:** Evaluates infrastructure plans between the `plan` and `apply` phases to check tagging conventions, allowed cloud regions, or cost limits.
+  - **HashiCorp Vault:** Governs role- and endpoint-based secret access control.
+  - **HashiCorp Nomad:** Controls job scheduling and attribute-based deployment rules.
+  - **HashiCorp Consul:** Enforces service mesh and configuration governance
 
 ### **51. What is Open Policy Agent (OPA) / Conftest for Terraform?**
 **Answer:** Evaluates exported Terraform execution plans in JSON format against declarative **Rego** security policies in CI pipelines.
-
-### **52. What is KubeVela?**
-**Answer:** A modern application delivery platform on Kubernetes built on the Open Application Model (OAM) providing application-level abstractions over underlying infrastructure.
 
 ### **53. What is Terraform `terraform_remote_state` Data Source?**
 **Answer:** A data source that reads root output values from a separate remote state file, enabling loose coupling between infrastructure layers.
