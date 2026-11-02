@@ -1831,15 +1831,37 @@ The function supports directives like **loops** and **conditionals** directly in
 
   *(Note: The `~` symbol strips unnecessary whitespaces and newlines around the markers).*
 
-### **55. What is Terraform `null_resource` vs `terraform_data`?**
-**Answer:**
-- **`null_resource` (Legacy):** Requires downloading a separate provider plugin to execute local scripts (`local-exec`).
-- **`terraform_data` (Built-in since 1.4):** Native replacement for `null_resource` requiring zero external provider downloads.
 
-### **56. What is `local-exec` vs `remote-exec` Provisioner?**
+### **50. What is `local-exec` vs `remote-exec` Provisioner?**
 **Answer:**
-- **`local-exec`:** Runs a local command on the machine executing Terraform.
-- **`remote-exec`:** Connects to the provisioned remote instance over SSH/WinRM to execute shell commands. *Best practice: Avoid provisioners; use cloud-init or Ansible.*
+In Terraform, `local-exec` and `remote-exec` are **provisioners** used to run scripts or commands as part of your infrastructure setup. **The main difference lies in where the command is executed**.
+
+#### `local-exec` Provisioner
+
+- **Where it runs:** On the **local machine** where Terraform is being executed (your laptop, desktop, or CI/CD pipeline runner). 
+- **Connection requirements:** **None** (does not need SSH, WinRM, or network access to the target resource). 
+- **Common use cases:**
+  - Triggering a local CLI command (e.g., calling an external API).
+  - Running an Ansible playbook from your control machine.
+  - Writing out local configuration files or generating dynamic keys.
+
+#### `remote-exec` Provisioner
+
+- **Where it runs:** Inside the **newly created remote resource** (such as an EC2 instance or virtual machine). 
+- **Connection requirements:** Requires a `connection` block using **SSH** (for Linux) or **WinRM** (for Windows), including credentials like IP addresses, user names, and private keys.
+- **Common use cases:**
+  - Installing packages (e.g., `apt-get install nginx`).
+  - Bootstrapping or joining a server to a cluster.
+  - Running shell scripts directly on the target host post-creation.
+
+#### Quick Comparison
+
+| **Feature**                    | **`local-exec`**                          | **`remote-exec`**                      |
+| ------------------------------ | ----------------------------------------- | -------------------------------------- |
+| **Execution Location**         | Machine running Terraform                 | The target remote resource             |
+| **Requires Connection Block?** | No                                        | Yes (SSH or WinRM)                     |
+| **Target of Commands**         | Local host/CI runner                      | Newly provisioned VM/server            |
+| **Best Used For**              | Local glue scripts, CI tasks, local files | Remote package installs, server config |
 
 ### **57. What is Terraform Provider Dependency Lock?**
 **Answer:** Records exact cryptographic provider checksums in `.terraform.lock.hcl` to ensure all team members and CI runners download identical provider binaries.
