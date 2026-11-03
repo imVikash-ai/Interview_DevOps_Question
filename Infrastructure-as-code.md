@@ -3069,8 +3069,49 @@ hostnames:
 - **Tag-Based Targeted Execution**: Instead of targeting a specific server name, you can run playbooks targeting entire logical groups (e.g., `ansible-playbook -i aws_ec2.yml site.yml --limit env_production`). 
 - **Rich Host Variables**: Every piece of instance metadata—such as security groups, AMI IDs, block devices, and architecture types—is exposed to your playbook as `hostvars`, allowing for highly customizable automation logic.
 
-### **89. What is Terraform `replace_triggered_by`?**
-**Answer:** A lifecycle attribute that forces a resource to be replaced whenever another specified resource changes (e.g., replacing an EC2 instance whenever a security group changes).
+### **71. What is Terraform `replace_triggered_by`?**
+**Answer:** **`replace_triggered_by` is a resource lifecycle meta-argument in Terraform that forces a resource to be destroyed and recreated whenever another specified resource changes.**
+
+Introduced in Terraform 1.2, it allows you to create explicit replacement dependencies between resources when a standard in-place update isn't enough.
+
+**Why use it?**
+
+Normally, Terraform only replaces a resource if one of its own arguments changes in a way that requires recreation (e.g., changing the AMI of an EC2 instance). However, sometimes a resource needs to be completely rebuilt because something *outside* of it changed. `replace_triggered_by` solves this problem without forcing you to manually run `terraform apply -replace`.
+
+**How to use it (Syntax)**
+
+You add the `replace_triggered_by` block inside the resource's `lifecycle` block.
+
+```hcl
+resource "aws_instance" "web_server" {
+  ami           = "ami-12345678"
+  instance_type = "t3.micro"
+
+  lifecycle {
+    # Recreate this EC2 instance if the security group changes
+    replace_triggered_by = [
+      aws_security_group.web_sg
+    ]
+  }
+}
+
+resource "aws_security_group" "web_sg" {
+  name = "web-server-sg"
+  # ...
+}
+```
+
+**Key Rules & Behavior**
+
+- **Accepts multiple references:** You can pass a list of resources, resource attributes, or module outputs.
+- **Triggers on any change:** Any change to the target resource (whether it's updated in-place or replaced itself) will trigger the replacement of the managed resource.
+- **Works with specific attributes:** You can point to a specific attribute (e.g., `aws_security_group.web_sg.id`) if you only want to trigger a replacement when that specific value changes.
+
+**Common Use Cases**
+
+- **Virtual Machines & Security Configurations:** Rebuilding a VM when its firewall rules, IAM roles, or initialization scripts change to ensure it boots with the fresh configuration.
+- **Containers & Images:** Force-redeploying a container service (like AWS ECS or Kubernetes Pods) when a new Docker image tag is pushed or a config map updates.
+- **Certificates & Load Balancers:** Recreating a resource that caches SSL certificates when the underlying certificate is renewed.
 
 ### **91. What is Ansible Asynchronous Actions (`async` and `poll`)?**
 **Answer:** Running long-running tasks (e.g., database backups) asynchronously in the background while polling for status periodically.
