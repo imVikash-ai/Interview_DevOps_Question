@@ -2717,12 +2717,99 @@ You have two safe methods to re-index the state without touching live resources:
 - Remove the migrated resource blocks from the original monolithic `main.tf` file (or keep them cleaned out once all 5 states are verified).
 - Update your CI/CD pipelines to run independently and concurrently against the 5 new isolated state directories.
 
-### **78. Scenario: A live production AWS S3 bucket containing 50TB of data was created manually. Bring it under Terraform management with zero data loss risk.**
+### **66. Scenario: A live production AWS S3 bucket containing 50TB of data was created manually. Bring it under Terraform management with zero data loss risk.**
 **Answer:**
-1. Declare resource in HCL: `resource "aws_s3_bucket" "prod_data" { bucket = "company-prod-data" }`.
-2. Import resource via `import {}` block (Terraform 1.5+).
-3. Run `terraform plan` and reconcile attributes until plan shows **0 to add, 0 to change, 0 to destroy**.
-4. Apply to bind state.
+To bring an existing, live production AWS S3 bucket under Terraform management with **zero risk of data loss**, you must use Terraform's native import workflow. This process links the real-world infrastructure to your code without destroying or recreating the bucket.
+
+Here is the step-by-step production runbook.
+
+#### Step 1: Write the Configuration Code
+
+First, write the Terraform code that matches your existing S3 bucket configuration. If you don't match the current configuration exactly, Terraform will try to modify the bucket on the next `apply`.
+
+Create a `main.tf` file:
+
+```hcl
+resource "aws_s3_bucket" "production_bucket" {
+  bucket = "your-actual-bucket-name" # Must match the exact AWS name
+
+  # Prevent accidental deletion via Terraform in the future
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+# Optional: Add other existing configurations if active (Versioning, Encryption, etc.)
+resource "aws_s3_bucket_versioning" "production_bucket_versioning" {
+  bucket = aws_s3_bucket.production_bucket.id
+  versioning_configuration {
+    status = "Enabled" # Match your current setting (Enabled/Suspended)
+  }
+}
+```
+
+#### Step 2: Initialize Terraform
+
+Initialize the working directory to download the necessary AWS providers.
+
+```bash
+terraform init
+```
+
+#### Step 3: Import the Bucket into State
+
+Use the `import` block (recommended for modern Terraform) or the legacy CLI command to map the physical AWS resource to your configuration.
+
+**Option A: Using the `import` block (Terraform v1.5+)**
+
+Add this temporary block to your code:
+
+```hcl
+import {
+  to = aws_s3_bucket.production_bucket
+  id = "your-actual-bucket-name"
+}
+```
+
+Then run the planning phase to generate the state:
+
+```bash
+terraform plan
+```
+
+*(Once successfully applied, you can safely remove the `import` block from your code).*
+
+**Option B: Using the CLI (Terraform v1.4 and older)**
+
+Run the following command directly in your terminal:
+
+```bash
+terraform import aws_s3_bucket.production_bucket your-actual-bucket-name
+```
+
+#### Step 4: Verify with a Dry Run (`terraform plan`)
+
+This is the **critical safety gate** to ensure zero data loss. Run a plan to see if Terraform wants to make any destructive changes.
+
+```bash
+terraform plan
+```
+
+- **Safe Output:** `No changes. Your infrastructure matches the configuration.` or metadata-only updates.
+- **Danger Output:** If you see `-# forces replacement` or `Destroy`, **do not apply**. This means your code does not match the actual bucket settings (e.g., changing the bucket name, location, or certain encryption constraints). Fix your `main.tf` code until the plan shows zero destructive actions.
+
+#### Step 5: Apply and Lock State
+
+Once the plan is completely clean or only shows benign, non-destructive updates, run the apply step to cement the resource in your state file.
+
+```bash
+terraform apply
+```
+
+**Production Safety Guardrails**
+
+- **The `prevent_destroy` Lifecycle Hook:** Keeping `prevent_destroy = true` inside the resource block acts as an insurance policy. If anyone accidentally runs `terraform destroy` or makes a change that forces a replacement, Terraform will throw an error and refuse to touch the bucket.
+- **AWS Side-Safety (MFA Delete):** For a 50TB production bucket, ensure **MFA Delete** or an explicit `Deny` policy for `s3:DeleteBucket` is enabled directly in AWS IAM/Resource policies as an extra layer of protection during this migration.
 
 ### **79. Compare Crossplane vs Terraform at enterprise scale.**
 **Answer:**
