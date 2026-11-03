@@ -1,4 +1,4 @@
-## **Infrastructure as Code (IaC) - DevOps Interview Questions **
+## Infrastructure as Code (IaC) - DevOps Interview Questions 
 
 ### **1. What is Infrastructure as Code (IaC) and what core problems does it solve?**
 **Answer:** # Infrastructure as Code (IaC)
@@ -2341,33 +2341,85 @@ Frequent pipeline failures due to benign state updates can create alert fatigue.
 
 2. **Keep Providers Updated:** Buggy or out-of-date cloud provider plugins frequently read legitimate data models as drifted states. Maintain a pipeline update cadence for your `.providers.tf` block.
 
-### **70. How do you test Terraform modules with Terratest in Go?**
+
+### **70. What is Policy as Code with Rego and Conftest?**
 **Answer:**
-```go
-func TestVpcModule(t *testing.T) {
-    terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-        TerraformDir: "../modules/vpc",
-        Vars: map[string]interface{}{"cidr_block": "10.0.0.0/16"},
-    })
-    defer terraform.Destroy(t, terraformOptions)
-    terraform.InitAndApply(t, terraformOptions)
-    vpcId := terraform.Output(t, terraformOptions, "vpc_id")
-    assert.NotEmpty(t, vpcId)
+**Policy as Code (PaC)** is **the practice of defining, versioning, and enforcing organizational rules, security guardrails, and compliance standards through text-based code**. Instead of relying on manual security audits, spreadsheets, or human code reviews, PaC transforms governance into deterministic, automated tests that can be integrated directly into your CI/CD pipelines.
+
+When combining **Rego** and **Conftest**, you form a powerful, developer-friendly stack designed to catch misconfigurations early (a practice known as "shifting left") before they ever reach production. 
+
+#### The Three Core Components
+
+| **Component** | **What it does** | **Analogous to...** |
+|---|---|---|
+| **Policy as Code (The Paradigm)** | The methodology of treating infrastructure and application compliance exactly like software source code. | **Software Testing:** Writing tests to ensure your app logic doesn't break. |
+| **Rego (The Language)** | A declarative query language developed by the [**Open Policy Agent (OPA)**](https://openpolicyagent.org/) specifically designed to write rules against complex hierarchical data structures. | **SQL or Jest Assertions:** The actual syntax used to specify what is "allowed" vs. "denied". |
+| **Conftest (The Engine/CLI)** | A lightweight command-line tool built on top of OPA that executes your Rego policies against structured configuration files like YAML, JSON, HCL (Terraform), and Dockerfiles. | **The Test Runner:** The engine (like `npm test` or `pytest`) that takes your configurations, applies the Rego rules, and outputs pass/fail statuses. |
+
+#### How They Work Together (The Workflow)
+
+1. **Write Configurations:** A developer writes a Kubernetes manifest, a Dockerfile, or a Terraform script. 
+2. **Write Policies in Rego:** A platform or security engineer writes a `.rego` file outlining rules (e.g., *"Containers must not run as root"* or *"Cloud storage buckets must not be public"*).
+3. **Execute Conftest:** During a local commit or inside a GitHub Actions/GitLab CI pipeline, `conftest test` is executed.
+4. **Enforce Governance:** Conftest parses the configurations, evaluates them against the Rego logic, and immediately fails the build if a violation is found, blocking non-compliant code from being deployed.
+
+#### Code Example: Catching a Bad Kubernetes Deployment
+
+Here is a practical example of how Rego and Conftest protect an environment.
+
+#### 1. The Policy (`policy/deployment.rego`)
+
+This Rego file evaluates the incoming data (`input`) and populates a list of `deny` messages if the security context is missing or insecure:
+
+```rego
+package main
+
+# Deny deployments that run containers as root
+deny contains msg if {
+    input.kind == "Deployment"
+    not input.spec.template.spec.securityContext.runAsNonRoot
+    msg := "Security Risk: Containers must be explicitly set to runAsNonRoot"
 }
 ```
 
-### **71. What is Policy as Code with Rego and Conftest?**
-**Answer:**
-Export plan to JSON (`terraform show -json tfplan.binary > tfplan.json`), then evaluate against Rego rules in CI:
-```rego
-package main
-deny[msg] {
-    resource := input.resource_changes[_]
-    resource.type == "aws_s3_bucket"
-    not resource.change.after.server_side_encryption_configuration
-    msg := "S3 buckets must have server-side encryption enabled!"
-}
+#### 2. The Configuration (`deployment.yaml`)
+
+A developer inadvertently creates a configuration without setting the root security parameters:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+spec:
+  template:
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
 ```
+
+#### 3. Running Conftest
+
+The developer or CI pipeline runs the test via the **Conftest CLI**: 
+
+```bash
+conftest test deployment.yaml
+```
+
+**Output:**
+
+```text
+FAIL - deployment.yaml - main - Security Risk: Containers must be explicitly set to runAsNonRoot
+
+1 test, 0 passed, 0 warnings, 1 failure, 0 errors
+```
+
+#### Why Teams Choose Rego + Conftest
+
+- **Multi-Format Versatility:** OPA natively expects JSON, but Conftest extends OPA to automatically read raw YAML, TOML, HCL (Terraform), and Dockerfiles without forcing you to manually convert files first.
+- **Fast Feedback:** Developers find out within seconds of pushing a Git branch if their infrastructure violates security standards, bypassing lengthy human approval queues.
+- **Single Language for Everything:** Using Rego allows your team to use the exact same policy language across your entire stack—from CI pipeline linting via Conftest to runtime admission control in Kubernetes using OPA Gatekeeper.
 
 ### **73. What is Terraform Module Semantic Versioning?**
 **Answer:** Pinning module sources to specific SemVer versions (`source = "terraform-aws-modules/vpc/aws?version=5.1.0"`) to prevent untested breaking changes from being applied automatically.
