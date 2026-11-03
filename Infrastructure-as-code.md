@@ -3017,23 +3017,57 @@ Ensure this exact scenario cannot happen again by locking down the workflow.
 - Install a Secret Scanner (e.g., ggshield or trufflehog): Integrate pre-commit hooks to block commits containing high-entropy strings or .tfstate extensions.
 - Enable GitHub Secret Scanning: Turn on native GitHub advanced security features to automatically alert or block pushes containing known secret patterns.
 
-### **83. What is Ansible Dynamic Inventory for AWS EC2?**
-**Answer:** An Ansible plugin (`aws_ec2`) that queries AWS APIs to automatically group managed instances based on tags (e.g., `tag:Role_webservers`), eliminating static IP files.
+### **70. What is Ansible Dynamic Inventory for AWS EC2?**
+**Answer:** **Ansible Dynamic Inventory for AWS EC2** is **a mechanism that allows Ansible to dynamically query and retrieve live EC2 instance data from Amazon Web Services (AWS) at runtime**, rather than relying on a manually maintained, static text file of IP addresses or hostnames.
 
-### **84. What is Pulumi Stack?**
-**Answer:** An isolated, independently configurable instance of a Pulumi program (e.g., `dev`, `staging`, `prod`) with its own state and secrets encryption provider.
+In modern cloud environments where autoscaling, IP changes, and frequent provisioning occur, static inventory files quickly become obsolete. Dynamic inventory solves this by making real-time API calls to AWS using the official `aws_ec2` inventory plugin to fetch the current state of your infrastructure.
 
-### **85. What is Pulumi Crosswalk?**
-**Answer:** A collection of high-level libraries (in TypeScript/Python) that implement well-architected cloud infrastructure best practices (e.g., creating a production VPC in 5 lines of code).
+**Static vs. Dynamic Inventory**
 
-### **86. What is Crossplane Provider Family?**
-**Answer:** Modular, decoupled Crossplane provider packages (e.g., `provider-aws-s3`, `provider-aws-rds`) that install only the specific CRD controllers needed, avoiding cluster CRD limits.
+| **Feature** | **Static Inventory** | **Dynamic Inventory (`aws_ec2`)** |
+|---|---|---|
+| **Management** | Manual text updates (INI/YAML) | Automated via AWS API calls |
+| **Scaling** | Fails or requires custom scripting during autoscaling | Instantly detects newly launched or terminated instances |
+| **Metadata** | Limited to variables you manually define | Automatically imports AWS tags, regions, VPCs, and instance states as host variables |
+| **Targeting** | Hardcoded host groups | Group hosts dynamically using Jinja2 expressions and AWS tags |
 
-### **87. What is Crossplane Composition Function?**
-**Answer:** Advanced gRPC functions (written in Go, Python, or KCL) that dynamically render complex compositions and conditionals that static YAML cannot express.
+**Core Components & Workflow**
 
-### **88. What is Terraform Provider Factory in Unit Tests?**
-**Answer:** Mocking cloud provider responses during unit tests to validate HCL logic and module transformations without making real cloud API calls.
+1. **The Plugin (`amazon.aws.aws_ec2`)**: Ansible uses the `amazon.aws` collection's **Ansible EC2 Inventory Plugin**. This has replaced the legacy `ec2.py` python script.
+2. **The Configuration File**: You define a YAML configuration file (which must end in `aws_ec2.yml` or `aws_ec2.yaml`) specifying your targeting criteria, AWS regions, and grouping options. 
+3. **Authentication**: The plugin queries AWS using standard credentials. It can seamlessly inherit an **IAM Role** attached to your Ansible controller instance, read environment variables (`AWS_ACCESS_KEY_ID`), or leverage local AWS CLI profiles.
+4. **Boto3 SDK**: Ansible relies on Python's `boto3` and `botocore` libraries under the hood to authenticate and communicate with the AWS API. 
+
+**Example Configuration (`aws_ec2.yml`)**
+
+Below is a typical setup file that fetches instances from specific regions and automatically groups them by their AWS tags: 
+
+```yaml
+---
+plugin: amazon.aws.aws_ec2
+regions:
+  - us-east-1
+  - us-west-2
+
+# Set the variable to connect via private IP address
+keyed_groups:
+  # Create groups based on the value of the 'env' tag (e.g., env_production, env_staging)
+  - key: tags.env
+    prefix: env
+  # Create groups based on the instance type (e.g., type_t2_micro)
+  - key: instance_type
+    prefix: type
+
+hostnames:
+  # Use the private IP address as the ansible_host name
+  - private-ip-address
+```
+
+**Key Benefits**
+
+- **Automated Host Discovery**: Any machine spun up outside of Ansible (e.g., via Terraform, the AWS Console, or an Auto Scaling Group) is immediately picked up and managed. 
+- **Tag-Based Targeted Execution**: Instead of targeting a specific server name, you can run playbooks targeting entire logical groups (e.g., `ansible-playbook -i aws_ec2.yml site.yml --limit env_production`). 
+- **Rich Host Variables**: Every piece of instance metadata—such as security groups, AMI IDs, block devices, and architecture types—is exposed to your playbook as `hostvars`, allowing for highly customizable automation logic.
 
 ### **89. What is Terraform `replace_triggered_by`?**
 **Answer:** A lifecycle attribute that forces a resource to be replaced whenever another specified resource changes (e.g., replacing an EC2 instance whenever a security group changes).
