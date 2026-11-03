@@ -2854,23 +2854,69 @@ Rather than a strict replacement, many large-scale enterprise environments adopt
 1. **Terraform for Core Infrastructure**: Used to build the foundational, slow-changing layers of the enterprise—such as core networks, base VPCs, IAM root setups, and the Kubernetes clusters themselves. These risky, high-blast-radius foundational assets benefit heavily from Terraform's human-in-the-loop review and static execution planning. 
 2. **Crossplane for Ephemeral Developer Services**: Once the core infrastructure is established, Crossplane is deployed onto the cluster. It consumes outputs from the Terraform layer (like network IDs) to dynamically provision and continuously reconcile rapid, daily developer needs like S3 buckets, Redis caches, and application databases.
 
-### **80. How do you structure a production multi-environment Terragrunt repository?**
+### **68. How do you implement zero-trust secrets injection in Terraform without writing credentials to disk?**
 **Answer:**
-```
-root/
-├── terragrunt.hcl               # Root config: S3 backend + provider generation
-├── environments/
-│   ├── dev/
-│   │   ├── vpc/terragrunt.hcl
-│   │   └── eks/terragrunt.hcl   # dependencies = ["../vpc"]
-│   ├── staging/
-│   └── prod/
-└── modules/                     # Pure Terraform source modules
+To implement zero-trust secrets injection in Terraform without writing credentials to disk, you must **use dynamic, short-lived credentials retrieved in-memory at runtime**.
+
+The core principle is to completely eliminate static passwords or tokens from your `.tfvars` files, state files, or local runner disks, and instead rely on **Identity Federation (OIDC)** and **native secret provider integrations**.
+
+#### 1. Leverage OpenID Connect (OIDC) for Cloud Providers
+
+Instead of storing a cloud credential (like an AWS IAM Access Key or GCP Service Account JSON key) on your CI/CD runner disk, use **OIDC**. This allows your execution environment (GitHub Actions, GitLab CI, Terraform Cloud) to assume a cloud role using a temporary JWT token exchanged in-memory.
+
+- **How it works:**
+  1. The CI/CD runner requests a short-lived OIDC token from its host.
+  2. The runner passes this token to AWS/GCP/Azure in-memory.
+  3. The cloud provider returns temporary, scoped session credentials valid only for that specific Terraform run.
+
+#### 2. Use Vault or Secret Managers via Data Sources
+
+If you need secrets for third-party providers (like a database password or an API key), retrieve them using **Terraform Data Sources** at runtime. Terraform fetches these values directly into memory during the `plan` and `apply` phases.
+
+```hcl
+# Authenticate to Vault natively via environment variables (VAULT_TOKEN or OIDC)
+data "vault_generic_secret" "database" {
+  path = "secret/data/production/db"
+}
+
+resource "aws_db_instance" "default" {
+  # The secret is read directly from memory into the provider block
+  username = data.vault_generic_secret.database.data["username"]
+  password = data.vault_generic_secret.database.data["password"]
+  
+  # ... rest of configuration
+}
 ```
 
-### **81. How do you implement zero-trust secrets injection in Terraform without writing credentials to disk?**
-**Answer:**
-Configure Terraform with the **HashiCorp Vault Dynamic Secrets Provider** (`data "vault_aws_access_credentials"`). Terraform requests short-lived (1-hour) cloud credentials generated on-demand by Vault, eliminating static keys entirely.
+#### 3. Inject via Ephemeral Environment Variables
+
+If you cannot use a data source, pass secrets directly into the Terraform process memory using `TF_VAR_` environment variables from an external memory-only pipeline step.
+
+- **Do not** write these to a `.tfvars` file on disk.
+- **Do** inject them inline when calling the CLI:
+
+  ```bash
+  export TF_VAR_db_password=$(vault kv get -field=password secret/db)
+  terraform apply -auto-approve
+  unset TF_VAR_db_password
+  ```
+
+#### 4. Use the Ephemeral Variables Feature (Terraform 1.10+)
+
+If you are using a modern version of Terraform, you can leverage the **`ephemeral`** variable type. This explicitly marks inputs as short-lived and prevents them from being written to certain logs or easily exposed, though you must still handle the state file carefully.
+
+```hcl
+ephemeral "string" "db_password" {
+  sensitive = true
+}
+```
+
+#### 5. Securing the State File (The Ultimate Trade-off)
+
+Even if you fetch a secret purely in memory, **Terraform will still write that secret in plain text to its state file (`.tfstate`)** if it is passed into a resource attribute. To maintain a true zero-trust posture:
+
+- **Use Remote State Encryption:** Always store state in a remote backend (like AWS S3 or HashiCorp Cloud Platform) with **Customer-Managed Keys (KMS)** and strict IAM controls.
+- **Externalize Lifecycle Management:** Where possible, do not pass secrets into Terraform resources at all. For example, instead of passing a database password to an EC2 instance via Terraform, pass an IAM Role to the EC2 instance and let the instance fetch its own secret from AWS Secrets Manager at runtime via IAM.
 
 ### **82. Scenario: An engineer accidentally committed a production `.tfstate` file containing database passwords to GitHub. Walk through the complete response procedure.**
 **Answer:**
