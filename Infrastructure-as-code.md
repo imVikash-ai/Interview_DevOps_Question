@@ -3187,8 +3187,36 @@ You can start a task in the background, perform other tasks in the playbook, and
 - **Module Compatibility**: Not all modules support `async`. Modules that manage connections or actions local to the control node (like `include_tasks` or `local_action`) cannot be run asynchronously.
 - **Systemd / Services**: Do not use `async` to start persistent background daemons directly if they don't fork properly. Use the `ansible.builtin.systemd` module instead.
 
-### **92. What is Ansible Handler?**
-**Answer:** A special task executed only when notified by another task that resulted in a `changed` status (e.g., restarting Nginx only when `nginx.conf` changes).
+### **73. What is Ansible Handler?**
+**Answer:**An **Ansible handler** is **a special type of conditional task that executes only when triggered by another task that reports a status change**. Unlike standard tasks, which run sequentially in the order they are defined, handlers sit dormant and are typically used to perform post-configuration cleanup or service lifecycle actions—such as restarting a web server or reloading a firewall—only when a modification actually occurs. 
+
+As validated by users discussing best practices on r/ansible, handlers are specifically designed to run by default after all other standard tasks in a play have completely finished executing.
+
+**Why Use Handlers?**
+
+- **Efficiency & Performance:** Instead of restarting a service every time a playbook runs, handlers ensure the service restarts **only** if its underlying configuration file changed. 
+- **De-duplication:** If five different tasks make updates that require a service restart, Ansible registers the requests but **flushes the handler only once** at the very end of the play, preventing redundant restarts and downtime.
+- **Idempotency:** They prevent playbooks from executing unnecessary operations, keeping server automation lean and predictable.
+
+**How it Works (Code Example)**
+
+To create a handler, you link a primary task to a dedicated `handlers` block using the `notify` keyword. The value of `notify` must exactly match the `name` or `listen` topic of the handler. 
+
+For a complete YAML example demonstrating how to define templates, tasks, and notification blocks for services like Apache, please refer to the referenced documentation. 
+
+**Core Behavioral Rules**
+
+| **Feature**               | **Behavior**                                                                                                                                                                 |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Execution Order**       | Handlers run in the order they are **defined** in the `handlers:` section, not in the order they are called by `notify`.                                                     |
+| **Execution Timing**      | They run **at the end of the play** after all regular tasks have executed successfully.                                                                                      |
+| **Task Failure Behavior** | If a playbook encounters an error and fails on a regular task before reaching the end, **handlers will not run** by default.                                                 |
+| **The `listen` Keyword**  | Handlers can subscribe to a generic topic string using `listen`. A single `notify` statement pointing to that topic will trigger multiple decoupled handlers simultaneously. |
+
+**Advanced Controls**
+
+- **Forcing Handlers:** You can pass the `--force-handlers` flag or configure `force_handlers = True` in `ansible.cfg` to ensure notified handlers run even if a task fails later. 
+- **Immediate Flushes:** To restart a service mid-play before subsequent tasks run (such as a health check), use the **Ansible Meta Module** with `ansible.builtin.meta: flush_handlers`
 
 ### **93. What is Ansible Serial Execution (`serial`)?**
 **Answer:** Rolling execution of playbooks across batches of servers (e.g., `serial: "20%"`) to perform zero-downtime rolling updates.
