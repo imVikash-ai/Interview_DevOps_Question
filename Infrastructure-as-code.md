@@ -2220,7 +2220,7 @@ The `can()` function evaluates an expression and tells you whether it's valid or
   }
   ```
 
-### **69. How do you implement automated Terraform Drift Detection in CI/CD?**
+### **59. How do you implement automated Terraform Drift Detection in CI/CD?**
 **Answer:**
 To implement automated Terraform Drift Detection in a CI/CD pipeline, you must routinely compare your live cloud infrastructure against your defined Terraform configuration code.
 
@@ -2342,7 +2342,7 @@ Frequent pipeline failures due to benign state updates can create alert fatigue.
 2. **Keep Providers Updated:** Buggy or out-of-date cloud provider plugins frequently read legitimate data models as drifted states. Maintain a pipeline update cadence for your `.providers.tf` block.
 
 
-### **70. What is Policy as Code with Rego and Conftest?**
+### **60. What is Policy as Code with Rego and Conftest?**
 **Answer:**
 **Policy as Code (PaC)** is **the practice of defining, versioning, and enforcing organizational rules, security guardrails, and compliance standards through text-based code**. Instead of relying on manual security audits, spreadsheets, or human code reviews, PaC transforms governance into deterministic, automated tests that can be integrated directly into your CI/CD pipelines.
 
@@ -2421,7 +2421,7 @@ FAIL - deployment.yaml - main - Security Risk: Containers must be explicitly set
 - **Fast Feedback:** Developers find out within seconds of pushing a Git branch if their infrastructure violates security standards, bypassing lengthy human approval queues.
 - **Single Language for Everything:** Using Rego allows your team to use the exact same policy language across your entire stack—from CI pipeline linting via Conftest to runtime admission control in Kubernetes using OPA Gatekeeper.
 
-### **71. What is Terraform Module Semantic Versioning?**
+### **61. What is Terraform Module Semantic Versioning?**
 **Answer:** **Terraform Module Semantic Versioning (SemVer)** is **a standardized versioning system used to communicate the nature of changes made to a reusable Terraform module**. It follows a strict **`MAJOR.MINOR.PATCH`** formatting rule (e.g., `v2.1.4`) that helps infrastructure teams safely upgrade module dependencies without accidentally breaking production environments. 
 
 #### The SemVer Breakdown for Infrastructure
@@ -2473,10 +2473,52 @@ When calling a module in your root Terraform configuration, you use the `version
 
 Unlike standard software code, a broken dependency in Terraform can trigger a `terraform apply` that accidentally **deletes and recreates physical production resources**. Strictly adhering to SemVer ensures teams can leverage automation tools (like Dependabot or Renovate) to keep infrastructure updated safely. For teams operating inside a monorepo, a consensus among engineers on platforms like **Reddit** underscores that tagging modules independently or using specific build metadata is standard practice to prevent global version confusion.
 
-### **74. What is the difference between `merge()` and `concat()` in HCL?**
+### **62. What is the difference between `merge()` and `concat()` in HCL?**
 **Answer:**
-- `merge(map1, map2)`: Combines two or more maps into a single map (keys overwritten by rightmost map).
-- `concat(list1, list2)`: Combines two or more lists into a single sequential list.
+In HCL (HashiCorp Configuration Language), the primary difference is the **data type they operate on**: **`merge()` combines maps or objects, while `concat()` combines lists**. [[1](https://developer.hashicorp.com/terraform/language/functions/merge), [2](https://oneuptime.com/blog/post/2026-02-23-how-to-use-the-concat-function-in-terraform/view)]
+
+| **Feature** | **`merge()`** | **`concat()`** |
+|---|---|---|
+| **Target Data Type** | Maps (`{...}`) or Objects | Lists (`[...]`) |
+| **Duplicate Elements** | Overwrites keys (later arguments win) | Preserves duplicates (keeps all items) |
+| **Primary Use Case** | Configuration layering, tags, and overrides | Joining dynamic arrays or security groups |
+
+#### 1. The `merge()` Function
+
+The **`merge()` function** takes an arbitrary number of maps or objects and flattens them into a single map. 
+
+- **Key Overriding:** If a key exists in multiple maps, the **last argument** passed into the function will overwrite any earlier ones. 
+
+**HCL Example:**
+
+```hcl
+# Example usage in a console or local block
+> merge({ env = "dev", region = "us-east-1" }, { env = "prod", managed_by = "terraform" })
+{
+  "env"        = "prod"        # Overwritten by the second map
+  "managed_by" = "terraform"
+  "region"     = "us-east-1"
+}
+```
+
+#### 2. The `concat()` Function
+
+The **`concat()` function** takes two or more lists and combines them sequentially into a single flat list. 
+
+- **Element Preservation:** It does **not** deduplicate elements. If the same item appears in both lists, it will appear twice in the final output. 
+
+**HCL Example:**
+
+```hcl
+# Example usage in a console or local block
+> concat(["subnet-a", "subnet-b"], ["subnet-b", "subnet-c"])
+[
+  "subnet-a",
+  "subnet-b",
+  "subnet-b", # Duplicate is preserved
+  "subnet-c",
+]
+```
 
 ### **75. What is Terraform Custom Provider development?**
 **Answer:** Authoring custom Go plugins using the HashiCorp Terraform Plugin Framework that implement `Create`, `Read`, `Update`, and `Delete` methods against internal proprietary APIs.
