@@ -2651,13 +2651,71 @@ Sometimes, a cloud provider deletes a resource, but Terraform didn't get a chanc
 2. **Restrict CI/CD Permissions:** Prevent local machine execution of `terraform destroy` against staging/production by restricting credentials.
 3. **Use RBAC / IAM:** Ensure engineers require explicit multi-approver pull requests to run destructive actions via automated pipelines.
 
-### **77. Scenario: Refactor a monolithic 500-resource Terraform state into 5 decoupled state files with zero downtime.**
+### **65. Scenario: Refactor a monolithic 500-resource Terraform state into 5 decoupled state files with zero downtime.**
 **Answer:**
-1. Backup production state file.
-2. Create target directory structure (`01-network/`, `02-database/`, `03-compute/`).
-3. Migrate resources using `terraform state mv -state=monolith.tfstate -state-out=02-database/terraform.tfstate <source> <dest>`.
-4. Initialize remote S3 backends in each new directory.
-5. Verify with `terraform plan` in each directory to confirm **0 to add, 0 to change, 0 to destroy**.
+To refactor a monolithic 500-resource Terraform state into 5 decoupled state files with zero downtime, you must **migrate the state tracking layer without altering or destroying the underlying cloud infrastructure**. 
+
+#### Step 1: Inventory and Classify Resources
+
+- Run `terraform state list` in the monolithic directory to generate a complete inventory of all 500 resources.
+- Group resources logically into 5 distinct domain boundaries (e.g., `networking`, `database`, `identity-iam`, `compute`, `storage`) based on change frequency and team ownership.
+- Document cross-state dependencies (such as a security group ID or VPC ID that must be shared across domains). 
+
+#### Step 2: Provision New Backends
+
+- Create 5 separate target remote backend configurations (e.g., individual S3 buckets/DynamoDB locks or isolated Terraform Cloud workspaces) for the new state files.
+- Initialize empty root directories for each of the 5 new components with their respective `backend "s3" { key = "..." }` (or equivalent) configuration blocks.
+- Run `terraform init` in each of the 5 new directories to establish the clean, empty remote states.
+
+#### Step 3: Move State Using `terraform state mv` or `moved` Blocks
+
+You have two safe methods to re-index the state without touching live resources:
+
+- **Option A: Command-line State Migration (`terraform state mv`)**
+
+  ```bash
+  terraform state mv -state=terraform.tfstate -state-out=../networking/terraform.tfstate aws_vpc.main module.networking.aws_vpc.main
+  ```
+
+  *(Repeat this for every resource or use scripted batch moves per domain)*.
+
+- **Option B: Declarative `moved` Blocks (Recommended for Terraform v1.1+)**
+
+  Instead of manual state surgery, add declarative `moved` blocks inside your configuration files:
+
+  ```hcl
+  moved {
+    from = aws_vpc.main
+    to   = module.networking.aws_vpc.main
+  }
+  ```
+
+  When you run `terraform plan`, Terraform recognizes the re-indexing natively without destroying or recreating the resource.
+
+#### Step 4: Handle Cross-State Dependencies
+
+- Replace direct internal HCL references (`aws_vpc.main.id`) with dynamic cross-state lookups using the `terraform_remote_state` data source or outputs: 
+
+  ```hcl
+  data "terraform_remote_state" "networking" {
+    backend = "s3"
+    config = {
+      bucket = "my-tf-state-bucket"
+      key    = "networking/terraform.tfstate"
+      region = "us-east-1"
+    }
+  }
+
+  output "vpc_id" {
+    value = aws_vpc.main.id
+  }
+  ```
+
+#### Step 5: Verify and Clean Up
+
+- Run `terraform plan` in refresh-only mode or a standard plan inside each of the 5 new directories to confirm that `0 to add, 0 to change, 0 to destroy` is reported.
+- Remove the migrated resource blocks from the original monolithic `main.tf` file (or keep them cleaned out once all 5 states are verified).
+- Update your CI/CD pipelines to run independently and concurrently against the 5 new isolated state directories.
 
 ### **78. Scenario: A live production AWS S3 bucket containing 50TB of data was created manually. Bring it under Terraform management with zero data loss risk.**
 **Answer:**
