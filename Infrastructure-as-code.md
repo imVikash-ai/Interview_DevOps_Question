@@ -2566,14 +2566,90 @@ Developers use HashiCorp's modern **Terraform Plugin Framework** to bootstrap an
 4. **Defining Resources:** Implements the actual resource state loop. If a resource doesn't match the desired code blueprint, the `Create` or `Update` blocks are fired. 
 5. **Testing & Publishing:** Developers execute automated acceptance tests against live endpoint sandboxes. Once stable, they use tools like `GoReleaser` to sign and publish the binary directly to the Terraform Registry for distribution.
 
-## 🔴 **Part 3: Crossplane, Pulumi, Ansible & Enterprise Scenarios (Questions 76–200)**
-
-### **76. Scenario: An engineer accidentally ran `terraform destroy` against staging and cancelled it midway. How do you recover?**
+### **64. Scenario: An engineer accidentally ran `terraform destroy` against staging and cancelled it midway. How do you recover?**
 **Answer:**
-1. Release any stuck state locks: `terraform force-unlock <LOCK-ID>`.
-2. Sync state: `terraform refresh`.
-3. Generate targeted recovery plan: `terraform plan -out=recovery.plan`.
-4. Apply plan to recreate destroyed resources and restore consistency: `terraform apply recovery.plan`.
+To recover from a mid-way terraform destroy in staging, your priority is to assess the state file before running any modifications.
+
+Because Terraform destroys resources sequentially and updates the state file incrementally, canceling it midway leaves your infrastructure in a "half-dead" hybrid state: some resources are completely gone, some are partially deleted, and others are untouched.
+
+Follow this step-by-step recovery plan to restore your staging environment safely.
+
+#### Step 1: Lock the Environment & Isolate State
+
+Stop any automated CI/CD pipelines or other team members from running Terraform commands while you fix the state.
+
+- **Pull a backup of the current state immediately:**
+
+  ```bash
+  terraform state pull > interrupted_state.tfstate
+  ```
+
+- **Verify your remote backend backup:** If you use AWS S3, Terraform Cloud, or Azure Blob with versioning enabled, locate the exact state file version from before the accidental destroy command was executed.
+
+#### Step 2: Conduct a Damage Assessment
+
+You need to find out exactly what was destroyed before trying to fix anything.
+
+- **Run a plan against the current state:**
+
+  ```bash
+  terraform plan -out=recovery.tfplan
+  ```
+
+- **Analyze the plan output:**
+  - Any resource marked with `+ create` means it was successfully destroyed and needs to be recreated.
+  - Any resource marked with `~ update` or `-/+ replace` might be in a corrupted or partially deleted state.
+
+#### Step 3: Choose Your Recovery Path
+
+Depending on your infrastructure setup and the severity of the half-destroy, choose one of the following two strategies:
+
+**Option A: Roll Back State to Pre-Destroy (Best for Managed/Data Resources)**
+
+If you have remote state versioning and most of the "destroyed" resources were managed services (like databases with deletion protection, IAM roles, or networking) that might still actually exist, you can roll back.
+
+1. Restore the pre-destroy state file in your remote backend.
+2. Run `terraform plan` to see if Terraform can still find the physical resources.
+3. If some resources were truly deleted, Terraform will show a plan to recreate only those missing pieces.
+
+**Option B: Recreate from Current State (Best for Stateless Apps/Episodic Infrastructure)**
+
+If staging is mostly stateless (EC2 instances, ECS tasks, Kubernetes pods) and easily reproducible, it is usually safer to let Terraform finish what it started or sync forward.
+
+1. **Target destroyed resources to recreate them safely:**
+
+   ```bash
+   terraform apply -target=module.network -target=module.compute
+   ```
+
+2. **Alternatively, if it's safe to cleanly wipe and restart staging, let the destroy finish, then do a fresh apply:**
+
+   ```bash
+   terraform destroy (to clean the slate)
+   terraform apply
+   ```
+
+#### Step 4: Handle "Orphaned" or Corrupted Resources
+
+Sometimes, a cloud provider deletes a resource, but Terraform didn't get a chance to log it before you canceled. Or, a resource exists but its state is corrupted.
+
+- **If a resource exists but Terraform wants to recreate it:** Manually re-import it.
+
+  ```bash
+  terraform import <terraform_resource_address> <cloud_provider_id>
+  ```
+
+- **If Terraform thinks a resource exists but it was actually deleted:** Force Terraform to forget it so it can be cleanly recreated on the next apply.
+
+  ```bash
+  terraform state rm <terraform_resource_address>
+  ```
+
+#### Post-Mortem: How to Prevent This Next Time
+
+1. **Enable Deletion Protection:** Add `lifecycle { prevent_destroy = true }` to mission-critical staging resources (like databases or core networks).
+2. **Restrict CI/CD Permissions:** Prevent local machine execution of `terraform destroy` against staging/production by restricting credentials.
+3. **Use RBAC / IAM:** Ensure engineers require explicit multi-approver pull requests to run destructive actions via automated pipelines.
 
 ### **77. Scenario: Refactor a monolithic 500-resource Terraform state into 5 decoupled state files with zero downtime.**
 **Answer:**
