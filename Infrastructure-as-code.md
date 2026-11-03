@@ -2421,8 +2421,57 @@ FAIL - deployment.yaml - main - Security Risk: Containers must be explicitly set
 - **Fast Feedback:** Developers find out within seconds of pushing a Git branch if their infrastructure violates security standards, bypassing lengthy human approval queues.
 - **Single Language for Everything:** Using Rego allows your team to use the exact same policy language across your entire stack—from CI pipeline linting via Conftest to runtime admission control in Kubernetes using OPA Gatekeeper.
 
-### **73. What is Terraform Module Semantic Versioning?**
-**Answer:** Pinning module sources to specific SemVer versions (`source = "terraform-aws-modules/vpc/aws?version=5.1.0"`) to prevent untested breaking changes from being applied automatically.
+### **71. What is Terraform Module Semantic Versioning?**
+**Answer:** **Terraform Module Semantic Versioning (SemVer)** is **a standardized versioning system used to communicate the nature of changes made to a reusable Terraform module**. It follows a strict **`MAJOR.MINOR.PATCH`** formatting rule (e.g., `v2.1.4`) that helps infrastructure teams safely upgrade module dependencies without accidentally breaking production environments. 
+
+#### The SemVer Breakdown for Infrastructure
+
+In Terraform, the semantic components are mapped directly to how code modifications affect your live infrastructure and code syntax:
+
+| **Component** | **Meaning in Terraform** | **Examples of Changes** | **Risk Level** |
+|---|---|---|---|
+| **`MAJOR`** | **Breaking Changes**. The consumer must change their root code, or the infrastructure faces critical recreation risk. | Renaming or removing input variables, removing resource outputs, or altering a fundamental resource block that forces recreation (e.g., changing a database engine). | 🔴 **High** (Requires planning) |
+| **`MINOR`** | **Backward-Compatible Features**. New functionality is added, but existing deployments will continue to work without modification. | Adding a new optional input variable with a default value, adding new outputs, or creating an optional nested resource. | 🟡 **Medium** (Safe, but introduces new features) |
+| **`PATCH`** | **Backward-Compatible Bug Fixes**. Internal changes that fix bugs, resolve provider drift, or adjust settings under the hood. | Fixing a typo in a resource description, adjusting internal logic to eliminate state drift, or patching a minor API configuration. | 🟢 **Low** (Safe to auto-update) |
+
+#### How Module Versioning is Maintained and Consumed
+
+#### 1. Publishing via Git Tags
+
+When developing a custom module, versions are applied by creating **Git tags** in the module's repository. 
+
+```bash
+git tag -a v1.2.0 -m "Add optional S3 replication feature"
+git push origin v1.2.0
+```
+
+Platforms like the **HashiCorp Terraform Registry** look for these tags to automatically index and display available module versions. 
+
+#### 2. Consuming and Pinning Versions
+
+When calling a module in your root Terraform configuration, you use the `version` argument to control which SemVer updates your infrastructure accepts: 
+
+- **Exact Pinning (Safest for Production):** Restricts the block to one specific version. 
+
+  ```hcl
+  module "vpc" {
+    source  = "terraform-aws-modules/vpc/aws"
+    version = "5.1.2" 
+  }
+  ```
+
+- **Pessimistic Constraint (`~>`):** Automatically accepts safe minor or patch updates while blocking major breaking upgrades. 
+
+  ```hcl
+  module "vpc" {
+    source  = "terraform-aws-modules/vpc/aws"
+    version = "~> 5.1.0" # Allows 5.1.1, 5.1.2, etc., but blocks 5.2.0 and 6.0.0
+  }
+  ```
+
+#### Why it Matters
+
+Unlike standard software code, a broken dependency in Terraform can trigger a `terraform apply` that accidentally **deletes and recreates physical production resources**. Strictly adhering to SemVer ensures teams can leverage automation tools (like Dependabot or Renovate) to keep infrastructure updated safely. For teams operating inside a monorepo, a consensus among engineers on platforms like **Reddit** underscores that tagging modules independently or using specific build metadata is standard practice to prevent global version confusion.
 
 ### **74. What is the difference between `merge()` and `concat()` in HCL?**
 **Answer:**
