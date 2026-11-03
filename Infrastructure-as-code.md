@@ -2918,12 +2918,104 @@ Even if you fetch a secret purely in memory, **Terraform will still write that s
 - **Use Remote State Encryption:** Always store state in a remote backend (like AWS S3 or HashiCorp Cloud Platform) with **Customer-Managed Keys (KMS)** and strict IAM controls.
 - **Externalize Lifecycle Management:** Where possible, do not pass secrets into Terraform resources at all. For example, instead of passing a database password to an EC2 instance via Terraform, pass an IAM Role to the EC2 instance and let the instance fetch its own secret from AWS Secrets Manager at runtime via IAM.
 
-### **82. Scenario: An engineer accidentally committed a production `.tfstate` file containing database passwords to GitHub. Walk through the complete response procedure.**
+### **69. Scenario: An engineer accidentally committed a production `.tfstate` file containing database passwords to GitHub. Walk through the complete response procedure.**
 **Answer:**
-1. **Rotate All Secrets Immediately:** Rotate database master passwords, private TLS keys, and IAM credentials in the cloud provider.
-2. **Purge Git History:** Use `git-filter-repo` to permanently strip `.tfstate` from all commits, branches, and tags. Force-push clean history.
-3. **Move to Remote S3 Backend:** Configure remote encrypted S3 backend with DynamoDB locking.
-4. **Enforce Prevention:** Add `*.tfstate` to `.gitignore` and configure GitHub Secret Scanning.
+To resolve a committed .tfstate file containing sensitive production credentials, you must execute a dual-track response: immediately rotate the exposed secrets and completely purge the file from the repository's git history.
+
+Because Git is a distributed version control system, simply deleting the file and making a new commit does not remove the sensitive data from past commits. Anyone with access to the repository can still view the passwords via git history.
+
+#### Step 1: Immediate Secrets Rotation (Highest Priority)
+
+Assume the database passwords and any other credentials in that state file are compromised the moment they hit GitHub.
+
+- Rotate the database passwords: Immediately generate new passwords for the affected databases. Do not wait to fix the repository first.
+- Revoke and rotate cloud credentials: If the state file contained AWS/Azure/GCP service account keys or tokens, revoke them immediately in your cloud console and issue new ones.
+- Audit active sessions: Check for any anomalous connection attempts or active sessions on the database since the time of the commit.
+
+#### Step 2: Purge the File from Git History
+
+You must remove all traces of the .tfstate file from every commit, tag, and branch in the remote repository.
+
+**Option A: Using git-filter-repo (Recommended)**
+
+git-filter-repo is the modern, officially recommended tool for rewriting history (replacing the legacy git filter-branch).
+
+1. Install the tool (if not already installed):
+
+   ```bash
+   pip install git-filter-repo
+   # or via Homebrew on macOS
+   brew install git-filter-repo
+   ```
+
+2. Clone a fresh, isolated copy of the repository to prevent accidental data loss:
+
+   ```bash
+   git clone <repository-url>
+   cd <repository-name>
+   ```
+
+3. Run the purge command specifying the path to the state file:
+
+   ```bash
+   git filter-repo --path path/to/terraform.tfstate --invert-paths
+   ```
+
+4. Add your remote back (the tool removes remotes protectively) and force push to all branches:
+
+   ```bash
+   git remote add origin <repository-url>
+   git push origin --force --all
+   git push origin --force --tags
+   ```
+
+**Option B: Using BFG Repo-Cleaner (Faster alternative)**
+
+If git-filter-repo is unavailable, BFG is a fast, Java-based alternative.
+
+1. Download the BFG jar and run it against a bare clone of your repo:
+
+   ```bash
+   git clone --mirror <repository-url>
+   java -jar bfg.jar --delete-files terraform.tfstate <repo-name>.git
+   ```
+
+2. Clean up the reflog and force push:
+
+   ```bash
+   cd <repo-name>.git
+   git reflog expire --expire=now --all && git gc --prune=now --aggressive
+   git push origin --force
+   ```
+
+#### Step 3: Clear GitHub’s Cached Data
+
+Even after a force push, GitHub may cache the compromised commits in pull requests or internal views.
+
+- Contact GitHub Support: Submit a ticket to GitHub requesting a dangling commits / cached views purge for that specific repository to ensure the data cannot be reached via direct commit SHA URLs.
+
+#### Step 4: Re-establish the Terraform State Safely
+
+Now that the remote history is clean, ensure your infrastructure state is mapped correctly without local exposure.
+
+- Configure a Remote Backend: Ensure your main.tf or providers.tf uses a secure remote backend (e.g., AWS S3 with KMS encryption, Azure Blob Storage, HashiCorp Cloud Platform, or GitLab/GitHub managed HTTP backends).
+- Migrate local state: Run terraform init to push your local, corrected state file to the secure remote backend. Once verified, delete the local copy.
+
+#### Step 5: Implement Preventative Controls
+
+Ensure this exact scenario cannot happen again by locking down the workflow.
+
+- Update .gitignore immediately: Add rules to prevent tracking state files.
+
+  ```text
+  *.tfstate
+  *.tfstate.*
+  .terraform/
+  crash.log
+  ```
+
+- Install a Secret Scanner (e.g., ggshield or trufflehog): Integrate pre-commit hooks to block commits containing high-entropy strings or .tfstate extensions.
+- Enable GitHub Secret Scanning: Turn on native GitHub advanced security features to automatically alert or block pushes containing known secret patterns.
 
 ### **83. What is Ansible Dynamic Inventory for AWS EC2?**
 **Answer:** An Ansible plugin (`aws_ec2`) that queries AWS APIs to automatically group managed instances based on tags (e.g., `tag:Role_webservers`), eliminating static IP files.
