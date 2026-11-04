@@ -3337,8 +3337,40 @@ output "revealed_output" {
 - **State File Exposure:** `nonsensitive()` only changes what is displayed in the **CLI output and logs**. Terraform *always* stores sensitive values in plain text within the `terraform.tfstate` file, regardless of whether you use this function or not.
 - **Downstream Risks:** Use this function with caution. Exposing a value means it could easily be leaked into CI/CD logs, version control, or shared team terminal histories.
 
-### **96. What is Terraform Output `depends_on`?**
-**Answer:** Explicitly ordering output evaluation after specified resources complete provisioning.
+### **77. What is Terraform Output `depends_on`?**
+**Answer:** The **`depends_on` meta-argument inside a Terraform `output` block** specifies an explicit dependency on an upstream resource or module. It forces Terraform to **complete all operations on that resource before computing the value of the output block**. 
+
+While Terraform typically calculates output values automatically using implicit dependencies (e.g., when the output `value` references a resource attribute), there are edge cases where an output relies on invisible or side-effect behaviors that Terraform cannot infer. 
+
+**How it Works**
+
+When you define `depends_on` in an output block, it alters Terraform's execution graph:
+
+```hcl
+output "database_endpoint" {
+  value       = aws_db_instance.main.endpoint
+  description = "The connection endpoint for the database."
+  
+  # Explicitly wait until the security group rules are completely applied
+  depends_on = [
+    aws_security_group_rule.allow_tls
+  ]
+}
+```
+
+**When to Use It**
+
+You should only use `depends_on` in outputs as a **last resort**, primarily in complex configurations involving multiple modules. Common scenarios include: 
+
+- **Hidden Side Effects:** You need to pass an output value (like a server IP or database string) to another module, but you must ensure a secondary resource (like a firewall rule, a provisioning script, or an IAM policy) is fully operational before that value is consumed.
+- **Preventing Race Conditions:** If a root module immediately uses a child module's output to configure a third-party service, `depends_on` ensures Terraform doesn't hand off the data until every supporting resource in the child module is completely built. 
+
+**The Downsides**
+
+Relying too heavily on `depends_on` can negatively affect your Terraform workflows:
+
+- **Overly Conservative Plans:** It instructs Terraform to wait for the entire object, which often forces values to become `(known after apply)` during the plan phase. 
+- **Unnecessary Replacements:** It can cause Terraform to plan resource destructions and replacements that wouldn't normally be required if it could track specific attribute changes
 
 ### **97. What is Terraform Module Nesting Best Practice?**
 **Answer:** Keep module nesting to a maximum of 2 levels (Root $\rightarrow$ Child Module). Excessive nesting creates brittle dependency graphs and unmaintainable code.
