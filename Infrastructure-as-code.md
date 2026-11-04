@@ -3796,17 +3796,90 @@ Plan files can capture **sensitive variables and secrets** (such as passwords, A
 - Treat `tfplan` files with the same security care as your state files. 
 - Do not commit them to public version control repositories.
 
-### **119. What is Terraform Variable Validation (`validation` block)?**
-**Answer:** Enforcing custom regex and logic rules on input variables before execution:
+### **88. What is Terraform Variable Validation (`validation` block)?**
+**Answer:** A **Terraform Variable Validation (`validation`) block** **allows you to enforce custom rules and constraints on input variables before Terraform applies any infrastructure changes**. It acts as a guardrail, ensuring that users provide values that meet specific criteria (like naming conventions, allowed ranges, or string formatting).
+
+If the validation fails, Terraform halts execution immediately and displays a custom error message to the user.
+
+**Core Structure**
+
+The `validation` block sits inside an input `variable` block and contains two required arguments:
+
+- `condition`: A boolean expression that evaluates to `true` or `false`. If `true`, validation passes. If `false`, validation fails.
+- `error_message`: The text displayed to the user if the condition fails. It must be at least one full sentence, start with an uppercase letter, and end with a period.
+
+**hcl**
 ```hcl
-variable "environment" {
+variable "variable_name" {
   type = string
+
   validation {
-    condition     = contains(["dev", "staging", "prod"], var.environment)
-    error_message = "Environment must be dev, staging, or prod."
+    condition     = <BOOLEAN_EXPRESSION>
+    error_message = "The error message must be capitalized and end with a period."
   }
 }
 ```
+
+**Common Examples & Use Cases**
+
+**1. Enforcing Allowed Values (String Matching)**
+
+Ensures that a user only selects from a predefined list of allowed environments or sizes.
+
+**hcl**
+```hcl
+variable "environment" {
+  type        = string
+  description = "The deployment environment."
+
+  validation {
+    condition     = contains(["dev", "staging", "prod"], var.environment)
+    error_message = "The environment variable must be one of: dev, staging, prod."
+  }
+}
+```
+
+**2. Regex Pattern Matching**
+
+Ensures that an ID or string strictly follows a specific naming convention (e.g., an AWS VPC ID starting with `vpc-`).
+
+**hcl**
+```hcl
+variable "vpc_id" {
+  type        = string
+  description = "The target VPC ID."
+
+  validation {
+    condition     = can(regex("^vpc-[a-z0-9]+$", var.vpc_id))
+    error_message = "The vpc_id value must start with \"vpc-\" followed by lowercase alphanumeric characters."
+  }
+}
+```
+
+*(Note: Wrapping regex in the `can()` function ensures that if the regex fails to match entirely, it safely returns `false` instead of throwing a hard error).*
+
+**3. Numerical Ranges**
+
+Ensures numbers fall within acceptable infrastructure or budget limits.
+
+**hcl**
+```hcl
+variable "instance_count" {
+  type        = number
+  description = "Number of instances to deploy."
+
+  validation {
+    condition     = var.instance_count > 0 && var.instance_count <= 10
+    error_message = "The instance_count must be greater than 0 and less than or equal to 10."
+  }
+}
+```
+
+**Key Rules and Limitations**
+
+- **Reference Limits:** The `condition` expression can **only reference the variable it belongs to** (using `var.variable_name`). You cannot reference other variables, resources, or data sources inside the validation block.
+- **Multiple Blocks:** You can add **multiple `validation` blocks** to a single variable to check for different independent conditions.
+- **Execution Timing:** Validation happens during the **initial plan phase** (`terraform plan`). Terraform will reject invalid values before it even communicates with your cloud provider, saving time and preventing partial or broken deployments.
 
 ### **120. What is Terraform Sensitive Variable in Output?**
 **Answer:** Output values derived from sensitive variables are automatically marked sensitive and suppressed from CLI output.
