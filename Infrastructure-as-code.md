@@ -4201,27 +4201,54 @@ Instead of hardcoding values inside your main code (`main.tf`) or typing them ou
 
 - **JSON Variant:** You can also write variable definitions in JSON format using a `terraform.tfvars.json` file.
 
+### **97. What is Ansible Delegate_To?**
+**Answer:**
+**`delegate_to`** is **an Ansible keyword that lets you run a specific task on a different machine instead of the primary host targeted by the play, while keeping variables and context tied to the original host**.
 
-### **134. What is Terraform Workspace Isolation Anti-Pattern?**
-**Answer:** Using workspaces for staging and production when environments require different AWS accounts, IAM roles, or backend configurations.
+**How It Works**
 
-### **135. What is Terraform State File Locking Timeout (`-lock-timeout`)?**
-**Answer:** Instructs Terraform to wait up to $N$ duration (e.g., `-lock-timeout=5m`) to acquire a state lock before failing.
+By default, Ansible runs every task in a play against the machines defined in the `hosts:` line.
 
-### **136. What is Terraform Output Value Interpolation?**
-**Answer:** Referencing child module outputs in parent modules using `module.<name>.<output_name>`.
+When you add `delegate_to: <hostname>` to a task:
 
-### **137. What is Terraform Implicit Dependency?**
-**Answer:** Dependencies established automatically when one resource references an attribute of another resource (`vpc_id = aws_vpc.main.id`).
+- The **action/module executes** on the delegated machine (such as `127.0.0.1` / `localhost` or a jump/load-balancer host).
+- The variable `inventory_hostname` **remains** the original target host.
+- Any facts gathered or registered variables default to being bound to the **original host** (unless you explicitly set `delegate_facts: true`). 
 
-### **138. What is Terraform Explicit Dependency (`depends_on`)?**
-**Answer:** Manually declaring dependency order when no direct attribute reference exists in HCL code.
+**Common Use Cases**
 
-### **139. What is Terraform Provider Alias in Child Modules?**
-**Answer:** Passing custom provider configurations into child modules via the `providers` map block.
+- **Managing Load Balancers:** Temporarily removing a web server from an active load balancer pool right before updating it, and adding it back afterward. 
+- **Running Local Actions:** Executing a command or check on the machine running Ansible itself using `delegate_to: localhost` (or the shorthand `local_action`). 
+- **Centralized Operations:** Registering a newly provisioned node in an external DNS server, monitoring system, or central database from a control node.
 
-### **141. What is Ansible Delegate_To?**
-**Answer:** Executing a specific task on a different host (e.g., taking an instance out of a load balancer on the control node) during a host playbook.
+**Basic Example**
+
+**yaml**
+```yaml
+- hosts: webservers
+  tasks:
+    - name: Take server out of the load balancer pool
+      ansible.builtin.command: /usr/bin/take_out_of_pool {{ inventory_hostname }}
+      delegate_to: 127.0.0.1
+
+    - name: Update web application
+      ansible.builtin.yum:
+        name: acme-web-stack
+        state: latest
+
+    - name: Add server back to the load balancer pool
+      ansible.builtin.command: /usr/bin/add_back_to_pool {{ inventory_hostname }}
+      delegate_to: 127.0.0.1
+```
+
+*In the example above, the first and third tasks run locally on `127.0.0.1`, while `{{ inventory_hostname }}` still evaluates to the respective webserver being updated.*
+
+**Key Things to Keep in Mind**
+
+- **Variable Context:** `inventory_hostname` is the original host, but connection variables (`ansible_host`, SSH keys, etc.) apply to the *delegated* host.
+- **Privilege Escalation (`become`):** If you combine `delegate_to` with `become`, the privilege escalation applies to the delegated host, not the original target. Make sure the target user has the right permissions there.
+- **Localhost Connection:** Using `delegate_to: localhost` will use Ansible's local connection plugin by default.
+
 
 ### **142. What is Ansible Local_Action?**
 **Answer:** Shorthand syntax for delegating a task to execute locally on the Ansible control machine.
