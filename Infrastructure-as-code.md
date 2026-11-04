@@ -3305,8 +3305,37 @@ Allows you to start with a very small batch to "test the waters" and then scale 
 | **Use Case**            | Testing, labs, dev environments, or budget-conscious DIY setups | Enterprise production environments requiring high availability and clustering                                       |
 | **Upstream/Downstream** | AWX is the **upstream** open-source project                     | Tower (evolved into the **Red Hat Ansible Automation Platform**) is the hardened **downstream** commercial product. |
 
-### **95. What is Terraform `nonsensitive()` function?**
-**Answer:** Exposes a sensitive value as non-sensitive when strictly required for display or passing to external non-sensitive modules.
+### **76. What is Terraform `nonsensitive()` function?**
+**Answer:** **The `nonsensitive()` function in Terraform exposes a value that has previously been marked as sensitive.**
+
+By default, if a variable or output is flagged as `sensitive = true`, Terraform masks its value with `(sensitive value)` in the CLI output and log files to prevent accidental exposure of secrets (like passwords or API keys). The `nonsensitive()` function allows you to explicitly override this protection for a specific block or output when you know the data is safe to reveal.
+
+**💡 How It Works (Example)**
+
+If you have a sensitive variable, attempting to use it directly in a standard output will result in an error or a masked value:
+
+```hcl
+variable "database_password" {
+  type      = string
+  default   = "super-secret-pass"
+  sensitive = true
+}
+
+# This will just show "(sensitive value)" in the terminal
+output "masked_output" {
+  value = var.database_password
+}
+
+# This will explicitly reveal "super-secret-pass" in the terminal
+output "revealed_output" {
+  value     = nonsensitive(var.database_password)
+}
+```
+
+** Crucial Security Considerations**
+
+- **State File Exposure:** `nonsensitive()` only changes what is displayed in the **CLI output and logs**. Terraform *always* stores sensitive values in plain text within the `terraform.tfstate` file, regardless of whether you use this function or not.
+- **Downstream Risks:** Use this function with caution. Exposing a value means it could easily be leaked into CI/CD logs, version control, or shared team terminal histories.
 
 ### **96. What is Terraform Output `depends_on`?**
 **Answer:** Explicitly ordering output evaluation after specified resources complete provisioning.
