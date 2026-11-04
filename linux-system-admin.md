@@ -1,10 +1,4 @@
-# **Linux & System Administration - DevOps Interview Questions (200 Questions)**
-
-Welcome to the **Linux & System Administration** master collection containing **200 comprehensive interview questions and detailed answers** covering Linux Kernel Internals, Systemd, Process & Memory Management, Virtual Memory, Storage & Filesystems, TCP/IP Network Socket Tuning, and Production Troubleshooting.
-
----
-
-## 🟢 **Part 1: Linux Architecture, Processes & Memory Management (Questions 1–60)**
+## Linux & System Administration - DevOps Interview Questions
 
 ### **1. Explain the Linux Boot Process from power-on to user login.**
 **Answer:**
