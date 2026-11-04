@@ -3881,8 +3881,72 @@ variable "instance_count" {
 - **Multiple Blocks:** You can add **multiple `validation` blocks** to a single variable to check for different independent conditions.
 - **Execution Timing:** Validation happens during the **initial plan phase** (`terraform plan`). Terraform will reject invalid values before it even communicates with your cloud provider, saving time and preventing partial or broken deployments.
 
-### **120. What is Terraform Sensitive Variable in Output?**
-**Answer:** Output values derived from sensitive variables are automatically marked sensitive and suppressed from CLI output.
+### **89. What is Terraform Sensitive Variable in Output?**
+**Answer:** In Terraform, a **sensitive output** is **a mechanism used to prevent confidential information—such as passwords, API keys, and connection strings—from being printed in plain text to your console or CI/CD logs**. 
+
+When you mark a variable or an output as sensitive using the `sensitive = true` argument, Terraform redacts that value in standard CLI logs and replaces it with `(sensitive value)`.
+
+**1. How Sensitivity Propagation Works**
+
+Terraform operates on a **safety-first** mechanism called sensitivity propagation. If an output block references a value that is already marked as sensitive (like a sensitive input variable or a sensitive resource attribute from a cloud provider), **Terraform will throw an error** unless you explicitly mark that output block as sensitive too. 
+
+**The Error Trap:**
+
+If you try to output a sensitive value without the flag:
+
+**hcl**
+```hcl
+variable "db_password" {
+  type      = string
+  sensitive = true
+}
+
+# This will fail!
+output "database_password" {
+  value = var.db_password 
+}
+```
+
+Terraform will block execution and return an error:
+`Error: Output refers to sensitive values. To declare this output value as sensitive, set sensitive = true.` 
+
+**The Correct Implementation:**
+
+To fix this, you must explicitly add `sensitive = true` to the output configuration:
+
+**hcl**
+```hcl
+variable "db_password" {
+  type      = string
+  sensitive = true
+}
+
+# This works perfectly
+output "database_password" {
+  value     = var.db_password
+  sensitive = true
+}
+```
+
+**2. How to View the Hidden Output**
+
+While `terraform plan` and `terraform apply` will mask the data, you will eventually need to read these values (for example, to pass a generated password into a subsequent application script). You can bypass the CLI redaction using the following approaches:
+
+- **Raw or JSON Output:** Running `terraform output -json` or `terraform output -raw <output_name>` will display the exact value in plain text. 
+- **The `nonsensitive()` Function:** Based on a consensus among users on **Stack Overflow**, if you are troubleshooting or testing locally, you can wrap the value inside the `nonsensitive()` function within your code to temporarily force Terraform to print it to the CLI: 
+
+  **hcl**
+  ```hcl
+  output "exposed_secret" {
+    value = nonsensitive(var.db_password)
+  }
+  ```
+
+**3. Crucial Security Warning: The State File Trap**
+
+It is critical to understand that `sensitive = true` **only hides data from console logs and UIs**. It **does not encrypt or hide** the data inside your `terraform.tfstate` file.
+
+Anyone with read access to your Terraform state file can view your sensitive variables and outputs in plain text. To fully secure this data, always restrict access to your state backend or use secure remote backends like **HCP Terraform** or HashiCorp Vault.
 
 ### **121. What is Terraform Dynamic Provider Credentials?**
 **Answer:** Exchanging OIDC tokens from CI systems (GitHub Actions) for temporary cloud provider credentials dynamically during `terraform apply`.
