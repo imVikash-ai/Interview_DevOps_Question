@@ -4105,9 +4105,38 @@ An **Ansible Block and Rescue** mechanism **provides structured error handling i
 - **Skipped tasks inside the block:** Once a task fails inside a `block`, any remaining tasks *after* the failed task inside that same `block` are skipped.
 - **Built-in Error Variables:** Inside a `rescue` section, you can inspect `ansible_failed_task` and `ansible_failed_result` to see which task failed and why.
 
+### **94. What is Ansible Check Mode (`--check`)?**
+**Answer:** 
+Ansible Check Mode (`--check` or `-C`) is **a dry-run execution mode that lets you simulate a playbook or task without making any actual changes to your remote systems**. 
 
-### **129. What is Ansible Check Mode (`--check`)?**
-**Answer:** Dry-run execution that reports what changes would be made without actually modifying managed target servers.
+**How It Works**
+
+- **State Comparison:** Ansible connects to your target nodes and asks each supported module to compare the desired state against the current state. 
+- **Prediction Reporting:** Instead of applying modifications, the module reports whether a change *would* have occurred (`changed: [...]`) or if the system already matches (`ok: [...]`).
+- **Zero Modification:** No files are edited, packages are not installed, and services are left untouched on the managed nodes (unless explicitly overridden). 
+**Common Commands**
+
+- **Run in check mode:**
+
+  **bash**
+  ```bash
+  ansible-playbook site.yml --check
+  ```
+
+- **Combine with Diff Mode (`--diff` or `-D`)** to see exact line-by-line file content differences of what would change: 
+
+  **bash**
+  ```bash
+  ansible-playbook site.yml --check --diff
+  ```
+
+**Key Behaviors & Limitations**
+
+- **Module Support Varies:** Modules that support check mode preview potential changes; modules that do *not* support it simply do nothing and report nothing. 
+- **Dependent Tasks May Fail:** If a later task relies on a file, directory, or database created by an earlier task, check mode may fail because the earlier task didn't actually create anything on disk. 
+- **Forcing Tasks:** You can force a specific read-only task to run even during a dry run by setting `check_mode: false` (formerly `always_run: true`). 
+- **Magic Variable:** You can detect check mode inside templates or tasks using the built-in boolean variable `ansible_check_mode` (which is set to `True` during check mode).
+
 
 
 ### **132. What is Terraform Cloud Agent?**
