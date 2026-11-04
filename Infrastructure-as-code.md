@@ -3978,11 +3978,33 @@ Dynamic Provider Credentials natively support the major cloud vendors and securi
 - **HashiCorp Vault** (to centrally manage Vault-backed dynamic workflows)
 - **Kubernetes & Tencent Cloud**
 
-### **122. What is Terraform State Pull (`terraform state pull`)?**
-**Answer:** Downloads and outputs the raw JSON state file from the remote backend to stdout.
+### **91. What is Terraform State Pull (`terraform state pull`) and State Push (`terraform state push`)?**
+**Answer:** `terraform state pull` and `terraform state push` are **low-level CLI commands used to manually read, backup, or overwrite Terraform state data directly from or to your configured backend** (such as Amazon S3, Azure Blob Storage, or HCP Terraform).
 
-### **123. What is Terraform State Push (`terraform state push`)?**
-**Answer:** Manually uploads a modified state file to the remote backend (used for state disaster recovery).
+**`terraform state pull`**
+
+- **What it does:** Downloads the current state from your backend (remote or local), upgrades it to a compatible local version if needed, and outputs the raw JSON state data directly to standard output (`stdout`).
+- **Common Use Cases:**
+  - Viewing or inspecting remote state without opening cloud storage consoles.
+  - Piping state values into tools like `jq` to query specific resource attributes.
+  - Creating a manual backup of the remote state before making risky changes: 
+
+  **bash**
+  ```bash
+  terraform state pull > backup-state.json
+  ```
+
+**`terraform state push`**
+
+- **What it does:** Uploads a local state file to your currently configured remote (or local) backend, completely overwriting what is currently stored there. 
+- **High-Risk Operation:** This is a low-level, high-risk command. It is **not** part of normal Terraform workflows (normally, `terraform apply` handles state updates automatically). 
+- **Safety Checks:** Terraform runs built-in safety checks before pushing:
+  - **Differing Lineage:** Blocks the push if the `lineage` ID does not match (to prevent overwriting a completely different environment).
+  - **Higher Remote Serial:** Blocks the push if the destination state has a higher `serial` number than the file you are trying to push, meaning the remote state is newer.
+  - *Bypassing Safety:* You can force an override using the `-force` flag (e.g., `terraform state push -force state-file.json`), though this risks data loss or state corruption. 
+- **Common Use Cases:**
+  - Recovering a corrupted or lost remote state from a verified local backup or S3 object version.
+  - Manual backend migrations when automated migration fails
 
 ### **124. What is Terraform Enterprise Private Module Registry?**
 **Answer:** An internal organization module registry with built-in versioning, documentation generation, and access control.
