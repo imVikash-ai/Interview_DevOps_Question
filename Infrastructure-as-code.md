@@ -4344,81 +4344,77 @@ Ansible also provides a companion function called `query()`. They do the exact s
 - **`lookup()`**: Historically returns a **comma-separated string** by default. If the external source returns a list `['a', 'b']`, `lookup()` turns it into `"a,b"`. (You can force it to return a list by adding `wantlist=True`).
 - **`query()`**: Always returns a **native Python list** (`['a', 'b']`). It is generally preferred in modern Ansible playbooks, especially when loop structures expect an explicit list.
 
+### **100. What is Ansible Galaxy Requirements (`requirements.yml`)?**
+**Answer:** 
+An **Ansible Galaxy Requirements file (`requirements.yml`)** is **a configuration file used in Ansible to automatically install external Ansible roles and collections from Ansible Galaxy** (or custom source repositories like GitLab, GitHub, or a private Automation Hub).
 
-### **163. What is Ansible Lineinfile Module?**
-**Answer:** Ensuring a specific line of text exists or is modified in a file using regex matching.
+Instead of manually downloading and managing third-party code inside your project, you declare them in this file and let Ansible handle the downloading and version control.
 
+**Core Structure & Formats**
 
+The file is written in YAML and supports two main sections: `roles` and `collections`.
 
-### **166. What is Terraform Module Git Source Syntax?**
-**Answer:** Referencing modules in Git with tags: `source = "git::https://github.com/org/repo.git?ref=v1.2.0"`.
+**yaml**
+```yaml
+---
+# 1. Managing Collections (Ansible 2.9+)
+collections:
+  - name: amazon.aws
+    version: 5.2.0
+  - name: community.general
 
-### **167. What is Terraform Sub-directory Git Source?**
-**Answer:** Referencing modules in subdirectories of a Git repo: `source = "git::https://github.com/org/repo.git//modules/vpc?ref=v1.2.0"`.
+# 2. Managing Roles
+roles:
+  - name: geerlingguy.git
+    version: 3.1.0
+  - src: https://github.com
+    version: master
+    name: nginx_role
+```
 
-### **168. What is Terraform Provider Invalidation?**
-**Answer:** Forcing re-download of provider plugins by deleting the `.terraform/providers` directory.
+**Key Components Explained**
 
-### **169. What is Terraform Cloud Workspace VCS Integration?**
-**Answer:** Automatically triggering `terraform plan` and `terraform apply` on Git commits to specific branches in GitHub/GitLab.
+**1. Collections (`collections:`)**
 
+Collections are the modern standard for distributing Ansible content, bundling together modules, plugins, playbooks, and roles.
 
-### **172. What is Ansible Become (`become: true`)?**
-**Answer:** Privilege escalation system executing tasks with `sudo` or root permissions on target nodes.
+- **`name`**: The namespace and collection name (e.g., `namespace.collection_name`).
+- **`version`**: The specific version to install. You can pin exact versions (`5.2.0`) or use semantic versioning expressions (e.g., `>=4.0.0`).
+- **`source`**: *(Optional)* Used if you want to pull the collection from a private Automation Hub or specific URL instead of the default Ansible Galaxy.
 
-### **173. What is Ansible Tags (`--tags`)?**
-**Answer:** Executing a subset of tasks in a playbook marked with specific tag labels.
+**2. Roles (`roles:`)**
 
+Roles are the legacy method for distributing standalone, reusable automation tasks.
 
+- **`name` or `src`**: The name of the role on Galaxy (`username.role_name`) or the URL to a Git repository.
+- **`version`**: The tag, branch name, or commit hash to download.
+- **`name` (when using `src`)**: Allows you to rename the role directory locally if downloading from a custom URL.
 
-### **176. What is Terraform State Refresh Only (`terraform apply -refresh-only`)?**
-**Answer:** Updates the state file to reflect live cloud attributes without modifying any live cloud resources.
+**How to Install Requirements**
 
-### **177. What is Terraform Target Flag (`-target`) and why is it an anti-pattern?**
-**Answer:** Restricting plan/apply to a single resource. *Risk: Bypasses dependency graph tracking, causing orphaned resources and drift.*
+Once your `requirements.yml` file is created, you use the `ansible-galaxy` CLI tool to download everything.
 
-### **178. What is Terraform Parallelism Flag (`-parallelism=N`)?**
-**Answer:** Controls how many concurrent resource operations Terraform executes in parallel (default: 10).
+- **To install both collections and roles (Modern Ansible):**
 
-### **179. What is OpenTofu Provider Signature Verification Failure?**
-**Answer:** Occurs when a downloaded provider plugin's checksum does not match `.terraform.lock.hcl`, indicating corrupted files or tampering.
+  **bash**
+  ```bash
+  ansible-galaxy install -r requirements.yml
+  ```
 
-### **180. What is Terragrunt Generate Block?**
-**Answer:** Automatically generates boilerplate `.tf` files (provider configs, backend configs) in working directories dynamically before execution.
+- **To isolate and install only collections:**
 
-### **181. What is Ansible Stat Module?**
-**Answer:** Retrieves filesystem status and metadata (existence, permissions, checksum) of a file on remote hosts.
+  **bash**
+  ```bash
+  ansible-galaxy collection install -r requirements.yml
+  ```
 
-### **182. What is Ansible Template vs Copy Module?**
-**Answer:** `copy` copies static files byte-for-byte; `template` renders dynamic variables and loops via Jinja2 before copying.
+- **To isolate and install only roles:**
 
-### **183. What is Pulumi Dynamic Secrets?**
-**Answer:** Integrating Pulumi with HashiCorp Vault to issue short-lived credentials dynamically during cloud provisioning.
+  **bash**
+  ```bash
+  ansible-galaxy role install -r requirements.yml
+  ```
 
-### **185. What is Terraform State Lock ID?**
-**Answer:** A unique UUID generated when an operation begins, recorded in the lock store to identify the locking process.
+By default, roles are installed to `~/.ansible/roles` and collections to `~/.ansible/collections`, but you can override this path using the `-p` flag or by setting `roles_path` / `collections_path` in your `ansible.cfg` file.
 
-### **186. What is Terraform Plan Compact Warnings (`-compact-warnings`)?**
-**Answer:** Condenses warning outputs in CLI terminal output for cleaner logs.
-
-### **187. What is Terraform Debug Logging (`TF_LOG=DEBUG`)?**
-**Answer:** Enables verbose internal debugging logs printing raw cloud API HTTP requests and response payloads.
-
-### **190. What is Ansible Vault Rekey (`ansible-vault rekey`)?**
-**Answer:** Changing the encryption password of an existing Ansible Vault encrypted file.
-
-### **191. What is Ansible Facts Cache?**
-**Answer:** Persisting gathered host facts across playbook runs using Redis or JSON files to speed up execution.
-
-
-
-### **194. What is Terraform Workspace Delete (`terraform workspace delete`)?**
-**Answer:** Deletes an empty workspace; fails if resources are still tracked in the workspace state.
-
-### **195. What is Terraform Output JSON Format (`terraform output -json`)?**
-**Answer:** Emits all module output values in machine-readable JSON format for scripting.
-
-
-### **198. What is Ansible Galaxy Requirements (`requirements.yml`)?**
-**Answer:** Declaring third-party roles and collections to be downloaded automatically before playbook execution.
 
