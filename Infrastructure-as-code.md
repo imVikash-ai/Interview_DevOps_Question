@@ -4137,10 +4137,27 @@ Ansible Check Mode (`--check` or `-C`) is **a dry-run execution mode that lets y
 - **Forcing Tasks:** You can force a specific read-only task to run even during a dry run by setting `check_mode: false` (formerly `always_run: true`). 
 - **Magic Variable:** You can detect check mode inside templates or tasks using the built-in boolean variable `ansible_check_mode` (which is set to `True` during check mode).
 
+### **95. What is Terraform Cloud Agent?**
+**Answer:** 
+A **Terraform Cloud Agent** (now officially known as an **HCP Terraform Agent**) is **a self-hosted worker service that allows HCP Terraform or Terraform Enterprise to manage isolated, private, or on-premises infrastructure**. 
 
+**How It Works**
 
-### **132. What is Terraform Cloud Agent?**
-**Answer:** Self-hosted worker processes deployed in private VPCs to execute Terraform Cloud runs against internal private resources.
+- **Pull-Based Architecture:** The agent runs inside your private network and polls HCP Terraform over an outbound HTTPS (TCP port 443) connection. It does not require you to open inbound firewall ports or expose your private network to the public internet. 
+- **Job Execution:** When a run is triggered in a workspace assigned to an agent pool, the agent picks up the job, downloads the necessary configuration and provider plugins, executes the Terraform command (such as `plan` or `apply`) locally within your network, and sends the results back to HCP Terraform.
+- **Lightweight Deployment:** Distributed as a standalone 64-bit Linux binary or a Docker container image (`hashicorp/tfc-agent`). You can deploy it on Docker, Kubernetes, virtual machines, or Nomad.
+
+**Key Use Cases**
+
+- **On-Premises Infrastructure:** Provision and manage resources in private data centers like VMware vSphere, OpenStack, Nutanix, or custom enterprise networks. 
+- **Private Cloud / VPCs:** Manage cloud resources inside restricted private subnets, enclaves, or VPCs that are not reachable from public runner environments. 
+- **Credential Isolation:** Keep sensitive on-premises or multi-account cloud credentials local to your network rather than exposing them or managing complex static keys inside the public SaaS control plane.
+
+**Key Concepts**
+
+- **Agent Pools:** Groups of self-hosted agents that share workloads. Workspaces are linked to an agent pool so any available agent in that pool can execute runs. 
+- **Concurrency:** Each individual agent processes a single run at a time. You can deploy multiple agents in a pool to handle concurrent runs and provide high availability.
+
 
 ### **133. What is Terraform Variable Definition File (`terraform.tfvars`)?**
 **Answer:** A file automatically loaded by Terraform containing key-value assignments for declared input variables.
