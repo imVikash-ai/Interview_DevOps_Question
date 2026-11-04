@@ -3636,8 +3636,44 @@ Terraform uses specific operators to define matching rules:
 - **Feature Compatibility:** Ensures language features, block types, or resource behaviors introduced in a specific Terraform release are present. 
 - **Preventing State Corruption:** Stops older Terraform binaries from interacting with state files generated or upgraded by newer CLI versions.
 
-### **106. What is Terraform Provider Source Address?**
-**Answer:** The fully qualified global namespace of a provider: `registry.terraform.io/hashicorp/aws`.
+### **84. What is Terraform Provider Source Address?**
+**Answer:** A **Terraform Provider Source Address** is **a global, unique identifier that tells Terraform where and how to download a specific provider plugin**. 
+
+**Syntax**
+
+A provider source address follows this format:
+
+**text**
+```text
+[hostname/]namespace/type
+```
+
+- **`hostname`** *(optional, defaults to `registry.terraform.io`)*: The DNS host of the provider registry where the plugin is hosted (e.g., `registry.terraform.io` for the public registry).
+- **`namespace`** *(defaults to `hashicorp` if omitted)*: An organization or user name unique to that hostname that publishes the provider (e.g., `hashicorp`).
+- **`type`**: The short name of the platform or service the provider manages (e.g., `aws`, `azurerm`, `google`, `random`). 
+
+**Example Usage**
+
+In a Terraform configuration, source addresses are declared inside the `required_providers` block:
+
+**hcl**
+```hcl
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
+    }
+  }
+}
+```
+
+- **`hashicorp/aws`** is shorthand for `registry.terraform.io/hashicorp/aws`.
+- Terraform uses this address during `terraform init` to locate, download, and lock the correct plugin
 
 ### **109. What is Terraform Remote State Locking Mechanism in DynamoDB?**
 **Answer:** Uses an MD5 hash of the state file and a unique lock ID written to a DynamoDB table with strong consistency to prevent concurrent applies.
