@@ -4159,8 +4159,48 @@ A **Terraform Cloud Agent** (now officially known as an **HCP Terraform Agent**)
 - **Concurrency:** Each individual agent processes a single run at a time. You can deploy multiple agents in a pool to handle concurrent runs and provide high availability.
 
 
-### **133. What is Terraform Variable Definition File (`terraform.tfvars`)?**
-**Answer:** A file automatically loaded by Terraform containing key-value assignments for declared input variables.
+### **96. What is Terraform Variable Definition File (`terraform.tfvars`)?**
+**Answer:** 
+A **Terraform Variable Definition File (`terraform.tfvars`)** is **a dedicated file used to assign concrete values to the input variables you have declared in your Terraform configuration**. 
+
+**Key Purpose**
+
+Instead of hardcoding values inside your main code (`main.tf`) or typing them out repeatedly at the command line, you store environment-specific or project-specific variable values in `terraform.tfvars`. This keeps your infrastructure code reusable, clean, and decoupled from raw data.
+
+**How It Works**
+
+1. **Declaration (`variables.tf`):** You first declare the variable, its type, and an optional default value in a `.tf` file: 
+
+   **hcl**
+   ```hcl
+   variable "instance_count" {
+     type    = number
+     default = 1
+   }
+   ```
+
+2. **Assignment (`terraform.tfvars`):** You assign the actual value inside `terraform.tfvars`:
+
+   **hcl**
+   ```hcl
+   instance_count = 3
+   ```
+
+3. **Automatic Loading:** When you run `terraform plan` or `terraform apply` in the working directory, Terraform **automatically detects and loads** the `terraform.tfvars` file without needing extra flags.
+
+**Key Characteristics & Rules**
+
+- **Cannot Declare New Variables:** A `terraform.tfvars` file *only* assigns values to variables that have already been declared using a `variable` block; it will throw an error if you define an undeclared variable. 
+- **Precedence:** Values inside `terraform.tfvars` override any default values set in `variables.tf`.
+- **Multiple Environments:** You can create custom-named `.tfvars` files (e.g., `staging.tfvars`, `prod.tfvars`) and load a specific one during execution using the `-var-file` flag: 
+
+  **bash**
+  ```bash
+  terraform apply -var-file="prod.tfvars"
+  ```
+
+- **JSON Variant:** You can also write variable definitions in JSON format using a `terraform.tfvars.json` file.
+
 
 ### **134. What is Terraform Workspace Isolation Anti-Pattern?**
 **Answer:** Using workspaces for staging and production when environments require different AWS accounts, IAM roles, or backend configurations.
