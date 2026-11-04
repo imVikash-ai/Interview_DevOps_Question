@@ -4068,8 +4068,43 @@ To render and deploy the file to managed target hosts, you invoke Ansible's buil
 
 A distinct benefit of this system is that **all rendering happens on the Ansible control node** before the output is deployed. The managed target machines do not need Python's Jinja2 library installed; they merely receive the completely resolved static file.
 
-### **128. What is Ansible Block and Rescue?**
-**Answer:** Exception handling in playbooks: tasks in `block` are executed; if any fail, tasks in `rescue` execute to remediate.
+### **93. What is Ansible Block and Rescue?**
+**Answer:** 
+An **Ansible Block and Rescue** mechanism **provides structured error handling in Ansible playbooks**, very similar to a `try / catch / finally` block in traditional programming languages. 
+
+**How It Works**
+
+- **`block`**: You group logical sets of tasks here that you want to execute together. If a task inside the block runs smoothly, the rescue section is skipped. 
+- **`rescue`**: If any task inside the `block` fails, Ansible stops the rest of the block tasks and jumps directly to the `rescue` section to run recovery tasks (such as rolling back changes, sending alerts, or attempting an alternative method). If the rescue tasks succeed, Ansible treats the error as handled and continues running the rest of the playbook. 
+- **`always`** *(Optional)*: Tasks placed in this section run no matter what happens—whether the `block` succeeded or the `rescue` section was triggered. This is ideal for cleanup or reporting.
+
+**Basic Structure Example**
+
+**yaml**
+```yaml
+- name: Example block and rescue playbook
+  hosts: all
+  tasks:
+    - name: Try risky deployment with recovery
+      block:
+        - name: Run primary task
+          ansible.builtin.command: /usr/local/bin/primary-script.sh
+      rescue:
+        - name: Run recovery task if primary task fails
+          ansible.builtin.command: /usr/local/bin/fallback-script.sh
+      always:
+        - name: Always run this cleanup task
+          ansible.builtin.debug:
+            msg: "Execution of block/rescue phase finished."
+```
+
+**Key Behaviors to Keep in Mind**
+
+- **What triggers a rescue:** Only tasks that return a **`failed`** state trigger the rescue section.
+- **What does NOT trigger a rescue:** Errors caused by **invalid task definitions** (syntax/formatting errors) or **unreachable hosts** do not trigger rescue blocks.
+- **Skipped tasks inside the block:** Once a task fails inside a `block`, any remaining tasks *after* the failed task inside that same `block` are skipped.
+- **Built-in Error Variables:** Inside a `rescue` section, you can inspect `ansible_failed_task` and `ansible_failed_result` to see which task failed and why.
+
 
 ### **129. What is Ansible Check Mode (`--check`)?**
 **Answer:** Dry-run execution that reports what changes would be made without actually modifying managed target servers.
