@@ -4274,44 +4274,76 @@ While `local_action` provides a legacy shorthand syntax for running tasks on the
 - **Local File Generation:** Writing deployment reports or aggregating data onto the control machine.
 - **Waiting/Health Checks:** Running local socket checks or wait commands from the controller.
 
+### **99. What is Ansible Lookups (`lookup()`)?**
+**Answer:** 
+**Ansible Lookups (`lookup()`) are a powerful feature used to retrieve data from external sources outside of Ansible.** They allow you to pull information dynamically during the execution of a playbook from the machine running Ansible (the control node).
 
-### **145. What is Terraform S3 Backend Key Naming Convention?**
-**Answer:** Storing state files in structured S3 paths: `env://prod/network/terraform.tfstate`.
+The data can come from a wide variety of sources, such as local files, environment variables, databases, key-value stores (like HashiCorp Vault or Consul), or API endpoints.
 
-### **146. What is Terraform Backend Re-initialization (`terraform init -reconfigure`)?**
-**Answer:** Reconfiguring remote backend settings from scratch, disregarding any existing backend configuration cached in `.terraform/`.
+**Key Characteristics of Lookups**
 
-### **147. What is Terraform Backend Migration (`terraform init -migrate-state`)?**
-**Answer:** Migrating state data automatically from one backend type to another (e.g., local state to remote S3).
+- **Executed on the Control Node:** Unlike modules or tasks that run on the target managed hosts, lookup plugins always run on the machine where you execute the `ansible-playbook` command.
+- **Evaluated at Runtime:** The data is fetched in real-time exactly when the task or variable is evaluated.
+- **Returns Strings or Lists:** By default, lookups return a comma-separated string of values, but they can also return native Python lists or data structures depending on how they are called.
 
-### **148. What is Terraform Custom Function in Provider Framework?**
-**Answer:** User-defined HCL functions exposed by modern provider plugins to execute specialized string/crypto transformations.
+**Common Use Cases & Examples**
 
+Lookups are typically invoked using the template syntax `{{ lookup('plugin_name', 'argument') }}`.
 
-### **151. What is Ansible Meta Dependencies (`meta/main.yml`)?**
-**Answer:** Declaring prerequisite roles that must be executed automatically before the parent role runs.
+**1. Reading Local Files**
 
-### **152. What is Ansible Custom Filter Plugin?**
-**Answer:** Writing custom Python functions to extend Jinja2 template transformations inside playbooks.
+You can read the contents of a text file on your control node directly into a variable or task parameter.
 
+**yaml**
+```yaml
+- name: Set an authorized key from a local file
+  ansible.posix.authorized_key:
+    user: admin
+    state: present
+    key: "{{ lookup('ansible.builtin.file', '/path/to/id_rsa.pub') }}"
+```
 
-### **155. What is Terraform Flatten Function (`flatten()`)?**
-**Answer:** Flattens nested lists of lists into a single flat list, commonly used with nested dynamic block collections.
+**2. Accessing Environment Variables**
 
-### **156. What is Terraform Element Function (`element()`)?**
-**Answer:** Retrieves an element from a list at a given index with wrap-around modulo behavior.
+You can fetch the value of an environment variable set on your control machine.
 
-### **157. What is Terraform SetProduct Function (`setproduct()`)?**
-**Answer:** Computes the Cartesian product of multiple sets or lists to generate combinations of environments and subnets.
+**yaml**
+```yaml
+- name: Show the current system PATH of the control node
+  ansible.builtin.debug:
+    msg: "The control node PATH is {{ lookup('ansible.builtin.env', 'PATH') }}"
+```
 
-### **158. What is Terraform Zipmap Function (`zipmap()`)?**
-**Answer:** Constructs a map from a list of keys and a corresponding list of values.
+**3. Retrieving Secrets from Vaults**
 
-### **159. What is Terraform One Function (`one()`)?**
-**Answer:** Converts a zero- or one-element list into a scalar value or `null`, failing if the list contains multiple elements.
+Instead of hardcoding passwords, you can fetch them securely from password managers or secret vaults like HashiCorp Vault at runtime.
 
-### **162. What is Ansible Lookups (`lookup()`)?**
-**Answer:** Querying external data sources (environment variables, HashiCorp Vault, AWS SSM) dynamically during playbook execution.
+**yaml**
+```yaml
+- name: Get API token from HashiCorp Vault
+  ansible.builtin.debug:
+    msg: "The token is {{ lookup('community.hashi_vault.vault_kv', 'secret/data/api') }}"
+```
+
+**4. Iterating Over Command Outputs**
+
+You can run a local command on the control node and loop through its output lines.
+
+**yaml**
+```yaml
+- name: Loop over lines returned by a local command
+  ansible.builtin.debug:
+    msg: "Found user: {{ item }}"
+  loop: "{{ lookup('ansible.builtin.lines', 'cat /etc/passwd | cut -d: -f1') }}"
+```
+
+**Lookups vs. Query (`query()`)**
+
+Ansible also provides a companion function called `query()`. They do the exact same thing under the hood, but they format the output differently:
+
+- **`lookup()`**: Historically returns a **comma-separated string** by default. If the external source returns a list `['a', 'b']`, `lookup()` turns it into `"a,b"`. (You can force it to return a list by adding `wantlist=True`).
+- **`query()`**: Always returns a **native Python list** (`['a', 'b']`). It is generally preferred in modern Ansible playbooks, especially when loop structures expect an explicit list.
+
 
 ### **163. What is Ansible Lineinfile Module?**
 **Answer:** Ensuring a specific line of text exists or is modified in a file using regex matching.
