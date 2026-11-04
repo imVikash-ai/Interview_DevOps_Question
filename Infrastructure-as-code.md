@@ -3372,8 +3372,50 @@ Relying too heavily on `depends_on` can negatively affect your Terraform workflo
 - **Overly Conservative Plans:** It instructs Terraform to wait for the entire object, which often forces values to become `(known after apply)` during the plan phase. 
 - **Unnecessary Replacements:** It can cause Terraform to plan resource destructions and replacements that wouldn't normally be required if it could track specific attribute changes
 
-### **97. What is Terraform Module Nesting Best Practice?**
-**Answer:** Keep module nesting to a maximum of 2 levels (Root $\rightarrow$ Child Module). Excessive nesting creates brittle dependency graphs and unmaintainable code.
+### **78. What is Terraform Module Nesting Best Practice?**
+**Answer:** The core best practice for Terraform module nesting is to **keep the module tree as flat as possible, ideally limiting nesting to a maximum depth of two layers (one root module calling child modules)**. 
+
+While Terraform technically allows you to nest modules deeply (a module calling a module, which calls another module), doing so introduces severe maintainability issues, debugging friction, and brittle code. 
+
+The industry-standard architectural best practices for nesting Terraform modules break down as follows:
+
+**1. The Standard Nested Structure (`/modules` Subdirectory)**
+
+If you must build nested components within a reusable module repository, they should reside inside a dedicated **`modules/`** subdirectory at the root of that package.
+
+```text
+your-module-repo/
+├── main.tf          # Root of the reusable module
+├── variables.tf
+├── outputs.tf
+├── README.md
+└── modules/         # Dedicated folder for internal nested modules
+    ├── nested-component-a/
+    │   ├── main.tf
+    │   └── README.md  # Presence means external users can call this directly
+    └── nested-component-b/
+        └── main.tf    # No README means it is strictly for internal module use
+```
+
+- **Relative Paths:** When the root of the repository calls these nested sub-modules, it must use relative paths (e.g., `source = "./modules/nested-component-a"`). This ensures Terraform treats them as part of the same package instead of attempting to download them as external dependencies. 
+- **Public vs. Internal Visibility:** By convention, any nested module containing its own `README.md` is considered usable by external consumers. If it lacks a README, it is strictly an internal building block for that repository. 
+
+**2. Flattening via "Composition" Over Deep Nesting**
+
+Instead of having deep hierarchical module chains, design your infrastructure using **Module Composition**. In this pattern, the root configuration combines several flat, single-purpose modules by passing the outputs of one module directly into the inputs of the next.
+
+| **Paradigm**                    | **Architecture**                                                                                                                      | **Pros & Cons**                                                                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Deep Nesting (Bad)**          | `Root Configuration` ➔ `App Module` ➔ `Network Module` ➔ `Subnet Module`                                                              | ❌ **High maintenance.** A change to a subnet variable requires bubble-up changes through every single parent layer's inputs and outputs. |
+| **Composition (Best Practice)** | `Root Configuration`<br>├── ➔ `Network Module`<br>├── ➔ `App Module` (takes network ID)<br>└── ➔ `Database Module` (takes network ID) | **Highly scalable.** Modules remain independent, isolated, easy to test, and reusable across different architectures.                    |
+
+**3. Key Rules for Nesting Wisely**
+
+If your application complexity truly demands internal module nesting, follow these structural rules:
+
+- **Do Not Hardcode Dependencies:** Never hardcode resource links inside a nested module. If `nested-component-a` depends on an IAM policy, design it to take the policy ARN as an input variable. This allows advanced users to bypass the built-in logic and pass their own choices into the system. 
+- **Avoid Loop Duplication:** If you use loops (`for_each` or `count`) on a parent module block, avoid adding compounding nested loops inside the sub-modules. Flatten complex arrays using Terraform local variables (`locals`) before sending data to the child components to maintain steady resource tracking and prevent recreation bugs. 
+- **Decouple Providers:** Let the root execution layer pass providers implicitly. Avoid declaring hardcoded `provider` blocks inside nested child modules, as this hinders flexibility and complicates resource destruction workflows.
 
 ### **98. What is Terraform CLI Configuration (`.terraformrc`)?**
 **Answer:** A configuration file on the developer workstation or CI runner managing plugin cache directories, credentials helpers, and provider installation mirrors.
