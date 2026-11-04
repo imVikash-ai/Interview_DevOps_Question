@@ -3675,11 +3675,24 @@ terraform {
 - **`hashicorp/aws`** is shorthand for `registry.terraform.io/hashicorp/aws`.
 - Terraform uses this address during `terraform init` to locate, download, and lock the correct plugin
 
-### **109. What is Terraform Remote State Locking Mechanism in DynamoDB?**
-**Answer:** Uses an MD5 hash of the state file and a unique lock ID written to a DynamoDB table with strong consistency to prevent concurrent applies.
+### **85. What is Ansible Galaxy?**
+**Answer:** **Ansible Galaxy** is **the official hub, marketplace, and sharing platform for the Ansible community**. It allows users to discover, download, and share pre-packaged units of automation content—known as **roles** and **collections**—so you do not have to write everything from scratch. 
 
-### **113. What is Ansible Galaxy?**
-**Answer:** The public community repository for discovering, downloading, and sharing Ansible roles and collections.
+You can browse or search for thousands of ready-made automation solutions on the **Ansible Galaxy Website**.
+
+**What Content Does Galaxy Provide?**
+
+- **Roles:** Reusable packages of tasks, variables, files, and templates organized in a standard directory structure to accomplish a specific goal (e.g., installing Docker, setting up Nginx, or configuring a database).
+- **Collections:** A broader, comprehensive packaging format that can include multiple playbooks, roles, modules, and plugins.
+
+**Key Features & How It Works**
+
+- **The Command-Line Tool (`ansible-galaxy`):** Ansible comes bundled with a CLI tool called `ansible-galaxy` that lets you interact with the hub directly from your terminal.
+  - **Install a role:** `ansible-galaxy role install username.rolename`
+  - **Install a collection:** `ansible-galaxy collection install namespace.collectionname`
+  - **Initialize a new local role:** `ansible-galaxy init my_role`
+- **Publishing Your Own Content:** You can host your role or collection in a public repository (like GitHub), import it into Ansible Galaxy, and share it with the global DevOps community. 
+- **Community vs. Customization:** While Galaxy saves time by offering pre-built templates for common software, many users find that community roles require tweaking or customization to fit strict enterprise security or environment needs.
 
 ### **116. What is Terraform State Inspect (`terraform state show`)?**
 **Answer:** Prints the exact attributes and current live state of a single specific resource managed by Terraform.
