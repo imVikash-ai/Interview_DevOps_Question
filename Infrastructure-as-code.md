@@ -3694,8 +3694,60 @@ You can browse or search for thousands of ready-made automation solutions on the
 - **Publishing Your Own Content:** You can host your role or collection in a public repository (like GitHub), import it into Ansible Galaxy, and share it with the global DevOps community. 
 - **Community vs. Customization:** While Galaxy saves time by offering pre-built templates for common software, many users find that community roles require tweaking or customization to fit strict enterprise security or environment needs.
 
-### **116. What is Terraform State Inspect (`terraform state show`)?**
-**Answer:** Prints the exact attributes and current live state of a single specific resource managed by Terraform.
+### **86. What is Terraform State Inspect (`terraform state show`)?**
+**Answer:** The `terraform state show` command is **a Terraform CLI tool used to display detailed attribute data for a single managed resource recorded in your state file**. 
+
+**What It Does**
+
+- **Inspects Specific Resources:** While `terraform state list` shows a simple list of resource addresses, `terraform state show <ADDRESS>` prints out all the attributes, arguments, and provider-generated read-only IDs for one chosen resource. 
+- **Reveals Hidden Data:** It displays computed attributes (such as cloud-assigned IP addresses, security group IDs, or Amazon Resource Names) that may not be explicitly written in your `.tf` configuration files. 
+- **Aids in Troubleshooting:** It helps you verify what Terraform currently "remembers" about a resource so you can compare it against your code or real-world infrastructure. 
+
+**Basic Usage and Syntax**
+
+**bash**
+```bash
+terraform state show [options] <RESOURCE_ADDRESS>
+```
+
+**Common Examples:**
+
+- **Show an EC2 instance's attributes:**
+
+  **bash**
+  ```bash
+  terraform state show aws_instance.web
+  ```
+
+- **Show a resource inside a module:**
+
+  **bash**
+  ```bash
+  terraform state show module.vpc.aws_subnet.public[0]
+  ```
+
+- **Output in machine-readable JSON format:** *(requires Terraform v1.16+)*
+
+  **bash**
+  ```bash
+  terraform state show -json aws_instance.web
+  ```
+
+- **Specify a custom state file path:** ]
+
+  **bash**
+  ```bash
+  terraform state show -state=./path/to/terraform.tfstate aws_instance.web
+  ```
+
+**`terraform state show` vs. Similar Commands**
+
+| **Command**                          | **What It Does**                                                                            | **Scope**                   |
+| ------------------------------------ | ------------------------------------------------------------------------------------------- | --------------------------- |
+| **`terraform state list`**           | Prints a flat list of all resource addresses managed in state.                              | All resources               |
+| **`terraform state show <address>`** | Prints detailed attributes for a **single** specified resource.                             | One specific resource       |
+| **`terraform show`**                 | Prints a human-readable or JSON representation of the entire state snapshot or a plan file. | Entire state or plan        |
+| **`terraform refresh`**              | Queries real-world infrastructure and updates the state file to match.                      | Modifies/updates state data |
 
 ### **117. What is Terraform State List (`terraform state list`)?**
 **Answer:** Lists all resource addresses currently tracked in the state file.
