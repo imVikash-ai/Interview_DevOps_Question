@@ -3603,8 +3603,38 @@ If your playbook does not rely on system environment variables, disabling fact g
       ansible.builtin.command: echo "Hello World"
 ```
 
-### **105. What is Terraform `terraform_version` Constraint?**
-**Answer:** Locking configurations to compatible engine versions (`required_version = ">= 1.5.0, < 2.0.0"`) to prevent syntax incompatibility issues.
+### **83. What is Terraform `terraform_version` Constraint?**
+**Answer:** The Terraform `terraform_version` constraint (officially configured via the `required_version` argument inside the `terraform` block) **specifies which versions of the Terraform CLI are allowed to run a configuration**. 
+
+If you run `terraform plan` or `terraform apply` using a Terraform binary version that does not satisfy the rule, Terraform will print an error and stop immediately.
+
+**How to Define It**
+
+You declare `required_version` inside the root `terraform` configuration block: 
+
+**hcl**
+```hcl
+terraform {
+  required_version = "~> 1.7.0"
+}
+```
+
+**Supported Version Operators**
+
+Terraform uses specific operators to define matching rules:
+
+| **Operator**                         | **Meaning**                                                                | **Example**             | **Behavior**                                                                                                                |
+| ------------------------------------ | -------------------------------------------------------------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **`=`** or *(none)*                  | Exact version match                                                        | `1.7.0`                 | Allows only version `1.7.0`.                                                                                                |
+| **`!=`**                             | Not equal                                                                  | `!= 1.6.0`              | Excludes version `1.6.0`.                                                                                                   |
+| **`>`**, **`>=`**, **`<`**, **`<=`** | Comparison ranges                                                          | `>= 1.5.0, < 2.0.0`     | Allows any version from `1.5.0` up to, but not including, `2.0.0`.                                                          |
+| **`~>`**                             | Pessimistic constraint operator (allows right-most component to increment) | `~> 1.7.0` <br>`~> 1.7` | `~> 1.7.0` allows `1.7.1`, `1.7.5`, etc., but blocks `1.8.0`. <br>`~> 1.7` allows `1.8.0` and `1.10.0`, but blocks `2.0.0`. |
+
+**Why Use It?**
+
+- **Team Consistency:** Prevents team members from running configurations with older or untested CLI versions.
+- **Feature Compatibility:** Ensures language features, block types, or resource behaviors introduced in a specific Terraform release are present. 
+- **Preventing State Corruption:** Stops older Terraform binaries from interacting with state files generated or upgraded by newer CLI versions.
 
 ### **106. What is Terraform Provider Source Address?**
 **Answer:** The fully qualified global namespace of a provider: `registry.terraform.io/hashicorp/aws`.
