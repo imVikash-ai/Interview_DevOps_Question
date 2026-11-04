@@ -3490,11 +3490,39 @@ plugin_cache_dir = "$HOME/.terraform.d/plugin-cache"
 1. **Initial Download:** When you run `terraform init`, Terraform checks your cache directory. If the required plugin version isn't there, it downloads it from the registry into the cache.
 2. **Linking to the Project:** Once the plugin is in the cache, Terraform populates the local project's `.terraform/providers` directory. Depending on your operating system, it will either create a **symbolic link (symlink)** to the cache directory or **copy** the binary directly.
 
-### **100. What is Policy as Code Shift-Left Testing?**
-**Answer:** Executing OPA/Checkov linters directly in pre-commit hooks and PR builds to catch compliance violations before code is merged to `main`.
+### **81. What is Terraform JSON Syntax (`*.tf.json`)?**
+**Answer:** **Terraform JSON syntax (`*.tf.json`) is an alternative way to write Terraform configurations using JSON instead of standard HashiCorp Configuration Language (HCL).**
 
-### **101. What is Terraform JSON Syntax (`*.tf.json`)?**
-**Answer:** Allowing Terraform configurations to be written in standard JSON rather than HCL, useful for machine-generated infrastructure templates.
+While HCL (`*.tf`) is designed to be human-readable and is the standard choice for writing infrastructure as code, Terraform natively parses JSON files ending in `.tf.json` as exact equivalents to HCL. This syntax is primarily intended for **machine generation** and automated tooling rather than manual drafting.
+
+**Key Mapping Rules: HCL to JSON**
+
+Terraform translates HCL blocks into JSON objects by following a strict set of structural rules:
+
+- **Blocks become JSON Objects:** An HCL block type and its labels are mapped into nested JSON keys.
+- **Arguments become Key-Value Pairs:** Standard configuration attributes inside a block are mapped as direct JSON properties.
+- **Meta-Arguments use a Single Underscore:** Configuration lifecycle attributes like `_count`, `_for_each`, and `_depends_on` are prefixed with a single underscore to distinguish them from provider-specific attributes.
+
+**Direct Comparison: HCL vs. JSON**
+
+Here is a side-by-side comparison of how a basic AWS S3 bucket resource is defined in both syntaxes:
+
+| **Standard HCL (`main.tf`)** | **Terraform JSON (`main.tf.json`)** |
+|---|---|
+| ```hcl<br>resource "aws_s3_bucket" "example" {<br>  bucket = "my-unique-bucket-name"<br><br>  tags = {<br>    Environment = "Dev"<br>  }<br>}<br>``` | ```json<br>{<br>  "resource": {<br>    "aws_s3_bucket": {<br>      "example": {<br>        "bucket": "my-unique-bucket-name",<br>        "tags": {<br>          "Environment": "Dev"<br>        }<br>      }<br>    }<br>  }<br>}<br>``` |
+
+**Handling Expressions & Interpolations**
+
+Because JSON does not natively support HCL features like variables, functions, or resource references, you must wrap these expressions in **JSON string interpolations** using the `${...}` syntax.
+
+- **Variable Reference:** `"ami": "${var.aws_ami_id}"`
+- **Resource Reference:** `"vpc_id": "${aws_vpc.main.id}"`
+- **Conditional Logic:** `"count": "${var.environment == \"prod\" ? 3 : 1}"`
+
+**Trade-offs: When to use `*.tf.json`**
+
+- **Why use it:** It is perfect if you are building an internal developer platform, using a programming language (like Python or Node.js) to generate infrastructure blueprints dynamically, or linting files with standard JSON ecosystem tools.
+- **Why avoid it for manual code:** JSON lacks native comment support, requires strict quote escaping for nested logic, is highly verbose, and is significantly harder for humans to audit and maintain compared to standard HCL.
 
 ### **104. What is Ansible Fact Gathering (`setup` module)?**
 **Answer:** Automatically discovering hardware, OS, network, and disk facts from target hosts upon playbook execution and storing them in `ansible_facts`.
