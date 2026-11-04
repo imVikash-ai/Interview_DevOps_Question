@@ -3417,8 +3417,34 @@ If your application complexity truly demands internal module nesting, follow the
 - **Avoid Loop Duplication:** If you use loops (`for_each` or `count`) on a parent module block, avoid adding compounding nested loops inside the sub-modules. Flatten complex arrays using Terraform local variables (`locals`) before sending data to the child components to maintain steady resource tracking and prevent recreation bugs. 
 - **Decouple Providers:** Let the root execution layer pass providers implicitly. Avoid declaring hardcoded `provider` blocks inside nested child modules, as this hinders flexibility and complicates resource destruction workflows.
 
-### **98. What is Terraform CLI Configuration (`.terraformrc`)?**
-**Answer:** A configuration file on the developer workstation or CI runner managing plugin cache directories, credentials helpers, and provider installation mirrors.
+### **79. What is Terraform CLI Configuration (`.terraformrc`)?**
+**Answer:**The Terraform CLI configuration file (`.terraformrc` on Unix/Linux/macOS or `terraform.rc` on Windows) is **a user-level configuration file that controls the global behavior of the Terraform CLI across all working directories and projects on your machine**.
+
+It is separate from your infrastructure configuration files (`.tf` files), which define your cloud resources. 
+
+**Where Does It Live?**
+
+- **Unix / Linux / macOS:** `~/.terraformrc`
+- **Windows:** `%APPDATA%\terraform.rc`
+- *Note:* You can also override the file location using the `TF_CLI_CONFIG_FILE` environment variable. 
+
+**What Can You Configure in `.terraformrc`?**
+
+- **Plugin Cache Directory (`plugin_cache_dir`):** Tells Terraform to store downloaded provider plugins in a central local folder rather than re-downloading them for every single project. 
+- **Provider Installation Methods (`provider_installation`):** Customizes how providers are sourced, allowing you to set up local filesystem mirrors, network mirrors, or development overrides for local testing. 
+- **Credentials (`credentials`):** Stores authentication tokens and API credentials for remote services like Terraform Cloud or HCP Terraform. 
+- **Credential Helpers (`credentials_helper`):** Integrates external tools or password managers to fetch sensitive tokens dynamically. 
+- **Checkpoint Disabling (`disable_checkpoint = true`):** Disables anonymous telemetry and periodic checks for new Terraform versions. 
+
+**Example Configuration & Settings Layers**
+
+An example configuration can include plugin caching, disabling checkpoints, setting provider installation mirrors, and configuring credentials. For the complete syntax and reference examples, please consult the official documentation. 
+
+Terraform behavior is managed across three primary layers: 
+
+1. **Command-Line Switches** (tactical, per-command flags such as `-chdir=DIR` or `-var`)
+2. **CLI Configuration Files** (`.terraformrc` / `terraform.rc` for persistent, machine-wide settings)
+3. **Environment Variables** (dynamic overrides like `TF_LOG`, `TF_VAR_name`, or `TF_PLUGIN_CACHE_DIR`)
 
 ### **99. What is Terraform Plugin Cache Directory (`TF_PLUGIN_CACHE_DIR`)?**
 **Answer:** Caching downloaded provider binaries locally on disk across multiple directories, saving gigabytes of bandwidth and minutes of CI build time.
