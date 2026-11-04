@@ -3524,8 +3524,84 @@ Because JSON does not natively support HCL features like variables, functions, o
 - **Why use it:** It is perfect if you are building an internal developer platform, using a programming language (like Python or Node.js) to generate infrastructure blueprints dynamically, or linting files with standard JSON ecosystem tools.
 - **Why avoid it for manual code:** JSON lacks native comment support, requires strict quote escaping for nested logic, is highly verbose, and is significantly harder for humans to audit and maintain compared to standard HCL.
 
-### **104. What is Ansible Fact Gathering (`setup` module)?**
-**Answer:** Automatically discovering hardware, OS, network, and disk facts from target hosts upon playbook execution and storing them in `ansible_facts`.
+### **82. What is Ansible Fact Gathering (`setup` module)?**
+**Answer:****Ansible Fact Gathering** is **the process where Ansible automatically collects system-level details from managed target nodes before executing any playbook tasks**. This process is powered by the **`ansible.builtin.setup` module**, which queries the target machine and returns an extensive JSON dictionary of system properties known as **Ansible Facts**. 
+
+These facts are temporarily saved as variables (`ansible_facts`) and can be used to dynamically customize playbook logic. 
+
+**Key System Metrics Collected**
+
+The `setup` module discovers a massive footprint of system configuration details, including: 
+
+- **Operating System:** Distribution name, kernel version, and family (e.g., `ansible_os_family: "Debian"`). 
+- **Networking:** Active network interfaces, IP addresses, MAC addresses, and subnet masks (e.g., `ansible_all_ipv4_addresses`).
+- **Hardware & Resources:** CPU core counts, total memory, available storage, and architecture. 
+- **Environment:** System time, hostnames, and environment paths. 
+
+**Why Fact Gathering is Vital**
+
+Facts remove hardcoded variables, allowing you to build adaptive, intelligent automation.
+
+1. **Conditional Execution (`when` loops):** You can target distinct actions depending on the system type. 
+
+   ```yaml
+   - name: Install Apache on RedHat systems
+     ansible.builtin.yum:
+       name: httpd
+       state: present
+     when: ansible_facts['os_family'] == "RedHat"
+   ```
+
+2. **Dynamic Configuration Templates:** You can pass hardware-specific parameters to configuration files (e.g., matching database memory boundaries directly to `ansible_facts['memtotal_mb']`). 
+
+**Interacting with the `setup` Module**
+
+By default, Ansible runs this module implicitly at the beginning of every play (`TASK [Gathering Facts]`). However, you can manage and interact with it manually. 
+
+**1. Checking Host Facts via Ad-Hoc Command**
+
+To audit or debug everything Ansible can see about a target server, execute: 
+
+```bash
+ansible all -m ansible.builtin.setup
+```
+
+**2. Filtering Specific Data**
+
+Because gathering everything dumps hundreds of lines of JSON, you can target specific properties using the `filter` argument:
+
+```bash
+# Get only network IP data
+ansible all -m ansible.builtin.setup -a "filter=ansible_all_ipv4_addresses"
+
+# Get memory attributes
+ansible all -m ansible.builtin.setup -a "filter=ansible_*_mb"
+```
+
+**3. Optimizing Speed with Subsets**
+
+Fact collection establishes SSH connections and parses commands, which can slow down massive infrastructure rollouts. You can minimize the footprint using `gather_subset`: 
+
+```yaml
+- name: Collect only basic network and virtual specs
+  ansible.builtin.setup:
+    gather_subset:
+      - '!all'
+      - 'network'
+      - 'virtual'
+```
+
+**4. Disabling Fact Gathering Completely**
+
+If your playbook does not rely on system environment variables, disabling fact gathering will drastically accelerate your execution times: 
+
+```yaml
+- hosts: webservers
+  gather_facts: no
+  tasks:
+    - name: Run a direct command
+      ansible.builtin.command: echo "Hello World"
+```
 
 ### **105. What is Terraform `terraform_version` Constraint?**
 **Answer:** Locking configurations to compatible engine versions (`required_version = ">= 1.5.0, < 2.0.0"`) to prevent syntax incompatibility issues.
