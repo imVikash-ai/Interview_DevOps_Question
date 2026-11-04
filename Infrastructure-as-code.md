@@ -4006,12 +4006,67 @@ Dynamic Provider Credentials natively support the major cloud vendors and securi
   - Recovering a corrupted or lost remote state from a verified local backup or S3 object version.
   - Manual backend migrations when automated migration fails
 
-### **124. What is Terraform Enterprise Private Module Registry?**
-**Answer:** An internal organization module registry with built-in versioning, documentation generation, and access control.
+### **92. What is Ansible Jinja2 Templating?**
+**Answer:** **Ansible Jinja2 Templating** is **a powerful feature that allows you to generate dynamic configuration files, scripts, and playbooks by combining static text files with dynamic variables, system facts, and programming logic**. 
 
+Instead of writing hardcoded static configuration files for every single server, you can write a single blueprint template using the **Jinja2 Python templating engine**. When your playbook runs, Ansible processes this file on the control node, replaces variables with actual host-specific values, and pushes the final tailored file to your target machines.
 
-### **127. What is Ansible Jinja2 Templating?**
-**Answer:** Dynamically generating configuration files (`template` module) with variable substitution and loops using Jinja2 syntax.
+**Core Syntax Basics**
+
+Jinja2 templates are typically saved with a `.j2` file extension and use specific tag types to mix logic with text: 
+
+| **Element Type** | **Syntax**  | **Use Case**                                                | **Example**                                   |
+| ---------------- | ----------- | ----------------------------------------------------------- | --------------------------------------------- |
+| **Expressions**  | `{{ ... }}` | Interpolating variables or system facts into the text.      | `My IP is {{ ansible_default_ipv4.address }}` |
+| **Statements**   | `{% ... %}` | Managing logic, control flows, loops, and conditions.       | `{% if env == 'prod' %} ... {% endif %}`      |
+| **Comments**     | `{# ... #}` | Internal documentation that won't appear in the final file. | `{# This is an internal comment #}`           |
+
+**Key Capabilities**
+
+- **Variable Substitution:** Automatically inject variables from your playbooks, host files, or server "facts" (like `{{ ansible_facts['hostname'] }}`).
+- **Conditionals (`if` statements):** Change what gets generated depending on the target system. For instance, setting up an Apache configuration differently if the target machine is running Debian vs. RedHat. 
+- **Loops (`for` loops):** Dynamically iterate over list arrays or dictionaries. Excellent for mapping out host entries, generating multi-port routing sheets, or configuring load balancers.
+- **Filters:** Clean up or reformat data on the fly using a pipe operator (`\|`). For example, `{{ user_input | upper }}` converts a string to all uppercase. 
+
+**Quick Code Example**
+
+**1. The Jinja2 Template (`templates/nginx.conf.j2`) **
+
+**nginx**
+```nginx
+# Managed by Ansible
+server {
+    listen {{ http_port }};
+    server_name {{ server_name }};
+
+    root /var/www/html;
+    
+    # Conditional logic block
+    {% if enable_ssl %}
+    listen 443 ssl;
+    {% endif %}
+}
+```
+
+**2. The Ansible Playbook Task (`playbook.yml`)**
+
+To render and deploy the file to managed target hosts, you invoke Ansible's built-in `template` module: 
+
+**yaml**
+```yaml
+- name: Deploy dynamic Nginx configuration
+  ansible.builtin.template:
+    src: templates/nginx.conf.j2
+    dest: /etc/nginx/sites-available/default
+  vars:
+    http_port: 80
+    server_name: example.com
+    enable_ssl: true
+```
+
+**Where it Executes**
+
+A distinct benefit of this system is that **all rendering happens on the Ansible control node** before the output is deployed. The managed target machines do not need Python's Jinja2 library installed; they merely receive the completely resolved static file.
 
 ### **128. What is Ansible Block and Rescue?**
 **Answer:** Exception handling in playbooks: tasks in `block` are executed; if any fail, tasks in `rescue` execute to remediate.
