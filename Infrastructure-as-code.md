@@ -3948,8 +3948,35 @@ It is critical to understand that `sensitive = true` **only hides data from cons
 
 Anyone with read access to your Terraform state file can view your sensitive variables and outputs in plain text. To fully secure this data, always restrict access to your state backend or use secure remote backends like **HCP Terraform** or HashiCorp Vault.
 
-### **121. What is Terraform Dynamic Provider Credentials?**
-**Answer:** Exchanging OIDC tokens from CI systems (GitHub Actions) for temporary cloud provider credentials dynamically during `terraform apply`.
+### **90. What is Terraform Dynamic Provider Credentials?**
+**Answer:** **Terraform Dynamic Provider Credentials** is **a feature in HCP Terraform (formerly Terraform Cloud) and Terraform Enterprise that eliminates the need for hardcoded, long-lived cloud access keys (static secrets) by generating temporary, short-lived tokens for each infrastructure run**. 
+
+Instead of storing sensitive credentials like `AWS_ACCESS_KEY_ID` or Azure Client Secrets inside your Terraform workspaces, this feature establishes a secure, cryptographic trust relationship directly between HashiCorp and your cloud provider using the **OpenID Connect (OIDC)** standard. 
+
+**How It Works**
+
+The authentication flow moves completely away from permanent keys through an automated handshake:
+
+1. **The Trigger:** When a Terraform run (`plan` or `apply`) starts, HCP Terraform automatically generates a temporary, signed OIDC workload identity token. 
+2. **The Handshake:** HCP Terraform sends this token to your cloud provider (e.g., AWS, GCP, Azure). This token carries specific metadata containing details about the exact HashiCorp organization, project, and workspace initiating the run. 
+3. **The Exchange:** The cloud provider validates the token using HCP Terraform's public keys. If the workspace matches the pre-configured trust policy, the cloud provider generates fresh, temporary credentials valid *only* for the duration of that specific run. 
+4. **The Cleanup:** Terraform uses these short-lived keys to provision the infrastructure, and once the run finishes, the keys are completely discarded and become useless. 
+
+**Key Benefits**
+
+- **Zero Credential Rotation:** Because the credentials expire immediately after a run, your engineering team no longer has to manually manage, rotate, or safeguard long-lived keys. 
+- **Minimized Blast Radius:** If a workspace or machine is compromised, there are no static, permanent passwords or master keys sitting in environment variables for attackers to steal. 
+- **Granular Least-Privilege Access:** You can assign highly specific cloud roles per workspace. For example, you can assign a restrictive, read-only cloud role to a workspace's `plan` phase, and a separate, write-permissive role to the `apply` phase. 
+
+**Supported Platforms**
+
+Dynamic Provider Credentials natively support the major cloud vendors and security ecosystems:
+
+- **Amazon Web Services (AWS)** (via AWS IAM OIDC Identity Providers)
+- **Microsoft Azure** (via Workload Identity Federation)
+- **Google Cloud Platform (GCP)** (via Workload Identity Pools)
+- **HashiCorp Vault** (to centrally manage Vault-backed dynamic workflows)
+- **Kubernetes & Tencent Cloud**
 
 ### **122. What is Terraform State Pull (`terraform state pull`)?**
 **Answer:** Downloads and outputs the raw JSON state file from the remote backend to stdout.
