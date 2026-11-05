@@ -39,10 +39,39 @@ The **Linux Boot Process** **moves through five primary stages from the moment y
 
 ### **2. What is `systemd` and what are Units, Targets, and Timers?**
 **Answer:**
-`systemd` is the Linux init system and service manager running as **PID 1**.
-- **Unit:** A configuration file (`.service`, `.socket`, `.mount`, `.timer`) representing a managed system resource.
-- **Target:** A synchronization point grouping units together (e.g., `multi-user.target` replaces SysV init runlevel 3).
-- **Timer:** Native systemd replacement for cron, executing service units based on monotonic or calendar events.
+
+`systemd` is **a system and service manager for Linux distributions**. It usually runs as **PID 1** (the first process started by the Linux kernel when the system boots) and manages background services, devices, and system states.
+
+Unlike older init systems (like `sysvinit`) that launched services sequentially one-by-one, `systemd` tracks dependencies and starts services in parallel, which significantly speeds up boot times. You interact with and control `systemd` using the **systemctl command line tool**.
+
+#### What are Units?
+
+In `systemd`, **everything** it manages or tracks is called a **unit**. A unit is represented by a plain-text configuration file (a unit file) that defines an object, its properties, how it behaves, and its dependencies.
+
+Units end with different file extensions depending on what they represent: 
+
+- `.service` (background daemons or programs like a web server)
+- `.target` (synchronization points or groups of units)
+- `.timer` (scheduled tasks)
+- `.mount` / `.automount` (file system mounts)
+- `.socket` (inter-process communication sockets) 
+
+#### What are Targets?
+
+A **target** (`.target`) is a special type of unit used to **group other units together** and establish system states or synchronization milestones (similar to traditional runlevels in older init systems). 
+
+- Targets do not do much work on their own; instead, they pull in a collection of other units using dependency rules like `Wants=` or `Requires=`. 
+- Common examples include:
+  - `multi-user.target`: A standard headless/multi-user command-line system state.
+  - `graphical.target`: A multi-user system state that includes a graphical desktop environment.
+  - `network.target`: A milestone used to synchronize network-dependent services. 
+
+#### What are Timers?
+
+A **timer** (`.timer`) is a unit used for **scheduled task execution**, acting as a modern, integrated alternative to traditional `cron` jobs. 
+
+- Timers do not execute code directly; instead, **every `.timer` unit requires a matching `.service` unit**. When the timer reaches its trigger condition, `systemd` launches the associated service. 
+- **Advantages over cron:** They integrate directly with `systemd` dependencies and logging (`journald`), can trigger tasks based on real-world time/dates or relative system events (e.g., *15 minutes after boot*), and can automatically catch up on jobs missed if the machine was powered off
 
 ### **3. Explain the Linux Process States (`R`, `S`, `D`, `Z`, `T`).**
 **Answer:**
