@@ -320,8 +320,32 @@ If a program tries to access a page that is currently sitting on the hard drive/
 
 ### **8. What is a Page Fault (Minor vs Major Page Fault)?**
 **Answer:**
-- **Minor Page Fault:** The requested memory page is already in physical RAM (e.g., shared library), requiring only updating the process page table (fast, no disk I/O).
-- **Major Page Fault:** The requested page is not in RAM (must be read from swap space or disk filesystem), causing process latency stalls.
+
+A **page fault** is **an interrupt or exception raised by the Memory Management Unit (MMU) when a program tries to access a piece of virtual memory that does not currently have a valid mapping to physical RAM**. 
+
+When this happens, the operating system kernel intercepts the CPU, resolves the missing mapping or loads the required data, updates the page table, and lets the instruction run again transparently. 
+
+**Minor vs. Major Page Faults**
+
+The primary difference comes down to **where** the missing data is located and **how much time** it takes to resolve.
+
+| **Feature**            | **Minor Page Fault (Soft Fault)**                                                                   | **Major Page Fault (Hard Fault)**                                                        |
+| ---------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **Data Location**      | Already in physical **RAM** (e.g., shared libraries, parent process memory, or Copy-on-Write pages) | Not in RAM; stored on **secondary storage/disk** (swap space or executable file on disk) |
+| **Disk I/O Required**  | **No**                                                                                              | **Yes** (slow read from disk)                                                            |
+| **Resolution Time**    | Very fast (microseconds / fast kernel updates)                                                      | Orders of magnitude slower (milliseconds due to disk latency)                            |
+| **Performance Impact** | Negligible; normal part of system execution                                                         | High cost; frequent occurrences can cause severe lag or **thrashing**                    |
+
+**What Happens During a Page Fault?**
+
+1. **The Trap:** The CPU tries to access a virtual address. The MMU sees that the "present bit" in the page table is set to `0` and triggers a hardware trap/exception.
+2. **Kernel Intervention:** The operating system pauses the offending process and switches to kernel mode.
+3. **Fault Classification:** The kernel checks the nature of the reference:
+   - **Minor fault:** The page is already sitting in RAM somewhere else (e.g., shared code used by another program). The kernel simply updates the process's page table to point to that existing physical frame.
+   - **Major fault:** The page is not in RAM. The kernel allocates a physical frame (or evicts a victim page if RAM is full), issues a disk read to fetch the page from swap or storage, and waits for the I/O to complete.
+   - **Invalid fault:** If the address is illegal or unassigned, the kernel triggers a **segmentation fault** and usually terminates the program.
+4. **Resume:** Once fixed, the kernel updates the page table entry, marks the page as present, and restarts the interrupted instruction.
+
 
 ### **9. What is Swap Space and how does the `swappiness` kernel parameter work?**
 **Answer:** Dedicated disk space used as an extension of physical RAM when memory is exhausted.
