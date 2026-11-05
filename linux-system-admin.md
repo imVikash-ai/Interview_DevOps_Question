@@ -125,8 +125,61 @@ A zombie process **is already dead**, meaning it has finished execution and free
 - **Fixing Zombies:** If a zombie lingers (`defunct`), it means the parent process is poorly coded and forgot to check on its child. To get rid of a lingering zombie, you must kill or restart the *parent* process. Once the parent dies, the zombie is adopted by `systemd` (PID 1), which automatically cleans it up
 
 ### **4. What is a Zombie Process and how do you resolve it?**
-**Answer:** A child process that has exited but remains in the process table because its parent has not invoked `wait()` / `waitpid()`. Zombies consume process table entries (PIDs) but zero CPU/RAM. Since zombies are already dead, they cannot be killed with `kill -9`.
-- **Resolution:** Send `SIGCHLD` to the parent process, or kill the parent process so the zombie is orphaned and adopted by **PID 1 (`systemd`)**, which reaps it immediately.
+**Answer:** 
+
+A **zombie process** (or defunct process) is a child process that has finished execution (via the `exit` system call) but still has an entry in the operating system's process table. 
+
+- **Why it happens:** When a child process terminates, the kernel retains a small table entry containing its Process ID (PID) and exit status so the parent process can read it via a `wait()` or `waitpid()` system call. Once the parent reads this status (known as "reaping"), the entry is deleted. If the parent fails to read it, the child remains a zombie. 
+- **Impact:** A zombie process has already stopped running and does **not** consume CPU or active memory. However, it continues to hold a PID. If thousands of zombies accumulate, they can exhaust the system's pool of available PIDs and block new processes from starting.
+- **Note on killing:** You **cannot** kill a zombie process with standard termination commands (like `kill -9`) because it is already dead; the OS ignores signals sent to a process in the `Z` (zombie) state. You must deal with the parent process instead. 
+
+#### How to Identify Zombie Processes
+
+You can spot zombie processes in Unix-like systems using the `ps` command: 
+
+**bash**
+
+```bash
+ps aux | grep Z
+```
+
+In the output, look for a `Z` in the STAT (state) column or `<defunct>` in the command column. You can also check the parent Process ID (PPID) to see which application spawned them.
+
+#### How to Resolve a Zombie Process
+
+Because you cannot target the zombie directly, resolution focuses on the **parent process**: 
+
+1. **Send a `SIGCHLD` signal to the parent:**
+
+   Sometimes a gentle push wakes up the parent process to handle pending child states:
+
+   ```bash
+   kill -s SIGCHLD <parent_pid>
+   ```
+
+2. **Fix or restart the parent application:**
+
+   A high volume of zombie processes usually points to a bug in the software where the developer forgot to implement `wait()` or handle the `SIGCHLD` signal. Updating or restarting the parent service typically clears the child zombies. 
+
+3. **Terminate the parent process:**
+
+   If the parent process is unresponsive or misbehaving and refuses to clean up its children, you can terminate the parent:
+
+   ```bash
+   kill -15 <parent_pid>   # Graceful termination
+   # or
+   kill -9 <parent_pid>    # Force kill if necessary
+   ```
+
+   - *What happens next:* When a parent process dies, its orphaned children are automatically re-parented to the init/systemd process (PID 1). PID 1 automatically executes `wait()` to reap and clean up the leftover zombies. 
+
+4. **Reboot the system (Last Resort):**
+
+   If the parent is a core system process that cannot be safely killed and the zombies are locking up the PID table, a system reboot will clear all process table entries. 
+
+5. **Containerized Environments (Docker/Kubernetes):**
+
+   If zombies accumulate inside containers, the container entrypoint may not be reaping PID 1 children properly. Using flags like `--init` in Docker (`docker run --init`) or lightweight init systems (such as `tini`) ensures a proper init process handles child reaping inside the container
 
 ### **5. Explain Linux Load Average (1, 5, and 15-minute metrics).**
 **Answer:** The average number of processes that are in a **runnable state** (using or waiting for CPU) plus processes in **uninterruptible sleep (`D` state)** (waiting for disk or network I/O) over 1, 5, and 15 minutes.
