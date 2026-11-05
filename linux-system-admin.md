@@ -75,11 +75,54 @@ A **timer** (`.timer`) is a unit used for **scheduled task execution**, acting a
 
 ### **3. Explain the Linux Process States (`R`, `S`, `D`, `Z`, `T`).**
 **Answer:**
-- **`R` (Running / Runnable):** Process is currently executing on CPU or waiting in the run queue.
-- **`S` (Interruptible Sleep):** Process is waiting for an event or I/O; can be awakened by signals.
-- **`D` (Uninterruptible Sleep - Disk Sleep):** Process is waiting on hardware I/O (disk, NFS); **cannot be killed by `SIGKILL`**.
-- **`Z` (Zombie / Defunct):** Process has completed execution, but its exit status has not been reaped by its parent process.
-- **`T` (Stopped / Traced):** Process suspended by `SIGSTOP` or debugger (`ptrace`).
+
+In Linux, process states tell you exactly what a program is doing relative to the CPU, memory, and hardware devices. You can view these states using monitoring tools like `top`, `htop`, or `ps aux`.
+
+Here is the breakdown of the five primary **Linux process states (`R`, `S`, `D`, `Z`, `T`)**:
+
+| **State Code** | **State Name** | **Meaning & Behavior** | **Can it be killed?** |
+|---|---|---|---|
+| **`R`** | **Running / Runnable** | Actively executing on the CPU or waiting in the scheduler queue to get CPU time. | Yes (`SIGKILL`) |
+| **`S`** | **Interruptible Sleep** | Waiting for an event, user input, or network packet. It wakes up when signaled. | Yes (`SIGKILL`) |
+| **`D`** | **Uninterruptible Sleep** | Waiting on a critical hardware operation (usually direct disk I/O). It ignores all signals. | **No** (until I/O finishes) |
+| **`T`** | **Stopped / Traced** | Suspended manually by a user or tool (e.g., using `Ctrl+Z` or a debugger). | Yes (`SIGKILL`) |
+| **`Z`** | **Zombie / Defunct** | Finished executing but waiting for its parent process to acknowledge its exit status. | **No** (already dead) |
+
+#### Detailed Breakdown:
+
+#### R (Running or Runnable)
+
+A process in the **`R` state** is either currently using a CPU core or sitting in the OS CPU scheduler's run queue, ready to be executed the split second a CPU core becomes free. 
+
+- **Example:** Running a high-intensity Python math script or running `grep` over a massive log file.
+- **Note:** A system with a lot of `R` processes will experience high CPU usage and increased load averages. 
+
+#### S (Interruptible Sleep)
+
+This is the most common state in a healthy Linux system. The process has nothing to do right now and is **waiting for a specific event or resource** to wake it up (like a keystroke, network data, or a timer). 
+
+- **Example:** A text editor like `nano` waiting for you to type a key, or an SSH daemon waiting for a login request.
+- **Signal Behavior:** If you send a termination signal (like `kill -9`), the process wakes up immediately and terminates.
+
+#### D (Uninterruptible Sleep)
+
+A process enters the **`D` state** when it is waiting for low-level kernel or hardware operations-most commonly disk read/write cycles. To protect the integrity of the data being moved, the kernel blocks the process from being interrupted by *any* software signal.
+
+- **Example:** A database querying a slow Network File System (NFS) or a failing hard drive.
+- **The "Unkillable" Catch:** You **cannot kill a `D` process**, not even with `kill -9`. If a process stays stuck in `D` for a long time, it usually points to failing hardware, corrupted device drivers, or frozen network storage. The only way to clear it is to fix the underlying hardware problem or reboot the machine.
+
+#### T (Stopped)
+
+The **`T` state** means the process has been explicitly paused. It uses zero CPU resources while stopped.
+- **Example:** Pressing `Ctrl + Z` in your terminal to pause a foreground command, or when a programmer uses a debugging tool (like `gdb`) to hit a breakpoint.
+- **Resuming:** You can resume the process by sending the `SIGCONT` signal, or by using terminal commands like `fg` (foreground) or `bg` (background). 
+
+#### Z (Zombie / Defunct)
+
+A zombie process **is already dead**, meaning it has finished execution and freed its memory. However, it retains a tiny entry in the system's process table so that its parent process can read its final exit code. Once the parent reads it (called "reaping"), the zombie disappears. 
+
+- **The Catch:** Because it is already dead, you **cannot kill a zombie process** with `kill`.
+- **Fixing Zombies:** If a zombie lingers (`defunct`), it means the parent process is poorly coded and forgot to check on its child. To get rid of a lingering zombie, you must kill or restart the *parent* process. Once the parent dies, the zombie is adopted by `systemd` (PID 1), which automatically cleans it up
 
 ### **4. What is a Zombie Process and how do you resolve it?**
 **Answer:** A child process that has exited but remains in the process table because its parent has not invoked `wait()` / `waitpid()`. Zombies consume process table entries (PIDs) but zero CPU/RAM. Since zombies are already dead, they cannot be killed with `kill -9`.
