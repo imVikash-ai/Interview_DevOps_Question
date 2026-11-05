@@ -509,17 +509,62 @@ sudo systemctl mask <service_name>
 sudo systemctl unmask <service_name>
 ```
 
+### **12. Explain File Permissions and Octal Notation (`chmod`).**
+**Answer:** 
 
-### **14. What is `journalctl` and how do you query system logs?**
-**Answer:** Queries the systemd binary structured journal:
-- `journalctl -u nginx.service -f` (follow live service logs)
-- `journalctl -p err -b` (show all error-level logs since current boot)
-- `journalctl --since "1 hour ago"`
+**File permissions control who can read, write, or execute a file or directory.** In Linux and Unix-like operating systems, these permissions are assigned to three distinct types of users: the Owner, the Group, and Others.
 
-### **15. Explain File Permissions and Octal Notation (`chmod`).**
-**Answer:** Read (`r` = 4), Write (`w` = 2), Execute (`x` = 1):
-- `chmod 755 script.sh` $\rightarrow$ Owner: `rwx` (7), Group: `r-x` (5), Others: `r-x` (5).
-- `chmod 644 file.txt` $\rightarrow$ Owner: `rw-` (6), Group: `r--` (4), Others: `r--` (4).
+The `chmod` (change mode) command uses **octal notation**—a three-digit number system—as a shorthand way to set these permissions simultaneously.
+
+#### 1. The Core Components
+
+Every file or directory has three basic permission types, each represented by a letter or a specific numeric value:
+
+- **Read (`r`) = 4**: Allows viewing the contents of a file or listing the contents of a directory.
+- **Write (`w`) = 2**: Allows modifying or deleting a file, or adding/deleting files within a directory.
+- **Execute (`x`) = 1**: Allows running a file as a program or script, or entering (`cd` into) a directory.
+- **No Permission (`-`) = 0**: Denies that specific capability.
+
+#### 2. The Three User Classes
+
+When you use `chmod`, the permission number consists of **three digits** in a specific order:
+
+1. **First Digit (User/Owner):** The person who owns the file.
+2. **Second Digit (Group):** Users who belong to the file's assigned group.
+3. **Third Digit (Others):** Everyone else on the system.
+
+#### 3. How Octal Math Works
+
+To calculate the digit for a user class, you simply **add the numbers** of the permissions you want to grant:
+
+| **Permission Combo**           | **Math**  | **Octal Number** |
+| ------------------------------ | --------- | ---------------- |
+| No permissions (`---`)         | 0 + 0 + 0 | **0**            |
+| Execute only (`--x`)           | 0 + 0 + 1 | **1**            |
+| Write only (`-w-`)             | 0 + 2 + 0 | **2**            |
+| Write & Execute (`-wx`)        | 0 + 2 + 1 | **3**            |
+| Read only (`r--`)              | 4 + 0 + 0 | **4**            |
+| Read & Execute (`r-x`)         | 4 + 0 + 1 | **5**            |
+| Read & Write (`rw-`)           | 4 + 2 + 0 | **6**            |
+| Read, Write, & Execute (`rwx`) | 4 + 2 + 1 | **7**            |
+
+---
+
+#### 4. Common `chmod` Examples
+
+- `chmod 777 filename`
+  - **Full access for everyone.**
+  - Owner (7), Group (7), and Others (7) can all read, write, and execute. *(Note: This is a major security risk and should rarely be used).*
+- `chmod 755 filename`
+  - **Standard for executable files and directories.**
+  - Owner can do everything (7). Group (5) and Others (5) can only read and execute.
+- `chmod 644 filename`
+  - **Standard for regular files (like text files or images).**
+  - Owner can read and write (6). Group (4) and Others (4) can only read.
+- `chmod 600 filename`
+  - **Private files (like SSH keys).**
+  - Owner can read and write (6). Group (0) and Others (0) have zero access.
+
 
 ### **16. What are Special Permissions: SUID, SGID, and Sticky Bit?**
 **Answer:**
