@@ -408,12 +408,107 @@ When you run `ls /sys`, you typically find directories such as:
 - **`/sys`**: Introduced in Linux kernel 2.6 to cleanly structure and separate hardware device topology, driver models, and kernel objects, relieving clutter from `/proc`.
 
 
-### **13. What is `systemctl` and how do you manage service lifecycles?**
-**Answer:** CLI utility to manage systemd services:
-- `systemctl start <service>` / `stop` / `restart` / `reload`
-- `systemctl status <service>`
-- `systemctl enable <service>` (creates symlinks in target directories to start on boot)
-- `systemctl daemon-reload` (reloads unit files from disk)
+### **11. What is `systemctl` and how do you manage service lifecycles?**
+**Answer:** 
+
+`systemctl` is the primary command-line control tool used to interact with `systemd`, the system and service manager for modern Linux distributions. Acting as PID 1 (the first process started by the kernel), `systemd` initializes the operating system, spawns background services (daemons), and manages system state.
+
+##### Managing the Service Lifecycle
+
+Services in Linux are managed via "unit files" and controlled through `systemctl` commands.
+
+#### 1. Runtime State (Starting, Stopping, and Restarting)
+
+- **Start a service:** Launches an inactive service immediately.
+
+```bash
+sudo systemctl start <service_name>
+```
+
+- **Stop a service:** Halts a running service immediately.
+
+```bash
+sudo systemctl stop <service_name>
+```
+
+- **Restart a service:** Stops and then starts the service.
+
+```bash
+sudo systemctl restart <service_name>
+```
+
+- **Reload configuration:** Instructs the service to reload its configuration files without a full restart (if supported by the service).
+
+```bash
+sudo systemctl reload <service_name>
+```
+
+- **Try-restart:** Restarts a service only if it is already running.
+
+```bash
+sudo systemctl try-restart <service_name>
+```
+
+#### 2. Status & Inspection
+
+- **Check service status:** Displays whether the service is active, its PID, uptime, and recent log snippets.
+
+```bash
+systemctl status <service_name>
+```
+
+- **Check if active:** Quick boolean check to see if a service is running.
+
+```bash
+systemctl is-active <service_name>
+```
+
+- **Check if failed:** Determines if a service crashed or failed to start.
+
+```bash
+systemctl is-failed <service_name>
+```
+
+#### 3. Boot Behavior (Enabling and Disabling)
+
+- **Enable at boot:** Creates a symbolic link to configure the service to launch automatically when the system boots.
+
+```bash
+sudo systemctl enable <service_name>
+```
+
+- **Disable at boot:** Prevents the service from starting automatically at boot time.
+
+```bash
+sudo systemctl disable <service_name>
+```
+
+- **Enable and start immediately:** Combines enabling at boot and starting right now.
+
+```bash
+sudo systemctl enable --now <service_name>
+```
+
+- **Check if enabled:** Verifies boot startup configuration.
+
+```bash
+systemctl is-enabled <service_name>
+```
+
+#### 4. Advanced Control (Masking)
+
+- **Mask a service:** Links the service file to `/dev/null`, making it impossible to start manually or via other dependencies.
+
+```bash
+sudo systemctl mask <service_name>
+```
+
+- **Unmask a service:** Reverses a mask so the service can be managed normally again.
+
+```bash
+sudo systemctl unmask <service_name>
+```
+
 
 ### **14. What is `journalctl` and how do you query system logs?**
 **Answer:** Queries the systemd binary structured journal:
