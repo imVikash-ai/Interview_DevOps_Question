@@ -566,11 +566,51 @@ To calculate the digit for a user class, you simply **add the numbers** of the p
   - Owner can read and write (6). Group (0) and Others (0) have zero access.
 
 
-### **16. What are Special Permissions: SUID, SGID, and Sticky Bit?**
+### **13. What are Special Permissions: SUID, SGID, and Sticky Bit?**
 **Answer:**
-- **SUID (`chmod u+s` / 4000):** Executes the binary with the file owner's permissions (e.g., `/usr/bin/passwd` runs as root).
-- **SGID (`chmod g+s` / 2000):** New files created in directory inherit directory group ownership.
-- **Sticky Bit (`chmod +t` / 1000):** In shared directories (`/tmp`), only file owners or root can delete files.
+
+Special permissions in Linux—**SUID**, **SGID**, and the **Sticky Bit**—extend standard read, write, and execute (`rwx`) permissions to handle specialized execution and multi-user security scenarios. 
+
+#### 1. SUID (Set User ID)
+
+- **What it does:** Allows an executable file to run with the privileges of the **file owner** rather than the user who is running it. 
+- **Where it applies:** Executable files only (ignored on directories). 
+- **Visual indicator:** An **`s`** appears in place of the owner's execute bit (`-rwsr-xr-x`). If the owner lacks execution rights, it appears as a capital **`S`**. 
+- **Real-world example:** The `/usr/bin/passwd` command is owned by `root` and has SUID set. When a normal user runs `passwd` to change their password, the binary temporarily runs with root privileges so it can write to `/etc/shadow`.
+- **Commands:**
+  - Set: `chmod u+s filename` or numeric `4755`
+  - Remove: `chmod u-s filename`
+
+#### 2. SGID (Set Group ID)
+
+- **What it does:**
+  - **On an executable file:** Runs the program with the privileges of the **group owner**.
+  - **On a directory:** Any new files or subdirectories created inside automatically **inherit the group ownership** of the parent directory rather than the creator's default group.
+- **Where it applies:** Both executable files and directories (crucial for shared team folders). 
+- **Visual indicator:** An **`s`** appears in place of the group's execute bit (`drwxrwsr-x`). 
+- **Real-world example:** A shared project directory owned by a `developers` group. With SGID enabled, any file created inside by user `alice` belongs to the `developers` group so `bob` can edit it easily. 
+- **Commands:**
+  - Set: `chmod g+s dirname` or numeric `2775`
+  - Remove: `chmod g-s dirname`
+
+#### 3. The Sticky Bit
+
+- **What it does:** Restricts file deletion and renaming inside a shared directory. Even if regular users have write access to the directory, **only the file owner, directory owner, or `root`** can delete or rename a file. 
+- **Where it applies:** Directories only. 
+- **Visual indicator:** A **`t`** (or `T` if execute is missing) appears in place of the "others" execute bit (`drwxrwxrwt`). 
+- **Real-world example:** The system temporary directory `/tmp`, where any user can create files, but nobody is allowed to delete someone else's files. 
+- **Commands:**
+  - Set: `chmod +t dirname` or numeric `1775`
+  - Remove: `chmod -t dirname` 
+
+#### Summary Reference Table
+
+| **Permission** | **Symbolic (Owner/Group/Other)** | **Octal Digit Prefix** | **Effect on Files**                | **Effect on Directories**        |
+| -------------- | -------------------------------- | ---------------------- | ---------------------------------- | -------------------------------- |
+| **SUID**       | `u+s`                            | `4`                    | Runs with file owner's privileges  | No effect                        |
+| **SGID**       | `g+s`                            | `2`                    | Runs with group owner's privileges | New files inherit parent group   |
+| **Sticky Bit** | `+t`                             | `1`                    | Not applicable                     | Only owner/root can delete files |
+
 
 ### **17. What is a Hard Link vs a Soft Link (Symlink)?**
 **Answer:**
