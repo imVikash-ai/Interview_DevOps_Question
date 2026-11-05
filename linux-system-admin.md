@@ -346,13 +346,34 @@ The primary difference comes down to **where** the missing data is located and *
    - **Invalid fault:** If the address is illegal or unassigned, the kernel triggers a **segmentation fault** and usually terminates the program.
 4. **Resume:** Once fixed, the kernel updates the page table entry, marks the page as present, and restarts the interrupted instruction.
 
+### **9. What is the Linux Out-Of-Memory (OOM) Killer?**
+**Answer:** 
 
-### **9. What is Swap Space and how does the `swappiness` kernel parameter work?**
-**Answer:** Dedicated disk space used as an extension of physical RAM when memory is exhausted.
-- **`vm.swappiness` (0–100):** Controls the kernel's aggressiveness in swapping anonymous memory pages to disk relative to reclaiming page cache (default: 60; recommended for Kubernetes/Databases: 0–10).
+The **Linux Out-Of-Memory (OOM) Killer** is **a built-in kernel mechanism that activates when the operating system runs critically low on physical memory and swap space**. To prevent a complete system freeze or kernel panic, the OOM killer steps in as a last resort to sacrifice one or more processes, freeing up RAM so the rest of the system can keep running. 
 
-### **10. What is the Linux Out-Of-Memory (OOM) Killer?**
-**Answer:** A kernel mechanism activated when physical RAM and swap are completely exhausted. It computes an `oom_score` for each process based on memory consumption and `oom_score_adj`, terminating the highest-scoring process with `SIGKILL` to prevent a full kernel panic.
+#### How It Works
+
+1. **Memory Pressure Detection:** When normal memory reclamation methods (such as `kswapd` flushing page caches or swapping data out to disk) fail to free enough memory and thresholds drop past minimum limits, the OOM state is triggered.
+2. **Process Scoring ("Badness Score"):** The kernel evaluates running processes and assigns each a "badness score" (typically ranging from `0` to `1000`) to decide which process makes the best victim.
+   - It calculates scores primarily based on the **percentage of total RAM** the process consumes.
+   - It factors in process age, root privileges, and child processes.
+   - Administrators can customize this behavior for individual processes using the `/proc/[PID]/oom_score_adj` file (values from `-1000` for total immunity up to `+1000` to guarantee it gets killed first). 
+3. **Termination:** The kernel sends a fatal `SIGKILL` signal to the chosen process (or cgroup) to immediately reclaim its memory.
+
+#### Common Causes
+
+- **Memory Leaks:** A long-running application or service gradually consumes more and more RAM without releasing it back to the OS.
+- **Traffic Spikes / Heavy Workloads:** Sudden surges in user requests or massive batch jobs flooding memory beyond available limits.
+- **Exhausted Swap:** Running without swap space or misconfigured memory limits in containerized environments (like Docker or Kubernetes). 
+
+#### How to Detect OOM Events
+
+You can check if the OOM killer has terminated a process by inspecting system logs: 
+
+- Using `dmesg`: `dmesg -T | grep -i "killed process"`
+- Using `journalctl`: `journalctl -k | grep -i "oom"`
+- Checking legacy logs: `grep -i "oom" /var/log/syslog` or `/var/log/messages`
+
 
 ### **11. What is `/proc` filesystem in Linux?**
 **Answer:** A pseudo-filesystem (procfs) dynamically generated in memory by the kernel that acts as an interface to internal kernel data structures, process states, and runtime hardware metrics.
