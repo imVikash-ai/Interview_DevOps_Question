@@ -374,12 +374,39 @@ You can check if the OOM killer has terminated a process by inspecting system lo
 - Using `journalctl`: `journalctl -k | grep -i "oom"`
 - Checking legacy logs: `grep -i "oom" /var/log/syslog` or `/var/log/messages`
 
+### **10. What is `/sys` filesystem (sysfs)?**
+**Answer:** 
 
-### **11. What is `/proc` filesystem in Linux?**
-**Answer:** A pseudo-filesystem (procfs) dynamically generated in memory by the kernel that acts as an interface to internal kernel data structures, process states, and runtime hardware metrics.
+The `/sys` filesystem (known as **sysfs**) is **a virtual, in-memory filesystem provided by the Linux kernel**. It does not take up any space on your physical hard drive.
 
-### **12. What is `/sys` filesystem (sysfs)?**
-**Answer:** A pseudo-filesystem providing a structured, hierarchical tree of kernel objects, device drivers, and hardware subsystem settings (e.g., block devices, network interfaces, power states).
+Instead, it acts as a window into the kernel's internal device model, exposing hardware devices, drivers, buses, and kernel subsystems to user space. 
+
+#### Key Characteristics
+
+- **Virtual and dynamic:** It is generated on the fly by the Linux kernel. As you plug or unplug hardware (like a USB drive or PCI device), the files and directories update automatically in real time. 
+- **Tied to `kobjects`:** Internally, sysfs is built around the kernel’s `kobject` (kernel object) infrastructure, turning internal data structures into a hierarchical directory tree.
+- **Read and write interface:**
+  - **Reading** a file (e.g., using `cat`) returns the current state or attribute value of a hardware component or kernel parameter.
+  - **Writing** to certain files (e.g., using `echo`) allows administrators to configure or tune kernel behavior and hardware settings at runtime without rebooting.
+
+#### Common Top-Level Directories
+
+When you run `ls /sys`, you typically find directories such as:
+
+- `block/`: Lists block devices (like hard drives and partitions).
+- `bus/`: Organizes buses in the system (like `pci`, `usb`, `i2c`).
+- `class/`: Groups devices by their functional class (e.g., `net`, `input`, `sound`, `leds`).
+- `devices/`: The global hierarchical view of all physical and virtual devices discovered by the kernel.
+- `firmware/`: Exposes firmware-related interfaces (like ACPI or UEFI data).
+- `module/`: Lists all currently loaded kernel modules.
+- `power/`: Contains global system power state controls (such as sleep or hibernation settings).
+- `net/`: Shows network interfaces.
+
+#### Difference Between `/sys` and `/proc`
+
+- **`/proc`**: An older virtual filesystem originally created to export process and system information (like CPU usage, memory stats, and running PIDs). System parameters also live here under `/proc/sys` (managed via `sysctl`). 
+- **`/sys`**: Introduced in Linux kernel 2.6 to cleanly structure and separate hardware device topology, driver models, and kernel objects, relieving clutter from `/proc`.
+
 
 ### **13. What is `systemctl` and how do you manage service lifecycles?**
 **Answer:** CLI utility to manage systemd services:
