@@ -282,7 +282,41 @@ If you notice your load average is higher than your CPU core count, look at **wh
 - **Drawbacks:** Steep learning curve, dense and technical UI, and higher complexity compared to a quick live view.
 
 ### **7. What is Virtual Memory and how does Paging work?**
-**Answer:** An abstraction providing each process with a private, contiguous address space. Memory is divided into fixed-size **Pages** (typically 4KB). The Memory Management Unit (MMU) uses **Page Tables** to translate virtual memory addresses to physical RAM addresses.
+**Answer:** 
+
+**Virtual Memory** is **a memory management technique used by operating systems to give each running program the illusion that it has its own large, private block of contiguous memory, even if the physical Random Access Memory (RAM) is small or nearly full**.
+
+- **The Abstraction:** Instead of letting programs directly access physical RAM chips on the motherboard, the operating system intercepts memory requests.
+- **Using Disk Space:** When physical RAM runs low, the operating system moves inactive chunks of memory from RAM to a designated area on the hard drive or SSD (known as a swap file or page file).
+- **Security and Isolation:** Because every process operates in its own virtual address space, applications cannot interfere with one another's memory, which improves system stability and security.
+
+#### How Does Paging Work?
+
+**Paging** is the core hardware-and-software mechanism that makes virtual memory possible. It breaks down memory into uniform, fixed-size blocks so the operating system can map virtual locations to physical locations without needing continuous physical space.
+
+#### 1. The Core Building Blocks
+
+- **Pages:** The operating system divides a program’s **virtual memory** into fixed-size blocks called **pages** (commonly 4 KB in size).
+- **Frames:** The computer’s **physical RAM** is divided into blocks of the exact same size called **frames**.
+- **Flexibility:** Because pages and frames are the same size, a virtual page can be loaded into *any* available physical frame in RAM, meaning a program's memory does not need to sit in one continuous block. This completely eliminates external memory fragmentation. 
+
+#### 2. The Page Table (Address Translation)
+
+When the CPU tries to read or write to a virtual address, it cannot use that address directly. It relies on a hardware component called the **Memory Management Unit (MMU)**. 
+
+- The MMU looks up the virtual page number inside a data structure called the **Page Table**.
+- The Page Table translates the **virtual page** into the corresponding **physical frame number** in RAM.
+- An **offset** (the exact byte location inside that page) is combined with the frame number to pinpoint the exact physical memory location.
+
+#### 3. What Happens During a Page Fault?
+
+If a program tries to access a page that is currently sitting on the hard drive/SSD rather than in physical RAM, a **page fault** occurs:
+
+1. The CPU pauses the instruction and triggers an interrupt to the operating system.
+2. The operating system looks for the missing page on the secondary storage (swap/page file).
+3. If RAM is full, the OS evicts an older or unused page (using algorithms like Least Recently Used or FIFO).
+4. The requested page is loaded from the disk into a free frame in RAM.
+5. The page table is updated, and the CPU resumes running the program.
 
 ### **8. What is a Page Fault (Minor vs Major Page Fault)?**
 **Answer:**
