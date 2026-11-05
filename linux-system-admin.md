@@ -182,8 +182,68 @@ Because you cannot target the zombie directly, resolution focuses on the **paren
    If zombies accumulate inside containers, the container entrypoint may not be reaping PID 1 children properly. Using flags like `--init` in Docker (`docker run --init`) or lightweight init systems (such as `tini`) ensures a proper init process handles child reaping inside the container
 
 ### **5. Explain Linux Load Average (1, 5, and 15-minute metrics).**
-**Answer:** The average number of processes that are in a **runnable state** (using or waiting for CPU) plus processes in **uninterruptible sleep (`D` state)** (waiting for disk or network I/O) over 1, 5, and 15 minutes.
-- A load average of `4.0` on a 4-core machine means 100% CPU utilization. If load average is `12.0` on 4 cores, CPU or disk I/O is heavily saturated.
+**Answer:** 
+
+**Linux load average** **represents the average system load over a specific period of time** (1, 5, and 15 minutes). It measures the number of CPU-bound and disk-bound processes that are either actively running or waiting to run.
+
+Unlike a simple CPU utilization percentage, the load average gives you a holistic look at system pressure, including both processing power and disk I/O bottlenecks.
+
+#### The Three Metrics Explained
+
+When you run commands like `uptime`, `top`, or `htop`, you will see three numbers listed under load average:
+
+**bash**
+
+```bash
+load average: 1.05, 0.70, 5.15
+              │     │     │
+              │     │     └─ 15-minute average
+              │     └─────── 5-minute average
+              └───────────── 1-minute average
+```
+
+- **1-Minute Average:** The recent, immediate load. Highly volatile and prone to sudden spikes.
+- **5-Minute Average:** The mid-term trend. Smooths out temporary spikes.
+- **15-Minute Average:** The long-term trend. Indicates whether the system is experiencing sustained, systemic overload.
+
+#### How to Interpret the Numbers (The Core Rule)
+
+The numbers alone mean nothing without knowing **how many CPU cores** your system has.
+
+Think of CPU cores like lanes on a highway:
+
+- **Load = 1.00 on a 1-Core System:** The highway is perfectly full. Every process is moving, but there is no room for error.
+- **Load = 0.50 on a 1-Core System:** The highway is at 50% capacity. Traffic is moving smoothly.
+- **Load = 2.00 on a 1-Core System:** The highway is completely gridlocked. For every process running, another one is waiting in line.
+- **Load = 2.00 on a 4-Core System:** The highway has 4 lanes, and only 2 are full. The system is at 50% capacity.
+
+> ⚠️ **The Golden Rule:** A load average equal to your total number of logical CPU cores means your system is at 100% capacity.
+
+
+#### Reading Trends
+
+Comparing the three numbers tells you exactly what direction your system's performance is heading:
+
+- **Spike Incoming (e.g., `2.00, 0.50, 0.10`):** The 1-minute load is high, but the 15-minute load is low. A sudden rush of work just hit the CPU.
+- **Cooling Down (e.g., `0.10, 0.50, 2.00`):** The 15-minute load is high, but the 1-minute load dropped. The heavy bottleneck has passed, and the system is recovering.
+- **Sustained Overload (e.g., `5.00, 5.10, 5.05`):** All three numbers are high. If you only have a 2-core CPU, your system has been severely bogged down for at least 15 minutes.
+
+#### Linux vs. Other Unix Systems (The "Uninterruptible" Catch)
+
+On traditional Unix systems, load average *only* tracks processes using or waiting for the CPU.
+
+**Linux is different.** Linux includes processes in the **Uninterruptible Sleep state (State D)**. These are usually processes waiting for Disk I/O or network responses (e.g., reading a massive file, waiting on a slow NFS storage share).
+
+- **Result:** You can have a system with 0% CPU utilization, but a Load Average of `10.00` if multiple processes are stuck waiting on a failing or slow hard drive.
+
+#### Quick Diagnostics Cheat Sheet
+
+If you notice your load average is higher than your CPU core count, look at **why** it is high:
+
+1. **Check Core Count:** Run `nproc` to see how many logical cores you have.
+2. **CPU-bound vs. I/O-bound:** Run `top` or `htop`.
+   - If **%CPU** is near 100%, your CPU is maxed out by heavy software.
+   - If **%wa** (iowait) is high, your CPU is sitting idle because your hard drives/SSD cannot keep up with read/write requests.
 
 ### **6. Compare `top`, `htop`, and `atop` for process monitoring.**
 **Answer:**
