@@ -665,7 +665,7 @@ This creates a hidden trap: **you can completely run out of disk space even if y
 
 *Note: Modern filesystems like XFS and Btrfs avoid this by allocating inodes dynamically as needed.* 
 
-### Essential Inode Commands
+#### Essential Inode Commands
 
 You can interact with and check inodes using basic terminal commands:
 
@@ -675,15 +675,28 @@ You can interact with and check inodes using basic terminal commands:
 | `df -i`           | Displays the total, used, and free **inode capacity** of your filesystems.                          |
 | `stat <filename>` | Pulls the complete **metadata payload** directly from the file's inode (size, links, blocks, etc.). |
 
-
-### **19. How do you troubleshoot "No space left on device" when `df -h` shows disk space available?**
-**Answer:** The filesystem has **exhausted its Inodes** (caused by millions of zero-byte temporary files or mail queue files). Verify via `df -i`. Delete small orphaned files (`find /tmp -type f -delete`) to free inodes.
-
-### **20. What is the difference between `atime`, `mtime`, and `ctime`?**
+### **16. What is the difference between `atime`, `mtime`, and `ctime`?**
 **Answer:**
-- **`atime` (Access Time):** Last time file content was read.
-- **`mtime` (Modification Time):** Last time file content was modified.
-- **`ctime` (Change Time):** Last time file metadata or inode attributes (permissions, ownership) changed.
+
+In Unix and Linux systems, every file tracks three primary timestamps, which can be viewed using the `stat` command:
+
+**1. `atime` (Access Time)**
+
+- **What it is:** The last time the file's *data* was read or accessed (e.g., opening a file, running a script, or viewing it with `cat` or `less`).
+- **How to check:** `ls -lu`
+- **Note:** On many modern systems, `atime` updates may be disabled or modified (using mount options like `relatime`) to improve disk performance. 
+
+**2. `mtime` (Modification Time)**
+
+- **What it is:** The last time the *contents* of the file were modified (e.g., adding, editing, or deleting text inside the file).
+- **How to check:** `ls -l`
+- **Note:** This reflects the age of the file's actual data.
+
+**3. `ctime` (Change Time / Inode Change Time)**
+
+- **What it is:** The last time the file's *metadata* or inode data was changed (e.g., modifying file permissions, ownership, or renaming/moving the file). 
+- **How to check:** `ls -lc` 
+- **Key detail:** `ctime` is **not** creation time. Whenever `mtime` changes, `ctime` also updates automatically because modifying the contents changes the file size/metadata; however, changing permissions or ownership updates `ctime` *without* changing `mtime`.
 
 ### **21. Explain the Linux Filesystem Hierarchy Standard (FHS).**
 **Answer:**
