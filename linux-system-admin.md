@@ -614,8 +614,25 @@ Special permissions in Linux—**SUID**, **SGID**, and the **Sticky Bit**—exte
 
 ### **17. What is a Hard Link vs a Soft Link (Symlink)?**
 **Answer:**
-- **Hard Link:** A direct directory reference pointing to the existing inode on the same filesystem. Deleting the original file does not delete the data; data is removed only when link count reaches 0.
-- **Soft Link (Symlink):** A separate file containing a path reference to the target file. Can cross filesystems; breaks (dangling link) if the target file is deleted or moved.
+
+**A hard link points directly to the underlying data block (inode) of a file, while a soft link (also known as a symbolic link or symlink) acts as a shortcut pointing to the file's path or name**.
+
+#### Core Differences
+
+| **Feature**                | **Hard Link**                                                                           | **Soft Link (Symlink)**                                              |
+| -------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **Underlying Reference**   | Points directly to the file's **inode** (the physical data on disk).                    | Points to the **file path or name** of the target.                   |
+| **Inode Number**           | Shares the **exact same** inode number as the original file.                            | Has a **different/distinct** inode number from the target file.      |
+| **Deleting Original File** | The data **remains accessible** through the hard link until all hard links are deleted. | The link becomes a **dangling (broken) link** and fails to work.     |
+| **Cross File Systems**     | **Cannot** span across different partitions or file systems.                            | **Can** span across different file systems, partitions, or networks. |
+| **Directories**            | **Cannot** link directories (except under rare superuser/kernel constraints).           | **Can** link to directories as well as files.                        |
+| **Command**                | `ln <target> <link_name>`                                                               | `ln -s <target> <link_name>`                                         |
+
+#### Summary of How They Work
+
+- **Hard Link:** Created as another directory entry that references the same physical data. If you modify the content through any hard link, the changes appear everywhere because they share the exact same data storage. As long as at least one hard link exists, the data is safe on the disk.
+- **Soft Link:** Created as a special, separate file that stores the text path of the target file (like a Windows shortcut). If the target file moves or gets deleted, the soft link points to a non-existent path and breaks.
+
 
 ### **18. What is an Inode in Linux?**
 **Answer:** A filesystem data structure storing metadata about a file: file size, ownership UID/GID, access permissions, timestamps (`atime`, `mtime`, `ctime`), and data block pointers (does **not** store filename or actual file content).
