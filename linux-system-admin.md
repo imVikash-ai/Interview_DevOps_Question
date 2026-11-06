@@ -698,16 +698,47 @@ In Unix and Linux systems, every file tracks three primary timestamps, which can
 - **How to check:** `ls -lc` 
 - **Key detail:** `ctime` is **not** creation time. Whenever `mtime` changes, `ctime` also updates automatically because modifying the contents changes the file size/metadata; however, changing permissions or ownership updates `ctime` *without* changing `mtime`.
 
-### **21. Explain the Linux Filesystem Hierarchy Standard (FHS).**
+### **17. Explain the Linux Filesystem Hierarchy Standard (FHS).**
 **Answer:**
-- `/bin`, `/usr/bin`: Core user binaries.
-- `/sbin`, `/usr/sbin`: System administration binaries.
-- `/etc`: Host-specific configuration files.
-- `/var`: Variable data (logs, spool, caches).
-- `/tmp`: Ephemeral temporary files (cleared on reboot).
-- `/dev`: Device nodes representing hardware.
-- `/proc`, `/sys`: Virtual kernel filesystems.
-- `/opt`: Add-on third-party software packages.
+
+The **Filesystem Hierarchy Standard (FHS)** is **a formal specification that standardizes how directories and files are organized in Unix-like operating systems**. Maintained to ensure cross-distribution consistency, it dictates where specific software, configuration files, and system resources must reside. 
+
+Unlike Windows, which uses independent drive letters (like `C:` or `D:`), Linux structures everything under a **single unified tree** starting at the root directory (`/`). Even external hard drives or network shares are attached ("mounted") as folders within this single tree. 
+
+#### Core Principles of the FHS
+
+The standard classifies files into two main categories to determine their ideal location:
+
+- **Shareable vs. Non-shareable:** Shareable data can be hosted on one machine and accessed by others (e.g., user documents), while non-shareable data is bound to a specific local machine (e.g., hardware configuration files). 
+- **Static vs. Variable:** Static files do not change without administrative action (e.g., program binaries), while variable files are constantly modified by active processes (e.g., logs and caches). 
+
+#### Key Directories Breakdown
+
+| **Directory** | **Core Purpose & Contents** | **Type of Data** |
+|---|---|---|
+| **`/`** | **The Root Directory.** The base of the entire system tree; all files and folders branch from here. | Top-level |
+| **`/bin`** | **Essential User Binaries.** Core command-line utilities needed for all users to function (e.g., `ls`, `cp`, `mkdir`). | Static / Shareable |
+| **`/sbin`** | **System Binaries.** Essential tools used primarily by system administrators for maintenance and recovery (e.g., `fdisk`, `iptables`). | Static / Non-shareable |
+| **`/boot`** | **Bootloader Files.** Stores the Linux kernel, initial RAM disk (initrd), and GRUB bootloader configuration files needed to start up. | Static / Non-shareable |
+| **`/etc`** | **System Configuration.** Host-specific configuration files for services, users, and applications. Think of it as the control room for the OS. | Static / Non-shareable |
+| **`/dev`** | **Device Files.** Virtual files that point directly to hardware devices like hard drives (`/dev/sda`) or keyboards. | Dynamic / Non-shareable |
+| **`/home`** | **User Personal Directories.** Personal storage for individual users (e.g., `/home/alice`). Contains documents, downloads, and user settings. | Variable / Shareable |
+| **`/root`** | **Root Home Directory.** The private home directory reserved strictly for the root user (administrator). | Variable / Non-shareable |
+| **`/lib`** | **Shared Libraries.** Essential code libraries that binaries in `/bin` and `/sbin` require to execute properly. | Static / Shareable |
+| **`/media`** | **Removable Media.** Auto-managed mount points for removable hardware like USB flash drives and CD-ROMs. | Variable / Shareable |
+| **`/mnt`** | **Temporary Mount Points.** A location designated for administrators to manually mount external file systems temporarily. | Variable / Shareable |
+| **`/opt`** | **Optional Software.** Dedicated to third-party, self-contained application packages (e.g., Google Chrome or Zoom installations). | Static / Shareable |
+| **`/usr`** | **User Utilities.** The largest secondary hierarchy containing user programs, documentation, shared assets, and non-essential binaries. | Static / Shareable |
+| **`/var`** | **Variable Data.** Stores files that actively grow or change over time, such as system logs (`/var/log`) and database entries. | Variable / Non-shareable |
+| **`/tmp`** | **Temporary Files.** Stores short-lived data created by programs, which is automatically cleared out during system reboots. | Variable / Non-shareable |
+| **`/proc` & `/sys`** | **Virtual Filesystems.** Expose live kernel data, running processes, and hardware status directly from memory as files. | Runtime / Dynamic |
+
+#### Understanding the `/usr` and `/usr/local` Sub-Hierarchies
+
+A common source of confusion is why folders like `bin` and `lib` repeat inside the `/usr` directory. The FHS uses this layout to segment core OS files from secondary user apps:
+
+1. **`/bin` vs `/usr/bin`**: `/bin` holds commands crucial for fixing a broken system in single-user recovery mode. `/usr/bin` contains standard daily-use programs (like Python or git) that aren't structurally required just to boot up. 
+2. **`/usr/local`**: This folder mimics the root structure and is reserved for software that you build or install manually on the machine, keeping them safe from being overwritten during system-wide OS updates.
 
 ### **22. What is LVM (Logical Volume Manager) and what are PV, VG, and LV?**
 **Answer:** Storage abstraction allowing dynamic disk resizing without repartitioning:
