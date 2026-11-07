@@ -796,46 +796,56 @@ The file is structured into lines, where each line represents a specific filesys
 | **5** | **Dump** | A legacy backup flag used by the old `dump` utility to decide if the filesystem needs to be backed up. It is almost universally set to `0` on modern systems. <br> *Values:* `0` (ignore) or `1` (back up). |
 | **6** | **Pass (fsck Order)** | Determines the order in which the `fsck` (filesystem check) utility scans the drives for errors at boot time. <br> *Values:* `0` (skip check), `1` (highest priority, strictly reserved for the root `/` filesystem), or `2` (other filesystems checked later). |
 
-### **26. What is `noatime` mount option and why is it used for database performance?**
-**Answer:** Disables updating the inode `atime` whenever a file is read, eliminating write I/O overhead on disk during heavy read workloads.
+### **20. What is `ip` command vs `ifconfig`?**
+**Answer:** 
 
-### **27. What is `tmpfs` and `/dev/shm`?**
-**Answer:** Memory-backed temporary filesystems storing files directly in virtual memory (RAM/swap) with ultra-low latency; wiped completely on reboot.
+The **`ip` command is the modern, powerful replacement** for the legacy **`ifconfig`** utility on Linux systems. While `ifconfig` (part of the older `net-tools` package) was the default network management tool for decades, it is now officially **deprecated** on most Linux distributions. The `ip` command (part of the `iproute2` suite) is actively maintained and handles modern networking requirements. 
 
-### **28. What is `strace` and how do you trace a running process?**
-**Answer:** Diagnostic tool intercepting and recording system calls made by a process:
-```bash
-strace -p <PID> -f -e trace=open,read,write,network
-```
+#### Key Differences At a Glance
 
-### **29. What is `lsof` and how do you find open files/network sockets?**
-**Answer:** Lists open files:
-- `lsof -i :8080` (find process listening on port 8080)
-- `lsof -p <PID>` (list all files/sockets opened by a process)
-- `lsof +D /var/log` (list open files in a directory).
+| **Feature** | **`ifconfig` (Legacy)** | **`ip` (Modern)** |
+|---|---|---|
+| **Package** | `net-tools` (often missing by default now) | `iproute2` (pre-installed on all modern distros) |
+| **Status** | Deprecated / Obsolete | Active standard |
+| **Capabilities** | Limited to basic interface configuration | Handles advanced routing, tunnels, policy routing, namespaces |
+| **Syntax** | Irregular across different tasks | Highly structured, predictable, and script-friendly |
+| **Underlying API** | Relies on older `ioctl` system calls | Uses faster, more efficient `netlink` sockets |
 
-### **30. What is `fuser`?**
-**Answer:** Identifies processes using specific files, directories, or sockets (`fuser -k 8080/tcp` kills the process holding port 8080).
+#### Command Cheat Sheet
 
-### **31. What is `vmstat` and what do `bi`, `bo`, `wa`, `si`, `so` mean?**
-**Answer:** Reports virtual memory statistics:
-- `bi`/`bo`: Blocks received from (`bi`) / sent to (`bo`) block devices (Disk I/O).
-- `wa`: CPU I/O Wait percentage (CPU idle while waiting on disk).
-- `si`/`so`: Memory swapped in (`si`) / out (`so`) from disk per second ($> 0$ indicates RAM exhaustion).
+Because `ifconfig` is being phased out, it is highly recommended to shift your muscle memory to the `ip` suite. Here is how everyday tasks translate between the two: 
 
-### **32. What is `iostat` and what does `%util` indicate?**
-**Answer:** Monitors I/O device loading:
-- `%util`: Percentage of CPU time during which I/O requests were issued to the device. Approaching 100% indicates storage saturation and disk bottlenecks.
+- **View all network interfaces and IP addresses:**
+  - `ifconfig`
+  - `ip a` *(short for `ip address show`)* 
 
-### **33. What is `netstat` vs `ss`?**
-**Answer:** `ss` is the modern, fast replacement for legacy `netstat`. It dumps socket statistics directly from kernel memory (`sock_diag`) rather than parsing slow `/proc/net/` files.
-- `ss -tulpn`: Show listening TCP/UDP sockets with process names and PIDs.
+- **View details for a specific interface (e.g., `eth0`):**
+  - `ifconfig eth0`
+  - `ip a show dev eth0` 
 
-### **34. What is `ip` command vs `ifconfig`?**
-**Answer:** `ip` (iproute2) replaces legacy `ifconfig`:
-- `ip addr show` (replaces `ifconfig`)
-- `ip route show` (replaces `route -n`)
-- `ip link set eth0 up`
+- **Bring an interface UP:**
+  - `ifconfig eth0 up`
+  - `ip link set eth0 up`
+
+- **Bring an interface DOWN:**
+  - `ifconfig eth0 down`
+  - `ip link set eth0 down`
+
+- **Assign an IP address to an interface:**
+  - `ifconfig eth0 192.168.1.50 netmask 255.255.255.0`
+  - `ip addr add 192.168.1.50/24 dev eth0`
+
+- **View the routing table:**
+  - `route -n` *(or `netstat -rn`)*
+  - `ip route show` 
+
+#### Why `ip` Won the Battle
+
+1. **Modern Feature Support:** `ifconfig` does not properly understand hardware features like network namespaces, policy routing, or multiple IP addresses assigned to a single interface (without creating clumsy aliases like `eth0:1`). The `ip` command handles all of these natively.
+
+2. **Unified Utility:** In the past, you needed separate tools like `ifconfig` for interfaces, `route` for traffic paths, and `arp` for MAC tables. The `ip` command consolidates all of these into subcommands (`ip link`, `ip addr`, `ip route`, `ip neigh`).
+
+3. **Speed and Interaction:** The `ip` command communicates with the Linux kernel via modern **netlink sockets**. This makes it significantly faster and less prone to performance bottlenecks when handling heavy enterprise networking setups than `ifconfig`'s older `ioctl` interface.
 
 ### **35. What is `sar` (System Activity Reporter)?**
 **Answer:** Part of the `sysstat` package that collects, logs, and reports historical CPU, memory, network, and disk performance data.
