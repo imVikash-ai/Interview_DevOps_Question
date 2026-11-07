@@ -776,31 +776,25 @@ LVM breaks storage down into three main architectural layers:
    ↓ *(formatted with a file system and mounted)*
 5. **Usable Directories** (`/var/www`, `/var/lib/db`)
 
-### **23. How do you extend an ext4 and XFS filesystem dynamically using LVM?**
-**Answer:**
-```bash
-# 1. Extend the Logical Volume by 50GB
-lvextend -L +50G /dev/vg_prod/lv_data
+### **19. What is `/etc/fstab` and what are the 6 fields?**
+**Answer:** 
 
-# 2. Resize filesystem online:
-resize2fs /dev/vg_prod/lv_data   # For ext4
-xfs_growfs /mnt/data             # For XFS
-```
+The **`/etc/fstab` (File Systems Table) file** is a system configuration file in Unix-like systems that controls how storage devices and filesystems are automatically integrated (mounted) into the system's directory structure during boot. 
 
-### **24. Compare ext4 vs XFS vs Btrfs.**
-**Answer:**
-- **ext4:** Battle-tested, rock-solid, supports shrinking and online expansion.
-- **XFS:** High-performance 64-bit journaling filesystem optimized for large files and parallel multi-threaded I/O (default in RHEL/CentOS); cannot be shrunk.
-- **Btrfs:** Copy-on-Write (CoW) filesystem with built-in subvolumes, snapshots, and software RAID.
+Instead of requiring users to manually mount drives every time the system starts, the operating system reads this file to determine what partitions to mount, where they belong, and what permissions to apply. 
 
-### **25. What is `/etc/fstab` and what are the 6 fields?**
-**Answer:** Defines static filesystem mounting rules on boot:
-1. `Device/UUID` (e.g., `UUID=1234-...`)
-2. `Mount Point` (e.g., `/mnt/data`)
-3. `Filesystem Type` (e.g., `ext4`, `xfs`)
-4. `Mount Options` (e.g., `defaults,noatime`)
-5. `Dump` (0 = disable dump backup)
-6. `Pass / Fsck Order` (1 = root filesystem, 2 = other filesystems, 0 = skip fsck).
+The file is structured into lines, where each line represents a specific filesystem and contains **six space- or tab-separated fields**: 
+
+#### The 6 Fields of `/etc/fstab`
+
+| **Field #** | **Field Name** | **Description & Common Examples** |
+|---|---|---|
+| **1** | **Device / File System Identifier** | Specifies the storage device or partition to be mounted. Modern systems recommend using the **UUID** (Universally Unique Identifier) or a **LABEL** because traditional device paths (like `/dev/sda1`) can change if hardware is reordered. <br> *Examples:* `UUID=1234-abcd` or `/dev/sdb1` |
+| **2** | **Mount Point** | The target directory where the contents of the storage device will appear in your Linux file tree. Swap partitions do not have a directory and use `none` or `swap` here. <br> *Examples:* `/`, `/home`, `/mnt/data` |
+| **3** | **Filesystem Type** | Tells the kernel how to read and manage the filesystem format of the device. <br> *Examples:* `ext4`, `xfs`, `btrfs`, `vfat`, `ntfs`, `swap` |
+| **4** | **Mount Options** | Comma-separated configurations that dictate the behavior and permissions of the mount. <br> *Examples:* `defaults` (which applies `rw`, `suid`, `dev`, `exec`, `auto`, `nouser`, and `async`), `ro` (read-only), or `nofail` (boot won't freeze if the drive is missing). |
+| **5** | **Dump** | A legacy backup flag used by the old `dump` utility to decide if the filesystem needs to be backed up. It is almost universally set to `0` on modern systems. <br> *Values:* `0` (ignore) or `1` (back up). |
+| **6** | **Pass (fsck Order)** | Determines the order in which the `fsck` (filesystem check) utility scans the drives for errors at boot time. <br> *Values:* `0` (skip check), `1` (highest priority, strictly reserved for the root `/` filesystem), or `2` (other filesystems checked later). |
 
 ### **26. What is `noatime` mount option and why is it used for database performance?**
 **Answer:** Disables updating the inode `atime` whenever a file is read, eliminating write I/O overhead on disk during heavy read workloads.
