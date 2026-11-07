@@ -884,37 +884,52 @@ The `killall` command targets processes by their **exact name**. Instead of kill
 - **Example:** `killall chrome` terminates every open Chrome tab and window at once.
 - **Safety Tip:** Linux users on platforms like **Ask Ubuntu** point out that `killall` is generally safer than `pkill` for basic tasks because it demands an exact name match rather than a loose pattern. 
 
-### **38. Explain common Linux Signals (`SIGTERM`, `SIGKILL`, `SIGHUP`, `SIGINT`, `SIGQUIT`).**
+### **22. What is `iptables` Architecture (Tables, Chains, Targets)?**
 **Answer:**
-- **`SIGTERM` (15):** Graceful termination request; can be caught and handled.
-- **`SIGKILL` (9):** Immediate forceful termination by kernel; **cannot be caught or ignored**.
-- **`SIGHUP` (1):** Hangup signal; commonly used to trigger configuration reloads without process restart.
-- **`SIGINT` (2):** Interrupt signal sent via `Ctrl+C`.
-- **`SIGQUIT` (3):** Quit signal generating a core dump via `Ctrl+\`.
 
-### **39. What is a Core Dump?**
-**Answer:** An on-disk snapshot of a process's memory space and register states captured at the exact moment it crashed (e.g., segmentation fault), analyzed using `gdb` for debugging.
+`iptables` is **a user-space utility program that configures the Linux kernel's built-in Netfilter firewall framework**. It organizes packet processing into three core pillars: **Tables**, **Chains**, and **Targets**. 
 
-### **40. What is `gdb` (GNU Debugger)?**
-**Answer:** Interactive debugger for inspecting memory, call stacks, and execution points of C/Go/Rust binary programs and core dumps (`gdb /bin/app core.dump`).
+#### 1. Tables (What kind of work to do)
 
-### **41. What is `/etc/resolv.conf`?**
-**Answer:** Configuration file for the Linux DNS stub resolver specifying nameservers (`nameserver 8.8.8.8`), search domains, and lookup options (`ndots:5`).
+Tables represent the broad categories of functionality or types of packet processing. Each table contains a collection of chains. 
 
-### **42. What is `/etc/hosts`?**
-**Answer:** Static local table mapping IP addresses to hostnames evaluated before querying external DNS servers.
+- **`filter`** *(Default Table)*: Used for actual packet filtering (deciding whether to allow or block a packet).
+- **`nat`** (Network Address Translation): Used to translate source or destination IP addresses and ports (e.g., port forwarding, masquerading).
+- **`mangle`**: Used for specialized packet header alterations (e.g., modifying TTL, TOS, or QoS/packet marking).
+- **`raw`**: Used to configure exemptions from connection tracking (`conntrack`) before connection state is evaluated.
+- **`security`**: Used for Mandatory Access Control (MAC) networking rules, such as SELinux security contexts.
 
-### **43. What is `/etc/nsswitch.conf`?**
-**Answer:** Name Service Switch configuration defining the lookup precedence for databases (e.g., `hosts: files dns` checks `/etc/hosts` before querying DNS).
+#### 2. Chains (When to evaluate rules / Netfilter Hooks)
 
-### **44. What is `systemd-resolved`?**
-**Answer:** A system service providing local network name resolution, DNS caching, and LLMNR/DNS-over-TLS resolving.
+Chains are checkpoints or hooks where packets are intercepted as they travel through the kernel's network stack. Rules are attached inside chains. 
 
-### **45. What is `iptables` Architecture (Tables, Chains, Targets)?**
-**Answer:**
-- **Tables:** `filter` (packet filtering), `nat` (address translation), `mangle` (header modification), `raw`.
-- **Chains:** `PREROUTING`, `INPUT`, `FORWARD`, `OUTPUT`, `POSTROUTING`.
-- **Targets:** `ACCEPT`, `DROP`, `REJECT`, `SNAT`, `DNAT`, `MASQUERADE`.
+The five built-in chains correspond to different stages of a packet's journey:
+
+- **`PREROUTING`**: Evaluated as soon as a packet arrives at the network interface, *before* any routing decision is made.
+- **`INPUT`**: Evaluated when a packet is addressed directly to the local system itself.
+- **`FORWARD`**: Evaluated for packets that are passing through the system en route to another destination (i.e., the server is acting as a router).
+- **`OUTPUT`**: Evaluated for packets generated locally by the server itself.
+- **`POSTROUTING`**: Evaluated just before a packet leaves the network interface. 
+
+*Note: Not every chain exists in every table. For example, the default `filter` table only includes `INPUT`, `FORWARD`, and `OUTPUT`.*
+
+#### 3. Targets and Verdicts (What action to take)
+
+When a packet matches the conditions (criteria) of a specific rule inside a chain, it hits a **target** which dictates the action taken.
+
+- **`ACCEPT`**: Allow the packet to pass through.
+- **`DROP`**: Silently discard the packet without sending any feedback to the sender.
+- **`REJECT`**: Discard the packet and send an error/rejection reply back to the sender (e.g., `ICMP port unreachable`).
+- **`LOG`**: Write matching packet details to the system kernel log (usually `/var/log/messages` or `dmesg`) and continue processing the next rules.
+- **Custom Chains**: Jump to a user-defined chain for further rule evaluation.
+
+#### Command Structure Overview
+
+An `iptables` command generally follows this syntax:
+
+```bash
+iptables -t [table] [command/action] [chain] [matching criteria] -j [target]
+```
 
 ### **46. What is `nftables`?**
 **Answer:** The modern framework replacing `iptables`, `ip6tables`, and `arptables` with a unified syntax, single CLI (`nft`), and kernel bytecode engine.
