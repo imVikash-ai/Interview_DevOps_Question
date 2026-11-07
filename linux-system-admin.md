@@ -847,19 +847,42 @@ Because `ifconfig` is being phased out, it is highly recommended to shift your m
 
 3. **Speed and Interaction:** The `ip` command communicates with the Linux kernel via modern **netlink sockets**. This makes it significantly faster and less prone to performance bottlenecks when handling heavy enterprise networking setups than `ifconfig`'s older `ioctl` interface.
 
-### **35. What is `sar` (System Activity Reporter)?**
-**Answer:** Part of the `sysstat` package that collects, logs, and reports historical CPU, memory, network, and disk performance data.
-
-### **36. What is `nice` vs `renice`?**
-**Answer:** Controls process CPU scheduling priority (niceness ranges from `-20` highest priority to `19` lowest priority, default `0`).
-- `nice -n 10 ./script.sh`
-- `renice -n -5 -p <PID>`
-
-### **37. What is `kill` vs `pkill` vs `killall`?**
+### **21. What is `kill` vs `pkill` vs `killall`?**
 **Answer:**
-- `kill <PID>`: Dispatches a signal to a specific process ID.
-- `pkill <pattern>`: Sends signals to processes matching a regex name.
-- `killall <name>`: Sends signals to all processes matching exact binary name.
+
+The core difference between `kill`, `pkill`, and `killall` is **how they target the processes** you want to terminate. While all three commands are used to send signals (like `SIGTERM` or `SIGKILL`) to running programs, they identify those programs differently.
+
+| **Command** | **Targets By** | **Precision** | **Best Used For...** | **Example** |
+|---|---|---|---|---|
+| **`kill`** | **Process ID (PID)** | High  | Ending one specific instance of a program safely. | `kill 1234` |
+| **`pkill`** | **Pattern / Partial Name** | Medium  | Quick terminations or filtering by user/attributes. | `pkill fire` |
+| **`killall`** | **Exact Process Name** | High  | Safely clearing every instance of an exact program. | `killall firefox` |
+
+#### 1. `kill`: The Precision Tool
+
+The `kill` command requires you to know the exact **Process ID (PID)** of the program. It only affects the specific process associated with that number. 
+
+- **How it works:** You usually have to find the PID first using commands like `ps`, `top`, or `pgrep`.
+- **Syntax:** `kill [signal] [PID]`
+- **Example:** `kill 3487` (Sends a graceful termination signal `SIGTERM` to PID 3487). 
+
+#### 2. `pkill`: The Pattern Matcher
+
+The `pkill` command looks through your running processes and targets anything that **matches a text pattern** or regular expression. 
+
+- **How it works:** It is highly flexible but can be risky. If you type a partial name, it will kill *everything* that contains that string. 
+- **Syntax:** `pkill [options] [pattern]`
+- **Example:** `pkill fire` will terminate `firefox`, `firebase`, or any other process with "fire" in the name. 
+- **Advanced Filtering:** It is great for advanced sorting. For instance, `pkill -u sana chrome` will only terminate Chrome processes owned by the user "sana". 
+
+#### 3. `killall`: The Sweeper
+
+The `killall` command targets processes by their **exact name**. Instead of killing just one instance like `kill`, it wipes out every single instance running under that specific name. 
+
+- **How it works:** Unlike `pkill`, it won't accidentally kill a process just because it shares a partial name string (on standard Linux systems).
+- **Syntax:** `killall [options] [exact_name]`
+- **Example:** `killall chrome` terminates every open Chrome tab and window at once.
+- **Safety Tip:** Linux users on platforms like **Ask Ubuntu** point out that `killall` is generally safer than `pkill` for basic tasks because it demands an exact name match rather than a loose pattern. 
 
 ### **38. Explain common Linux Signals (`SIGTERM`, `SIGKILL`, `SIGHUP`, `SIGINT`, `SIGQUIT`).**
 **Answer:**
