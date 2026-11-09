@@ -1,7 +1,24 @@
 ## **Monitoring, Logging & Observability - DevOps Interview Questions**
 
 ### **1. What is the fundamental difference between Monitoring and Observability?**
-**Answer:** Monitoring tracks predefined metrics against static thresholds ("Is the system working?"). Observability is a property of a system that allows engineers to infer its internal state based on its external telemetry outputs (metrics, logs, traces, profiles), enabling them to answer "Why is the system broken?" for unforeseen failure modes.
+**Answer:** 
+The fundamental difference is that **monitoring tells you *when* and *what* is wrong based on known, predefined metrics, whereas observability tells you *why* an issue is happening—even for unknown, unexpected failures—by inspecting internal system states through external outputs.**
+
+**Core Comparison**
+
+| **Dimension** | **Monitoring** | **Observability** |
+|---|---|---|
+| **Primary Question** | *"Is the system working?"* (What and When) | *"Why is the system behaving this way?"* (How and Why) |
+| **Approach** | Reactive; tracks known-knowns using preset thresholds (e.g., CPU > 80%). | Proactive and exploratory; investigates unknown-unknowns. |
+| **Data Model** | Uses aggregated metrics, static logs, and fixed dashboards. | Uses high-cardinality telemetry: logs, metrics, and distributed tracing. |
+| **Car Analogy** | A **car's dashboard** telling you speed, fuel level, or that the check engine light is on. | A **mechanic's diagnostic tool / X-ray** peering deep into the engine to pinpoint a specific failing part. |
+
+**Key Distinctions**
+
+- **Known vs. Unknown Failures:** Monitoring is built for issues you can anticipate in advance and set an alert for (e.g., running out of disk space). Observability is built for complex, multi-service or microservice environments where a unique combination of events causes a failure you never predicted. 
+- **The Three Pillars vs. Alerts:** Monitoring relies heavily on checking metrics and threshold breaches to fire an alert. Observability synthesizes the three pillars—**logs** (granular records), **metrics** (numerical aggregations), and **traces** (end-to-end request paths across services)—to connect the dots. 
+- **Relationship:** Monitoring is a subset and the first line of defense (the detection layer), while observability is the broader, deeper investigative layer that helps resolve the root cause.
+
 
 ### **2. Explain the Three Pillars of Observability and how they correlate during an incident.**
 **Answer:**
