@@ -22,10 +22,26 @@ The fundamental difference is that **monitoring tells you *when* and *what* is w
 
 ### **2. Explain the Three Pillars of Observability and how they correlate during an incident.**
 **Answer:**
-1. **Metrics (Aggregable Numbers):** Lightweight time-series data for high-level alerting and health dashboards (`rate(http_requests_total[5m])`).
-2. **Logs (Discrete Events):** Timestamped structured JSON events recording specific execution context (`{"error":"DB connection timeout"}`).
-3. **Traces (Request Journeys):** End-to-end request propagation across microservices showing individual span latencies and database query durations.
-- **Correlation:** Alert fires on **Metric** (p99 latency) $\rightarrow$ Engineer clicks **Exemplar** to view distributed **Trace** (Tempo) to identify slow database query $\rightarrow$ Jumps to correlated **Log** (Loki) via `trace_id` to view exact SQL exception.
+
+The **Three Pillars of Observability** are **Metrics, Logs, and Traces**. Together, they turn raw system telemetry into actionable insights, allowing engineering teams to understand the internal state of complex software from its external outputs. 
+
+**The Three Pillars**
+
+- **Metrics (The "How Many" / Health Sign)**: Quantitative, aggregated numerical measurements recorded over time (such as CPU utilization, memory consumption, error rates, or request latency). They are lightweight, cheap to store, and ideal for building dashboards and triggering alerts. 
+- **Logs (The "What Happened" / Event Diary)**: Discrete, timestamped, and often structured text records of specific events or errors occurring within an application or infrastructure component. They provide deep, granular context about an exact action or failure. 
+- **Traces (The "Where" / Request Journey)**: End-to-end maps representing the sequential path and execution duration of a single request as it flows across multiple distributed microservices or components. They expose bottlenecks and handoff delays between services.
+
+**How They Correlate During an Incident**
+
+During a live production outage or performance degradation, these three pillars work in a cascading sequence to compress troubleshooting time:
+
+1. **Detection (Metrics):**
+   An automated alert triggers because a high-level metric crosses a threshold—for instance, an API's 95th-percentile response time spikes from 200ms to 8 seconds, or the error rate climbs above 5%. **Metrics** tell you *that* a problem exists and *how severe* it is, but they do not explain the underlying cause.
+2. **Localization (Traces):**
+   Using the unique **Trace ID** attached to the failing transactions, an engineer pulls up distributed **traces**. The trace visualizes the multi-hop request flow and reveals that while the API gateway and Service A responded quickly, **Service B** consumed 7.5 of those 8 seconds waiting on a database or downstream network call. Traces narrow the scope from the entire system down to the exact service or component failing. 
+3. **Resolution (Logs):**
+   Drilling down into the specific time window and trace/request context for Service B, the team inspects the structured **logs**. The log output exposes the exact stack trace or error message: e.g., `"External API call timed out after 6 seconds"` or a database connection pool exhaustion. **Logs** deliver the granular "why" and "what" needed to write a hotfix or rollback a deployment.
+
 
 ### **3. Explain the Four Golden Signals of Monitoring (Google SRE).**
 **Answer:**
