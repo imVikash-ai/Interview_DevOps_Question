@@ -963,14 +963,76 @@ The primary difference is that **`sudo`** (superuser do) lets you run a single c
 - **Note on `-`:** Using `su -` (or `su - root`) starts a full login shell, resetting environment variables, path settings, and your working directory to the target user's profile. Running `su` without the dash keeps your current environment variables.
 - **Best used for:** Extended system maintenance or running scripts that require continuous root access.
 
-### **71. Scenario: A Linux server load average is 45.0 on an 8-core CPU, but CPU utilization is only 15%. What is the bottleneck and how do you diagnose it?**
+### **24. Scenario: A Linux server load average is 45.0 on an 8-core CPU, but CPU utilization is only 15%. What is the bottleneck and how do you diagnose it?**
 **Answer:**
-- **Cause:** High load average with low CPU utilization indicates processes are blocked in **Uninterruptible Sleep (`D` state)** waiting on slow **Disk I/O** or a hanging **Network File System (NFS)** mount.
-- **Diagnosis:**
-  1. Check CPU I/O Wait in `top` (`%wa`).
-  2. Check disk device saturation in `iostat -xz 1 5` (look for `%util` approaching 100%).
-  3. Find processes in `D` state: `ps aux | awk '$8 ~ /D/'`.
-  4. Inspect what syscalls are blocked: `cat /proc/<PID>/stack`.
+
+A high Linux load average (45.0 on an 8-core system) combined with low CPU utilization (15%) indicates a **storage or I/O bottleneck** (specifically disk or NFS/network storage waiting). 
+
+In Linux, the load average counts not only processes actively using or waiting for the CPU (Runnable, `R` state), but also processes stuck in **uninterruptible sleep** (`D` state)—which almost always means they are waiting for a hardware response, heavily driven by slow disk I/O, storage arrays, or unresponsive network mounts.
+
+**Step-by-Step Diagnostic Commands**
+
+**1. Confirm the D-State (Blocked) Processes**
+
+Check `top` or `htop` to look at the process state summary at the top left. Look at the `D` (uninterruptible sleep) count, or use `ps` to list processes stuck in the `D` state:
+
+**bash**
+```bash
+ps aux | awk '$8 ~ /D/'
+```
+
+**2. Check I/O Wait and Kernel Statistics (`vmstat`)**
+
+Run `vmstat 1` to see real-time system metrics:
+
+**bash**
+```bash
+vmstat 1
+```
+
+- **`r` (runnable):** Number of processes waiting for run time.
+- **`b` (blocked):** Number of processes in uninterruptible sleep (waiting for I/O). If `b` is high, processes are stuck on disk/storage.
+- **`wa` (iowait):** Percentage of time the CPU is idle *because* it is waiting for disk I/O to complete. High `wa` confirms an I/O bottleneck. 
+
+**3. Identify Which Processes Are Causing I/O (`iotop` or `pidstat`)**
+
+Use `iotop` to see real-time disk read/write activity per process:
+
+**bash**
+```bash
+sudo iotop -o
+```
+
+Alternatively, use `pidstat` with the `-d` flag to see per-process I/O statistics:
+
+**bash**
+```bash
+pidstat -d 1
+```
+
+**4. Check Disk Subsystem Performance (`iostat`)**
+
+Inspect device-level utilization, wait times (`await`), and service times (`svctm`):
+
+**bash**
+```bash
+iostat -xz 1
+```
+
+- Look at **`%util`**: If it is close to 100%, the storage device is saturated.
+- Look at **`await`**: High average wait times indicate storage latency (slow SAN, degraded RAID array, congested NFS mount, or failing SSD/HDD).
+
+**5. Check Kernel Pressure Stall Information (PSI)**
+
+If your kernel supports PSI, check what resource is choking the system:
+
+**bash**
+```bash
+cat /proc/pressure/io
+```
+
+High `some` or `full` numbers under `io` confirm that tasks are stalling heavily on input/output operations.
+
 
 ### **72. Scenario: A critical process crashes with "Too many open files" (`EMFILE`). How do you fix it permanently?**
 **Answer:**
