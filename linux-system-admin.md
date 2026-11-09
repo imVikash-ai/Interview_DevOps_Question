@@ -1130,14 +1130,79 @@ To confirm that your running process successfully inherited the new limits, loca
 cat /proc/<PID>/limits | grep "Max open files"
 ```
 
-### **73. Scenario: A deleted log file is still consuming 100GB of disk space in `df -h`. Why and how do you reclaim the space immediately?**
+### **26. Scenario: A deleted log file is still consuming 100GB of disk space in `df -h`. Why and how do you reclaim the space immediately?**
 **Answer:**
-- **Why:** An active running process (e.g., Java / Nginx) still holds an open file descriptor pointing to the deleted file inode. The OS cannot free data blocks until all file descriptors close.
-- **Identify Process:** `lsof | grep deleted` (find PID and file descriptor number, e.g., FD 4).
-- **Reclaim Space Immediately:** Truncate the file descriptor to zero bytes without restarting the process:
-  ```bash
-  > /proc/<PID>/fd/<FD_NUM>
-  ```
+
+**A deleted file continues to consume disk space because an active process still holds an open file descriptor to it.** 
+
+In Linux, when you delete a file (e.g., using `rm`), you only remove its directory entry (the link). However, the underlying data blocks (the inode) are not released to the OS until the reference count drops to zero. Because a running process (like an application server, database, or a system logging daemon) is still actively writing to or reading from that file descriptor, `df -h` will accurately report the space as occupied, while `du -sh` will not find the file in the directory tree.
+
+**How to Reclaim the Space Immediately**
+
+To free up the 100GB of disk space without rebooting the server or completely crashing your production application, follow these steps:
+
+**1. Identify the Process Holding the File Open**
+
+Use the `lsof` (list open files) utility to locate the process ID (PID) and the file descriptor (FD) number tracking the deleted log file: 
+
+**bash**
+```bash
+lsof +L1
+```
+
+*Or target the specific partition or keyword:*
+
+**bash**
+```bash
+lsof | grep -i 'deleted'
+```
+
+**Example output:**
+
+**text**
+```text
+COMMAND   PID USER   FD   TYPE DEVICE   SIZE/OFF NLINK NODE NAME
+nginx   12345 root    7w   REG  253,1 107374182400     0 41234 /var/log/nginx/access.log (deleted)
+```
+
+*Take note of the **PID** (`12345`) and the **FD** (`7w`, where `7` is the file descriptor number).*
+
+**2. Truncate the Open File Descriptor (The Safe Fix)**
+
+Instead of killing the process, you can free up the disk space instantly by truncating the file to `0` bytes via the Linux `/proc` filesystem. Run either of the following commands using the PID and FD discovered in Step 1:
+
+**bash**
+```bash
+true > /proc/12345/fd/7
+```
+
+*Alternatively:*
+
+**bash**
+```bash
+cat /dev/null > /proc/12345/fd/7
+```
+
+**Result:** The space drops from 100GB to 0 immediately in `df -h`, allowing the application to safely keep running without service disruption.
+
+**3. Gracefully Reload the Daemon (Optional but Recommended)**
+
+To prevent the process from endlessly writing into a ghost descriptor and to force it to create a fresh, visible log file on the disk, signal the daemon to reload its configuration:
+
+**bash**
+```bash
+systemctl reload nginx
+```
+
+**What NOT to Do Next Time**
+
+Never use `rm` on a live, active log file. To safely clear space from large logs in the future, always truncate them in place:
+
+**bash**
+```bash
+> /var/log/app/huge_output.log
+```
+
 
 ### **74. Scenario: A multi-threaded application suffers from extreme memory fragmentation and allocation latency. How do you replace glibc malloc with `jemalloc` or `tcmalloc`?**
 **Answer:**
