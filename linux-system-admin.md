@@ -1034,16 +1034,101 @@ cat /proc/pressure/io
 High `some` or `full` numbers under `io` confirm that tasks are stalling heavily on input/output operations.
 
 
-### **72. Scenario: A critical process crashes with "Too many open files" (`EMFILE`). How do you fix it permanently?**
+### **25. Scenario: A critical process crashes with "Too many open files" (`EMFILE`). How do you fix it permanently?**
 **Answer:**
-1. Check current process file limits: `cat /proc/<PID>/limits`.
-2. Check system-wide file allocation: `cat /proc/sys/fs/file-nr`.
-3. Fix for systemd service: Add `LimitNOFILE=65535` under `[Service]` in `/etc/systemd/system/<service>.service` and run `systemctl daemon-reload && systemctl restart <service>`.
-4. Fix for interactive users: Edit `/etc/security/limits.conf`:
-   ```ini
-   * soft nofile 65535
-   * hard nofile 65535
+
+To permanently fix a **`Too many open files` (`EMFILE`)** error, you must increase the system and user-level descriptors limits. Since most critical processes are managed by **systemd**, updating the systemd service file is the most robust and modern solution.
+
+Here is how to fix it permanently across different configurations.
+
+#### Solution 1: For systemd Services (Recommended)
+
+Modern Linux distributions use `systemd` to manage background processes. Systemd bypasses traditional limits files (`/etc/security/limits.conf`).
+
+1. Open the systemd override configuration for your service:
+
+   **bash**
+   ```bash
+   sudo systemctl edit <service_name>
    ```
+
+2. Add the following lines between the top comment lines:
+
+   **ini**
+   ```ini
+   [Service]
+   LimitNOFILE=65535
+   ```
+
+3. Save and exit the editor. Reload the systemd daemon and restart your process:
+
+   **bash**
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl restart <service_name>
+   ```
+
+#### Solution 2: For User Sessions & Non-systemd Applications
+
+If the process is run manually by a specific user or a standard init script, you must configure PAM limits.
+
+1. Open the limits configuration file:
+
+   **bash**
+   ```bash
+   sudo nano /etc/security/limits.conf
+   ```
+
+2. Add the following lines at the bottom of the file (replace `username` with the user running the process, or use `*` for all users):
+
+   **text**
+   ```text
+   username    soft    nofile    65535
+   username    hard    nofile    65535
+   ```
+
+3. Ensure PAM limits are enabled by verifying `/etc/pam.d/common-session` contains:
+
+   **text**
+   ```text
+   session required pam_limits.so
+   ```
+
+4. **Log out and log back in** (or restart the server) for changes to take effect.
+
+#### Solution 3: Global System-Wide Limits
+
+If your application requires a massive number of files (e.g., a heavy database or reverse proxy), ensure the global kernel limit accommodates your change.
+
+1. Open the sysctl configuration file:
+
+   **bash**
+   ```bash
+   sudo nano /etc/sysctl.conf
+   ```
+
+2. Add or modify the following line:
+
+   **text**
+   ```text
+   fs.file-max = 2097152
+   ```
+
+3. Apply the changes immediately without restarting:
+
+   **bash**
+   ```bash
+   sudo sysctl -p
+   ```
+
+#### Verification
+
+To confirm that your running process successfully inherited the new limits, locate its Process ID (PID) and check its limits file:
+
+**bash**
+```bash
+cat /proc/<PID>/limits | grep "Max open files"
+```
 
 ### **73. Scenario: A deleted log file is still consuming 100GB of disk space in `df -h`. Why and how do you reclaim the space immediately?**
 **Answer:**
