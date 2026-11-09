@@ -1,10 +1,4 @@
-# **Monitoring, Logging & Observability - DevOps Interview Questions (200 Questions)**
-
-Welcome to the **Monitoring, Logging & Observability** master collection containing **200 comprehensive interview questions and detailed answers** covering OpenTelemetry (OTel), Prometheus, PromQL, Grafana, Loki (LogQL), Tempo (Distributed Tracing), Thanos, Mimir, Alertmanager, and eBPF Continuous Profiling.
-
----
-
-## 🟢 **Part 1: Observability Fundamentals, Metrics & Prometheus (Questions 1–60)**
+## **Monitoring, Logging & Observability - DevOps Interview Questions**
 
 ### **1. What is the fundamental difference between Monitoring and Observability?**
 **Answer:** Monitoring tracks predefined metrics against static thresholds ("Is the system working?"). Observability is a property of a system that allows engineers to infer its internal state based on its external telemetry outputs (metrics, logs, traces, profiles), enabling them to answer "Why is the system broken?" for unforeseen failure modes.
