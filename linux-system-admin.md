@@ -931,69 +931,38 @@ An `iptables` command generally follows this syntax:
 iptables -t [table] [command/action] [chain] [matching criteria] -j [target]
 ```
 
-### **46. What is `nftables`?**
-**Answer:** The modern framework replacing `iptables`, `ip6tables`, and `arptables` with a unified syntax, single CLI (`nft`), and kernel bytecode engine.
-
-### **47. What is `ufw` (Uncomplicated Firewall) vs `firewalld`?**
+### **23. What is `sudo` vs `su`?**
 **Answer:**
-- **`ufw` (Ubuntu/Debian):** Simplified CLI frontend for managing iptables/nftables firewall rules.
-- **`firewalld` (RHEL/CentOS):** Dynamic zone-based firewall daemon supporting runtime rule changes without dropping active connections.
 
-### **48. What is `tcpdump` and how do you capture packets?**
-**Answer:** Command-line packet analyzer:
-```bash
-tcpdump -i eth0 -nn -s0 -w capture.pcap port 443
-```
-- `-i eth0`: Interface.
-- `-nn`: Do not resolve hostnames or ports.
-- `-s0`: Capture full packet payload.
-- `-w file.pcap`: Write to Wireshark PCAP file.
+The primary difference is that **`sudo`** (superuser do) lets you run a single command or task with elevated privileges using **your own password**, whereas **`su`** (substitute user / switch user) logs you completely into another user's account (usually root) and requires **that user's password**. 
 
-### **49. What is `iperf3`?**
-**Answer:** Network bandwidth testing tool measuring maximum achievable TCP/UDP throughput and packet loss between client and server.
+**Key Differences**
 
-### **50. What is `traceroute` vs `mtr`?**
-**Answer:**
-- **`traceroute`:** Sends packets with incrementing TTLs to identify each hop in a network route.
-- **`mtr` (My Traceroute):** Combines `traceroute` and `ping` into a live real-time network path diagnostics tool displaying packet loss and latency per hop.
+| **Feature** | **`sudo`** | **`su`** |
+|---|---|---|
+| **Full Meaning** | Superuser do | Substitute / switch user |
+| **Password Required** | Your own user password | The target user's password (e.g., root password) |
+| **Scope** | Executes a specific command temporarily (or opens a managed shell via `sudo -i`) | Switches your entire shell session over to another user indefinitely until you type `exit` |
+| **Auditing & Logging** | Logs each command executed along with the user name in system logs | Does not track individual commands inside the session in the same granular way |
+| **Security Risk** | Lower; limits accidental damage and restricts access via `/etc/sudoers` | Higher; gives full, unmitigated root control of the system |
 
-### **51. What is `/etc/security/limits.conf` (PAM Limits)?**
-**Answer:** Sets user and group resource limits (max open file descriptors `nofile`, max user processes `nproc`).
+**How They Work**
 
-### **52. What is `chroot` Jail?**
-**Answer:** Changes the perceived root directory (`/`) for a running process, isolating it from the rest of the host filesystem (precursor to Linux containers).
+**`sudo` (Superuser Do)**
 
-### **53. What is `systemd-cgls` and `systemd-cgtop`?**
-**Answer:**
-- **`systemd-cgls`:** Displays the cgroup process hierarchy as a tree.
-- **`systemd-cgtop`:** Monitors real-time CPU, memory, and I/O consumption per systemd cgroup service unit.
+- **What it does:** Runs a command as the superuser (root) or another specified user without switching your active login session.
+- **Example:** `sudo apt update`
+- **Authentication:** You type your *own* password. 
+- **Best used for:** Quick, everyday administrative tasks (like installing software or restarting a service). 
 
-### **54. What is `sysctl` and `/etc/sysctl.conf`?**
-**Answer:** CLI and configuration interface for viewing and modifying Linux kernel runtime parameters at `/proc/sys/` (`sysctl -p` applies changes).
+**`su` (Switch User)**
 
-### **55. What is `journalctl -k` (dmesg)?**
-**Answer:** Displays kernel ring buffer messages from systemd journal.
+- **What it does:** Changes your current shell identity to another user account (defaulting to `root` if no user name is provided).
+- **Example:** `su -` or `su username` 
+- **Authentication:** You type the *target* user's password (e.g., the root password). 
+- **Note on `-`:** Using `su -` (or `su - root`) starts a full login shell, resetting environment variables, path settings, and your working directory to the target user's profile. Running `su` without the dash keeps your current environment variables.
+- **Best used for:** Extended system maintenance or running scripts that require continuous root access.
 
-### **56. What is `logrotate`?**
-**Answer:** Linux utility that automates rotation, compression, and removal of application log files.
-
-### **57. What is `rsyslog` vs `systemd-journald`?**
-**Answer:**
-- **`systemd-journald`:** Captures and stores binary structured logs for systemd units.
-- **`rsyslog`:** Traditional syslog daemon that receives logs from journald and formats/routes them to text files (`/var/log/syslog`) or remote syslog servers.
-
-### **58. What is `auditd` (Linux Audit Daemon)?**
-**Answer:** Kernel auditing subsystem logging security events (file access, permission modifications, system calls) for compliance and intrusion detection.
-
-### **59. What is `cron` vs `systemd` Timers?**
-**Answer:** systemd timers provide sub-second accuracy, dependency management, execution logging in journald, and monotonic timers (e.g., run 10 minutes after boot).
-
-### **60. What is `sudo` vs `su`?**
-**Answer:**
-- **`su` (Switch User):** Switches user session, requiring the target user's password.
-- **`sudo` (SuperUser Do):** Executes commands with elevated privileges, requiring the calling user's password, authenticated against `/etc/sudoers`.
-
----
 
 ## 🟡 **Part 2: Kernel Tuning, Sockets & Performance Troubleshooting (Questions 61–130)**
 
