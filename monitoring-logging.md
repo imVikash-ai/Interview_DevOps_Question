@@ -99,7 +99,32 @@ The **RED Method** and the **USE Method** are complementary monitoring framework
 
 
 ### **5. What is Prometheus and how does its pull-based architecture work?**
-**Answer:** An open-source, time-series database and monitoring system. It periodically scrapes (pulls) plain-text metrics from HTTP `/metrics` endpoints exposed by applications and exporters using Kubernetes Service Discovery, storing samples in its custom local TSDB engine.
+**Answer:** 
+**Prometheus** is **an open-source, cloud-native monitoring and alerting system designed to record numeric time-series data**. Created at SoundCloud and now part of the Cloud Native Computing Foundation (CNCF), it is widely used for tracking application performance, container health, and infrastructure metrics.
+
+**How the Pull-Based Architecture Works**
+
+Unlike traditional monitoring tools that require applications to push data to a central server, Prometheus operates on an **active pull model**. 
+
+1. **Scraping Endpoints:**
+   - Applications, services, or hardware "exporters" expose their current metrics in a plain-text, human-readable format on a specific HTTP endpoint—most commonly `/metrics`.
+   - The **Prometheus Server** periodically sends HTTP `GET` requests to these configured targets at regular intervals (e.g., every 15 seconds) to "scrape" the latest values.
+2. **Service Discovery:**
+   - In dynamic cloud or container environments (like Kubernetes), Prometheus uses built-in service discovery integrations (e.g., Kubernetes API, file-based discovery) to automatically detect new or removed targets without requiring manual configuration updates.
+3. **Local Time-Series Database (TSDB):**
+   - Once scraped, the raw metric samples along with their associated key-value label dimensions are stored directly in Prometheus's built-in, high-efficiency Time-Series Database on local disk.
+4. **Querying & Alerting:**
+   - Users and tools like Grafana query the stored data using PromQL (Prometheus Query Language).
+   - Prometheus continuously evaluates alert rules against the data and routes firing alerts to **Alertmanager** for deduplication, grouping, and notification (e.g., via Slack or email).
+5. **Handling Short-Lived Jobs (The Push Exception):**
+   - For short-lived or batch jobs (such as cron tasks or serverless functions) that finish before Prometheus can scrape them, Prometheus uses an intermediary **Pushgateway** where jobs push their metrics to be scraped later. 
+
+**Key Advantages of the Pull Model**
+
+- **Built-in Health Detection:** If a target stops responding or goes down, the Prometheus server immediately notices the failed scrape attempt, which itself acts as a signal that the service is unhealthy.
+- **Centralized Control:** The monitoring server dictates the scrape frequency and lifecycle rather than individual client apps overwhelming the server. 
+- **Easy Debugging:** You can inspect an application's `/metrics` page directly in your web browser to see real-time values.
+
 
 ### **6. Explain the four core Prometheus Metric Types.**
 **Answer:**
