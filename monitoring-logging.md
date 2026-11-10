@@ -128,10 +128,43 @@ Unlike traditional monitoring tools that require applications to push data to a 
 
 ### **6. Explain the four core Prometheus Metric Types.**
 **Answer:**
-1. **Counter:** Monotonically increasing cumulative metric (resets only on restart), e.g., `http_requests_total`.
-2. **Gauge:** A numerical value that can go up and down arbitrarily, e.g., `node_memory_utilization_bytes`.
-3. **Histogram:** Samples observations (request durations) and counts them in configurable bucket intervals (`le="0.1"`, `le="0.5"`).
-4. **Summary:** Samples observations and calculates client-side phi-quantiles (p50, p90, p99) over a sliding time window.
+Prometheus client libraries provide four core metric types for collecting and exposing time-series data: **Counter, Gauge, Histogram, and Summary**.
+
+**1. Counter**
+
+- **What it is:** A cumulative metric that represents a single monotonically increasing value—meaning it can only go up or reset to zero (e.g., when the application or server restarts). 
+- **Common Use Cases:** Tracking total HTTP requests received, total errors encountered, completed tasks, or bytes transferred. 
+- **How to Query:** You rarely look at the raw counter value itself. Instead, you use PromQL functions like `rate()`, `irate()`, or `increase()` to calculate the speed of change over a specific time window. 
+
+**2. Gauge**
+
+- **What it is:** A numerical value that can arbitrarily go up and down (increase or decrease).
+- **Common Use Cases:** Measuring current states or snapshot values such as active user connections, memory usage, CPU temperature, or free disk space. 
+- **How to Query:** The raw value is meaningful on its own and can be graphed or alerted on directly (e.g., alerting when free disk space drops below a certain threshold).
+
+**3. Histogram**
+
+- **What it is:** Samples observations (such as request durations or response sizes) and counts them in configurable, pre-defined numerical buckets. A histogram exposes three main time series automatically:
+  - `<basename>_bucket{le="<upper_bound>"}`: Cumulative counters for observations less than or equal to each bucket limit.
+  - `<basename>_sum`: The total sum of all observed values.
+  - `<basename>_count`: The total number of observations made.
+- **Common Use Cases:** Tracking application latency distributions or payload sizes. 
+- **How to Query:** You use the `histogram_quantile()` PromQL function to calculate approximate percentiles (e.g., the 99th percentile or p99 latency) across your buckets. 
+
+**4. Summary**
+
+- **What it is:** Similar to a histogram, a summary samples observations and provides a total sum and count (`<basename>_sum` and `<basename>_count`). However, instead of using server-side buckets, it calculates configurable φ-quantiles (percentiles) **directly on the client-side** over a sliding time window.
+- **Common Use Cases:** Measuring request durations or service time percentiles when you prefer client-side quantile calculations or when bucket boundaries are hard to pre-define.
+- **How to Query:** You query the pre-calculated quantile time series directly (e.g., `quantile="0.9"`), though summaries cannot be easily aggregated across multiple instances in PromQL the way histograms can.
+
+**Quick Comparison**
+
+| **Metric Type** | **Can Decrease?**          | **Primary Use Case**                    | **Key PromQL Functions**                  |
+| --------------- | -------------------------- | --------------------------------------- | ----------------------------------------- |
+| **Counter**     | No (only increases/resets) | Total events, requests, errors          | `rate()`, `increase()`                    |
+| **Gauge**       | Yes (goes up or down)      | Snapshots like memory, CPU, connections | Direct value, `deriv()`, `delta()`        |
+| **Histogram**   | Buckets only increase      | Value distributions & latency buckets   | `histogram_quantile()`                    |
+| **Summary**     | Pre-calculated client-side | Percentiles over a sliding time window  | Direct quantile labels (`quantile="..."`) |
 
 ### **7. What is a Prometheus Exporter?**
 **Answer:** A lightweight proxy agent that translates telemetry from third-party systems that do not natively emit Prometheus metrics and exposes them on `/metrics` (e.g., `node_exporter`, `mysqld_exporter`, `blackbox_exporter`).
