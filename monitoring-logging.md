@@ -427,7 +427,24 @@ LogQL queries generally fall into two categories:
 
 
 ### **17. What is Grafana Tempo?**
-**Answer:** A distributed tracing backend that stores raw spans directly in cheap cloud object storage (Amazon S3, GCS) without needing Elasticsearch, querying traces by `trace_id` retrieved from logs or metrics.
+**Answer:**
+**Grafana Tempo** is **an open-source, high-scale, cost-efficient distributed tracing backend developed by Grafana Labs**.
+
+**What It Does**
+
+- **Stores Traces in Object Storage:** Unlike traditional tracing systems that rely on heavy, expensive indexing databases (like Elasticsearch or Cassandra), Tempo stores trace data directly in object storage services like Amazon S3, Google Cloud Storage, or Azure Blob Storage. 
+- **Handles High Volume:** It scales horizontally to ingest and process millions of spans per second with minimal operational overhead. 
+- **Supports Open Standards:** It ingests common open-source tracing data formats including **OpenTelemetry**, **Jaeger**, and **Zipkin**.
+- **Queries via TraceQL:** It uses **TraceQL**, a query language designed to search and filter trace data, locate slow requests, and analyze errors. 
+
+**How It Fits Into the Observability Stack**
+
+Tempo is designed to work seamlessly alongside the rest of the Grafana ecosystem:
+
+- **Grafana:** Acts as the native UI to visualize traces, span call panels, and service topologies.
+- **Grafana Loki:** Correlates logs with traces via LogQL and derived fields.
+- **Prometheus:** Links metrics and traces using Prometheus exemplars and automatically generates RED (Rate, Error, Duration) metrics from spans
+
 
 ### **18. Compare Thanos vs Grafana Mimir for long-term Prometheus metric storage.**
 **Answer:**
