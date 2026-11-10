@@ -393,9 +393,38 @@ In **Prometheus Alertmanager**, **Grouping** and **Inhibition** are **core mecha
 
 ### **16. What is LogQL in Grafana Loki?**
 **Answer:**
-A Prometheus-inspired query language for logs:
-- **Log Stream Query:** `{app="payment", env="prod"} |= "status=failed" | json | error_code != 200`
-- **Metric Query over Logs:** `sum(rate({app="payment"} |= "ERROR" [5m])) by (region)` (derives real-time error rate metrics from raw log text).
+
+**LogQL** is **the dedicated query language for Grafana Loki, designed to select, filter, parse, and convert log data into metrics**. 
+
+**Core Concepts**
+
+- **Schema-at-Query:** Unlike traditional logging systems that require a rigid structure or index for every log field upfront, Loki indexes only timestamps and metadata labels. LogQL defines the "schema" on the fly when you write and execute a query. 
+- **PromQL Inspiration:** LogQL borrows its syntax structure, vector concepts, and aggregation functions (such as `sum`, `rate`, `topk`) heavily from PromQL (Prometheus Query Language), making it familiar to users of the Prometheus ecosystem. 
+- **Pipe-Based Pipelines:** Queries use a funnel-like pipe (`|`) mechanism where raw log lines or intermediate values flow through a sequence of filter expressions, parsers, and formatters. 
+
+**Basic Query Structure**
+
+A standard LogQL query follows this general format: 
+
+**text**
+```text
+{ log stream selector } | log pipeline
+```
+
+1. **Log Stream Selector (Mandatory):** Filters log streams using key-value metadata labels (e.g., `{app="payment-service", environment="prod"}`). Operators include `=`, `!=`, `=~` (regex match), and `!~` (regex mismatch).
+2. **Log Pipeline (Optional):** Appends filters or parsers to inspect the actual text inside the log lines.
+   - *Line filters:* `|= "error"`, `!= "debug"`, or regex filters like `|~ "status=\\d+"`.
+   - *Parsers:* Extract fields from unstructured or structured text using parsers like `| json`, `| logfmt`, or the high-speed `| pattern` syntax. 
+
+**Main Types of Queries**
+
+LogQL queries generally fall into two categories:
+
+1. **Log Queries:** Return matching log line streams directly (viewable in Grafana Explore or via **LogCLI**).
+   - *Example:* `{job="api-gateway"} |= "500 Internal Server Error"`.
+2. **Metric Queries:** Wrap log stream selections in range vector functions (such as `rate()`, `count_over_time()`, or `bytes_over_time()`) to turn log lines into numeric time-series data for graphing and alerting.
+   - *Example:* `sum(rate({job="api-gateway"} |= "500" [5m]))`
+
 
 ### **17. What is Grafana Tempo?**
 **Answer:** A distributed tracing backend that stores raw spans directly in cheap cloud object storage (Amazon S3, GCS) without needing Elasticsearch, querying traces by `trace_id` retrieved from logs or metrics.
