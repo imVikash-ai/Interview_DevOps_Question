@@ -74,11 +74,29 @@ The **Google SRE Book** defines the Four Golden Signals as the core metrics you 
 - What it is: How "full" your system is, or a measure of your most constrained resource.
 - Key detail: Saturation emphasizes the degree of utilization relative to capacity (e.g., CPU utilization, memory, disk I/O, database connection pools, or thread/queue depths). It often tells you when a system is about to degrade before hard errors start happening.
 
-
 ### **4. Compare the RED Method vs USE Method.**
 **Answer:**
-- **RED (For Request-Driven Services / Microservices):** **R**ate (req/sec), **E**rrors (failed req/sec), **D**uration (latency distribution).
-- **USE (For Infrastructure & Hardware Resources):** **U**tilization (% time resource was busy), **S**aturation (queue backlog), **E**rrors (error event count).
+
+The **RED Method** and the **USE Method** are complementary monitoring frameworks that target different layers of a system: **RED measures the user-facing service, while USE measures the underlying infrastructure resources**. 
+
+**Core Comparison at a Glance**
+
+| **Feature** | **RED Method** | **USE Method** |
+|---|---|---|
+| **Creator / Origin** | Tom Wilkie (2015) | Brendan Gregg |
+| **Primary Focus** | Applications, microservices, and request-driven workloads | Hardware and software infrastructure resources (CPU, memory, disk, network) |
+| **The Core Question** | *"Are my callers / users okay?"* | *"Is my machine / hardware okay?"* |
+| **The Three Metrics** | **Rate** (requests per second) <br> **Errors** (failed request count/rate) <br> **Duration** (latency/response time distribution) | **Utilization** (percentage of time a resource is busy) <br> **Saturation** (queued or waiting work backlog) <br> **Errors** (hardware/system failure count) |
+
+**Key Differences**
+
+- **Scope & Viewpoint:**
+  - **RED** takes a black-box, request-driven approach from the outside or service boundary. It measures what the client or user experiences.
+  - **USE** takes an internal, component-level approach. It walks through every physical and virtual resource (CPUs, disks, memory buses) to spot physical bottlenecks.
+- **What "Errors" Means:**
+  - In **RED**, errors mean failed application requests (e.g., HTTP 5xx responses or business logic rejections).
+  - In **USE**, errors mean resource-level or hardware-level faults (e.g., kernel page faults, corrupted disk sectors, or network interface drops).
+
 
 ### **5. What is Prometheus and how does its pull-based architecture work?**
 **Answer:** An open-source, time-series database and monitoring system. It periodically scrapes (pulls) plain-text metrics from HTTP `/metrics` endpoints exposed by applications and exporters using Kubernetes Service Discovery, storing samples in its custom local TSDB engine.
