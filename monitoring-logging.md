@@ -591,9 +591,29 @@ A **span** represents a **single, individual unit of work** or step inside a tra
 
 
 ### **22. What is W3C TraceContext?**
-**Answer:** Standardized HTTP headers propagated across microservice boundaries:
-- `traceparent`: Encodes version, `trace-id`, `parent-span-id`, and trace flags.
-- `tracestate`: Carries vendor-specific routing metadata.
+**Answer:** # W3C Trace Context
+
+W3C Trace Context is an industry standard that defines unified HTTP headers (`traceparent` and `tracestate`) to propagate distributed tracing context across microservices, cloud platforms, and different monitoring tools. 
+
+Before this standard, tools used proprietary headers (like Zipkin’s `B3` or Google's `X-Google-Cloud-Trace`), which often broke trace continuity when a request crossed vendor boundaries.
+
+#### Core Headers
+
+The specification relies on two primary HTTP headers:
+
+- **`traceparent`**: A mandatory header that carries the core tracing identity across services. It contains four fields formatted as a fixed-length string:
+  - **Version**: 1 byte (e.g., `00`).
+  - **Trace-ID**: A 16-byte (32-character hex) globally unique identifier for the entire transaction.
+  - **Parent-ID / Span-ID**: An 8-byte (16-character hex) identifier representing the specific caller step.
+  - **Trace-Flags**: An 8-bit field used for options like the sampling decision (whether the trace is recorded).
+- **`tracestate`**: An optional, comma-separated list of up to 32 key-value pairs that carry vendor-specific or proprietary extension data (such as tenant information or internal routing). Middleware and services can read, update, or append their own vendor keys while preserving the rest of the list.
+
+#### How It Works in Practice
+
+1. **Request Initiation**: When a user or client triggers a request, the starting service generates a `Trace-ID` and a `Parent-ID`, injecting them into the `traceparent` header. 
+2. **Propagation**: As the request moves through microservices, API gateways, and queues, each receiving service extracts the headers.
+3. **Span Correlation**: Downstream services create their own child spans using the same `Trace-ID` and updating the `Parent-ID` to their own ID before forwarding the request.
+4. **Reconstruction**: When logs and traces reach a central backend (like **Dynatrace** or **Elastic APM**), the matching IDs stitch the distributed actions into a single waterfall view.
 
 ### **23. Compare Tail-Based Sampling vs Head-Based Sampling in Distributed Tracing.**
 **Answer:**
