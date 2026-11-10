@@ -45,10 +45,35 @@ During a live production outage or performance degradation, these three pillars 
 
 ### **3. Explain the Four Golden Signals of Monitoring (Google SRE).**
 **Answer:**
-1. **Latency:** Time required to service a request (differentiating between successful vs failed request latency).
-2. **Traffic:** Demand placed on the system (HTTP req/sec, concurrent streaming sessions).
-3. **Errors:** Rate of requests that fail explicitly (HTTP 5xx) or implicitly (wrong data returned).
-4. **Saturation:** How full a resource is (CPU %, memory %, queue depth).
+
+The **Google SRE Book** defines the Four Golden Signals as the core metrics you should measure for any user-facing system to capture the vast majority of real-world failures.
+
+#### The Four Golden Signals
+
+**1. Latency**
+
+- What it is: The time it takes to service a request.
+- Key detail: It is crucial to measure the latency of successful requests separately from failed requests. If a server fails immediately with an error, its low latency can artificially skew your average metrics to look healthy when users are actually seeing broken experiences.
+- Best practice: Track request durations using percentiles (such as P95 or P99 tail latency) rather than just simple averages, which hide spikes affecting a subset of users.
+
+**2. Traffic**
+
+- What it is: A measure of how much demand is placed on your system.
+- Key detail: How traffic is measured depends on the type of service. For a web application, it is commonly measured in requests per second (RPS); for a stream-processing pipeline, it might be I/O rate or concurrent connections.
+
+**3. Errors**
+
+- What it is: The rate of requests that fail.
+- Key detail: Errors fall into different categories:
+  - Explicit failures: e.g., HTTP 5xx server error codes.
+  - Implicit failures: e.g., an HTTP 200 OK status code that actually contains the wrong payload or invalid data.
+  - Policy-based failures: e.g., a response that succeeds technically but violates a Service Level Agreement (SLA) or latency boundary.
+
+**4. Saturation**
+
+- What it is: How "full" your system is, or a measure of your most constrained resource.
+- Key detail: Saturation emphasizes the degree of utilization relative to capacity (e.g., CPU utilization, memory, disk I/O, database connection pools, or thread/queue depths). It often tells you when a system is about to degrade before hard errors start happening.
+
 
 ### **4. Compare the RED Method vs USE Method.**
 **Answer:**
