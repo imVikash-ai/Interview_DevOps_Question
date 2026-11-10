@@ -370,8 +370,26 @@ In **Prometheus Alertmanager**, **Grouping** and **Inhibition** are **core mecha
 
 ### **15. What is Grafana Loki and how does it differ from Elasticsearch?**
 **Answer:**
-- **Elasticsearch:** Indexes 100% of the raw text content of every log line (high CPU and heavy storage overhead).
-- **Grafana Loki:** "Like Prometheus, but for logs." **Indexes only metadata labels** (e.g., `namespace="prod"`, `app="payment"`), storing raw compressed log text chunks in cheap object storage (S3), reducing operational costs by over 80%.
+
+**Grafana Loki** is **a horizontally scalable, multi-tenant log aggregation system developed by Grafana Labs, inspired by Prometheus**. Instead of indexing the full text of every log message, Loki indexes only the metadata and labels (such as `app`, `environment`, or `namespace`), compressing the actual log data into chunks and storing them in cost-effective object storage like Amazon S3 or Google Cloud Storage. 
+
+**Key Differences: Grafana Loki vs. Elasticsearch**
+
+| **Feature**                 | **Grafana Loki**                                                                                                        | **Elasticsearch**                                                                                                     |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Indexing Approach**       | Indexes **labels only** (metadata), similar to Prometheus.                                                              | Indexes **full text** of every document/log line.                                                                     |
+| **Storage & Cost**          | Stores compressed log chunks in **object storage** (S3, GCS, MinIO), making it significantly cheaper (3–5x lower cost). | Stores full inverted indexes and JSON objects on local SSDs, requiring more disk space and higher memory allocations. |
+| **Query Language**          | Uses **LogQL** (focuses on label filtering and "schema at query time").                                                 | Uses **KQL (Kibana Query Language)** or Query DSL for deep full-text searches.                                        |
+| **Search Capability**       | Best for structured label-based filtering, line matching, and correlating logs with metrics.                            | Best for ad-hoc, deep, unstructured full-text searches and complex text analytics.                                    |
+| **User Interface**          | Visualized via **Grafana**.                                                                                             | Visualized via **Kibana**.                                                                                            |
+| **Resource & Ops Overhead** | Lower resource usage; stateless and lighter operational complexity.                                                     | Higher resource usage; heavier JVM heap tuning and shard/stateful management.                                         |
+| **Ecosystem & Ingest**      | Often paired with Grafana Alloy, Promtail, or OpenTelemetry collectors.                                                 | Part of the ELK Stack (Elasticsearch, Logstash, Kibana).                                                              |
+
+**When to Choose Which?**
+
+- **Choose Grafana Loki if:** You run Kubernetes or cloud-native infrastructure, already use Grafana and Prometheus, want to keep log storage costs low via object storage, and primarily filter logs by labels and time ranges.
+- **Choose Elasticsearch if:** You need deep, ad-hoc, full-text search across unstructured application logs, complex security/compliance log auditing, or heavy machine-learning-based anomaly detection
+
 
 ### **16. What is LogQL in Grafana Loki?**
 **Answer:**
