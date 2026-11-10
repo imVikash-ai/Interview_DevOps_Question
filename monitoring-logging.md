@@ -167,7 +167,19 @@ Prometheus client libraries provide four core metric types for collecting and ex
 | **Summary**     | Pre-calculated client-side | Percentiles over a sliding time window  | Direct quantile labels (`quantile="..."`) |
 
 ### **7. What is a Prometheus Exporter?**
-**Answer:** A lightweight proxy agent that translates telemetry from third-party systems that do not natively emit Prometheus metrics and exposes them on `/metrics` (e.g., `node_exporter`, `mysqld_exporter`, `blackbox_exporter`).
+**Answer:** A **Prometheus exporter** is **a standalone software service or agent that collects metrics from third-party systems, applications, or hardware and translates them into a format that Prometheus can understand and scrape**. 
+
+**How It Works**
+
+- **Translation Bridge:** Many systems (like Linux kernels, MySQL databases, or Redis) do not natively expose metrics in Prometheus's text-based format. The exporter acts as an intermediary, gathering internal statistics and converting them. 
+- **HTTP `/metrics` Endpoint:** The exporter runs alongside or targets the service and exposes the converted metrics on an HTTP endpoint (frequently `/metrics`).
+- **Prometheus Scraping:** The Prometheus server periodically pulls (or "scrapes") this HTTP endpoint at regular intervals to ingest and store the data. 
+
+**Common Types of Exporters**
+
+- **Node Exporter:** Collects low-level hardware and operating system metrics (CPU usage, memory, disk I/O, network traffic) from Linux and Unix-like machines. 
+- **Database Exporters:** Extract performance and health metrics from databases like MySQL, PostgreSQL, MongoDB, or Redis.
+- **Blackbox Exporter:** Allows Prometheus to probe endpoints (HTTP, HTTPS, DNS, TCP, ICMP) from the outside to check availability and uptime
 
 ### **8. In PromQL, what is the crucial difference between `rate()` and `irate()`?**
 **Answer:**
