@@ -448,8 +448,41 @@ Tempo is designed to work seamlessly alongside the rest of the Grafana ecosystem
 
 ### **18. Compare Thanos vs Grafana Mimir for long-term Prometheus metric storage.**
 **Answer:**
-- **Thanos:** Uses sidecars on Prometheus instances to upload metrics to S3 and queries them via Thanos Querier.
-- **Grafana Mimir:** Massively scalable, multi-tenant time-series database accepting Prometheus Remote Write directly, providing high-availability global querying and automated downsampling.
+
+Comparing **Thanos** and **Grafana Mimir comes down to whether you want to augment an existing Prometheus fleet (Thanos) or replace it with a centralized, scalable backend (Mimir)**. 
+
+**Core Architecture**
+
+- **Thanos (Prometheus + Sidecars):**
+  - Keeps your existing Prometheus servers running locally. A lightweight sidecar container runs alongside each Prometheus instance, shipping completed TSDB (Time Series Database) blocks to object storage (like AWS S3 or GCS).
+  - The `Thanos Query` component provides a global query view across active Prometheus instances and historical object storage.
+- **Grafana Mimir (Centralized Remote-Write):**
+  - Replaces local Prometheus storage dependency with a purpose-built, horizontally scalable, multi-tenant metrics backend.
+  - Prometheus servers (or OpenTelemetry collectors) **remote-write** metrics directly into Mimir’s distributor/ingester tier, which then cuts TSDB blocks and writes them to object storage. 
+
+**Key Comparison Breakdown**
+
+| **Feature / Dimension**        | **Thanos**                                                                                                                 | **Grafana Mimir**                                                                                           |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Primary Design Philosophy**  | Adopt-in-place; minimal disruption to existing Prometheus setups.                                                          | Purpose-built, centralized, SaaS-scale metrics backend.                                                     |
+| **Data Ingestion Path**        | Prometheus local TSDB → Sidecar → Object Storage.                                                                          | Prometheus Remote-Write → Mimir Ingesters → Object Storage.                                                 |
+| **Multi-Tenancy**              | Bolt-on/limited; single-tenant or basic multi-tenant design.                                                               | First-class, native multi-tenancy built into every component.                                               |
+| **Operational Complexity**     | Lower initial barrier (5–6 components); compactor and downsampling tier management can grow complex at scale.              | Higher operational footprint (8+ microservices), though well-documented with tuned defaults.                |
+| **Scale & High Cardinality**   | Good for multi-cluster federation, but struggles or requires tuning when scale hits hundreds of millions of active series. | Built for massive scale (e.g., millions of samples per second across heavy multi-tenant footprints).        |
+| **Ecosystem & Query Features** | Native PromQL, tightly tied to the CNCF/Prometheus ecosystem.                                                              | Full PromQL/LogQL alignment, native histograms, out-of-order ingestion, and deep Grafana stack integration. |
+
+**When to Choose Thanos**
+
+- You **already run many Prometheus servers** across clusters and want long-term storage and a global query view *without* completely rebuilding your collection pipeline.
+- You prefer keeping Prometheus close to the edge with local evaluation and alerting.
+- Your scale is moderate-to-large, and you want the **gentlest operational on-ramp** to object storage. 
+
+**When to Choose Grafana Mimir**
+
+- You need a **centralized, multi-tenant metrics platform** (e.g., serving internal engineering teams or external SaaS customers with strict data isolation).
+- You are dealing with **massive cardinality** and ultra-high ingestion rates where standard Prometheus remote-write or sidecar compactors start breaking down. 
+- You want modern capabilities out-of-the-box like native histograms, out-of-order sample support, and tight integration with the wider Grafana LGTM stack (Loki, Grafana, Tempo, Mimir)
+
 
 ### **19. What is OpenTelemetry (OTel)?**
 **Answer:** A CNCF vendor-neutral framework providing standardized APIs, SDKs, and collector tooling to generate, collect, transform, and export telemetry data (metrics, logs, traces) across polyglot microservice architectures.
