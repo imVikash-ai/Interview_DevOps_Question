@@ -558,8 +558,37 @@ Exporters are the exit points of the Collector. They translate the Collector's i
 
 ### **21. What is Distributed Tracing and what is a Span vs a Trace?**
 **Answer:**
-- **Trace:** The complete end-to-end representation of a request's journey across distributed services.
-- **Span:** A single contiguous unit of work within a trace (e.g., executing an HTTP request or SQL query), containing start/end timestamps, span context, tags, and logs.
+
+**Distributed tracing** is **an observability method that tracks a single user request as it travels across multiple services, microservices, or APIs in a distributed system**. Instead of searching through disconnected log files across a dozen different servers, distributed tracing links everything together so you can see the complete path and find where errors or slow response times happen.
+
+**What is a Trace?**
+
+A **trace** represents the **entire end-to-end journey** of a single request from the moment it starts (such as a user clicking a button or making an API call) until it finishes. 
+
+- **Trace ID:** Every request is assigned a unique identifier called a **trace ID**. As the request calls other downstream services, this trace ID travels along with it (**context propagation**). 
+- **Reconstruction:** A trace itself is not a physical object stored directly; rather, it is the full tree or timeline view that your observability backend builds by grouping all related steps that share that same trace ID. 
+
+**What is a Span?**
+
+A **span** represents a **single, individual unit of work** or step inside a trace. If the trace is the whole journey, a span is just one specific leg of the trip. 
+
+- **Examples of Spans:** An incoming HTTP request, a SQL database query, a call to an external payment gateway, or a write to a message queue. 
+- **Span Anatomy:** Each span contains:
+  - A unique **Span ID**
+  - A **Parent Span ID** (which shows which operation triggered it, creating a parent-child hierarchy)
+  - Start and end **timestamps / duration**
+  - **Attributes** (metadata like HTTP status codes, user IDs, or SQL statements)
+  - **Events or logs** tied to that specific operation 
+
+**Span vs. Trace: Key Differences**
+
+| **Feature**      | **Trace**                                                          | **Span**                                                                            |
+| ---------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| **Scope**        | The **entire journey** of a request from start to finish.          | A **single operation** or step within that journey.                                 |
+| **Relationship** | An overarching collection (tree) made up of multiple spans.        | A building block that links to a parent span and shares a trace ID.                 |
+| **Identifier**   | Uses a unique **Trace ID**.                                        | Uses a unique **Span ID** (plus references a Parent Span ID).                       |
+| **Analogy**      | Ordering food delivery, tracking it from the app tap to your door. | The restaurant getting the ticket, the chef cooking, or the driver dropping it off. |
+
 
 ### **22. What is W3C TraceContext?**
 **Answer:** Standardized HTTP headers propagated across microservice boundaries:
