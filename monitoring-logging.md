@@ -278,7 +278,21 @@ Prometheus crashes (typically via an **Out-Of-Memory / OOM crash**) due to how i
 - **Pre-aggregate Data:** Use recording rules or upstream aggregation to pre-compute lower-cardinality summaries of high-volume data
 
 ### **11. What are Prometheus Exemplars?**
-**Answer:** References to specific Trace IDs attached directly to metric samples in Prometheus TSDB. Clicking on a latency spike data point in Grafana opens the exact distributed trace in Grafana Tempo in 1 click.
+**Answer:** **Prometheus Exemplars** are **specific reference data points—most commonly distributed trace IDs (such as Jaeger or Grafana Tempo trace IDs)—attached to aggregated metric time series like counters or histograms**. 
+
+**Key Concepts**
+
+- **Bridging Metrics and Traces:** Standard metrics tell you *what* is happening (e.g., latency spiked or error rates increased) and traces tell you *why* by showing the detailed life-cycle of a single request. Exemplars bridge the gap by letting you jump straight from a metric data point to a specific, representative trace.
+- **How They Work:** When your application records a metric (like a histogram bucket for request latency) inside an active trace context, the client library attaches metadata (such as `trace_id` and `span_id`) to that measurement. Prometheus scrapes these metrics exposed in the **OpenMetrics** format. 
+- **Storage:** Exemplars are stored in Prometheus (or compatible systems like Grafana Mimir) inside a fixed-size in-memory circular buffer to avoid bloating the primary time series database (TSDB). 
+- **Visualization:** In tools like Grafana, exemplars appear as interactive markers (such as stars or diamonds) directly on metric charts. Clicking an exemplar opens the associated trace in a distributed tracing backend (e.g., Grafana Tempo or Jaeger).
+
+**Requirements to Use Exemplars**
+
+- **Prometheus:** Version 2.26+ with exemplar storage explicitly enabled (`--enable-feature=exemplar-storage`).
+- **Exposition Format:** Metrics must be exposed using the **OpenMetrics** format.
+- **Instrumentation:** Application code must be instrumented (via OpenTelemetry or Prometheus client libraries) to inject trace IDs into metric observations.
+- **Visualization:** A compatible frontend like **Grafana** (7.4+) paired with a trace backend like **Grafana Tempo**, **Jaeger**, or **Zipkin**
 
 ### **12. What is Grafana and what is its role in modern observability?**
 **Answer:** An open-source visualization and analytics platform that connects to heterogeneous data sources (Prometheus, Loki, Tempo, Elasticsearch, CloudWatch) to render unified dashboards, alerts, and correlated telemetry views.
