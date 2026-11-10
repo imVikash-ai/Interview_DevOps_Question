@@ -516,9 +516,45 @@ OpenTelemetry is not an observability database or dashboard itself; instead, it 
 
 ### **20. Explain the OpenTelemetry Collector Architecture (Receivers, Processors, Exporters).**
 **Answer:**
-- **Receivers:** Ingests telemetry in various formats (OTLP, Prometheus, Jaeger).
-- **Processors:** Batches requests (`batch`), redacts PII/secrets (`redaction`), and samples traces (`tail_sampling`).
-- **Exporters:** Translates and exports telemetry to backends (Prometheus, Tempo, Loki, Datadog).
+
+The **OpenTelemetry (OTel) Collector** is **a vendor-agnostic proxy that receives, processes, and exports telemetry data (traces, metrics, and logs)**. It decouples your instrumented application code from your monitoring and observability backends. 
+
+Data flows through the collector in a sequential pipeline structure: **Receivers ➔ Processors ➔ Exporters**. 
+
+**Core Pipeline Components**
+
+**1. Receivers (Ingestion Layer)**
+
+Receivers are the entry point of the Collector. They listen for or scrape telemetry data from applications, agents, or external systems, and convert them into OpenTelemetry's internal data model. 
+
+- **Protocols & Sources:** Accept native **OTLP** (OpenTelemetry Protocol via gRPC or HTTP), **Prometheus** (pulling metrics), **Jaeger**, **Zipkin**, **Kafka**, or local log file tailing.
+- **Role:** They ingest data without changing its core semantic content, forwarding it directly to the processing layer.
+
+**2. Processors (Transformation & Control Layer)**
+
+Processors sit in the middle of the pipeline to modify, filter, or aggregate telemetry before it reaches storage. They run sequentially in the order defined in the configuration. 
+
+- **Common Processor Types:**
+  - **Batch Processor:** Groups data spans, metrics, or logs together to reduce network overhead and improve compression/throughput. (Recommended for almost all production setups).
+  - **Filtering / Sampling Processors:** Drop noisy traces, high-cardinality metrics, or reduce trace volume via head/tail-based sampling to control storage costs.
+  - **Resource / Transform Processors:** Enrich telemetry with extra metadata, such as Kubernetes pod names, cloud provider regions, or environment tags (e.g., `environment: production`).
+  - **Redaction Processors:** Strip sensitive or PII data (like passwords or credit card numbers) out of logs and traces. 
+
+**3. Exporters (Delivery Layer)**
+
+Exporters are the exit points of the Collector. They translate the Collector's internal data format into specific vendor or open-source backend protocols and send it onward. 
+
+- **Destinations:** OTLP endpoints, **Prometheus Remote Write**, **Grafana Loki / Tempo**, **Jaeger**, **Datadog**, **Elasticsearch**, or a `debug` exporter for local inspection. 
+- **Fan-Out Support:** A single pipeline can point to **multiple exporters** simultaneously (e.g., sending the same traces to both a long-term data lake and a real-time monitoring tool).
+
+**Supporting Concepts**
+
+- **Pipelines:** Configured under the `service.pipelines` section in YAML, split by signal type (**traces**, **metrics**, and **logs**). Each pipeline explicitly chains selected receivers, processors, and exporters together.
+- **Extensions:** Non-pipeline components that provide auxiliary capabilities for the collector process itself, such as health check endpoints (`/healthz`), zPages, authentication, and remote monitoring. 
+- **Deployment Models:**
+  - **Agent / DaemonSet / Sidecar:** Runs locally alongside your application (on the same host or Kubernetes pod) to handle local collection, tagging, and immediate batching.
+  - **Gateway / Standalone:** Runs as a centralized cluster or service that receives aggregated data from local agents or SDKs before routing them to heavy backends.
+
 
 ### **21. What is Distributed Tracing and what is a Span vs a Trace?**
 **Answer:**
