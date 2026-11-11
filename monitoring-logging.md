@@ -989,10 +989,54 @@ While structured logging isn't a hard physical law, it has become practically ma
 4. **Provision to Grafana.** Grafana automatically loads the compiled JSON file from a provisioned folder or updates it via an automated deployment pipeline.
 
 
-### **39. What is Prometheus Scrape Interval vs Evaluation Interval?**
+### **35. What is Prometheus Scrape Interval vs Evaluation Interval?**
 **Answer:**
-- **`scrape_interval`:** How often Prometheus queries target `/metrics` endpoints (e.g., every 15 seconds).
-- **`evaluation_interval`:** How often Prometheus evaluates recording rules and alerting rules (e.g., every 30 seconds).
+
+**Scrape interval controls how often Prometheus pulls raw metrics from monitored targets, while evaluation interval controls how often Prometheus runs PromQL queries against stored data to compute recording rules and trigger alerts**. Both default to `1m` (60 seconds) in Prometheus if left unconfigured, though they are commonly tuned to `15s` in production. 
+
+#### Core Comparison
+
+| **Feature** | **Scrape Interval (`scrape_interval`)** | **Evaluation Interval (`evaluation_interval`)** |
+|---|---|---|
+| **Primary Purpose** | Pulls raw metrics from exporters and endpoints. | Evaluates recording rules and alerting rules against stored data. |
+| **Data Flow** | External targets → Prometheus TSDB. | Prometheus TSDB → New time series or Alertmanager. |
+| **Default Value** | `1m` (60 seconds). | `1m` (60 seconds). |
+| **Override Scope** | Global `global:` block or per-job inside `scrape_configs:`. | Global `global:` block or per-group inside rule files. |
+| **Related Timeout** | Must be greater than or equal to `scrape_timeout` (default `10s`). | Slow evaluations exceeding this interval cause skipped iterations. |
+
+#### How They Work Together
+
+- **Data Ingestion (`scrape_interval`).** Prometheus sends an HTTP request to each target's `/metrics` endpoint at this cadence to collect current counter, gauge, and histogram values. Setting a shorter scrape interval yields higher resolution graphs and faster detection of brief spikes, at the cost of increased CPU, network, and storage usage.
+- **Rule Processing (`evaluation_interval`).** On a separate internal clock, Prometheus executes the PromQL expressions defined in your `rule_files`. According to the **Prometheus Recording Rules documentation**, rule groups are evaluated in parallel, while individual rules within a group run sequentially so later rules can reference earlier ones. rt State Transitions.** Each time `evaluation_interval` triggers an alerting rule, Prometheus checks if the condition is met and transitions the alert state between `inactive`, `pending`, and `firing` before forwarding active alerts to Alertmanager. 
+
+#### Configuration Example
+
+In your `prometheus.yml` file, both intervals are set at the top level and can be overridden for specific jobs or rule groups: 
+
+**YAML**
+
+```yaml
+global:
+  scrape_interval: 15s      # Pull metrics from targets every 15s
+  scrape_timeout: 10s       # Abort scrape if target takes longer than 10s
+  evaluation_interval: 15s  # Run alerting and recording rules every 15s
+
+rule_files:
+  - "alerts.yml"
+
+scrape_configs:
+  - job_name: "critical-api"
+    scrape_interval: 5s     # Override: scrape this specific job every 5s
+    static_configs:
+      - targets: ["localhost:8080"]
+```
+
+#### Best Practices for Tuning
+
+- **Keep them aligned by default.** Matching `evaluation_interval` to `scrape_interval` ensures alerting rules check newly ingested samples immediately without redundant evaluations on unchanged data. 
+- **Avoid evaluating faster than you scrape.** Setting `evaluation_interval` shorter than `scrape_interval` wastes CPU cycles by re-evaluating the exact same underlying data points multiple times between scrapes.
+- **Watch for missed iterations.** If a heavy PromQL rule takes longer to compute than the `evaluation_interval`, Prometheus skips the next evaluation cycle, creating gaps in recording rule metrics and incrementing `rule_group_iterations_missed_total`.
+
 
 ### **40. What is a Prometheus Recording Rule?**
 **Answer:** Precomputes frequently needed or computationally expensive PromQL expressions and saves their result as a new time series, speeding up dashboard queries:
