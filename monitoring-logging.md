@@ -852,8 +852,41 @@ Operators often confuse KSM with the built-in Kubernetes Metrics Server, though 
 | **Primary Use Cases** | Alerting, dashboards, and SLO tracking | Horizontal Pod Autoscaling (HPA) and `kubectl top` |
 | **Storage & Output** | Exposes `/metrics` for Prometheus scraping | Exposes `metrics.k8s.io` aggregated API |
 
-### **34. What is OpenSearch vs Elasticsearch?**
-**Answer:** OpenSearch is a 100% open-source fork (Apache 2.0) of Elasticsearch and Kibana created by AWS and the community after Elastic changed licensing to SSPL.
+### **30. What is OpenSearch vs Elasticsearch?**
+**Answer:** 
+
+**Elasticsearch** and **OpenSearch** are both **distributed, Java-based search and analytics engines built on top of Apache Lucene**. They are designed to store, search, and analyze massive volumes of text, logs, and vector data in near real-time. 
+
+Because of their shared history, they look and function similarly on the surface, but they differ significantly in governance, licensing, and feature evolution. 
+
+#### Elasticsearch
+
+- **What it is:** The original search and analytics engine, created in 2010 by Elastic N.V. 
+- **Under the Hood:** Built on Apache Lucene, used alongside tools like **Kibana** (visualization) and **Logstash** (data ingestion) as part of the Elastic Stack. 
+- **Licensing:** Uses AGPLv3, SSPL, and the Elastic License (having returned to open-source designations in 2024 after prior license changes). 
+- **Ecosystem & Features:** Offers cutting-edge proprietary and commercial features (such as advanced machine learning, enterprise security, and vector search optimizers). 
+- **Cloud Options:** Available via **Elastic Cloud** across AWS, Google Cloud, and Microsoft Azure. 
+
+#### OpenSearch
+
+- **What it is:** A free, open-source fork of Elasticsearch created by Amazon Web Services (AWS) in 2021.
+- **Why it was created:** When Elastic altered its licensing away from permissive open-source terms, AWS forked Elasticsearch version **7.10.2** (the last Apache 2.0-licensed release) to maintain its cloud services and keep an open-source alternative alive.
+- **Under the Hood:** Maintained by the Linux Foundation’s OpenSearch Software Foundation. It uses **OpenSearch Dashboards** as its visualization tool (similar to Kibana).
+- **Licensing:** Strictly under the permissive **Apache 2.0 license**.
+- **Ecosystem & Features:** Includes core security, alerting, and vector search capabilities (with ongoing features like GPU-accelerated vector search) for free out-of-the-box.
+- **Cloud Options:** Deeply integrated into the Amazon OpenSearch Service on AWS, alongside other independent providers like Aiven and Instaclustr.
+
+#### Key Differences at a Glance
+
+| **Feature / Aspect** | **Elasticsearch** | **OpenSearch** |
+|---|---|---|
+| **Origin / History** | Original project by Elastic (2010) | Forked from Elasticsearch 7.10.2 by AWS (2021) |
+| **Governance** | Elastic N.V. (commercial company) | OpenSearch Software Foundation / Linux Foundation (community-driven) |
+| **License** | AGPLv3 / SSPL / Elastic License | Apache 2.0 (Permissive) |
+| **Cost of Enterprise Features** | Advanced security and ML often require a paid subscription | Security, role-based access, and alerting are included for free |
+| **Performance & R&D** | Tends to lead in raw benchmark speed and cutting-edge vector search optimizers | Maturing steadily, though divergent from core Elastic codebases over time |
+| **Managed Cloud** | Elastic Cloud (Multi-cloud: AWS, GCP, Azure) | Amazon OpenSearch Service (plus third-party providers) |
+
 
 ### **35. What is Structured Logging (JSON) and why is it mandatory?**
 **Answer:** Emitting logs formatted as JSON objects (`{"timestamp":"...","level":"info","user_id":"123"}`) eliminates fragile regex parsing, allowing log collectors to ingest native fields for instant indexing and filtering.
