@@ -658,7 +658,34 @@ Most large-scale engineering teams do not choose one exclusively. Instead, they 
 2. **Gateway Collector (Tail-based):** Run tail-sampling rules on the remaining traffic to guarantee that 100% of errors and slow latency outliers are persisted to storage.
 
 ### **24. What is Continuous Profiling with Pyroscope / Parca?**
-**Answer:** Continuous collection of runtime CPU, memory allocation, and thread contention call stacks directly from production workloads using low-overhead **eBPF probes**, visualizing bottlenecks as interactive **Flame Graphs**.
+**Answer:** 
+
+**Continuous profiling** is **an always-on, low-overhead observability method that continuously collects and analyzes runtime performance data—such as CPU utilization and memory allocations—across production applications and infrastructure over time**. 
+
+While traditional profiling is reactive and run temporarily on a developer’s machine to debug a known issue, continuous profiling acts as the **fourth pillar of observability** (alongside metrics, logs, and distributed traces), answering *why* a performance spike or memory leak happens down to the specific line of code.
+
+#### How It Works
+
+- **Low-Overhead Sampling:** Agents run permanently in the background, sampling application stacks at a safe rate (typically ~1% to 5% CPU overhead) so it can stay enabled in live production environments 24/7.
+- **Collection Methods:**
+  - **Language-specific SDKs/Profilers:** Embedded directly into the application runtime (e.g., using `pprof` in Go or language agents in Python, Java, or Rust).
+  - **eBPF-based Probers:** Uses Extended BPF (eBPF) to hook into the Linux kernel and sample stack traces across any language without requiring manual code changes or app restarts.
+- **Visualization:** Data is typically aggregated and rendered as **flame graphs** or **icicle graphs**, where wider bars represent functions consuming more time or resources.
+
+#### Pyroscope vs. Parca
+
+| **Feature** | **Grafana Pyroscope** | **Parca** |
+|---|---|---|
+| **Lineage & Backing** | Developed originally by Pyroscope, acquired and integrated into the **Grafana Labs** ecosystem. | Built by **Polar Signals** and hosted as a CNCF sandbox project. |
+| **Primary Approach** | Strong language-runtime SDKs + first-class eBPF support. | eBPF-first design using CO-RE (Compile Once – Run Everywhere) BPF for kernel portability. |
+| **Ecosystem Fit** | Ideal for teams already using Grafana, Loki, and Tempo (links traces directly to profiles). | Clean, lightweight, standalone choice for teams wanting zero-instrumentation simplicity. |
+| **Data Format** | Uses native `pprof` and custom compressed storage engines. | Uses the standard `pprof` data model. |
+
+#### Key Benefits & Use Cases
+
+- **Faster Incident Resolution (Lower MTTR):** Pinpoint exact functions or loops causing high latency or CPU saturation during an outage.
+- **Cost & Resource Optimization:** Identify bloated dependencies, inefficient algorithms, or redundant background jobs burning cloud infrastructure compute.
+- **Trace-to-Profile Correlation:** Connect a high-latency distributed trace span directly to a code-level flame graph to see what the CPU was doing at that exact millisecond
 
 ### **25. What is eBPF Hubble in Cilium for Network Observability?**
 **Answer:** Leverages Linux kernel eBPF probes to visualize service-to-service communication dependency graphs, network latency, TCP drops, DNS query failures, and HTTP status codes with zero application instrumentation.
