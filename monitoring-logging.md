@@ -942,8 +942,26 @@ While structured logging isn't a hard physical law, it has become practically ma
 - **Third-Party APIs:** If your service calls external or untrusted third-party APIs, baggage headers can leak internal business data unless explicitly filtered or cleared out before the call.
 
 
-### **37. What is Alert Deduplication and Fingerprinting in Prometheus?**
-**Answer:** Prometheus computes a hash (fingerprint) of all label names and values of an alert. Alertmanager uses this fingerprint to deduplicate incoming alert firings across redundant Prometheus servers scraping the same targets in HA pairs.
+### **33. What is Alert Deduplication and Fingerprinting in Prometheus?**
+**Answer:** 
+
+**Alert Deduplication** and **Fingerprinting** in Prometheus (specifically within its companion component, **Alertmanager**) **work together to prevent alert fatigue by merging repeated, identical notifications into single, manageable updates**. 
+
+#### What is Fingerprinting?
+
+- **Definition:** A fingerprint is a unique identifier (typically a hash) generated for an alert based on the combination of its label set (such as `alertname`, `instance`, `severity`, and custom labels).
+- **How it works:** When Prometheus fires an alert, it attaches a set of key-value label pairs. Alertmanager takes these labels, sorts them, and computes a unique hash (fingerprint).
+- **Role:** This fingerprint acts as an internal ID that allows Alertmanager to recognize whether an incoming alert is a brand-new issue or an ongoing recurrence of a known event. 
+
+#### What is Alert Deduplication?
+
+- **Definition:** Deduplication is the process where Alertmanager catches multiple identical or recurring alerts (sharing the same fingerprint) and collapses them into a single ongoing incident state instead of spamming notification channels (like Slack, PagerDuty, or Email) every time the evaluation loop runs. 
+- **How it works:**
+  1. Prometheus continuously evaluates alerting rules and sends active alerts to **Alertmanager**.
+  2. Alertmanager checks the alert's fingerprint against its active internal state.
+  3. If an alert with that exact fingerprint is already firing or pending, Alertmanager updates its internal record instead of triggering a fresh notification.
+  4. It suppresses redundant noise while respecting configured timing windows (such as `group_wait`, `group_interval`, and `repeat_interval`).
+
 
 ### **38. What is Grafana Dashboard as Code (jsonnet / grafonnet)?**
 **Answer:** Defining Grafana dashboards programmatically in Jsonnet or TypeScript, enabling version control, code reviews, and automated CI/CD deployment for dashboards.
