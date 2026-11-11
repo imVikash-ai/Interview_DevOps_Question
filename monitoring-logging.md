@@ -1038,15 +1038,57 @@ scrape_configs:
 - **Watch for missed iterations.** If a heavy PromQL rule takes longer to compute than the `evaluation_interval`, Prometheus skips the next evaluation cycle, creating gaps in recording rule metrics and incrementing `rule_group_iterations_missed_total`.
 
 
-### **40. What is a Prometheus Recording Rule?**
-**Answer:** Precomputes frequently needed or computationally expensive PromQL expressions and saves their result as a new time series, speeding up dashboard queries:
+### **36. What is a Prometheus Recording Rule?**
+**Answer:** 
+
+Prometheus recording rules **precompute frequently needed or computationally expensive PromQL expressions and save their results as a new set of time series**. 
+
+You can learn more about configuring them on the **Defining recording rules - Prometheus** official documentation page.
+
+#### Why Use Recording Rules?
+
+- **Performance:** Running complex aggregation queries over thousands of time series can be slow. Precomputing them once per evaluation interval makes dashboard refreshes and subsequent queries much faster. 
+- **Simplicity:** They turn long, multi-step PromQL queries into short, easy-to-use metric names. 
+- **Dashboard Efficiency:** Dashboards often re-query the same heavy expressions every few seconds; recording rules calculate it once and let the dashboard read the stored time series.
+
+#### How They Work
+
+- **Rule Groups:** Rules live inside *rule groups*, which run sequentially at a regular evaluation interval (e.g., every 15s or 1m). 
+- **Syntax Structure:** A rule file uses a YAML format containing a `groups` list. Each rule defines a new metric name (`record`) and the PromQL query (`expr`). 
+
+#### Example Recording Rule Configuration (`rules.yml`)
+
+**YAML**
+
 ```yaml
 groups:
-  - name: custom_rules
+  - name: example
+    interval: 1m
     rules:
-      - record: job:http_requests_total:rate5m
-        expr: sum(rate(http_requests_total[5m])) by (job)
+      - record: instance_path:requests:rate5m
+        expr: rate(requests_total{job="myjob"}[5m])
+
+      - record: path:requests:rate5m
+        expr: sum without (instance)(instance_path:requests:rate5m{job="myjob"})
 ```
+
+#### How to Configure Them
+
+1. **Create a Rule File:** Write your rules in a YAML file (e.g., `/etc/prometheus/rules.yml`). 
+
+2. **Reference in Main Config:** Add the file path under the `rule_files` section in your `prometheus.yml`:
+
+   **YAML**
+
+   ```yaml
+   rule_files:
+     - "rules.yml"
+   ```
+
+3. **Validate Syntax:** Run `promtool check rules /etc/prometheus/rules.yml` before applying changes. 
+
+4. **Reload Prometheus:** Restart Prometheus or send a `SIGHUP` reload request to load the new rules.
+
 
 ### **41. What is Prometheus TSDB Block Compaction?**
 **Answer:** Merges small 2-hour TSDB in-memory memory-mapped blocks into larger 24-hour persistent blocks on disk, compacting chunk data and pruning deleted series.
