@@ -687,14 +687,27 @@ While traditional profiling is reactive and run temporarily on a developer’s m
 - **Cost & Resource Optimization:** Identify bloated dependencies, inefficient algorithms, or redundant background jobs burning cloud infrastructure compute.
 - **Trace-to-Profile Correlation:** Connect a high-latency distributed trace span directly to a code-level flame graph to see what the CPU was doing at that exact millisecond
 
-### **25. What is eBPF Hubble in Cilium for Network Observability?**
-**Answer:** Leverages Linux kernel eBPF probes to visualize service-to-service communication dependency graphs, network latency, TCP drops, DNS query failures, and HTTP status codes with zero application instrumentation.
+### **25. What is Prometheus Remote Write and WAL?**
+**Answer:** # Prometheus Remote Write and WAL (Write-Ahead Log)
 
-### **26. What is SLO Multi-Window Multi-Burn-Rate Alerting?**
-**Answer:** Google SRE best practice: Alert when the **burn rate** of your Error Budget will consume the budget within critical timeframes (e.g., 14.4x burn rate over 1h and 5m consumes 2% of budget $\rightarrow$ page on-call immediately).
+**Prometheus Remote Write** is **an outbound protocol that allows Prometheus to continuously push scraped metrics to external, compatible storage systems or collectors (such as Thanos, Cortex, or Grafana Mimir) via HTTP POST with Snappy-compressed Protocol Buffers**.
 
-### **27. What is Prometheus Remote Write and WAL?**
-**Answer:** Prometheus writes incoming samples immediately to an on-disk Write-Ahead Log (WAL). Remote Write streams metrics to long-term storage (Mimir) via snappy-compressed protocol buffers. If the remote endpoint is unreachable, Prometheus replays buffered metrics from WAL once restored.
+**WAL (Write-Ahead Log)** is Prometheus’s local disk persistence layer. Before metrics are committed to long-term storage or local time-series databases, incoming samples and metadata are first written sequentially to the WAL. 
+
+#### How They Work Together
+
+1. **Scraping and WAL Ingestion:** Prometheus scrapes targets and records the metrics into its local WAL on disk.
+2. **Reading from the WAL:** The Remote Write component reads data directly from the WAL rather than buffering everything in volatile memory. 
+3. **Queueing and Sharding:** Data is distributed into memory queues managed across multiple shards. Prometheus dynamically adjusts the number of shards based on the incoming sample rate and network latency. 
+4. **Network Transmission:** Shards send the compressed metric batches to the configured remote write endpoints. 
+5. **Handling Outages:** If a remote storage endpoint goes down, Remote Write pauses its position in the WAL and safely buffers/retries sending the failed batches without crashing Prometheus or blowing up RAM.
+   - *Note:* If the remote endpoint remains down for more than **2 hours**, the WAL compacts and unsent data past that window is dropped. 
+
+#### Key Benefits
+
+- **Long-Term Storage & Centralization:** Standard Prometheus is designed for local, short-to-medium retention; Remote Write offloads data to scalable, centralized backends. 
+- **Agent Mode:** You can run Prometheus as a lightweight local agent that just scrapes and immediately ships metrics out, cutting local disk and memory footprints.
+- **Reliability:** Relying on the disk-backed WAL prevents data loss during transient network partitions or downstream outages
 
 ### **28. What is Synthetic Monitoring vs Real User Monitoring (RUM)?**
 **Answer:**
