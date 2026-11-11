@@ -711,8 +711,6 @@ While traditional profiling is reactive and run temporarily on a developer’s m
 
 ### **26. What is Synthetic Monitoring vs Real User Monitoring (RUM)?**
 **Answer:**
-# Synthetic Monitoring vs Real User Monitoring (RUM)
-
 **Synthetic Monitoring** and **Real User Monitoring (RUM)** are **two complementary approaches used to track, measure, and optimize website and application performance**. 
 
 #### Core Differences at a Glance
@@ -756,15 +754,53 @@ RUM and synthetic monitoring are not competing tools—they answer two different
 1. **Synthetic** tells you: *"Something broke or slowed down in a controlled test."*
 2. **RUM** tells you: *"Here are the specific real users who were affected and how badly."*
 
-### **29. What is Vector vs Fluent Bit for Edge Log Ingestion?**
-**Answer:** High-performance, lightweight log forwarders written in Rust (Vector) or C (Fluent Bit) running as DaemonSets ($< 30\text{MB}$ RAM) on Kubernetes nodes to parse container logs and stream them to Loki/Kafka/Elasticsearch.
-
-### **30. How do you use `predict_linear()` in PromQL for proactive disk space alerting?**
+### **27. How do you use `predict_linear()` in PromQL for proactive disk space alerting?**
 **Answer:**
-```promql
-predict_linear(node_filesystem_free_bytes[4h], 24 * 3600) < 0
+
+To use `predict_linear()` for proactive disk space alerting, you **pass a range vector of available disk space and a prediction horizon in seconds to estimate when the disk will reach zero bytes**. It calculates a simple linear regression over the specified time window and projects that trend forward.
+
+#### Basic Alert Expression
+
+A standard Prometheus alerting rule using `node_exporter` metrics looks like this:
+
+**YAML**
+
+```yaml
+- alert: DiskWillFillIn24Hours
+  expr: |
+    predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs|squashfs|vfat"}[6h], 24 * 3600) < 0
+  for: 30m
+  labels:
+    severity: warning
+  annotations:
+    summary: "Disk space will run out within 24 hours on {{ $labels.instance }}"
+    description: "Mountpoint {{ $labels.mountpoint }} is predicted to fill up in less than 24 hours based on the last 6 hours of usage."
 ```
-Alerts if the current disk consumption rate indicates the filesystem will run out of space **within the next 24 hours**.
+
+#### Key Parameters and Mechanics
+
+- **Metric (`node_filesystem_avail_bytes`)**: Use available bytes rather than free bytes, as Linux reserves a percentage of blocks (usually 5%) for the root user.
+- **Lookback Window (`[6h]`)**: Defines the historical data used to calculate the slope of disk consumption. Longer windows (like `6h` or `12h`) smooth out temporary spikes, while shorter windows (like `1h`) react faster to sudden log dumps.
+- **Prediction Horizon (`24 * 3600`)**: Sets how far into the future (in seconds) Prometheus projects the trend. Multiplying hours by `3600` makes the rule easier to read.
+- **Threshold (`< 0`)**: Triggers the alert when the predicted byte value drops below zero, meaning the disk is projected to be completely full.
+- **Filesystem Filter (`fstype!~"..."`)**: Excludes virtual, read-only, or temporary filesystems (like `tmpfs` or `squashfs`) that do not represent persistent storage.
+
+#### Best Practices to Prevent False Positives
+
+- **Pair with a static threshold**: Temporary operations (such as database backups or log rotations) can create steep downward slopes that trigger false alarms on mostly empty disks. Add an `and` condition to only alert if the disk is already somewhat full.
+
+  **PromQL**
+
+  ```promql
+  (node_filesystem_avail_bytes / node_filesystem_size_bytes < 0.25)
+  and
+  (predict_linear(node_filesystem_avail_bytes[6h], 24 * 3600) < 0)
+  ```
+
+  *Use code with caution.*
+
+- **Add a `for` duration**: Requiring the condition to remain true for `30m` or `1h` ensures brief write bursts settle down before paging an engineer.
+- **Match the lookback to the horizon**: A good rule of thumb is keeping your lookback window between one-quarter and one-half of your prediction horizon (e.g., `[6h]` lookback for a `24h` prediction).
 
 ### **31. What is Blackbox Exporter in Prometheus?**
 **Answer:** Probes external endpoints over HTTP, HTTPS, DNS, TCP, and ICMP to verify availability, response latency, and SSL certificate expiration dates.
