@@ -918,8 +918,29 @@ While structured logging isn't a hard physical law, it has become practically ma
 - **Cross-Team Consistency:** Standardizing schemas (e.g., always using `user_id` instead of mixing `usr`, `uid`, or `user`) ensures every service across an organization speaks the same telemetry language.
 
 
-### **36. What is Distributed Context Baggage in OpenTelemetry?**
-**Answer:** Propagates arbitrary key-value pairs (e.g., `tenant_id="enterprise_456"`) across network boundaries alongside trace contexts, allowing downstream spans to tag metrics and logs with business context.
+### **32. What is Distributed Context Baggage in OpenTelemetry?**
+**Answer:** 
+
+**OpenTelemetry Baggage** is **a built-in mechanism that stores and propagates custom key-value pairs (metadata) across different services and processes as a request travels through a distributed system**. 
+
+#### How It Works
+
+- **Contextual Storage:** It acts as an immutable, in-process key-value store tied to the execution context of a request. 
+- **Automatic Propagation:** When your application makes or receives network calls (such as HTTP or gRPC), OpenTelemetry automatically injects the baggage entries into outgoing request headers (like the W3C `baggage` header) and extracts them on the receiving side. 
+- **No Code Changes Required:** Downstream services can read these values or add new ones without changing existing API function signatures or manually passing variables through every layer. 
+
+#### Common Use Cases
+
+- **Business Metadata:** Propagating non-tracing metadata—such as `userId`, `tenantId`, `region`, or `isProduction`—so that it is available to loggers, metrics, and traces across every microservice in a call chain. 
+- **Debugging & Filtering:** Allowing engineers to filter logs and traces by specific customer or session identifiers without writing custom propagation logic. 
+- **Eliminating Parameter Drilling:** Avoiding the need to thread operational or diagnostic arguments through every single function in your codebase.
+
+#### Important Best Practices & Security Risks
+
+- **Avoid Secrets and PII:** Baggage headers are visible in transit over the network. **Never** put sensitive data like passwords, API tokens, credit card numbers, or private personal data (PII) into baggage. 
+- **Watch Header Size:** Every key-value pair added to baggage increases the size of HTTP/gRPC headers. Keep keys and values concise and limit the total number of entries.
+- **Third-Party APIs:** If your service calls external or untrusted third-party APIs, baggage headers can leak internal business data unless explicitly filtered or cleared out before the call.
+
 
 ### **37. What is Alert Deduplication and Fingerprinting in Prometheus?**
 **Answer:** Prometheus computes a hash (fingerprint) of all label names and values of an alert. Alertmanager uses this fingerprint to deduplicate incoming alert firings across redundant Prometheus servers scraping the same targets in HA pairs.
