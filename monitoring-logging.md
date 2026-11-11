@@ -888,8 +888,35 @@ Because of their shared history, they look and function similarly on the surface
 | **Managed Cloud** | Elastic Cloud (Multi-cloud: AWS, GCP, Azure) | Amazon OpenSearch Service (plus third-party providers) |
 
 
-### **35. What is Structured Logging (JSON) and why is it mandatory?**
-**Answer:** Emitting logs formatted as JSON objects (`{"timestamp":"...","level":"info","user_id":"123"}`) eliminates fragile regex parsing, allowing log collectors to ingest native fields for instant indexing and filtering.
+### **31. What is Structured Logging (JSON) and why is it mandatory?**
+**Answer:** 
+
+**Structured logging (JSON)** is **a method of recording log events as predictable, machine-readable key-value pairs (using JavaScript Object Notation) rather than free-form plain text**. 
+
+- **Unstructured Log (Plain Text):**
+  ```text
+  2026-11-11 10:15:00 ERROR User 123 failed to checkout cart
+  ```
+- **Structured JSON Log:**
+  ```json
+  {
+    "timestamp": "2026-11-11T10:15:00Z",
+    "level": "ERROR",
+    "user_id": 123,
+    "event": "checkout_failed"
+  }
+  ```
+
+#### Why It Is "Mandatory" (Crucial) in Modern Systems
+
+While structured logging isn't a hard physical law, it has become practically mandatory for production engineering because legacy plain-text logs collapse under modern architectures:
+
+- **Eliminates Fragile Regex Parsing:** Unstructured logs force tools or engineers to write complex regular expressions (`regex`) to extract data. If a developer changes a word in the log sentence, the regex breaks. JSON has explicit, named fields that parsers read natively. 
+- **Distributed Tracing & Correlation IDs:** In a microservices architecture, a single user click hits dozens of services. JSON logs allow platforms like Datadog or **New Relic** to automatically index `trace_id` and `user_id` across every service, letting you trace a request end-to-end. 
+- **High-Speed Indexing & Querying:** Centralized log stores (like Elasticsearch, Loki, or Splunk) can filter, aggregate, and build dashboards off JSON keys instantly without re-processing strings. 
+- **Automation and Alerting:** Machine-readable JSON makes it simple to trigger automated alerts (e.g., *fire an alert if `level == "ERROR"` and `latency_ms > 500`*). 
+- **Cross-Team Consistency:** Standardizing schemas (e.g., always using `user_id` instead of mixing `usr`, `uid`, or `user`) ensures every service across an organization speaks the same telemetry language.
+
 
 ### **36. What is Distributed Context Baggage in OpenTelemetry?**
 **Answer:** Propagates arbitrary key-value pairs (e.g., `tenant_id="enterprise_456"`) across network boundaries alongside trace contexts, allowing downstream spans to tag metrics and logs with business context.
