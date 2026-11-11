@@ -1089,14 +1089,35 @@ groups:
 
 4. **Reload Prometheus:** Restart Prometheus or send a `SIGHUP` reload request to load the new rules.
 
-
-### **41. What is Prometheus TSDB Block Compaction?**
-**Answer:** Merges small 2-hour TSDB in-memory memory-mapped blocks into larger 24-hour persistent blocks on disk, compacting chunk data and pruning deleted series.
-
-### **42. What is Prometheus Head Block vs Persistent Block?**
+### **37. What is Prometheus Head Block vs Persistent Block?**
 **Answer:**
-- **Head Block:** In-memory block holding current live samples written to the Write-Ahead Log (WAL).
-- **Persistent Block:** Immutable, compacted historical blocks stored on disk holding raw chunks and index files.
+
+**A Head Block is the active, in-memory component of the Prometheus Time Series Database (TSDB) that handles newly incoming metric samples, while a Persistent Block is an immutable, on-disk storage segment created periodically from older head block data**. 
+
+#### Head Block
+
+- **Where it lives:** Primarily in RAM (memory), backed by a disk-based Write-Ahead Log (WAL) and memory-mapped chunks.
+- **What it does:** Incoming samples land here first, appending simultaneously to the WAL for crash recovery and getting organized into compressed chunks (up to 120 samples per chunk). 
+- **Time window:** Typically stores the most recent 1 to 3 hours of data (defaulting around a 2-hour window). 
+- **Memory & Performance:** All active time series must be held in RAM here. High metric cardinality (endless unique label values) or high churn can cause out-of-memory (OOM) crashes in the head block. Full chunks are memory-mapped to disk to reduce active RAM usage. 
+- **Lifecycle:** When the 2-hour window elapses or chunk ranges fill up, Prometheus runs head compaction to flush the head block contents out into a persistent block.
+
+#### Persistent Block
+
+- **Where it lives:** Completely on disk as an immutable directory identified by a unique Universally Unique Lexicographically Sortable Identifier (ULID).
+- **What it does:** Serves as the long-term, read-optimized storage layer. It contains raw sample chunks (`chunks` directory), an inverted index (`index` file), metadata (`meta.json`), and deletion markers (`tombstones`). 
+- **Time window:** Represents a fixed historical time range (e.g., blocks of 2 hours or larger). 
+- **Compaction & Retention:** Smaller persistent blocks are periodically merged into larger blocks via block compaction to improve query speed. When data moves past the configured retention policy (by time or total disk size), entire persistent blocks are deleted.
+
+#### Key Differences at a Glance
+
+| **Feature** | **Head Block** | **Persistent Block** |
+|---|---|---|
+| **Primary Location** | RAM + WAL + Memory-mapped files | Immutable disk directory |
+| **Mutabilty** | Mutable / Active (accepts new incoming writes) | Immutable (read-only once written) |
+| **Data Age** | Most recent 1–3 hours | Older historical data after compaction |
+| **Risk / Bottleneck** | Vulnerable to RAM exhaustion / high cardinality | Uses disk space; managed by retention/compaction |
+
 
 ### **43. What is Alertmanager Silence?**
 **Answer:** Temporarily mutes specific alert notifications based on label matchers (e.g., `service="payment"`) during scheduled maintenance windows.
