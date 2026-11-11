@@ -802,11 +802,23 @@ A standard Prometheus alerting rule using `node_exporter` metrics looks like thi
 - **Add a `for` duration**: Requiring the condition to remain true for `30m` or `1h` ensures brief write bursts settle down before paging an engineer.
 - **Match the lookback to the horizon**: A good rule of thumb is keeping your lookback window between one-quarter and one-half of your prediction horizon (e.g., `[6h]` lookback for a `24h` prediction).
 
-### **31. What is Blackbox Exporter in Prometheus?**
-**Answer:** Probes external endpoints over HTTP, HTTPS, DNS, TCP, and ICMP to verify availability, response latency, and SSL certificate expiration dates.
+### **28. What is Node Exporter?**
+**Answer:** 
 
-### **32. What is Node Exporter?**
-**Answer:** Exposes hardware and OS metrics (CPU utilization, memory usage, disk I/O, network traffic) of Linux hosts for Prometheus scraping.
+**Node Exporter** is **an official monitoring agent built for Prometheus that collects and exposes low-level hardware and operating system metrics from Unix and Linux machines**. 
+
+#### How It Works
+
+- **Role:** It acts as a lightweight agent (a single Go binary) that reads data directly from the OS kernel and hardware components.
+- **Metrics Exposed:** It tracks hundreds of system metrics like `node_cpu_seconds_total` (CPU usage/saturation), memory pressure, disk performance/I/O, network throughput, and filesystem capacity. 
+- **Endpoint:** By default, it runs as a service on **port 9100** and exposes the collected data at the `/metrics` path in a text-based format that Prometheus can read. 
+- **Scraping:** Node Exporter does not push data or store metrics on its own; instead, **Prometheus** periodically pulls (scrapes) the data from its `/metrics` endpoint. 
+
+#### Common Use Cases
+
+- **Infrastructure Observability:** Monitoring bare-metal servers, virtual machines, or Kubernetes nodes (`DaemonSet`) to spot hardware failures, CPU saturation, or memory leaks. 
+- **Visualization:** Frequently paired with **Grafana Labs** dashboards (such as the popular Node Exporter Full dashboard) to plot real-time charts of system health. 
+- **Custom Metrics:** Utilizing built-in modules like the textfile collector to inject custom shell-script or app-level metrics into the same stream
 
 ### **33. What is Kube-State-Metrics (KSM)?**
 **Answer:** Listens to the Kubernetes API Server and emits metrics regarding the health and state of Kubernetes objects (deployment replicas, pod phases, resource limits).
