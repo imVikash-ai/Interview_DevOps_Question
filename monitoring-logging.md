@@ -963,8 +963,31 @@ While structured logging isn't a hard physical law, it has become practically ma
   4. It suppresses redundant noise while respecting configured timing windows (such as `group_wait`, `group_interval`, and `repeat_interval`).
 
 
-### **38. What is Grafana Dashboard as Code (jsonnet / grafonnet)?**
-**Answer:** Defining Grafana dashboards programmatically in Jsonnet or TypeScript, enabling version control, code reviews, and automated CI/CD deployment for dashboards.
+### **34. What is Grafana Dashboard as Code (jsonnet / grafonnet)?**
+**Answer:** 
+
+**Grafana Dashboard as Code** is **the practice of defining, configuring, and managing monitoring dashboards using software development workflows rather than clicking through a web interface**. Instead of manually editing massive raw JSON files, engineers use **Jsonnet** (a data templating language) and **Grafonnet** (a specialized Jsonnet library) to programmatically generate dashboards.
+
+#### Core Components
+
+- **Raw Grafana JSON.** Under the hood, Grafana stores every dashboard as a JSON object. Exporting a complex dashboard produces thousands of lines of repetitive JSON that are difficult to read, review, or maintain manually.
+- **Jsonnet.** Created by Google, **Jsonnet**is an open-source data templating language that acts as a superset of JSON. It adds programming features like variables, functions, loops, conditionals, comments, and imports, compiling cleanly down into standard JSON. 
+- **Grafonnet.** Maintained by Grafana, **Grafonnet** is a Jsonnet library containing pre-built templates and helper functions for Grafana components. It lets you write concise code to generate panels, rows, queries, alerts, and template variables without memorizing Grafana's underlying JSON schema.
+
+#### Why Teams Use It
+
+- **Version Control and Peer Review.** Storing `.jsonnet` files in Git allows teams to track history, open pull requests, and review dashboard changes just like application code.
+- **Code Reuse and Abstraction.** Teams can build standardized templates for common metrics (such as CPU, memory, or HTTP latency) and reuse them across dozens of microservices.
+- **Massive Reduction in Boilerplate.** Using functions and loops in Grafonnet typically shrinks dashboard code size by 85% to 90% compared to raw JSON.
+- **Automated Deployment.** CI/CD pipelines can automatically compile Jsonnet files into JSON and push them to Grafana via file provisioning, Kubernetes ConfigMaps, or CLI tools like **Grafana Grizzly**
+
+#### How the Workflow Works
+
+1. **Install Dependencies.** Engineers install a Jsonnet compiler (typically `go-jsonnet`) and the `jsonnet-bundler` (`jb`) package manager to pull in the Grafonnet library. 
+2. **Write Dashboard Code.** Developers import Grafonnet into a `.jsonnet` file and call helper functions to assemble panels, layout grids, and data source queries.
+3. **Compile to JSON.** Running the `jsonnet` CLI evaluates the functions and outputs a complete, valid Grafana dashboard `.json` file. 
+4. **Provision to Grafana.** Grafana automatically loads the compiled JSON file from a provisioned folder or updates it via an automated deployment pipeline.
+
 
 ### **39. What is Prometheus Scrape Interval vs Evaluation Interval?**
 **Answer:**
