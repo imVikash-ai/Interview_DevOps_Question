@@ -1172,10 +1172,55 @@ Grafana Unified Alerting (now officially known as **Grafana Alerting**) is **a b
 - **Flexible Routing & Notifications:** Group, mute, and route alerts dynamically to tools like Slack, PagerDuty, Jira, and webhooks via customizable notification policies and contact points.
 - **Prometheus Alerting Model:** Built on a reliable, open model that supports expressions, data transformations, and built-in silencing.
 
-### **46. What is Prometheus Relabel Config (`relabel_configs` vs `metric_relabel_configs`)?**
+### **45. What is Prometheus Relabel Config (`relabel_configs` vs `metric_relabel_configs`)?**
 **Answer:**
-- **`relabel_configs`:** Modifies, filters, or drops scrape targets *before* the scrape occurs based on target metadata labels.
-- **`metric_relabel_configs`:** Modifies, filters, or drops individual metric samples *after* the scrape occurs but *before* storing them in the TSDB.
+
+In **Prometheus**, **relabel configuration** is a core mechanism that lets you dynamically rewrite, add, or drop labels and filter objects before they are processed or stored. While both `relabel_configs` and `metric_relabel_configs` use the exact same YAML syntax, they operate at completely different stages of the data collection pipeline. 
+
+#### `relabel_configs` vs. `metric_relabel_configs`
+
+| **Feature** | **`relabel_configs` (Target Relabeling)** | **`metric_relabel_configs` (Metric Relabeling)** |
+|---|---|---|
+| **When it runs** | **Before** the scrape happens. | **After** the scrape happens, right before storage ingestion. |
+| **What it operates on** | Discovered targets (servers, pods, endpoints). | Individual metric samples returned by the target. |
+| **Available labels** | Service discovery metadata labels (like `__meta_ec2_tag_env` or `__address__`). | Target labels plus all metric names (`__name__`) and metric labels from the `/metrics` endpoint. |
+| **Primary use cases** | Filtering which targets to scrape, changing scrape paths or ports, and attaching infrastructure metadata as labels. | Dropping expensive or noisy metrics, stripping high-cardinality labels, and renaming metrics or labels. |
+
+#### How They Work in Practice
+
+- **Target relabeling (`relabel_configs`).** When Prometheus discovers endpoints through service discovery (like Kubernetes, AWS EC2, or Consul), it attaches temporary metadata labels prefixed with double underscores (`__meta_*`). You use `relabel_configs` to inspect those metadata labels, decide whether to scrape the target, and copy useful metadata into permanent labels before the `__` labels are automatically stripped away. 
+- **Metric relabeling (`metric_relabel_configs`).** Once a target is scraped, Prometheus receives a batch of raw time-series metrics. You use `metric_relabel_configs` to clean up that payload before writing it to the time-series database. It is commonly used to prevent cardinality explosions by dropping noisy metrics or removing high-cardinality labels (such as `user_id` or `request_path`). 
+
+#### Common Relabeling Fields & Actions
+
+As detailed in the **Grafana Labs relabeling guide**, both sections rely on the same rule structure: 
+
+- **Core fields.** Rules match values using `source_labels` and a `regex` pattern, then apply changes using `target_label`, `replacement`, and `action`.
+- **Filtering actions (`keep` / `drop`).** These keep or discard an entire target (in `relabel_configs`) or an entire metric sample (in `metric_relabel_configs`) when the regex matches.
+- **Modification actions (`replace` / `labeldrop` / `labelkeep`).** The default `replace` action creates or overwrites a label value, while `labeldrop` and `labelkeep` strip specific labels off a metric without deleting the metric itself. 
+
+#### Configuration Example
+
+**YAML**
+
+```yaml
+scrape_configs:
+  - job_name: 'web-servers'
+
+    # 1. Runs BEFORE scraping: Only scrape targets tagged "prod" in AWS EC2
+    relabel_configs:
+      - source_labels: [__meta_ec2_tag_env]
+        regex: prod
+        action: keep
+
+    # 2. Runs AFTER scraping: Drop heavy metrics and remove a high-cardinality label
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'go_gc_.*'
+        action: drop
+      - regex: 'session_id'
+        action: labeldrop
+```
 
 ### **47. What is Cardinality Aggregation in LogQL?**
 **Answer:** Counting unique values across log fields in Loki (e.g., `count_over_time({app="auth"} | json | unwrap user_id [1h])`).
