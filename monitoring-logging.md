@@ -1172,7 +1172,7 @@ Grafana Unified Alerting (now officially known as **Grafana Alerting**) is **a b
 - **Flexible Routing & Notifications:** Group, mute, and route alerts dynamically to tools like Slack, PagerDuty, Jira, and webhooks via customizable notification policies and contact points.
 - **Prometheus Alerting Model:** Built on a reliable, open model that supports expressions, data transformations, and built-in silencing.
 
-### **45. What is Prometheus Relabel Config (`relabel_configs` vs `metric_relabel_configs`)?**
+### **41. What is Prometheus Relabel Config (`relabel_configs` vs `metric_relabel_configs`)?**
 **Answer:**
 
 In **Prometheus**, **relabel configuration** is a core mechanism that lets you dynamically rewrite, add, or drop labels and filter objects before they are processed or stored. While both `relabel_configs` and `metric_relabel_configs` use the exact same YAML syntax, they operate at completely different stages of the data collection pipeline. 
@@ -1222,11 +1222,25 @@ scrape_configs:
         action: labeldrop
 ```
 
-### **47. What is Cardinality Aggregation in LogQL?**
-**Answer:** Counting unique values across log fields in Loki (e.g., `count_over_time({app="auth"} | json | unwrap user_id [1h])`).
+### **42. What is OpenTelemetry Semantic Conventions?**
+**Answer:**
 
-### **48. What is OpenTelemetry Semantic Conventions?**
-**Answer:** Standardized naming rules for telemetry attributes across languages (e.g., `http.request.method`, `db.system`, `rpc.service`).
+**OpenTelemetry Semantic Conventions** are **standard naming patterns and attribute definitions for telemetry data**—such as traces, metrics, logs, and resources. By following these shared naming rules, codebases, libraries, and cloud platforms produce consistent data that backends can automatically parse and correlate. 
+
+#### Core Areas Covered
+
+Semantic conventions span across general telemetry and specific domain models: 
+
+- **General & System:** Standard definitions for HTTP, RPC, databases, messaging, and system processes.
+- **Cloud & Infrastructure:** Attributes for major cloud providers (AWS, GCP, Azure, Alibaba, Tencent, Heroku) and Kubernetes (K8s).
+- **Resources:** Standard identifiers describing the entity producing telemetry, such as `service.name`, `telemetry.sdk.language`, and `telemetry.sdk.version`.
+- **Generative AI (GenAI):** Standardized attributes and metrics for LLM operations, chat calls, embeddings, and token usage.
+
+#### Key Benefits
+
+- **Interoperability:** Prevents vendor lock-in by avoiding custom attribute naming schemes that break when switching observability backends. 
+- **Automatic Visualization:** Backends can natively recognize systems (like Redis or HTTP servers) and generate pre-built dashboards or alerts without manual configuration. 
+- **Stability & Evolution:** Conventions use explicit stability levels (stable vs. experimental) with strict opt-in environment variables like `OTEL_SEMCONV_STABILITY_OPT_IN` for phased upgrades.
 
 ### **49. What is OpenTelemetry OTLP Protocol?**
 **Answer:** The native OpenTelemetry transmission protocol encoding telemetry in Protocol Buffers over gRPC or HTTP/protobuf.
