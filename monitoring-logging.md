@@ -1242,8 +1242,19 @@ Semantic conventions span across general telemetry and specific domain models:
 - **Automatic Visualization:** Backends can natively recognize systems (like Redis or HTTP servers) and generate pre-built dashboards or alerts without manual configuration. 
 - **Stability & Evolution:** Conventions use explicit stability levels (stable vs. experimental) with strict opt-in environment variables like `OTEL_SEMCONV_STABILITY_OPT_IN` for phased upgrades.
 
-### **49. What is OpenTelemetry OTLP Protocol?**
-**Answer:** The native OpenTelemetry transmission protocol encoding telemetry in Protocol Buffers over gRPC or HTTP/protobuf.
+### **43. What is OpenTelemetry OTLP Protocol?**
+**Answer:**
+
+The **OpenTelemetry Protocol (OTLP)** is **a standardized, vendor-neutral communication format used to transmit telemetry data—such as traces, metrics, and logs—from software applications and collectors to monitoring and observability backends**. 
+
+Managed by the Cloud Native Computing Foundation (CNCF), OTLP serves as the universal "language" of the **OpenTelemetry** framework. 
+
+#### Key Characteristics of OTLP
+
+- **Data Types Supported:** Transports the three pillars of observability: traces (execution flow/spans), metrics (numerical and statistical performance data), and logs (state information).
+- **Transport Mechanisms:** Implemented over **gRPC** (typically default port `4317`) and **HTTP 1.1 / JSON** (typically default port `4318`) using Protocol Buffers (`protobuf`) for compact payloads and low serialization overhead. 
+- **Vendor Neutrality:** Allows developers to instrument their code once and send telemetry to any compatible backend (such as Prometheus, Jaeger, Datadog, Dynatrace, or Grafana) without rewriting application code. 
+- **Reliability and Performance:** Designed for high throughput, low memory footprint, compression support, and backpressure handling to prevent data loss or client-side bottlenecks during transit.
 
 ### **50. What is eBPF Kernel Probing in Observability?**
 **Answer:** Attaching sandboxed bytecode to Linux kernel tracepoints and kprobes to measure execution duration and packet drops with sub-microsecond overhead.
