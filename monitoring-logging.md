@@ -1256,8 +1256,30 @@ Managed by the Cloud Native Computing Foundation (CNCF), OTLP serves as the univ
 - **Vendor Neutrality:** Allows developers to instrument their code once and send telemetry to any compatible backend (such as Prometheus, Jaeger, Datadog, Dynatrace, or Grafana) without rewriting application code. 
 - **Reliability and Performance:** Designed for high throughput, low memory footprint, compression support, and backpressure handling to prevent data loss or client-side bottlenecks during transit.
 
-### **50. What is eBPF Kernel Probing in Observability?**
-**Answer:** Attaching sandboxed bytecode to Linux kernel tracepoints and kprobes to measure execution duration and packet drops with sub-microsecond overhead.
+### **44. What is eBPF Kernel Probing in Observability?**
+**Answer:**
+
+**eBPF kernel probing** is **a technique that attaches small, sandboxed programs to specific events inside the Linux kernel to collect real-time system and application telemetry without modifying source code**. Because every application request—such as network traffic, disk reads, and system calls—passes through the operating system kernel, probing these points gives engineers a unified view of infrastructure and workload behavior with minimal performance overhead.
+
+#### How eBPF Kernel Probing Works
+
+The **eBPF architecture** transforms the Linux kernel into a safe, event-driven observability engine through four steps:
+
+- **Safety verification.** Before an eBPF program loads into the kernel, a strict verifier checks the code to ensure it cannot crash the system, access unauthorized memory, or enter an infinite loop.
+- **Just-In-Time (JIT) compilation.** Once verified, a JIT compiler translates the eBPF bytecode into native machine instructions. This allows the probe to execute at near-native speeds without requiring system reboots or custom kernel modules. 
+- **Event-driven attachment.** The compiled program attaches to a specific "hook" or probe point in the kernel. The program stays dormant until that specific event occurs, briefly runs to capture data, and immediately exits. 
+- **Data sharing via maps.** Instead of copying raw event streams to user space, eBPF programs aggregate metrics in shared key-value data structures called **BPF maps**. User-space observability agents then read these summaries and export them to monitoring dashboards.
+
+#### Common Types of Probes and Hooks
+
+Observability tools combine different types of hooks depending on what layer of the system they need to inspect:
+
+| **Probe / Hook Type** | **Target Layer** | **What It Observes** |
+|---|---|---|
+| **Kprobes / Kretprobes** | Kernel Space | Dynamically attaches to the entry and exit of nearly any kernel function to inspect internal execution paths and latencies. |
+| **Tracepoints** | Kernel Space | Attaches to stable, predefined hooks built into the kernel for events like system calls, process scheduling, and disk I/O. |
+| **Uprobes / Uretprobes** | User Space | Attaches to user-space application functions (such as OpenSSL libraries) to inspect application behavior or plaintext traffic before encryption. |
+| **Network Hooks (XDP / tc)** | Network Stack | Intercepts network packets directly at the driver or traffic-control layer to track packet drops, latency, and connection states. |
 
 ### **51. What is Prometheus DeadMansSwitch (Watchdog)?**
 **Answer:** An alert that is configured to fire continuously 24/7. It routes to an external monitoring service (Dead Man's Snitch / PagerDuty) to verify that the entire Prometheus $\rightarrow$ Alertmanager alerting pipeline is alive.
