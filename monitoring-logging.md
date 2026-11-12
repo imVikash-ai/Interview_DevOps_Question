@@ -1160,7 +1160,17 @@ The **Alertmanager routing tree** is **a hierarchical, tree-structured configura
 - **Throttling & Timing:** Controls how long to wait before sending the first notification (`group_wait`), how long to wait before sending updates (`group_interval`), and how often to repeat notifications for ongoing alerts (`repeat_interval`).
 
 ### **40. What is Grafana Unified Alerting?**
-**Answer:** A centralized alerting engine inside Grafana that allows creating and managing alerts across heterogeneous data sources (Prometheus, Loki, CloudWatch, PostgreSQL) from a single UI or API.
+**Answer:** 
+
+Grafana Unified Alerting (now officially known as **Grafana Alerting**) is **a built-in, scalable alerting and incident response system that monitors metrics, logs, and traces across multiple data sources**. 
+
+#### Key Features
+
+- **Decoupled Alerts:** Unlike legacy alerting tied strictly to individual graph panels, alerts are separated from dashboards and managed in a single, dedicated interface. 
+- **Multi-Dimensional Rules:** A single rule can evaluate multiple time series or dimensions at once, reducing rule bloat and alert noise.
+- **Cross-Data-Source Support:** Build alerts using data from Prometheus, Loki, Cortex, and various other supported backends. 
+- **Flexible Routing & Notifications:** Group, mute, and route alerts dynamically to tools like Slack, PagerDuty, Jira, and webhooks via customizable notification policies and contact points.
+- **Prometheus Alerting Model:** Built on a reliable, open model that supports expressions, data transformations, and built-in silencing.
 
 ### **46. What is Prometheus Relabel Config (`relabel_configs` vs `metric_relabel_configs`)?**
 **Answer:**
