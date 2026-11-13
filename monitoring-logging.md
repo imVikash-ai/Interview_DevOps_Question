@@ -1562,12 +1562,65 @@ In Prometheus, `increase()` is essentially just syntactic sugar for `rate()`. Sp
 - **Both extrapolate data:** Prometheus extrapolates values to cover the full time window if samples do not align perfectly with the start and end of your range. Because of this, `increase()` can return a decimal (like `3.42` requests) even when measuring whole events.
 - **Aggregate after calculating:** Always apply `rate()` or `increase()` first, and then wrap them in an aggregation function like `sum()`. Doing `sum(rate(metric[5m]))` preserves counter reset handling per time series, whereas `rate(sum(metric)[5m])` will break.
 
-### **64. What is PromQL Vector Matching (`on()`, `ignoring()`, `group_left()`, `group_right()`)?**
-**Answer:** Matching labels between two vector series during arithmetic operations:
-- `on(label)`: Match strictly on specified labels.
-- `ignoring(label)`: Ignore specified labels during match.
-- `group_left`: Many-to-one relationship.
-- `group_right`: One-to-many relationship.
+### **54. What is PromQL Vector Matching (`on()`, `ignoring()`, `group_left()`, `group_right()`)?**
+**Answer:** 
+
+**PromQL Vector Matching** is the mechanism Prometheus uses to align and combine time series when performing binary operations (like `+`, `-`, `*`, `/`, or `==`) between two instant vectors. By default, Prometheus pairs series only if their entire label sets match identically, excluding the metric name (`__name__`).
+
+When labels differ across metrics—such as when combining a request metric with a metadata metric—you use matching modifiers to control how Prometheus aligns the series and handles cardinality.
+
+#### Label Matching Modifiers: `on()` vs. `ignoring()`
+
+By default, Prometheus looks for an exact match on **all** labels. You can override this behavior using one of two keywords:
+
+- **`on(<label_list>)`**: Tells Prometheus to match time series using **only** the specified labels, disregarding all other differences.
+  - *Example:* `http_requests_total / on(instance, job) http_requests_limit`
+- **`ignoring(<label_list>)`**: Tells Prometheus to match time series using all labels **except** the ones listed.
+  - *Example:* `http_requests_total / ignoring(status_code) http_requests_limit`
+
+#### Group Modifiers: `group_left()` vs. `group_right()`
+
+Standard binary operations require a **one-to-one** relationship where each series on the left matches at most one series on the right. When you have a **many-to-one** or **one-to-many** relationship, you must specify a group modifier to tell Prometheus which side has higher cardinality (the "many" side).
+
+| **Modifier** | **Relationship** | **Behavior** | **Extra Labels Retained** |
+|---|---|---|---|
+| **`group_left(<labels>)`** | **Many-to-one** | Each series on the right can match multiple series on the left. | Can copy specified labels from the **right** side onto the result. |
+| **`group_right(<labels>)`** | **One-to-many** | Each series on the left can match multiple series on the right. | Can copy specified labels from the **left** side onto the result. |
+
+- **Rule of Thumb**: The modifier points toward the "many" side. If the left vector has more unique series per matching key, use `group_left`.
+
+#### Practical Examples
+
+#### 1. Joining Metadata Labels (`group_left`)
+
+A common use case is enriching a metric with descriptive labels from an "info" metric (like `kube_pod_info` or `node_uname_info`).
+
+```promql
+rate(node_cpu_seconds_total{mode="idle"}[5m])
+  * on(instance) group_left(nodename)
+node_uname_info
+```
+
+- **`on(instance)`**: Matches both metrics strictly by the `instance` label.
+- **`group_left(nodename)`**: Allows multiple CPU cores (left) to match a single node info series (right) and copies the `nodename` label into the final output.
+
+#### 2. Calculating Ratios Across Sub-dimensions (`ignoring` + `group_left`)
+
+If you want to divide per-status-code requests by total requests per path:
+
+```promql
+sum by (path, status) (rate(http_requests_total[5m]))
+  / ignoring(status) group_left()
+sum by (path) (rate(http_requests_total[5m]))
+```
+
+- **`ignoring(status)`**: Allows the numerator (which has `path` and `status`) to match the denominator (which only has `path`).
+- **`group_left()`**: Handles the many-to-one relationship because multiple `status` codes map to a single `path`.
+
+#### Common Errors to Watch For
+
+- **`many-to-many matching not allowed`**: Occurs when multiple series on both the left and right share the same matching labels. You must aggregate one side (using `sum`, `avg`, etc.) or add more labels to your `on()` clause to make at least one side unique.
+- **Empty Result**: Occurs when your `on()` or `ignoring()` labels still leave unmatched keys between the two sides. Double-check that the remaining label sets are identical in both name and value.
 
 ### **65. How do you implement Tail-Based Sampling in OTel Collector for error capture?**
 **Answer:**
