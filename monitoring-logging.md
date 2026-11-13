@@ -1329,8 +1329,24 @@ Grafana Alloy collects, processes, and exports all four major pillars of observa
 | **Primary Focus** | Prometheus, Loki, and OTel integration | Unified OTel + Prometheus + Loki + Pyroscope pipelines |
 | **Configuration** | YAML (Static mode) or River/Flow syntax | Alloy component pipeline syntax |
 
-### **53. What is Distributed Tracing Span Context?**
-**Answer:** The immutable metadata containing `TraceID`, `SpanID`, `TraceFlags`, and `TraceState` passed across process boundaries in HTTP/gRPC headers.
+### **47. What is Distributed Tracing Span Context?**
+**Answer:** 
+
+A **Distributed Tracing Span Context** is **the set of unique identifiers and metadata carried along with a request that allows individual units of work (spans) across different services to link together into a single, cohesive end-to-end trace**. 
+
+#### Core Components of Span Context
+
+- **Trace ID**: A globally unique identifier shared by every span and service involved in processing a specific end-to-end request.
+- **Span ID**: A unique identifier for the specific operation or step (span) currently being executed within that trace.
+- **Parent Span ID**: The ID of the upstream/calling span, which establishes the parent-child tree structure of the request.
+- **Trace Flags / TraceState**: Additional vendor-specific metadata or sampling decisions (such as whether the trace is being recorded) passed along the wire. 
+
+#### How It Works (Context Propagation)
+
+1. **Creation**: When a user request enters a system (like an API gateway), the tracing library generates a **Trace ID** and an initial **Span ID**. 
+2. **Injection**: When Service A makes an outgoing call (such as an HTTP request or a message queue publish) to Service B, it **injects** the span context into the carrier medium—typically via standard HTTP headers like `traceparent`. 
+3. **Extraction**: Service B **extracts** the context from the incoming headers, adopts the same **Trace ID**, sets Service A's Span ID as its own **Parent Span ID**, and creates a new **Span ID** for its local work. 
+4. **Reconstruction**: By passing this context across all microservice boundaries, observability backends can stitch the fragmented logs and timings together into a complete visual flamegraph or waterfall view.
 
 ### **54. What is Grafana Loki Log Streams?**
 **Answer:** A sequence of log lines sharing the exact same unique set of labels, stored as compressed chunks in object storage.
