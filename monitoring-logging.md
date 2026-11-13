@@ -1485,13 +1485,55 @@ For a standard HTTP request counter (such as `http_requests_total`), filter for 
 
 - **Zero total traffic:** If a service receives zero total traffic, dividing by zero produces `NaN`. Wrap the expression with `> 0` or use `clamp_min` in alerting rules to prevent false alerts during idle periods.
 
-### **62. How do you calculate CPU utilization percentage per container in Kubernetes using PromQL?**
+### **52. How do you calculate CPU utilization percentage per container in Kubernetes using PromQL?**
 **Answer:**
+
+To calculate CPU utilization percentage per container in Kubernetes using PromQL, you divide the container's actual **CPU usage rate** (`container_cpu_usage_seconds_total`) by its **allocated CPU limit or request** and multiply by 100. Because Kubernetes containers do not always have CPU limits set, the exact query depends on your baseline (CPU Limit, CPU Request, or Node Capacity). 
+
+#### 1. Percentage of Container CPU Limit (Most Common)
+
+If your containers have explicit CPU limits defined, use the cAdvisor quota and period metrics to find the limit in cores. 
+
 ```promql
-sum(rate(container_cpu_usage_seconds_total{container!="", container!="POD"}[5m])) by (pod, namespace)
-/
-sum(kube_pod_container_resource_limits{resource="cpu"}) by (pod, namespace) * 100
+(
+  sum(rate(container_cpu_usage_seconds_total{container!="", image!=""}[5m])) by (namespace, pod, container)
+  /
+  sum(container_spec_cpu_quota{container!="", image!=""} / container_spec_cpu_period{container!="", image!=""}) by (namespace, pod, container)
+) * 100
 ```
+
+- **Important Caveat.** Containers without a CPU limit set do not export a valid `container_spec_cpu_quota` metric. Those containers will be excluded from the results of this query.
+- **Alternative using `kube-state-metrics`.** If you use **kube-state-metrics**, you can divide usage by `kube_pod_container_resource_limits{resource="cpu"}` instead of cAdvisor quota metrics.
+
+#### 2. Percentage of Container CPU Request
+
+To measure how much CPU a container is consuming relative to its guaranteed baseline, use `kube_pod_container_resource_requests` from `kube-state-metrics`. Note that this percentage can exceed **100%** if the container bursts above its request. 
+
+```promql
+(
+  sum(rate(container_cpu_usage_seconds_total{container!="", image!=""}[5m])) by (namespace, pod, container)
+  /
+  sum(kube_pod_container_resource_requests{resource="cpu"}) by (namespace, pod, container)
+) * 100
+```
+
+#### 3. Percentage of Node CPU Capacity
+
+If your containers do not have requests or limits configured, you can calculate utilization relative to the total allocatable CPU cores on the underlying node. 
+
+```promql
+(
+  sum(rate(container_cpu_usage_seconds_total{container!="", image!=""}[5m])) by (namespace, pod, container, node)
+  / on(node) group_left()
+  sum(kube_node_status_allocatable{resource="cpu"}) by (node)
+) * 100
+```
+
+#### Key Query Breakdown
+
+- **`rate(...[5m])`.** Converts the cumulative counter `container_cpu_usage_seconds_total` into average CPU cores used per second over a 5-minute window. 
+- **`container!="", image!=""`.** Filters out root cgroup summaries and Kubernetes pause containers (formerly filtered via `container_name!="POD"` in older Kubernetes versions) so only your actual application containers are measured. 
+- **`on(node) group_left()`.** Performs a many-to-one vector match so multiple containers running on the same node can be divided by that single node's total capacity.
 
 ### **63. What is the difference between `increase()` and `rate()` in PromQL?**
 **Answer:**
