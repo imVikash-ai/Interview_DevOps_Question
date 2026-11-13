@@ -1649,16 +1649,57 @@ To find the root cause of a 10-second **p99 latency** spike when standard infras
 
 - Use the **Trace ID** from the offending span to pull structured application logs generated during that exact window. This bridges the gap between *where* the delay happened (trace) and *why* it happened (log statement or exception).
 
-### **72. Scenario: Your Prometheus server crashes with OOM every morning at 9:00 AM. How do you diagnose and fix the memory explosion?**
+### **56. Scenario: Your Prometheus server crashes with OOM every morning at 9:00 AM. How do you diagnose and fix the memory explosion?**
 **Answer:**
-1. Query the TSDB status API: `GET /api/v1/status/tsdb` to find the metric with the highest label combinations.
-2. Identify if a new microservice is exposing dynamic labels (`user_id` or random GUIDs).
-3. Configure `metric_relabel_configs` in Prometheus scrape config to drop the offending high-cardinality label:
-   ```yaml
-   metric_relabel_configs:
-     - action: labeldrop
-       regex: "user_id|session_token"
-   ```
+
+A predictable 9:00 AM Out-Of-Memory (OOM) crash in Prometheus is almost always triggered by an external scheduled event. Common culprits include an expensive dashboard load, a scheduled report, a heavy batch job, or a sudden burst of new metric labels (high cardinality).
+
+Here is a step-by-step approach to diagnosing and fixing the root cause.
+
+#### Phase 1: Diagnosis
+
+Because Prometheus dies at 9:00 AM, you must capture evidence right before the crash or analyze what happened during the spike.
+
+- **Check the Query Log:** Enable the Prometheus query log (`--query.log-file=/path/to/query.log`) if it is not already on. Inspect the timestamps between 8:58 AM and 9:00 AM to catch massive PromQL queries executing right before the crash.
+- **Inspect TSDB Status and Cardinality:** Open the Prometheus UI at `/tsdb-status` around 8:55 AM. Look at the **Top 10 series count by metric name** and **Top 10 label names with value count** to spot sudden cardinality explosions.
+- **Capture a Live Heap Profile:** At 8:58 AM, run a manual pprof capture before the Linux OOM killer steps in. Execute:
+
+  ```bash
+  curl -s http://localhost:9090/debug/pprof/heap > heap.pb.gz
+  ```
+
+  Analyze it later with:
+
+  ```bash
+  go tool pprof -top heap.pb.gz
+  ```
+
+  This helps identify which Go functions are allocating the most memory.
+- **Review System Logs:** Run `dmesg -T | grep -i -E 'oom|killed'` to verify the exact timestamp of the Linux OOM killer. Compare that timestamp against cron jobs, Grafana scheduled reports, and CI/CD pipelines across your infrastructure.
+
+#### Phase 2: Root Causes & Fixes
+
+Once you isolate whether the spike is driven by **queries** or **ingestion**, apply the matching fix.
+
+**1. Heavy 9:00 AM Queries (Dashboards, Alerts, Reports)**
+
+People logging in at 9:00 AM or automated daily reports often run wide time-range queries (e.g., `rate(http_requests_total[30d])`) that load millions of chunks into RAM at once.
+
+- **Set Query Limits:** Add `--query.max-samples=50000000` (adjust based on your RAM) to your Prometheus startup flags. This aborts individual memory-hogging queries instead of crashing the entire server.
+- **Use Recording Rules:** Pre-compute expensive aggregations and long-range rates into lightweight time series so dashboards read pre-calculated data.
+- **Limit Concurrency:** Lower `--query.max-concurrency` (default is 20) so simultaneous 9:00 AM dashboard loads queue up rather than spiking RAM simultaneously.
+
+**2. Sudden Cardinality Spikes (Batch Jobs & Cron Tasks)**
+
+A 9:00 AM cron job might spin up ephemeral containers or push metrics with dynamic labels (like `user_id`, `request_id`, or timestamps), creating millions of brand-new series in seconds.
+
+- **Drop High-Cardinality Labels:** Use `metric_relabel_configs` in `prometheus.yml` with `action: labeldrop` to strip unbounded labels before Prometheus ingests them.
+- **Enforce Sample Limits:** Set `sample_limit: 10000` on vulnerable scrape jobs so Prometheus drops scrapes from misbehaving targets rather than exhausting memory.
+
+**3. System & Configuration Tuning**
+
+- **Cap Go Garbage Collection:** Set the environment variable `GOMEMLIMIT` to roughly 80%–85% of your container or VM memory limit (e.g., `GOMEMLIMIT=13GiB` on a 16 GB machine). This forces the Go runtime to run garbage collection aggressively before hitting the kernel OOM threshold.
+- **Check `scrape_interval` vs. Retention:** Ensure your head block compaction (which happens every 2 hours) does not overlap with a heavy 9:00 AM workload on an under-provisioned instance.
 
 ### **73. Design an enterprise Observability Pipeline with OpenTelemetry and Kafka for high-throughput resilience.**
 **Answer:**
