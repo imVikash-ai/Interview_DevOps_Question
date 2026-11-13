@@ -1701,30 +1701,54 @@ A 9:00 AM cron job might spin up ephemeral containers or push metrics with dynam
 - **Cap Go Garbage Collection:** Set the environment variable `GOMEMLIMIT` to roughly 80%–85% of your container or VM memory limit (e.g., `GOMEMLIMIT=13GiB` on a 16 GB machine). This forces the Go runtime to run garbage collection aggressively before hitting the kernel OOM threshold.
 - **Check `scrape_interval` vs. Retention:** Ensure your head block compaction (which happens every 2 hours) does not overlap with a heavy 9:00 AM workload on an under-provisioned instance.
 
-### **73. Design an enterprise Observability Pipeline with OpenTelemetry and Kafka for high-throughput resilience.**
+### **57. Scenario: A Kubernetes node disk is 100% full due to container log accumulation. Pods are evicted and kubelet fails. How do you recover and prevent recurrence?**
 **Answer:**
-```
-[ App Pods (OTel SDK) ] ➔ [ Local OTel Collector DaemonSet ]
-                                     │
-                                     ▼
-                         [ Apache Kafka Cluster ] (Peak traffic buffer)
-                                     │
-                                     ▼
-                       [ Central OTel Collector Fleet ]
-                                     │
-                ┌────────────────────┼────────────────────┐
-                ▼                    ▼                    ▼
-       [ Prometheus / Mimir ]  [ Grafana Tempo ]    [ Grafana Loki ]
-```
 
-### **74. Scenario: A Kubernetes node disk is 100% full due to container log accumulation. Pods are evicted and kubelet fails. How do you recover and prevent recurrence?**
-**Answer:**
-1. **Immediate Recovery:** Delete rotated log archives (`find /var/log/pods -name "*.gz" -delete`) and prune container images (`crictl rmi --prune`).
-2. **Permanent Fix:** Configure container runtime log limits in `kubelet-config.yaml`:
-   ```yaml
-   containerLogMaxSize: "50Mi"
-   containerLogMaxFiles: 3
+To recover a node whose disk is 100% full from container logs, **first SSH into the affected node to manually clear space and restart the kubelet, then configure kubelet log rotation and ephemeral-storage limits so a single noisy container cannot exhaust the disk again**.
+
+#### Immediate Recovery Steps
+
+When the disk hits 100%, the kubelet often crashes or becomes unresponsive because it cannot write state files. Follow these steps in order to restore the node:
+
+1. **Cordon the node.** Run `kubectl cordon <node-name>` from your workstation so the scheduler stops placing new pods on the unhealthy node while you clean it up.
+
+2. **SSH into the node and inspect disk usage.** Run `df -h` and `df -i` to confirm whether block storage or inodes are exhausted, and check `/var/log/pods` or `/var/log/containers` to find the largest log files.
+
+3. **Truncate bloated container logs.** Use:
+
+   ```bash
+   truncate -s 0 /var/log/pods/<namespace>_<pod>_<uid>/<container>/*.log
    ```
+
+   Rather than `rm`, so active file descriptors release their disk blocks immediately without requiring a container restart.
+
+4. **Prune unused container images and stopped containers.** Run `crictl rmi --prune` (for containerd/CRI-O) to reclaim extra space on `imagefs` or `nodefs`.
+
+5. **Restart the container runtime and kubelet.** Run `systemctl restart containerd` (if needed) followed by `systemctl restart kubelet`, then verify the node returns to `Ready` and clears its `DiskPressure` taint via:
+
+   ```bash
+   kubectl describe node <node-name>
+   ```
+
+6. **Uncordon the node and clean up evicted pods.** Run `kubectl uncordon <node-name>`, then remove lingering `Failed` or `Evicted` pod objects across namespaces using:
+
+   ```bash
+   kubectl get pods -A --field-selector=status.phase=Failed -o json | kubectl delete -f -
+   ```
+
+#### Long-Term Prevention
+
+Once the node is healthy, apply cluster-level controls to contain log growth and ensure predictable eviction behavior:
+
+- **Configure Kubelet log rotation.** Set `containerLogMaxSize` (for example, `50Mi`) and `containerLogMaxFiles` (for example, `5`) in your **KubeletConfiguration** so the kubelet automatically rotates and deletes old container logs.
+
+- **Enforce ephemeral-storage limits.** Define `ephemeral-storage` requests and limits on workloads—or set defaults with a **LimitRange**-so the kubelet evicts only the specific pod exceeding its local storage cap rather than letting one container fill the entire node.
+
+- **Reserve disk space for system daemons.** Configure `kubeReserved` and `systemReserved` for `ephemeral-storage` in the kubelet config, and tune hard/soft eviction thresholds (such as `nodefs.available<10%`) as outlined in the **Kubernetes Node-pressure Eviction docs**.
+
+- **Separate log and runtime storage.** Mount `/var/log` and `/var/lib/containerd` on dedicated volumes separate from the root OS filesystem (`/`) so a runaway log stream cannot take down core system services.
+
+- **Set up proactive monitoring and log shipping.** Ship logs off the node using a lightweight agent (such as Fluent Bit or Vector), reduce verbose debug logging in production, and configure **Prometheus** alerts when `nodefs` or `imagefs` usage crosses 80–85%.`
 
 ### **75. Write a complete Alertmanager Multi-Window Multi-Burn-Rate alerting rule for a 99.9% SLO.**
 **Answer:**
