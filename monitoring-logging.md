@@ -1297,8 +1297,37 @@ A **Prometheus Dead Man's Switch (Watchdog)** is **a safety mechanism used to ve
 
 A standard monitoring system can tell you when a database is down or a server is out of memory, **but it cannot tell you that the monitoring system itself has died.** Without a dead man's switch, a silent outage of Prometheus or Alertmanager would leave you blind to real-world incidents without knowing alerts aren't being delivered.
 
-### **52. What is Grafana Agent / Grafana Alloy?**
-**Answer:** A lightweight, vendor-neutral telemetry collector based on OpenTelemetry and Prometheus that captures metrics, logs, traces, and profiles in a single binary.
+### **46. What is Grafana Agent / Grafana Alloy?**
+**Answer:** 
+
+**Grafana Alloy** is **Grafana Labs' open-source, unified telemetry collector and official distribution of the OpenTelemetry Collector**. It serves as the spiritual successor and direct replacement for **Grafana Agent** (including its Static and Flow modes), as well as related tools like Promtail. 
+
+Grafana Agent officially reached End-of-Life (EOL) on November 1, 2025, and users have transitioned to Grafana Alloy.
+
+#### What It Does
+
+Grafana Alloy collects, processes, and exports all four major pillars of observability—**metrics, logs, traces, and continuous profiles**—using a single piece of software: 
+
+- **Metrics:** Native Prometheus pipelines, scraping, and remote write.
+- **Logs:** Native support for Loki logs.
+- **Traces:** OpenTelemetry (OTel) and Tempo trace handling.
+- **Profiles:** Native continuous profiling support for Pyroscope.
+
+#### Key Features & Architecture
+
+- **OpenTelemetry-Based:** Built on top of the upstream OpenTelemetry Collector framework, allowing it to seamlessly receive and export OTLP (OpenTelemetry Protocol) data.
+- **Programmable Component Pipeline:** Uses a custom component-based configuration language where modules (like scrapers, processors, and exporters) are wired together to create reactive, dynamic pipelines. 
+- **Consolidation:** Replaces the need to run separate, fragmented agents (such as Prometheus exporters, Fluent Bit, Promtail, and Jaeger agents) on your hosts or Kubernetes clusters.
+- **Built-in Debugging UI:** Includes a local web interface to inspect component health, live telemetry flow, and configuration status.
+
+#### Grafana Agent vs. Grafana Alloy
+
+| **Feature** | **Grafana Agent (EOL Nov 2025)** | **Grafana Alloy (Current Standard)** |
+|---|---|---|
+| **Status** | **End-of-Life (EOL)** as of Nov 1, 2025 | **Active** (Current official telemetry collector) |
+| **Base Architecture** | Custom Grafana Labs agent with Static/Flow modes | OpenTelemetry Collector distribution with custom Alloy runtime |
+| **Primary Focus** | Prometheus, Loki, and OTel integration | Unified OTel + Prometheus + Loki + Pyroscope pipelines |
+| **Configuration** | YAML (Static mode) or River/Flow syntax | Alloy component pipeline syntax |
 
 ### **53. What is Distributed Tracing Span Context?**
 **Answer:** The immutable metadata containing `TraceID`, `SpanID`, `TraceFlags`, and `TraceState` passed across process boundaries in HTTP/gRPC headers.
