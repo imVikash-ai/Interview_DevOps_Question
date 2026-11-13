@@ -1622,55 +1622,32 @@ sum by (path) (rate(http_requests_total[5m]))
 - **`many-to-many matching not allowed`**: Occurs when multiple series on both the left and right share the same matching labels. You must aggregate one side (using `sum`, `avg`, etc.) or add more labels to your `on()` clause to make at least one side unique.
 - **Empty Result**: Occurs when your `on()` or `ignoring()` labels still leave unmatched keys between the two sides. Double-check that the remaining label sets are identical in both name and value.
 
-### **65. How do you implement Tail-Based Sampling in OTel Collector for error capture?**
+### **55. Scenario: Production p99 latency spikes to 10 seconds, but CPU, memory, and database metrics appear normal. How do you use Distributed Tracing to find the root cause?**
 **Answer:**
-```yaml
-processors:
-  tail_sampling:
-    decision_wait: 10s
-    expected_trajectories: 100000
-    policies:
-      - name: status_code_policy
-        type: status_code
-        status_code: { status_codes: [ERROR] }
-      - name: latency_policy
-        type: latency
-        latency: { threshold_ms: 2000 }
-      - name: probabilistic_policy
-        type: probabilistic
-        probabilistic: { sampling_percentage: 5.0 }
-```
+To find the root cause of a 10-second **p99 latency** spike when standard infrastructure metrics (CPU, memory, database) look normal, you use **distributed tracing** to **isolate the specific tail-latency outlier across the request lifecycle**. 
 
-### **66. What is OpenTelemetry TraceID Ratio-Based Sampler?**
-**Answer:** Head-based sampler configured at the SDK level that deterministically samples a percentage of traces based on the Trace ID hash.
+#### Step-by-Step Tracing Workflow:
 
-### **67. What is Grafana Tempo Trace-to-Logs and Logs-to-Trace correlation?**
-**Answer:** Configuring Tempo data source settings in Grafana with LogQL/Loki queries mapping `traceId` attributes, allowing 1-click bidirectional navigation between traces and logs.
+#### 1. Isolate High-Latency Traces (Tail Sampling / Filtering)
 
-### **68. What is Thanos Querier vs Thanos Store Gateway?**
-**Answer:**
-- **Thanos Querier:** Stateless query engine evaluating PromQL queries across live Prometheus sidecars and Store Gateways, deduplicating HA samples.
-- **Thanos Store Gateway:** Implements long-term historical block querying directly from cloud object storage (S3).
+- Filter your tracing backend (such as Jaeger, Zipkin, or Datadog APM) for traces where total duration exceeds a threshold (e.g., `duration > 10s`) rather than looking at average or median (p50) traces.
 
-### **69. What is Thanos Compactor?**
-**Answer:** A singleton background service that applies downsampling (5-minute and 1-hour resolution) and retention policies to historical TSDB blocks in S3.
+#### 2. Inspect the Critical Path and Span Breakdown
 
-### **70. What is Grafana Mimir Architecture (Ingester, Distributor, Querier, Compactor)?**
-**Answer:**
-- **Distributor:** Stateless receiver validating and hashing incoming OTLP/Prometheus samples.
-- **Ingester:** Stateful service holding in-memory series and writing WAL chunks.
-- **Querier:** Stateless PromQL execution engine querying Ingesters and Store Gateways.
-- **Compactor:** Merges and downsamples long-term storage blocks in S3.
+- Open a slow trace and look at the **waterfall view**. Each unit of work is a **span** with a start time and duration.
+- Scan horizontally to see which individual span consumes the 10-second block. Is it a long-running external HTTP call, a slow internal function, or a queue-waiting state?
 
----
+#### 3. Check for Downstream or Third-Party Dependencies
 
-## 🔴 **Part 3: Production Diagnostics, Incident Walkthroughs & SRE Scenarios (Questions 71–200)**
+- Look past your primary service. A microservice architecture often hides a slow downstream API, a third-party webhook, or an auth provider that is hanging or timing out, which does not spike your local CPU or primary database metrics.
 
-### **71. Scenario: Production p99 latency spikes to 10 seconds, but CPU, memory, and database metrics appear normal. How do you use Distributed Tracing to find the root cause?**
-**Answer:**
-1. Filter traces in Grafana Tempo by duration $> 5\text{s}$ and HTTP Status 200 during the incident window.
-2. Inspect the span waterfall view to locate the specific span responsible for the delay.
-3. Identify hidden bottlenecks: un-batched sequential N+1 HTTP calls, thread pool contention, or an external third-party webhook timing out with a 10-second fallback.
+#### 4. Analyze Concurrency, Locks, or Thread/Connection Pool Starvation
+
+- Expand span tags and attributes (like user tier, payload size, or region). Check if the 10-second delay correlates with a specific subset of traffic—such as large payloads, cache misses, or specific tenant lock contention—that causes requests to sit in an internal queue or thread pool wait state rather than burning CPU.
+
+#### 5. Correlate Traces with Logs and Metrics
+
+- Use the **Trace ID** from the offending span to pull structured application logs generated during that exact window. This bridges the gap between *where* the delay happened (trace) and *why* it happened (log statement or exception).
 
 ### **72. Scenario: Your Prometheus server crashes with OOM every morning at 9:00 AM. How do you diagnose and fix the memory explosion?**
 **Answer:**
