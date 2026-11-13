@@ -1535,10 +1535,32 @@ If your containers do not have requests or limits configured, you can calculate 
 - **`container!="", image!=""`.** Filters out root cgroup summaries and Kubernetes pause containers (formerly filtered via `container_name!="POD"` in older Kubernetes versions) so only your actual application containers are measured. 
 - **`on(node) group_left()`.** Performs a many-to-one vector match so multiple containers running on the same node can be divided by that single node's total capacity.
 
-### **63. What is the difference between `increase()` and `rate()` in PromQL?**
+### **53. What is the difference between `increase()` and `rate()` in PromQL?**
 **Answer:**
-- `rate()` calculates the per-second average rate of increase.
-- `increase()` calculates the total absolute increase over the range window (`increase(v[1h]) = rate(v[1h]) * 3600`).
+
+The main difference between `rate()` and `increase()` in PromQL is **the unit of measurement they return**. Both functions calculate how fast a counter is growing over a specified time window, and both automatically handle counter resets.
+
+- **`rate()`** calculates the **per-second** average rate of increase.
+- **`increase()`** calculates the **total** increase over the entire time range.
+
+#### Key Differences
+
+| **Feature** | **`rate(v range-vector)`** | **`increase(v range-vector)`** |
+|---|---|---|
+| **Output Unit** | Events per second. | Total events in the window. |
+| **Formula** | `(Total Increase) / (Time Window in Seconds)` | `rate() * (Time Window in Seconds)` |
+| **Best Use Case** | Alerting, high-volume traffic, and graphing request throughput. | Slow-moving counters, daily/hourly totals, and error counts. |
+| **Return Type** | Floating-point number (often a small decimal). | Floating-point number (can still be non-integer due to extrapolation). |
+
+#### How They Relate Under the Hood
+
+In Prometheus, `increase()` is essentially just syntactic sugar for `rate()`. Specifically, `increase(http_requests_total[5m])` returns the exact same value as `rate(http_requests_total[5m]) * 300` (since 5 minutes equals 300 seconds).
+
+#### Important Behaviors to Keep in Mind
+
+- **Both require a counter:** You should only use `rate()` and `increase()` on counters (metrics that only go up or reset to zero). Never use them on gauges (metrics that go up and down, like memory usage).
+- **Both extrapolate data:** Prometheus extrapolates values to cover the full time window if samples do not align perfectly with the start and end of your range. Because of this, `increase()` can return a decimal (like `3.42` requests) even when measuring whole events.
+- **Aggregate after calculating:** Always apply `rate()` or `increase()` first, and then wrap them in an aggregation function like `sum()`. Doing `sum(rate(metric[5m]))` preserves counter reset handling per time series, whereas `rate(sum(metric)[5m])` will break.
 
 ### **64. What is PromQL Vector Matching (`on()`, `ignoring()`, `group_left()`, `group_right()`)?**
 **Answer:** Matching labels between two vector series during arithmetic operations:
