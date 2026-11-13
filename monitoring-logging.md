@@ -1348,8 +1348,30 @@ A **Distributed Tracing Span Context** is **the set of unique identifiers and me
 3. **Extraction**: Service B **extracts** the context from the incoming headers, adopts the same **Trace ID**, sets Service A's Span ID as its own **Parent Span ID**, and creates a new **Span ID** for its local work. 
 4. **Reconstruction**: By passing this context across all microservice boundaries, observability backends can stitch the fragmented logs and timings together into a complete visual flamegraph or waterfall view.
 
-### **54. What is Grafana Loki Log Streams?**
-**Answer:** A sequence of log lines sharing the exact same unique set of labels, stored as compressed chunks in object storage.
+### **48. What is Grafana Loki Log Streams?**
+**Answer:** 
+
+A **log stream** in **Grafana Loki** is **a unique sequence of log lines that share the exact same combination of label metadata** (such as `{service_name="nginx", status="500"}`). 
+
+Unlike traditional logging systems (like Elasticsearch) that index every single word inside every log message, Grafana Loki groups logs into streams and indexes **only the labels**, keeping storage costs low and write speeds high. 
+
+#### Key Concepts of Loki Log Streams
+
+- **Log Stream Selector (Label Selector):** A query string wrapped in curly braces (e.g., `{job="api-gateway", environment="production"}`) used to filter and select a specific stream or set of streams in Loki's query language, **LogQL**. 
+- **Labels:** Key-value pairs attached to incoming logs by collectors (like Grafana Alloy or Promtail). They define the stream's identity and act as the partition key. 
+- **Stream Cardinality:** The uniqueness of your label combinations. Loki requires **low cardinality** labels (e.g., region, service, namespace, log level). Using high-cardinality values like user IDs, request UUIDs, or timestamps as stream labels will degrade Loki's performance.
+- **Storage Model:** While the label metadata defines the stream index, the actual raw log text of the stream is compressed into chunks and sent to cost-effective object storage (such as Amazon S3, Google Cloud Storage, or Azure Blob Storage). 
+
+#### Example of a Log Stream
+
+When an agent scrapes logs from an application, it assigns labels:
+
+```text
+{app="payment-service", env="prod", level="error"}
+```
+
+- All log lines matching this exact set of key-value pairs belong to the **same log stream**.
+- If an app emits a log with `{app="payment-service", env="prod", level="info"}`, that forms a **completely separate log stream** because the `level` label changed.
 
 ### **55. What is OpenTelemetry Auto-Instrumentation vs Manual Instrumentation?**
 **Answer:**
