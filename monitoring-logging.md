@@ -1425,32 +1425,65 @@ In practice, most production teams **combine both approaches**:
 1. Use **auto-instrumentation** as the baseline to cover all standard incoming requests, database calls, and outgoing HTTP traffic effortlessly. 
 2. Layer **manual instrumentation** on top for critical business transactions, custom calculations, or specific debugging contexts that auto-agents cannot interpret.
 
-### **56. What is OpenTelemetry Resource Attributes?**
-**Answer:** Entity metadata attached to all telemetry emitted by a process (e.g., `service.name="order-api"`, `service.version="1.4.0"`, `deployment.environment="prod"`).
-
-### **57. What is Jaeger Tracing?**
-**Answer:** A CNCF open-source distributed tracing platform developed by Uber used for monitoring and troubleshooting microservices transactions.
-
-### **58. What is Prometheus Pushgateway?**
-**Answer:** An intermediary metrics cache allowing ephemeral batch jobs (which exit before Prometheus can scrape them) to push metrics.
-
-### **59. What is Grafana Variables / Template Queries?**
-**Answer:** Dynamic dropdown variables inside dashboards allowing users to filter panels by cluster, namespace, pod, or region on the fly.
-
-### **60. What is OpenTelemetry Collector Memory Limiter Processor?**
-**Answer:** Drops or pauses incoming telemetry batches if the OTel Collector process approaches its allocated RAM threshold, preventing OOM crashes.
-
----
-
-## 🟡 **Part 2: Advanced PromQL, Distributed Tracing & Pipeline Scaling (Questions 61–130)**
-
-### **61. How do you calculate error rate percentage in PromQL?**
+### **50. What is OpenTelemetry Resource Attributes?**
 **Answer:**
+
+An **OpenTelemetry resource** represents the physical or logical entity (such as a microservice, container, host, or serverless function) that produces telemetry data, and **resource attributes** are **the immutable key-value pairs that describe that entity**.
+
+When your application emits traces, metrics, or logs, these resource attributes attach system-level context to every signal. 
+
+#### Core Purpose & Why They Matter
+
+- **Entity Identification:** They tell your observability backend *where* and *what* generated the data (e.g., service name, version, host ID, or container ID). 
+- **Low-Cardinality Context:** Unlike high-cardinality span attributes (which describe a specific code execution or database call), resource attributes define stable, low-cardinality metadata to prevent database bloat or metadata explosion. 
+- **Root Cause Analysis:** If a trace shows high latency, you can use resource attributes in tools like Jaeger, Prometheus, or Grafana to filter or group data by a specific Kubernetes pod, cloud region, or deployment environment.
+
+#### Common Examples of Resource Attributes
+
+OpenTelemetry recommends following standardized **Semantic Conventions** (using dot-notation like `namespace.attribute`): 
+
+- **Service Identification:** `service.name` (e.g., `payment-service`), `service.version` (e.g., `2.1.0`), `service.namespace`.
+- **Deployment & Environment:** `deployment.environment.name` (e.g., `production`, `staging`).
+- **Infrastructure & Host:** `host.name`, `process.pid`, `service.instance.id`.
+- **Cloud Provider:** `cloud.provider` (e.g., `aws`, `gcp`), `cloud.region`, `cloud.availability_zone`.
+- **SDK Identity (Auto-provided):** `telemetry.sdk.name`, `telemetry.sdk.language`, `telemetry.sdk.version`.
+
+### **51. How do you calculate error rate percentage in PromQL?**
+**Answer:**
+
+To calculate the error rate percentage in PromQL, **divide the rate of failed requests by the rate of total requests and multiply by 100**.
+
+#### Standard Error Rate Formula
+
+For a standard HTTP request counter (such as `http_requests_total`), filter for `5xx` server errors in the numerator and include all status codes in the denominator:
+
 ```promql
-sum(rate(http_requests_total{status=~"5.."}[5m]))
-/
-sum(rate(http_requests_total[5m])) * 100
+(
+  sum(rate(http_requests_total{status=~"5.."}[5m])) 
+  / 
+  sum(rate(http_requests_total[5m]))
+) * 100
 ```
+
+#### Key Query Components
+
+- **The `rate()` function:** Calculates the per-second average rate of increase for counter metrics over a time window like `[5m]`. Always apply `rate()` before summing counters so counter resets are handled properly.
+- **The `sum()` aggregation:** Combines rates across all pods, instances, or endpoints to give a service-wide percentage. Add `by (service, job)` if you want to break down error rates per service.
+- **Regex matching (`=~`):** Matches all 500-level server error status codes using `"5.."`. Change this to `"4..|5.."` if you want to include client errors as well.
+
+#### Handling Edge Cases
+
+- **Zero errors (`NaN` or empty results):** If a service has zero errors during the time window, the numerator series might not exist yet, causing the query to return no data instead of `0`. Add `or on() vector(0)` to safely default missing error series to zero:
+
+```promql
+(
+  (sum(rate(http_requests_total{status=~"5.."}[5m])) or on() vector(0))
+  / 
+  sum(rate(http_requests_total[5m]))
+) * 100
+```
+
+- **Zero total traffic:** If a service receives zero total traffic, dividing by zero produces `NaN`. Wrap the expression with `> 0` or use `clamp_min` in alerting rules to prevent false alerts during idle periods.
 
 ### **62. How do you calculate CPU utilization percentage per container in Kubernetes using PromQL?**
 **Answer:**
