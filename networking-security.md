@@ -1,21 +1,34 @@
-# **Networking & DevSecOps - DevOps Interview Questions (200 Questions)**
-
-Welcome to the **Networking & DevSecOps** master collection containing **200 comprehensive interview questions and detailed answers** covering Zero Trust Architecture, mTLS, SPIFFE/SPIRE, Kubernetes NetworkPolicies, HashiCorp Vault, OPA/Kyverno Policy as Code, Supply Chain Security (SLSA/SBOM), and Runtime Threat Detection (Falco).
-
----
-
-## 🟢 **Part 1: Networking Fundamentals, OSI & Transport Protocols (Questions 1–60)**
+## **Networking & DevSecOps - DevOps Interview Questions **
 
 ### **1. Explain the 7-Layer OSI Model and the specific layers DevOps engineers interact with daily.**
 **Answer:**
-1. **Application (Layer 7):** HTTP, HTTPS, DNS, gRPC, SSH, TLS (Ingress, API Gateways).
-2. **Presentation (Layer 6):** TLS/SSL encryption, JSON/Protobuf serialization.
-3. **Session (Layer 5):** Sockets, RPC sessions.
-4. **Transport (Layer 4):** TCP, UDP, QUIC (NLBs, Port forwarding).
-5. **Network (Layer 3):** IP, ICMP, BGP, IPsec (VPCs, Subnets, Routers).
-6. **Data Link (Layer 2):** Ethernet, MAC, ARP, VLAN (Switching, CNI virtual bridges).
-7. **Physical (Layer 1):** Fiber optics, physical data center cables.
-*(DevOps and Cloud Engineers primarily architect and debug systems at Layers 3, 4, and 7).*
+
+The **OSI (Open Systems Interconnection) model** is a conceptual seven-layer framework that **standardizes how data travels across a network**. As data moves from sender to receiver, each layer wraps or unwraps headers while handling a distinct networking job.
+
+#### The 7 OSI Layers
+
+- **Layer 7 – Application:** Provides network services directly to user-facing apps and APIs using protocols like HTTP/HTTPS, DNS, SMTP, and FTP.
+
+- **Layer 6 – Presentation:** Handles data formatting, serialization (JSON, XML), compression, and encryption/decryption (TLS/SSL).
+
+- **Layer 5 – Session:** Establishes, manages, maintains, and closes communication sessions or dialogues between endpoints (e.g., RPC, socket/session tracking).
+
+- **Layer 4 – Transport:** Delivers data end-to-end with ports, segmentation, flow control, and reliability via TCP or speed via UDP.
+
+- **Layer 3 – Network:** Routes packets across different networks using logical IP addresses (IPv4/IPv6) and routing protocols.
+
+- **Layer 2 – Data Link:** Moves frames node-to-node across the same local network segment using MAC addresses, switches, and Ethernet.
+
+- **Layer 1 – Physical:** Transmits raw bits as electrical, optical, or radio signals over cables, fiber, or wireless hardware.
+
+#### Layers DevOps Engineers Interact With Daily
+
+DevOps engineers rarely manage physical cables (Layer 1) or local switches (Layer 2) in cloud environments, focusing instead on **Layers 3, 4, 6, and 7** (with occasional Layer 5 debugging):
+
+- **Layer 7 (Application):** Configuring NGINX, Envoy, or API gateways; routing traffic by host/path; debugging HTTP status codes, DNS records, and service mesh policies.
+- **Layer 6 (Presentation):** Provisioning and renewing TLS/SSL certificates (e.g., cert-manager, Let's Encrypt), enforcing HTTPS, and debugging serialization/encoding mismatches.
+- **Layer 4 (Transport):** Opening or blocking TCP/UDP ports in security groups and network policies, configuring Layer 4 load balancers, and diagnosing connection resets or timeouts.
+- **Layer 3 (Network):** Designing VPCs, subnets, route tables, NAT gateways, VPNs/peering, and Kubernetes pod/service IP ranges.
 
 ### **2. Compare TCP vs UDP across connection state, reliability, header overhead, and production use cases.**
 **Answer:**
