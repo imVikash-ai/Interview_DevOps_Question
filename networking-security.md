@@ -164,19 +164,32 @@ Suppose you have `10.0.1.0/27`:
 - Total IPs = `2^5 = 32` (`10.0.1.0` through `10.0.1.31`).
 - Usable hosts = `32 - 2 = 30` (`10.0.1.1` through `10.0.1.30`), since `.0` is the network ID and `.31` is the broadcast address.
 
-
-### **6. Explain the TLS 1.3 Handshake and compare it to TLS 1.2.**
+### **6. Compare Symmetric vs Asymmetric Encryption.**
 **Answer:**
-- **TLS 1.2 (2-RTT Handshake):** Required two full network round-trips to negotiate cipher suites and exchange keys before sending application data.
-- **TLS 1.3 (1-RTT / 0-RTT Handshake):**
-  1. **ClientHello:** Client sends supported ciphers and key share guess in the very first packet.
-  2. **ServerHello:** Server selects cipher, returns certificate and server key share. Both compute shared secret immediately.
-  3. **0-RTT Resumption:** Returning clients resume encrypted sessions in 0 round-trips.
 
-### **7. Compare Symmetric vs Asymmetric Encryption.**
-**Answer:**
-- **Asymmetric Encryption (RSA, ECC):** Uses mathematically linked public/private key pairs. Slower; used for digital signatures and TLS key exchange.
-- **Symmetric Encryption (AES-256, ChaCha20):** Uses a single shared key for encryption and decryption. Ultra-fast; used for encrypting bulk data in-transit and at-rest.
+Symmetric and asymmetric encryption are the two core methods used to secure digital data. They **differ primarily in how they handle encryption keys and performance**.
+
+#### Symmetric Encryption
+
+- **Key usage:** Uses a **single shared secret key** for both encrypting and decrypting data. Both parties must possess this same key.
+- **Speed & efficiency:** Very fast and computationally lightweight, making it ideal for bulk data encryption (like databases, file storage, and VPNs).
+- **Key challenge:** Requires a secure way to share the secret key beforehand, which can create a vulnerability if intercepted.
+- **Common algorithms:** AES, DES, 3DES, Blowfish, and RC4.
+
+#### Asymmetric Encryption (Public-Key Cryptography)
+
+- **Key usage:** Uses a **mathematically linked pair of keys**—a **public key** to encrypt data and a **private key** to decrypt it.
+- **Speed & efficiency:** Slower and more resource-intensive because it relies on complex mathematical operations (such as large prime numbers or elliptic curves).
+- **Key advantage:** Eliminates the need to share a secret key over the network, enhancing security and enabling **digital signatures** for authenticity and non-repudiation.
+- **Common algorithms:** RSA, ECC (Elliptic Curve Cryptography), Diffie-Hellman, and DSA.
+
+#### How They Work Together (Hybrid Model)
+
+Most modern secure systems—such as HTTPS/TLS web browsing and secure messaging—combine both methods.
+
+- Asymmetric cryptography is used at the start to safely authenticate participants and establish shared session keys.
+- Symmetric encryption then handles fast, bulk data transfer for the rest of the connection.
+
 
 ### **8. Compare Reverse Proxy vs Forward Proxy.**
 **Answer:**
