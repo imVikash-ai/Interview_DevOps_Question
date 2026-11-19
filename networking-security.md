@@ -32,16 +32,23 @@ DevOps engineers rarely manage physical cables (Layer 1) or local switches (Laye
 
 ### **2. Compare TCP vs UDP across connection state, reliability, header overhead, and production use cases.**
 **Answer:**
-- **TCP (Transmission Control Protocol):**
-  - **Connection-Oriented:** Establishes connection via **3-Way Handshake** (`SYN` $\rightarrow$ `SYN-ACK` $\rightarrow$ `ACK`).
-  - **Reliable:** Guarantees in-order delivery via sequence numbers, acknowledgment packets, and automatic retransmission of lost packets.
-  - **Overhead:** 20-byte header; higher latency due to sliding window flow control and congestion management.
-  - **Use Cases:** Web applications (HTTP/HTTPS), databases (PostgreSQL/MySQL), SSH, file transfers.
-- **UDP (User Datagram Protocol):**
-  - **Connectionless:** No handshake; "fire-and-forget" datagram delivery.
-  - **Unreliable:** No retransmission, no ordering guarantee, no flow control.
-  - **Overhead:** Minimal 8-byte header; ultra-low latency.
-  - **Use Cases:** DNS lookups, video streaming, VoIP, gaming, and **HTTP/3 (QUIC)**.
+
+**TCP is connection-oriented and guarantees reliable, ordered delivery with a 20–60 byte header, while UDP is connectionless and "fire-and-forget" with an 8-byte header that prioritizes low latency over guaranteed delivery.**
+
+#### Side-by-Side Comparison
+
+| **Dimension** | **TCP (Transmission Control Protocol)** | **UDP (User Datagram Protocol)** |
+|---|---|---|
+| **Connection State** | **Connection-oriented:** Uses a 3-way handshake (`SYN`, `SYN-ACK`, `ACK`) to establish state and tracks byte streams. | **Connectionless:** Stateless datagram delivery with no setup handshake or session state. |
+| **Reliability** | **Reliable & ordered:** Uses sequence numbers, ACKs, retransmissions, plus flow and congestion control. | **Best-effort:** No delivery guarantees, ordering, ACKs, retransmissions, or flow/congestion control. |
+| **Header Overhead** | **20–60 bytes** (variable; includes ports, sequence/ACK numbers, flags, window size, checksum, options). | **8 bytes** (fixed; four 16-bit fields: source port, destination port, length, checksum). |
+| **Production Use Cases** | HTTP/HTTPS, SSH, FTP, SMTP, financial transactions, database/API calls. | DNS, DHCP, VoIP, live video/audio streaming, multiplayer gaming, telemetry/sensors. |
+
+#### Key Trade-offs in Production
+
+- **Latency vs. Integrity:** As noted on **GeeksforGeeks**, TCP protects data integrity at the cost of handshake delays and retransmission stalls, whereas UDP avoids delays when stale packets matter less than speed. Most users on **StackOverflow** agree on this core divide between guaranteed delivery for data accuracy and speed for real-time traffic.
+
+- **Traffic Patterns:** According to [**Nitiz Sharma**](https://nitizsharma.com/tcp-vs-udp-differences/), UDP supports broadcast/multicast and serves as the transport foundation for modern protocols like QUIC (which adds connection semantics, encryption, and loss recovery over UDP). As highlighted by **Spiceworks**, UDP leaves reliability and congestion handling to the application layer when needed.
 
 ### **3. Walk through the complete step-by-step DNS resolution lifecycle when accessing `api.stripe.com`.**
 **Answer:**
