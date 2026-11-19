@@ -102,9 +102,26 @@ The recursive resolver now queries one of **Stripe's Authoritative Nameservers**
 
 ### **4. Compare Public IP vs Private IP (RFC 1918) vs NAT (Network Address Translation).**
 **Answer:**
-- **Public IP:** Globally unique and directly routable on the public internet.
-- **Private IP (RFC 1918):** Reserved for internal networks (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`); not routable on the public internet.
-- **NAT:** Translates multiple private IP addresses to a single public IP address, allowing private instances to initiate outbound internet traffic (e.g., downloading OS patches) while preventing unsolicited incoming internet connections.
+
+**Public IPs are globally unique, internet-routable addresses assigned by an ISP; Private IPs (RFC 1918) are non-routable local addresses reused inside private networks; and NAT (Network Address Translation) is the router mechanism that translates between the two so local devices can use the internet.**
+
+#### Side-by-Side Comparison
+
+| **Feature** | **Public IP** | **Private IP (RFC 1918)** | **NAT (Network Address Translation)** |
+|---|---|---|---|
+| **What It Is** | A globally unique IPv4/IPv6 address for external communication. | A reserved local IPv4 address for internal networks (LANs). | A translation process at a network boundary/router that rewrites IP packet headers. |
+| **Address Ranges** | Globally allocated blocks (excludes private & special-use ranges). | `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`. | Not an address range; maps private IPs to public IPs (often using ports via PAT). |
+| **Internet Routability** | Routable across the public internet. | Not routable on the public internet; dropped by public routers. | Enables private-IP devices to reach the internet via a public IP. |
+| **Uniqueness** | Globally unique while assigned. | Unique within a local network; reusable across separate networks. | Tracks active sessions/ports in a translation table to keep return traffic distinct. |
+| **Who Assigns / Runs It** | Assigned by an ISP (dynamic or static). | Assigned locally by a router/DHCP server or set statically. | Performed by a router, firewall, or gateway (and sometimes ISP CGNAT). |
+
+#### How They Work Together
+
+- **Internal addressing:** Devices like laptops and phones get RFC 1918 addresses (such as `192.168.1.10`) to talk inside your LAN.
+- **Outbound translation:** When a device sends internet traffic, the router's NAT—typically **PAT (Port Address Translation)**—replaces the private source IP and port with its public IP and a mapped port.
+- **Return routing:** External servers reply to the public IP. The router checks its NAT table and routes the reply back to the exact internal device.
+- **Security note:** Private IPs and NAT hide internal addresses from direct external reachability, but they are not a substitute for a firewall or access controls.
+
 
 ### **5. Explain CIDR Notation and subnet sizing calculations.**
 **Answer:** CIDR represents an IP range using base IP and prefix length (`/XX` bits for network portion):
