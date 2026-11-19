@@ -52,12 +52,53 @@ DevOps engineers rarely manage physical cables (Layer 1) or local switches (Laye
 
 ### **3. Walk through the complete step-by-step DNS resolution lifecycle when accessing `api.stripe.com`.**
 **Answer:**
-1. **Local Caches:** Browser cache $\rightarrow$ OS Resolver cache $\rightarrow$ Local router DNS cache.
-2. **Recursive Resolver (e.g., 8.8.8.8 / ISP DNS):** If cache misses, the recursive resolver queries:
-3. **Root Name Server (`.`):** Directs resolver to the `.com` Top-Level Domain (TLD) name server.
-4. **TLD Name Server (`.com`):** Directs resolver to the Authoritative Name Server for `stripe.com`.
-5. **Authoritative Name Server:** Queries zone file and returns the `A` (IPv4) or `AAAA` (IPv6) record (`192.0.2.1`) along with TTL.
-6. **Client Connection:** Resolver caches the IP and returns it to the client browser to initiate the TLS handshake.
+
+When an application makes a request to `api.stripe.com`, the system translates that human-readable hostname into an IP address through a hierarchical **DNS resolution process**. Because `api.stripe.com` relies on dynamic infrastructure and load balancing, this lookup happens every time a cached record expires.
+
+Here is the complete step-by-step lifecycle from your application to Stripe's servers.
+
+#### 1. Local Client & OS Checks
+
+Before sending any traffic over the network, the client device checks local memory and configuration files.
+
+- **Application & Browser Cache:** If the request originates from a browser or an HTTP client with internal DNS caching (like the JVM or Node.js caching libraries), it checks its local memory for a recent, unexpired IP mapping.
+- **OS Stub Resolver & Cache:** If the app doesn't have the IP, it hands the query to the operating system's stub resolver, which checks the OS-level DNS cache.
+- **Local `hosts` File:** If there is a cache miss, the OS reads the local `hosts` file (`/etc/hosts` on Linux/macOS or `C:\Windows\System32\drivers\etc\hosts` on Windows) to see if `api.stripe.com` is manually mapped to a static IP.
+
+#### 2. The Recursive Resolver
+
+If the IP isn't found locally, the OS stub resolver sends a **recursive query** to your configured DNS Recursive Resolver (typically operated by your ISP, your cloud VPC like AWS `10.0.0.2`, or a public resolver like `8.8.8.8` or `1.1.1.1`).
+
+- **Resolver Cache Check:** The recursive resolver checks its own massive cache. Because `api.stripe.com` is a heavily trafficked endpoint, public resolvers almost always have it cached. If it's a cache hit and the Time-to-Live (TTL) hasn't expired, the resolver immediately returns the IP and skips to Step 6.
+- **Iterative Querying:** If it's a cache miss, the recursive resolver takes over the heavy lifting, performing a series of **iterative queries** down the DNS hierarchy.
+
+#### 3. The Root Nameserver (`.`)
+
+The recursive resolver contacts one of the 13 logical **Root Nameserver** clusters (whose IP addresses are hardcoded into the resolver's configuration).
+
+- **Query:** *"Where can I find `api.stripe.com`?"*
+- **Response:** The root server doesn't know the IP for Stripe, nor does it store IP mappings. Instead, it looks at the rightmost part of the domain (`.com`) and responds with a referral to the Top-Level Domain (TLD) nameservers responsible for `.com`.
+
+#### 4. The TLD Nameserver (`.com`)
+
+The recursive resolver takes the referral and queries the **`.com` TLD Nameserver** (managed by Verisign).
+
+- **Query:** *"Where can I find `api.stripe.com`?"*
+- **Response:** The `.com` TLD server doesn't hold the final IP address either. Instead, it checks its registry for `stripe.com` and returns the **NS (Name Server) records** pointing to Stripe's designated authoritative nameservers (e.g., AWS Route 53 or NS1 endpoints).
+
+#### 5. Stripe's Authoritative Nameserver
+
+The recursive resolver now queries one of **Stripe's Authoritative Nameservers** directly.
+
+- **CNAME & Traffic Routing:** In enterprise architectures like Stripe's, `api.stripe.com` often resolves first to a `CNAME` (Canonical Name) record managed by a traffic management or CDN/edge routing layer to direct your request to the healthiest, geographically closest Stripe edge point of presence (PoP).
+- **A Record Resolution:** Stripe's authoritative DNS server evaluates routing health and resolves the chain to a final **A record** containing an IPv4 address. *(Note: Per **[Stripe's IP documentation](https://docs.stripe.com/ips)**, `api.stripe.com` strictly serves IPv4 `A` records and does not return IPv6 `AAAA` records).*
+- **TTL Assignment:** Along with the IPv4 address, the authoritative server attaches a short **Time-to-Live (TTL)** value—typically 60 seconds or less—so Stripe can rapidly reroute traffic away from degraded servers without clients getting stuck on stale IPs.
+
+#### 6. Caching & Connection Handoff
+
+- **Resolver Caching:** The recursive resolver receives the IPv4 address, caches it for the duration of the TTL, and sends the answer back to your machine's OS stub resolver.
+- **Client Caching & Socket Creation:** Your OS caches the IP locally and passes it to your application.
+- **TCP & TLS Handshake:** With the DNS lifecycle complete, your application opens a socket to that IPv4 address on port `443`, initiating the **TCP 3-way handshake** followed by the **TLS handshake** (verifying Stripe's SSL certificate) before finally sending your encrypted HTTP API request.
 
 ### **4. Compare Public IP vs Private IP (RFC 1918) vs NAT (Network Address Translation).**
 **Answer:**
