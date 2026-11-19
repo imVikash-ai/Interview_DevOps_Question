@@ -124,10 +124,46 @@ The recursive resolver now queries one of **Stripe's Authoritative Nameservers**
 
 
 ### **5. Explain CIDR Notation and subnet sizing calculations.**
-**Answer:** CIDR represents an IP range using base IP and prefix length (`/XX` bits for network portion):
-- `/24` $\rightarrow 2^{(32-24)} = 256$ IP addresses.
-- `/16` $\rightarrow 2^{(32-16)} = 65,536$ IP addresses.
-*(AWS VPC subnets reserve 5 IPs per subnet: Network, VPC Router, DNS, Future use, Broadcast).*
+**Answer:** 
+
+**Classless Inter-Domain Routing (CIDR)** notation writes an IP address followed by a slash and a prefix length (such as `192.168.1.0/24`), showing how many leading bits form the network portion. In IPv4 (32 bits total), the remaining bits identify individual hosts, and you calculate subnet sizes using powers of 2.
+
+#### How CIDR Notation Works
+
+- **Prefix length (`/n`):** Counts the consecutive `1` bits in a subnet mask from left to right. For example, `/24` means the first 24 bits define the network and `32 - 24 = 8` bits remain for hosts.
+- **Classless flexibility:** Unlike older Class A, B, and C boundaries, CIDR lets you pick arbitrary prefix lengths (`0` to `32` in IPv4; `0` to `128` in IPv6) to match actual network needs and reduce address waste. 
+- **Subnet masks:** Each prefix maps to a binary mask of `n` ones followed by `32 - n` zeros. For instance, `/26` has 26 ones (`255.255.255.192`). 
+
+#### Subnet Sizing Formulas
+
+For an IPv4 prefix `/n`:
+
+1. **Host bits (`h`):** `32 - n`
+2. **Total IP addresses:** `2^h` (or `2^(32 - n)`)
+3. **Usable host IPs:** `2^h - 2` for standard subnets (`/0` through `/30`). The first address is the **network address** (all host bits `0`) and the last is the **broadcast address** (all host bits `1`).
+
+   **Exceptions:** `/31` is commonly used for point-to-point links with 2 usable IPs per RFC 3021, and `/32` identifies a single host IP.
+
+#### Common IPv4 Subnet Sizes
+
+| **CIDR** | **Subnet Mask** | **Total IPs** | **Usable Hosts** |
+|---|---|---:|---:|
+| `/24` | `255.255.255.0` | 256 | 254 |
+| `/25` | `255.255.255.128` | 128 | 126 |
+| `/26` | `255.255.255.192` | 64 | 62 |
+| `/27` | `255.255.255.224` | 32 | 30 |
+| `/28` | `255.255.255.240` | 16 | 14 |
+| `/29` | `255.255.255.248` | 8 | 6 |
+| `/30` | `255.255.255.252` | 4 | 2 |
+
+#### Quick Example
+
+Suppose you have `10.0.1.0/27`:
+
+- Host bits = `32 - 27 = 5`.
+- Total IPs = `2^5 = 32` (`10.0.1.0` through `10.0.1.31`).
+- Usable hosts = `32 - 2 = 30` (`10.0.1.1` through `10.0.1.30`), since `.0` is the network ID and `.31` is the broadcast address.
+
 
 ### **6. Explain the TLS 1.3 Handshake and compare it to TLS 1.2.**
 **Answer:**
