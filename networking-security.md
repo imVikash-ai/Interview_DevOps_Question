@@ -359,15 +359,40 @@ It helps organizations eliminate secret sprawl and enforce strict access control
 - **Identity-Based Authentication & Policy Authorization:** Authenticates human users, machines, and workloads through trusted identity providers (such as AWS, Azure, Kubernetes, LDAP, or AppRole) and restricts access using path-based policies.
 - **Audit Logging & Compliance:** Records detailed request-response trails of all secret access and administrative actions to support security monitoring and regulatory compliance.
 
-### **15. What is a CVE and CVSS score?**
+### **13. Explain Kubernetes RBAC (Role, ClusterRole, RoleBinding, ClusterRoleBinding).**
 **Answer:**
-- **CVE (Common Vulnerabilities and Exposures):** Standardized identifier for a publicly known vulnerability (e.g., `CVE-2021-44228`).
-- **CVSS (Common Vulnerability Scoring System):** Severity score from 0.0 to 10.0 (Low: 0.1–3.9, Medium: 4.0–6.9, High: 7.0–8.9, Critical: 9.0–10.0).
 
-### **16. Explain Kubernetes RBAC (Role, ClusterRole, RoleBinding, ClusterRoleBinding).**
-**Answer:**
-- **`Role` / `ClusterRole`:** Defines permission rules (verbs: `get`, `list`, `create` on resources: `pods`, `secrets`). Scoped to a namespace (`Role`) or entire cluster (`ClusterRole`).
-- **`RoleBinding` / `ClusterRoleBinding`:** Grants defined permissions to subjects (Users, Groups, ServiceAccounts).
+**Kubernetes Role-Based Access Control (RBAC)** is the built-in authorization mechanism that regulates who can access the Kubernetes API and what actions they can perform.
+
+It splits permissions into **what can be done** (Roles) and **who can do it** (Bindings), operating at either the namespace or cluster level.
+
+#### Quick Comparison
+
+| **Object** | **Scope** | **Purpose** | **Can Reference** |
+|---|---|---|---|
+| **Role** | Namespace | Defines permissions within a single namespace. | N/A (contains rules) |
+| **ClusterRole** | Cluster-wide | Defines permissions across all namespaces or for cluster-level resources. | N/A (contains rules) |
+| **RoleBinding** | Namespace | Grants permissions to subjects inside a specific namespace. | A `Role` (same namespace) or a `ClusterRole` |
+| **ClusterRoleBinding** | Cluster-wide | Grants permissions to subjects across the entire cluster. | Only a `ClusterRole` |
+
+#### 1. Defining Permissions: Role vs. ClusterRole
+
+Both objects contain `rules` made up of **API Groups** (e.g., `""` for core, `apps`), **Resources** (e.g., `pods`, `deployments`), and **Verbs** (e.g., `get`, `list`, `create`, `delete`).
+
+- **Role:** Sets permissions strictly within one specific namespace. For example, you might create a Role in the `dev` namespace allowing a user to read and restart pods there, without affecting `prod`.
+- **ClusterRole:** Sets permissions at the cluster level. It is used for:
+  - **Cluster-scoped resources** that do not live in a namespace (like `nodes` or `PersistentVolumes`).
+  - **Non-resource endpoints** (like `/healthz`).
+  - **Reusable templates** of namespaced permissions (such as read-only access to pods) that you want to apply across many namespaces without duplicating YAML.
+
+#### 2. Assigning Permissions: RoleBinding vs. ClusterRoleBinding
+
+Defining a Role does nothing on its own. Bindings connect **Subjects** (Users, Groups, or ServiceAccounts) to a Role or ClusterRole.
+
+- **RoleBinding:** Grants the permissions defined in a Role to a subject *within a single namespace*.
+  - **Common pattern:** A `RoleBinding` in the `staging` namespace can reference a cluster-wide `ClusterRole` (like the built-in `view` role). This grants the user read-only access **only** inside `staging`, keeping permissions reusable.
+- **ClusterRoleBinding:** Grants the permissions defined in a `ClusterRole` to a subject *across every namespace and cluster resource*. A `ClusterRoleBinding` cannot reference a standard namespaced `Role`.
+
 
 ### **17. Compare Bastion Hosts vs AWS SSM Session Manager.**
 **Answer:**
