@@ -191,10 +191,47 @@ Most modern secure systems—such as HTTPS/TLS web browsing and secure messaging
 - Symmetric encryption then handles fast, bulk data transfer for the rest of the connection.
 
 
-### **8. Compare Reverse Proxy vs Forward Proxy.**
+### **7. Compare Reverse Proxy vs Forward Proxy.**
 **Answer:**
-- **Forward Proxy:** Sits in front of client devices to inspect, filter, or anonymize outbound traffic to the internet (corporate enterprise proxies).
-- **Reverse Proxy:** Sits in front of backend web servers to handle SSL termination, load balancing, compression, caching, and rate limiting (Nginx, Envoy).
+
+A **forward proxy** acts on behalf of clients to manage outbound requests to external servers, while a **reverse proxy** acts on behalf of backend servers to manage incoming requests from clients.
+
+Both sit between clients and servers to filter traffic, cache data, and add security.
+
+#### Side-by-Side Comparison
+
+| **Feature** | **Forward Proxy** | **Reverse Proxy** |
+|---|---|---|
+| **Represents** | Clients (users or internal networks) | Backend / origin servers |
+| **Traffic Flow** | Outbound (Client → Proxy → Internet/Server) | Inbound (Client/Internet → Proxy → Backend) |
+| **IP Masking** | Hides client IP addresses from external servers | Hides backend server IP addresses from clients |
+| **Primary Goal** | Client privacy, access control, and outbound filtering | Server scalability, security, load balancing, and routing |
+| **Where It Sits** | Near clients or on client-side networks | In front of web/application servers (often in a DMZ or edge) |
+| **Common Examples** | Squid, Apache Traffic Server, VPNs | Nginx, HAProxy, Cloudflare, AWS Elastic Load Balancer |
+
+#### Key Differences Explained
+
+#### 1. Forward Proxy
+
+- The destination server sees the forward proxy's IP address rather than the client's IP address.
+- Organizations use forward proxies to:
+  - Block restricted websites.
+  - Monitor employee browsing.
+  - Cache frequently fetched external pages.
+  - Apply outbound access policies.
+- Forward proxies are configured on client devices or client-side networks and can tunnel or intercept HTTPS traffic when trusted.
+
+#### 2. Reverse Proxy
+
+- Clients connect to the reverse proxy as if it were the origin server, without knowing which backend server handles the request.
+- Reverse proxies are typically managed by site administrators and DevOps teams.
+- Common uses include:
+  - **Load balancing:** Distributes traffic across multiple backend servers.
+  - **Caching:** Stores static content to improve response times.
+  - **SSL/TLS termination:** Handles encryption and decryption at the proxy layer.
+  - **Security:** Helps block DDoS attacks and malicious traffic.
+  - **Routing:** Directs requests to the appropriate backend service.
+
 
 ### **9. What is a Web Application Firewall (WAF)?**
 **Answer:** A Layer 7 security appliance that inspects HTTP/HTTPS traffic to block OWASP Top 10 web vulnerabilities (SQL Injection, XSS, CSRF, malicious scrapers, rate floods).
