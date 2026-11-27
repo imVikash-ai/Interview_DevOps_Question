@@ -483,8 +483,22 @@ Falco typically runs across Kubernetes nodes (often deployed as a DaemonSet via 
 - **Use AWS Security Hub** when you need a centralized dashboard, compliance benchmarking, and unified management of findings across AWS services and partner tools. 
 - **Use both** for layered defense: GuardDuty catches ongoing attacks, while Security Hub tracks configuration drift and centralizes alerts across your environment.
 
-### **39. What is Trivy and what artifact types does it scan?**
-**Answer:** Scans container images, Git repositories, filesystems, IaC templates (Terraform, Helm), and live Kubernetes clusters for CVE vulnerabilities and misconfigurations.
+### **17. What is Trivy and what artifact types does it scan?**
+**Answer:** 
+
+**Trivy** is **an open-source, all-in-one security scanner created by Aqua Security that detects vulnerabilities (CVEs), misconfigurations, exposed secrets, and license issues across software artifacts and environments**. You can run it from the command line, inside CI/CD pipelines, or as a Kubernetes operator. 
+
+#### Artifact Types Trivy Scans
+
+Trivy scans several target and artifact types, including:
+
+- **Container images:** Images stored locally (such as Docker, Containerd, or Podman) or in remote registries (like Docker Hub, AWS ECR, Google Container Registry, and Azure Container Registry).
+- **Filesystems:** Local directories, root filesystems, and binary or software package artifacts.
+- **Git repositories:** Local or remote code repositories, including source code, dependencies, and Infrastructure as Code (IaC) files.
+- **Kubernetes clusters:** Live cluster resources and configurations.
+- **Virtual machine images:** Disk and VM images.
+- **Cloud environments and artifacts:** Supported cloud services and storage targets such as AWS accounts, S3 buckets, and Lambda functions.
+- **Software Bills of Materials (SBOMs):** Generates and inspects SBOM formats such as SPDX and CycloneDX.
 
 ### **40. Compare SSL Termination vs End-to-End Encryption.**
 **Answer:**
