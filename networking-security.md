@@ -542,10 +542,37 @@ The **Internet Control Message Protocol (ICMP)** is **a connectionless network-l
 - **Traceroute:** Uses **Time Exceeded** (Type 11) and **Destination Unreachable** (Type 3) messages to map the path and hop delays between devices.
 - **Routing & Error Alerts:** Notifies senders of unreachable hosts/networks, expired Time-to-Live (TTL) values, or better routes via **Redirect** (Type 5) messages.
 
-### **48. What is a Subnet Mask and Default Gateway?**
+### **20. What is a Subnet Mask and Default Gateway?**
 **Answer:**
-- **Subnet Mask:** Defines which portion of an IP address belongs to the network and which portion belongs to the host (e.g., `255.255.255.0` for `/24`).
-- **Default Gateway:** The router IP address that a host sends packets to when destination IPs lie outside the local subnet.
+
+**A subnet mask defines the boundaries of a local network, while a default gateway serves as the exit point to reach outside networks like the internet**. Together, they tell a device whether data can be sent directly to a local neighbor or must be routed externally.
+
+#### Subnet Mask
+
+A subnet mask is a 32-bit number (such as `255.255.255.0`) that splits an IP address into two distinct parts:
+
+- **Network ID:** Identifies the specific local network or subnet.
+- **Host ID:** Identifies the individual device on that network.
+
+**How it works:** When your computer wants to send data to another IP address, it uses the subnet mask to check if the destination shares the same Network ID.
+
+- If it matches, the destination is on the **same local network**, and your device sends the data directly to it.
+- If it does not match, the destination is on a **remote network**, and your device hands the data off to the default gateway.
+
+#### Default Gateway
+
+A default gateway is the IP address of the router (such as `192.168.1.1`) that connects your local network to external networks.
+
+- **Role:** It acts as a traffic cop or middleman, forwarding data packets from your local devices out to the wider internet and directing incoming traffic back to the right device.
+- **Requirement:** Without a configured default gateway, devices can still communicate with each other locally (like printing to a Wi-Fi printer), but they cannot browse the web or reach outside servers.
+
+#### Quick Analogy
+
+| **Networking Term** | **Real-World Equivalent** | **Purpose** |
+|---|---|---|
+| **IP Address** | Your street address (`123 Main St`) | Uniquely identifies your house. |
+| **Subnet Mask** | Your neighborhood boundary | Tells the mail carrier which houses are in the same neighborhood. |
+| **Default Gateway** | The local post office | Handles any mail going outside your neighborhood to other cities. |
 
 ### **49. What is DNS CNAME vs A vs AAAA vs ALIAS Record?**
 **Answer:**
