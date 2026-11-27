@@ -265,8 +265,35 @@ Organizations use WAFs to protect websites, mobile backends, and APIs against ap
 - **Network-based (hardware) WAF:** Installed as local appliances on-premises to minimize latency, though typically more expensive and harder to scale.
 - **Host-based WAF:** Integrated directly into the web server or application software, offering high customization while using local server resources.
 
-### **10. What is Zero Trust Architecture (ZTA)?**
-**Answer:** A cybersecurity model based on **"Never trust, always verify"**. Eliminates the concept of a trusted internal network; every single request is authenticated, authorized, and encrypted (mTLS) regardless of whether it originates inside or outside the VPC.
+### **9. What is Zero Trust Architecture (ZTA)?**
+**Answer:** 
+
+**Zero Trust Architecture (ZTA)** is **a cybersecurity framework built on the principle of "never trust, always verify," requiring every user, device, and connection to be continuously authenticated and authorized before accessing resources**.
+
+Unlike traditional perimeter-based security—which assumes everything inside a corporate network is safe—ZTA treats every access request as potentially risky, regardless of location.
+
+#### Core Principles
+
+- **Verify explicitly:** Evaluate identity, device health, location, and context continuously before granting or maintaining access.
+- **Use least privilege:** Grant only the minimum access needed for a specific task or timeframe.
+- **Assume breach:** Design systems to limit lateral movement and contain damage by assuming an attacker may already be inside.
+
+#### Key Components & Pillars
+
+According to frameworks like **NIST SP 800-207** and guidance from **Palo Alto Networks**, ZTA spans **identity, devices, networks, applications/workloads, and data** using:
+
+- **Identity and Access Management (IAM):** Multi-factor authentication (MFA), single sign-on (SSO), and role-based or just-in-time access.
+- **Policy Engine & Enforcement:** Central decision logic (policy engine/administrator) paired with enforcement points that allow or block sessions dynamically.
+- **Microsegmentation & Encryption:** Isolating network zones and encrypting data in transit and at rest to stop lateral movement.
+- **Continuous Monitoring:** Real-time telemetry, endpoint posture checks, and security analytics to detect anomalies.
+
+#### Common Usage Examples
+
+- **Remote and hybrid work:** Letting employees safely reach internal apps from home or public networks without broad VPN access.
+- **Cloud and multicloud environments:** Enforcing consistent access policies across SaaS tools, public clouds, and on-premises systems.
+- **Ransomware and lateral-movement containment:** Preventing a single compromised laptop or phishing credential from unlocking critical servers or databases.
+- **Third-party and contractor access:** Restricting vendors or temporary staff to only the specific apps and data they need.
+
 
 ### **11. What is Mutual TLS (mTLS)?**
 **Answer:** Standard TLS authenticates only the server to the client. In **Mutual TLS (mTLS)**, both client and server present X.509 cryptographic certificates to each other, establishing bidirectional encryption and strict cryptographic identity verification.
