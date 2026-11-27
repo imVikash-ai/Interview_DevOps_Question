@@ -457,43 +457,31 @@ Falco typically runs across Kubernetes nodes (often deployed as a DaemonSet via 
 - **Unexpected network & API activity:** Outbound connections to unusual destinations, traffic sniffing, or unexpected calls to the Kubernetes API server from inside a container.
 - **Malware patterns:** Signatures associated with activity like cryptominers.
 
-### **30. Compare BGP Routing vs Anycast DNS.**
+### **16. Compare AWS GuardDuty vs AWS Security Hub.**
 **Answer:**
-- **BGP:** Core routing protocol of the internet exchanging reachability information between autonomous systems.
-- **Anycast:** Multiple globally distributed servers share the exact same IP address. BGP routes client traffic to the topologically closest server, providing low latency and automatic DDoS absorption.
 
-### **31. What is HTTP/3 (QUIC) and why is it superior to HTTP/2?**
-**Answer:**
-- **HTTP/2 (TCP):** Suffers from **Head-of-Line Blocking**—if one TCP packet is dropped, the entire connection stalls.
-- **HTTP/3 (UDP with QUIC):** Multiplexed streams are independent. Packet loss on Stream A does not stall Stream B; provides 0-RTT connection resumption.
+**Amazon GuardDuty detects active threats and malicious behavior in real time, while AWS Security Hub aggregates security findings across tools and checks configuration compliance**. They are complementary rather than competing services—GuardDuty spots live attacks, and Security Hub centralizes visibility, posture checks, and response workflows. 
 
-### **32. Explain AWS KMS Envelope Encryption.**
-**Answer:**
-1. KMS Customer Master Key (CMK) generates a plaintext Data Encryption Key (DEK) and an encrypted DEK.
-2. Application encrypts bulk data locally in memory using the plaintext DEK.
-3. The plaintext DEK is erased from memory; only the encrypted DEK is stored alongside ciphertext.
+#### Core Differences
 
-### **33. What is CIS Benchmark and how do you enforce it in Kubernetes?**
-**Answer:** The Center for Internet Security (CIS) Benchmark provides prescriptive hardening rules for control plane, worker node, and etcd security, automated via tools like **`kube-bench`**.
+| **Feature** | **Amazon GuardDuty** | **AWS Security Hub** |
+|---|---|---|
+| **Primary role** | Threat detection | Security posture management & finding aggregation |
+| **What it looks for** | Active threats, unauthorized access, anomalies, malicious IPs | Misconfigurations, compliance violations, consolidated alerts |
+| **Data sources** | CloudTrail, VPC Flow Logs, DNS logs, plus optional S3, EKS, RDS, and Lambda protection plans | Security checks/controls, AWS Config rules, and findings from GuardDuty, Inspector, Macie, and third-party tools |
+| **Detection method** | Machine learning, anomaly detection, and threat intelligence | Automated security checks and compliance evaluations against standards (such as CIS, PCI DSS, and NIST) |
+| **Pricing model** | Based on volume of log/event data analyzed and enabled protection plans | Based on security checks/resource monitoring and ingested findings (plus underlying service costs like AWS Config) |
 
-### **34. What is a Zero-Day Vulnerability and how does Defense in Depth mitigate it?**
-**Answer:** A flaw actively exploited before a patch exists. Mitigated by runtime behavioral anomaly detection (Falco), strict egress NetworkPolicies (blocking reverse shell C2 traffic), and non-root, read-only container filesystems.
+#### How They Work Together
 
-### **35. What is DNSSEC?**
-**Answer:** Adds cryptographic digital signatures to DNS records to protect against DNS spoofing, cache poisoning, and man-in-the-middle attacks.
+- **GuardDuty feeds Security Hub:** GuardDuty generates detailed threat findings and can send them into Security Hub so security teams see live threats alongside posture and vulnerability data in one place.
+- **Shared automation:** Both integrate with Amazon EventBridge to trigger automated alerts or remediation workflows.
 
-### **36. Compare SQL Injection (SQLi) vs Cross-Site Scripting (XSS).**
-**Answer:**
-- **SQLi:** Attacker injects SQL fragments into input fields to manipulate database queries (prevented via prepared statements/parameterized queries).
-- **XSS:** Attacker injects malicious JavaScript into web pages viewed by other users to steal session cookies (prevented via Content Security Policy and input sanitization).
+#### When to Use Each
 
-### **37. What is a PKI and Certificate Authority (CA)?**
-**Answer:** A Public Key Infrastructure manages digital certificates. A CA is a trusted entity (Let's Encrypt, DigiCert, Vault CA) that validates identities and issues cryptographically signed X.509 certificates.
-
-### **38. Compare AWS GuardDuty vs AWS Security Hub.**
-**Answer:**
-- **GuardDuty:** Intelligent threat detection analyzing CloudTrail, VPC Flow Logs, and EKS audit logs via machine learning.
-- **Security Hub:** Centralized dashboard aggregating compliance posture (CIS, PCI-DSS) and alerts from GuardDuty, Inspector, and Macie.
+- **Use Amazon GuardDuty** when you need continuous, low-overhead detection of active intrusions, compromised instances, or suspicious API/network activity. 
+- **Use AWS Security Hub** when you need a centralized dashboard, compliance benchmarking, and unified management of findings across AWS services and partner tools. 
+- **Use both** for layered defense: GuardDuty catches ongoing attacks, while Security Hub tracks configuration drift and centralizes alerts across your environment.
 
 ### **39. What is Trivy and what artifact types does it scan?**
 **Answer:** Scans container images, Git repositories, filesystems, IaC templates (Terraform, Helm), and live Kubernetes clusters for CVE vulnerabilities and misconfigurations.
