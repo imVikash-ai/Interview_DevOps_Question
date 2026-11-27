@@ -343,9 +343,21 @@ The **"Shift-Left"** philosophy is **a core principle of DevSecOps that moves se
 #### 4. SCA (Software Composition Analysis)
 - Inventories libraries and dependencies to flag known CVEs, outdated versions, risky licenses, and malicious packages.
 
+### **12. What is HashiCorp Vault and what core capabilities does it provide?**
+**Answer:**
 
-### **14. What is HashiCorp Vault and what core capabilities does it provide?**
-**Answer:** An identity-based secrets management platform providing secure static and dynamic secret storage, automatic secret rotation, time-to-live (TTL) revocation, encryption as a service (Transit engine), and dynamic PKI X.509 certificate generation.
+**HashiCorp Vault** is **an identity-based secrets and encryption management system that centralizes control over sensitive credentials, keys, certificates, and data across on-premises, cloud, and hybrid environments**.
+
+It helps organizations eliminate secret sprawl and enforce strict access controls via a UI, CLI, or HTTP API.
+
+#### Core Capabilities
+
+- **Centralized Secrets Management:** Stores, accesses, and distributes static secrets—such as passwords, API keys, and tokens—in an encrypted state from a single location.
+- **Dynamic Secrets & Automated Rotation:** Generates short-lived, just-in-time credentials on demand (for databases, cloud providers, and services) and automatically revokes them when leases expire.
+- **Encryption as a Service (Transit):** Encrypts and decrypts application data in transit and at rest without requiring applications to store or manage encryption keys directly.
+- **Certificate & Key Lifecycle Management:** Issues, rotates, and revokes TLS/PKI certificates and manages cryptographic keys across providers.
+- **Identity-Based Authentication & Policy Authorization:** Authenticates human users, machines, and workloads through trusted identity providers (such as AWS, Azure, Kubernetes, LDAP, or AppRole) and restricts access using path-based policies.
+- **Audit Logging & Compliance:** Records detailed request-response trails of all secret access and administrative actions to support security monitoring and regulatory compliance.
 
 ### **15. What is a CVE and CVSS score?**
 **Answer:**
