@@ -294,12 +294,26 @@ According to frameworks like **NIST SP 800-207** and guidance from **Palo Alto N
 - **Ransomware and lateral-movement containment:** Preventing a single compromised laptop or phishing credential from unlocking critical servers or databases.
 - **Third-party and contractor access:** Restricting vendors or temporary staff to only the specific apps and data they need.
 
+### **10. What is DevSecOps and the "Shift-Left" philosophy?**
+**Answer:** 
 
-### **11. What is Mutual TLS (mTLS)?**
-**Answer:** Standard TLS authenticates only the server to the client. In **Mutual TLS (mTLS)**, both client and server present X.509 cryptographic certificates to each other, establishing bidirectional encryption and strict cryptographic identity verification.
+**DevSecOps** is a software delivery approach that integrates security practices, automation, and shared responsibility across development, security, and operations teams throughout the entire software development lifecycle (SDLC).
 
-### **12. What is DevSecOps and the "Shift-Left" philosophy?**
-**Answer:** Integrating security controls, vulnerability testing, and compliance guardrails into the software delivery pipeline from initial code commit ("Shift-Left") rather than testing security as an afterthought before production.
+The **"Shift-Left"** philosophy is **a core principle of DevSecOps that moves security testing, threat modeling, and compliance checks earlier in the SDLC—closer to planning, design, and coding—rather than waiting until testing or release**.
+
+#### How DevSecOps and Shift-Left Work Together
+
+- **Earlier defect detection:** Security checks happen while code is written or built, making flaws cheaper and easier to fix than after deployment.
+- **Automated guardrails:** Pipelines run automated checks—such as static application security testing (SAST), dependency/SCA scans, and infrastructure-as-code checks—without creating manual bottlenecks.
+- **Shared accountability:** Developers, operations, and security share visibility and ownership instead of treating security as a separate final gate.
+- **Balanced velocity:** Teams ship updates faster while maintaining continuous monitoring (often paired with "shifting right" in production).
+
+#### Usage Examples
+
+- **Coding & pull requests:** Running static analysis (SAST) or secret/dependency scanners in a CI pipeline (such as GitHub Actions) before code merges.
+- **Design & architecture:** Performing threat modeling during planning to spot design risks before writing features.
+- **Build & pre-deploy:** Validating container images, APIs, and cloud/infrastructure configurations before staging or production release.
+
 
 ### **13. Compare SAST vs DAST vs IAST vs SCA.**
 **Answer:**
