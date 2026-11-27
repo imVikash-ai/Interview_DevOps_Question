@@ -425,74 +425,37 @@ Secret masking (or log redaction) prevents sensitive environment variables from 
 | **Action Taken** | Blocks the push or triggers a security alert | Replaces the string with `***` or `[MASKED]` |
 | **Remediation if Exposed** | Revoke/rotate key and scrub Git history | Revoke/rotate key and delete the job log |
 
-### **21. Write a complete Kubernetes Default-Deny NetworkPolicy and explain how whitelisting works.**
-**Answer:**
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: default-deny-all
-  namespace: production
-spec:
-  podSelector: {}  # Selects all pods
-  policyTypes:
-    - Ingress
-    - Egress
-```
-Once applied, all incoming and outgoing pod traffic is blocked unless explicitly whitelisted by subsequent NetworkPolicy rules.
+### **15. What is Falco and how does it detect Runtime Threats in Kubernetes?**
+**Answer:** 
 
-### **22. What is Cilium NetworkPolicy and how does it provide Layer 7 security?**
-**Answer:**
-Standard Kubernetes NetworkPolicies only filter on IP and Port (Layer 3/4).
-**Cilium L7 Policy (via eBPF):** Enforces rules on HTTP methods, URL paths, and gRPC methods:
-```yaml
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: l7-payment-policy
-spec:
-  endpointSelector:
-    matchLabels: { app: payment }
-  ingress:
-    - fromEndpoints:
-        - matchLabels: { app: frontend }
-      toPorts:
-        - ports: [{ port: "8080", protocol: TCP }]
-          rules:
-            http:
-              - method: "POST"
-                path: "/v1/charge"
-```
+**Falco** is **an open-source, Cloud Native Computing Foundation (CNCF) graduated runtime security tool that detects abnormal behavior, potential threats, and compliance violations across Kubernetes clusters, containers, hosts, and cloud environments in near real time**. Originally created by Sysdig in 2016, it acts like an intrusion detection system (IDS) for running workloads—catching suspicious activity that static image scanners and admission controllers miss. 
 
-### **23. What is SPIFFE/SPIRE and how does Workload Identity Attestation work?**
-**Answer:** SPIFFE defines standardized cryptographic identities (`spiffe://prod.example.com/ns/finance/sa/payment-service`).
-- **Node & Workload Attestation:** SPIRE agent queries the local kernel/kubelet to verify the calling process's UID, container ID, and namespace, issuing short-lived, auto-rotating X.509 SVID certificates into memory without long-lived keys on disk.
+#### How Falco Detects Runtime Threats in Kubernetes
 
-### **24. How do HashiCorp Vault Dynamic Secrets eliminate static database credentials?**
-**Answer:**
-1. App authenticates to Vault using its Kubernetes ServiceAccount token.
-2. App requests dynamic DB credentials from Vault Database Engine.
-3. Vault dynamically executes `CREATE USER 'v-token-xyz' WITH PASSWORD 'temp_pass' VALID UNTIL '...'` in PostgreSQL and returns credentials.
-4. When TTL expires, Vault drops the database user automatically.
+Falco typically runs across Kubernetes nodes (often deployed as a DaemonSet via Helm) and detects threats in four main stages:
 
-### **25. What is the Kubernetes External Secrets Operator (ESO)?**
-**Answer:** Syncs secrets from external secrets managers (AWS Secrets Manager, HashiCorp Vault, Azure Key Vault) into native Kubernetes `Secret` objects, allowing GitOps repositories to commit declarative `ExternalSecret` manifests safely without storing plaintext values in Git.
+1. **Event Collection (Kernel & External Sources):**
+   - **Linux System Calls (syscalls):** Containers share the host kernel, so every action—opening a file, spawning a process, or making a network call—triggers syscalls. Falco captures these events from kernel space using an **eBPF** probe or a **kernel module**.
+   - **Additional Telemetry:** Through plugins and integrations, Falco also ingests **Kubernetes audit logs** and cloud/application events. 
 
-### **26. Compare OPA Gatekeeper vs Kyverno for Kubernetes Admission Control.**
-**Answer:**
-- **OPA Gatekeeper:** Uses **Rego** query language. Highly expressive, but steep learning curve.
-- **Kyverno:** Kubernetes-native policy engine written **100% in YAML**. Easier to author and test; supports native payload mutation and image verification.
+2. **Context Enrichment:**
+   - Raw kernel events are enriched with metadata from the container runtime and the Kubernetes API server—such as container ID, image name, pod/namespace, user, and file or network details—so alerts show *which* workload triggered an event. 
 
-### **27. Compare CycloneDX vs SPDX SBOM formats.**
-**Answer:**
-- **CycloneDX (OWASP):** Lightweight, designed specifically for application security, vulnerability identification, and CI/CD automation.
-- **SPDX (Linux Foundation / ISO standard):** Rich standard frequently used for open-source software licensing and intellectual property compliance.
+3. **Rule Evaluation:**
+   - Falco's user-space engine evaluates incoming enriched events against YAML-based **rules** (along with reusable **macros** and **lists**).
+   - It ships with default rules and supports custom rules tailored to your environment or compliance frameworks. 
 
-### **28. What is Sigstore Cosign and Keyless Container Image Signing?**
-**Answer:** Cosign cryptographically signs container images using OIDC tokens from GitHub Actions. Fulcio generates short-lived X.509 certificates, and Rekor records signatures in an immutable transparency log, eliminating static PGP private keys.
+4. **Alerting & Response:**
+   - When an event matches a rule's conditions, Falco emits an alert with a priority, description, and structured fields.
+   - Falco focuses on **detection and alerting** rather than blocking syscalls itself. Alerts can be sent to stdout, files, syslog, Prometheus, SIEMs, or tools like **Falcosidekick** to route notifications (such as Slack or PagerDuty) or trigger automated responses (such as via **Falco Talon**). 
 
-### **29. What is Falco and how does it detect Runtime Threats in Kubernetes?**
-**Answer:** A CNCF runtime security engine that parses Linux kernel system calls via eBPF probes, triggering instant alerts on suspicious behavior (spawning `/bin/bash` in production, modifying `/etc/shadow`, unauthorized outbound connections).
+#### Common Kubernetes Threats Falco Detects
+
+- **Interactive shells in containers:** A shell (`sh`, `bash`) spawned inside a running container.
+- **Sensitive file access:** Reading or modifying sensitive files such as `/etc/shadow` or `/etc/passwd`.
+- **Suspicious execution & escapes:** Running binaries from `/tmp`, privilege escalation attempts, or container escape techniques.
+- **Unexpected network & API activity:** Outbound connections to unusual destinations, traffic sniffing, or unexpected calls to the Kubernetes API server from inside a container.
+- **Malware patterns:** Signatures associated with activity like cryptominers.
 
 ### **30. Compare BGP Routing vs Anycast DNS.**
 **Answer:**
