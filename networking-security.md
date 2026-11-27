@@ -314,13 +314,35 @@ The **"Shift-Left"** philosophy is **a core principle of DevSecOps that moves se
 - **Design & architecture:** Performing threat modeling during planning to spot design risks before writing features.
 - **Build & pre-deploy:** Validating container images, APIs, and cloud/infrastructure configurations before staging or production release.
 
-
-### **13. Compare SAST vs DAST vs IAST vs SCA.**
+### **11. Compare SAST vs DAST vs IAST vs SCA.**
 **Answer:**
-- **SAST (Static Analysis):** Scans source code for vulnerabilities before compilation (Semgrep, SonarQube).
-- **DAST (Dynamic Analysis):** Attacks running staging applications from the outside (OWASP ZAP).
-- **IAST (Interactive Analysis):** Instruments application runtime from the inside during test execution.
-- **SCA (Software Composition Analysis):** Scans open-source third-party dependencies for known CVEs (Trivy, Snyk).
+
+**SAST checks your own source code before running, DAST probes a live app from the outside, IAST monitors a running app from the inside, and SCA audits third-party and open-source dependencies.**
+
+#### Comparison at a Glance
+
+| **Feature** | **SAST (Static)** | **DAST (Dynamic)** | **IAST (Interactive)** | **SCA (Composition)** |
+|---|---|---|---|---|
+| **What it inspects** | Source code or binaries | Running app (black-box) | Running app with sensors (gray-box) | Open-source & third-party packages |
+| **Needs running app?** | No | Yes | Yes (during active tests) | No (scans manifests, builds, SBOMs) |
+| **SDLC stage** | IDE, pull request, build | QA, staging, pre-release | QA / functional testing | Build & continuous monitoring |
+| **Strengths** | Early feedback; pinpoints exact code lines | Finds runtime & config flaws; language-agnostic | Confirms exploitability with code location; fewer false positives | Catches known CVEs, license risks & supply-chain issues |
+| **Main limitations** | False positives; misses runtime context | Slower; no code line mapping; depends on test coverage | Needs instrumentation; depends on test execution & language support | Only covers imported dependencies, not custom code |
+
+#### Key Differences
+
+#### 1. SAST (Static Application Security Testing)
+- Scans proprietary code for insecure patterns, unsafe functions, and hardcoded secrets before execution.
+
+#### 2. DAST (Dynamic Application Security Testing)
+- Sends simulated attacks to deployed endpoints to spot runtime injection, authentication flaws, and server misconfigurations.
+
+#### 3. IAST (Interactive Application Security Testing)
+- Uses agents or sensors inside a running application while tests execute to trace data flow and confirm vulnerabilities with code context.
+
+#### 4. SCA (Software Composition Analysis)
+- Inventories libraries and dependencies to flag known CVEs, outdated versions, risky licenses, and malicious packages.
+
 
 ### **14. What is HashiCorp Vault and what core capabilities does it provide?**
 **Answer:** An identity-based secrets management platform providing secure static and dynamic secret storage, automatic secret rotation, time-to-live (TTL) revocation, encryption as a service (Transit engine), and dynamic PKI X.509 certificate generation.
