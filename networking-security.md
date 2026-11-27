@@ -525,26 +525,22 @@ Trivy scans several target and artifact types, including:
 - **Choose SSL Termination** when you need Layer 7 routing/inspection, centralized certificate management, and lower backend CPU load on a trusted or properly segmented internal network. 
 - **Choose End-to-End Encryption** when handling highly sensitive or regulated data, enforcing strict zero-trust boundaries, or protecting privacy from intermediaries.
 
-### **41. What is Address Resolution Protocol (ARP) and ARP Poisoning?**
-**Answer:** Maps Layer 3 IP addresses to Layer 2 physical MAC addresses on a local Ethernet segment. ARP Poisoning occurs when an attacker broadcasts forged ARP messages to link their MAC address with a legitimate IP (gateway), executing Man-in-the-Middle attacks.
+### **19. What is Internet Control Message Protocol (ICMP)?**
+**Answer:** 
 
-### **42. What is Maximum Transmission Unit (MTU) and Path MTU Discovery (PMTUD)?**
-**Answer:** MTU is the largest packet size in bytes that can be transmitted over a network (standard Ethernet MTU: 1500 bytes; Jumbo Frame: 9000 bytes). PMTUD dynamically discovers the minimum MTU along the entire network path to prevent packet fragmentation.
+The **Internet Control Message Protocol (ICMP)** is **a connectionless network-layer protocol in the TCP/IP suite used by routers and network devices to report delivery errors and run network diagnostics**. Because the Internet Protocol (IP) itself does not provide error feedback, ICMP notifies senders when packets fail to reach their destination or encounter routing problems. 
 
-### **43. What is TCP SYN Flood and SYN Cookies?**
-**Answer:** An attacker floods a server with `SYN` packets without sending final `ACK` packets, exhausting the server's TCP half-open connection backlog table. SYN Cookies encode connection state into the `SYN-ACK` sequence number, eliminating memory allocation until the valid client `ACK` arrives.
+#### How It Works
 
-### **44. What is Dynamic Host Configuration Protocol (DHCP)?**
-**Answer:** A network protocol that dynamically assigns IP addresses, subnet masks, default gateways, and DNS server IPs to client devices on a local network.
+- **Connectionless:** ICMP does not establish a session or use a handshake before sending messages, nor does it use TCP/UDP port numbers.
+- **Encapsulation:** ICMP messages ride inside IP datagrams, using **Type** and **Code** fields to specify the message purpose and details.
+- **IPv4 and IPv6:** ICMP works alongside IPv4 (ICMPv4) and has an IPv6 counterpart (ICMPv6) that also supports neighbor discovery and Path MTU Discovery. 
 
-### **45. What is a Virtual LAN (VLAN)?**
-**Answer:** A logical broadcast domain created at Layer 2 across physical switches, isolating network traffic between departments or tenants on shared physical cabling.
+#### Common Usage Examples
 
-### **46. What is Border Gateway Protocol (BGP)?**
-**Answer:** The core routing protocol of the internet that exchanges routing and reachability information between Autonomous Systems (AS) using path-vector algorithms.
-
-### **47. What is Internet Control Message Protocol (ICMP)?**
-**Answer:** A network-layer protocol used by network devices to send error messages and operational information (e.g., `ping` uses ICMP Echo Request/Reply; `traceroute` uses ICMP Time Exceeded).
+- **Ping:** Sends **Echo Request** (Type 8) packets and listens for **Echo Reply** (Type 0) packets to test reachability and round-trip latency.
+- **Traceroute:** Uses **Time Exceeded** (Type 11) and **Destination Unreachable** (Type 3) messages to map the path and hop delays between devices.
+- **Routing & Error Alerts:** Notifies senders of unreachable hosts/networks, expired Time-to-Live (TTL) values, or better routes via **Redirect** (Type 5) messages.
 
 ### **48. What is a Subnet Mask and Default Gateway?**
 **Answer:**
