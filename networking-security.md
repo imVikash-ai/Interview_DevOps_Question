@@ -500,10 +500,30 @@ Trivy scans several target and artifact types, including:
 - **Cloud environments and artifacts:** Supported cloud services and storage targets such as AWS accounts, S3 buckets, and Lambda functions.
 - **Software Bills of Materials (SBOMs):** Generates and inspects SBOM formats such as SPDX and CycloneDX.
 
-### **40. Compare SSL Termination vs End-to-End Encryption.**
+### **18. Compare SSL Termination vs End-to-End Encryption.**
 **Answer:**
-- **SSL Termination:** Load Balancer decrypts HTTPS and forwards unencrypted HTTP to private backend pods.
-- **End-to-End Encryption:** Traffic remains encrypted all the way down to the individual application container process (mandatory for Zero Trust, HIPAA, PCI-DSS).
+
+**SSL (TLS) termination decrypts incoming encrypted traffic at an intermediary (such as a load balancer or reverse proxy) and often forwards it as unencrypted HTTP internally, whereas end-to-end encryption (E2EE) keeps data encrypted from the sender all the way to the final recipient without exposing plaintext to intermediaries**. 
+
+#### Key Differences
+
+- **Where Decryption Happens**
+  - **SSL Termination:** Decrypts at the network edge or load balancer. Internal traffic to backend servers may travel as plain HTTP (unless re-encrypted in a bridging/re-encryption setup).
+  - **End-to-End Encryption:** Data remains encrypted across the entire path. In transport/infrastructure contexts, this happens via TLS passthrough (backend decrypts) or re-encryption; in messaging/app contexts, only the sender and recipient hold the decryption keys. 
+- **Security & Trust Model**
+  - **SSL Termination:** Trusts the intermediary and internal network. If an attacker breaches the internal network or compromises the intermediary, plaintext traffic can be exposed.
+  - **End-to-End Encryption:** Stronger protection against eavesdropping and internal breaches. agree that TLS allows intermediate servers to read traffic when terminated, while end-to-end encryption prevents intermediate servers from accessing the contents. 
+- **Performance & Overhead**
+  - **SSL Termination:** Offloads cryptographic work from backend servers and simplifies certificate management in one place.
+  - **End-to-End Encryption:** Can add CPU overhead on backend servers or require managing certificates across more endpoints. 
+- **Traffic Inspection & Routing**
+  - **SSL Termination:** Lets load balancers or web application firewalls (WAFs) inspect headers, paths, and payloads for Layer 7 routing and threat scanning.
+  - **End-to-End Encryption:** Passthrough encryption prevents intermediaries from inspecting or modifying encrypted application payloads, though re-encryption models can balance inspection with backend encryption. 
+
+#### When to Choose Which
+
+- **Choose SSL Termination** when you need Layer 7 routing/inspection, centralized certificate management, and lower backend CPU load on a trusted or properly segmented internal network. 
+- **Choose End-to-End Encryption** when handling highly sensitive or regulated data, enforcing strict zero-trust boundaries, or protecting privacy from intermediaries.
 
 ### **41. What is Address Resolution Protocol (ARP) and ARP Poisoning?**
 **Answer:** Maps Layer 3 IP addresses to Layer 2 physical MAC addresses on a local Ethernet segment. ARP Poisoning occurs when an attacker broadcasts forged ARP messages to link their MAC address with a legitimate IP (gateway), executing Man-in-the-Middle attacks.
