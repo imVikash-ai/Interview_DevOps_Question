@@ -233,8 +233,37 @@ Both sit between clients and servers to filter traffic, cache data, and add secu
   - **Routing:** Directs requests to the appropriate backend service.
 
 
-### **9. What is a Web Application Firewall (WAF)?**
-**Answer:** A Layer 7 security appliance that inspects HTTP/HTTPS traffic to block OWASP Top 10 web vulnerabilities (SQL Injection, XSS, CSRF, malicious scrapers, rate floods).
+### **8. What is a Web Application Firewall (WAF)?**
+**Answer:** 
+
+A **web application firewall (WAF)** is **a security tool that monitors, filters, and blocks malicious HTTP and HTTPS traffic traveling between a web application and the internet**.
+
+Operating at Layer 7 (the application layer) of the OSI model, it inspects the content of web requests to stop threats before they reach the application or backend servers.
+
+#### How It Works
+
+A WAF typically acts as a reverse proxy in front of a web application. It evaluates incoming requests against security rules (policies) and decides whether to allow, block, or log them.
+
+Common filtering models include:
+
+- **Blocklist (negative model):** Blocks known attack signatures and malicious sources while allowing other traffic.
+- **Allowlist (positive model):** Permits only pre-approved, trusted traffic and blocks everything else.
+- **Hybrid model:** Combines both blocklist and allowlist rules.
+
+#### Common Usage Examples
+
+Organizations use WAFs to protect websites, mobile backends, and APIs against application-layer threats, including:
+
+- **SQL injection and cross-site scripting (XSS):** Stopping attackers from injecting malicious code or database commands through forms, URLs, or headers.
+- **Cross-site request forgery (CSRF) and file inclusion:** Preventing unauthorized actions or unauthorized file access.
+- **Application-layer DDoS and abusive bots:** Applying rate limiting and bot rules to keep applications responsive during traffic spikes or scraping attempts.
+- **Compliance:** Helping meet regulatory requirements such as PCI DSS for protecting payment and customer data.
+
+#### Deployment Types
+
+- **Cloud-based WAF:** Hosted and managed by a third-party provider (often via DNS or a CDN), offering easy setup and automatic rule updates.
+- **Network-based (hardware) WAF:** Installed as local appliances on-premises to minimize latency, though typically more expensive and harder to scale.
+- **Host-based WAF:** Integrated directly into the web server or application software, offering high customization while using local server resources.
 
 ### **10. What is Zero Trust Architecture (ZTA)?**
 **Answer:** A cybersecurity model based on **"Never trust, always verify"**. Eliminates the concept of a trusted internal network; every single request is authenticated, authorized, and encrypted (mTLS) regardless of whether it originates inside or outside the VPC.
