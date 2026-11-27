@@ -393,22 +393,37 @@ Defining a Role does nothing on its own. Bindings connect **Subjects** (Users, G
   - **Common pattern:** A `RoleBinding` in the `staging` namespace can reference a cluster-wide `ClusterRole` (like the built-in `view` role). This grants the user read-only access **only** inside `staging`, keeping permissions reusable.
 - **ClusterRoleBinding:** Grants the permissions defined in a `ClusterRole` to a subject *across every namespace and cluster resource*. A `ClusterRoleBinding` cannot reference a standard namespaced `Role`.
 
-
-### **17. Compare Bastion Hosts vs AWS SSM Session Manager.**
+### **14. What is Secret Masking and Secret Scanning in Git?**
 **Answer:**
-- **Bastion Host:** Exposed instance in a public subnet requiring open inbound port 22 and SSH key management.
-- **AWS SSM Session Manager (Modern Standard):** Agent-driven shell access with **zero public IPs, zero open inbound ports (port 22 closed)**, authenticated via AWS IAM SSO with complete session audit logging.
 
-### **18. What is DDoS and how is it mitigated at the edge?**
-**Answer:** A malicious flood overwhelming server availability using distributed botnets. Mitigated via Cloudflare / AWS Shield, Anycast routing, edge caching, rate limiting, and WAF rules.
+**Secret Scanning finds and blocks hardcoded credentials in your repository, while Secret Masking hides sensitive values from appearing in your CI/CD build logs.**
 
-### **19. What is a Container Escape?**
-**Answer:** A vulnerability where an attacker running code inside a container exploits a kernel flaw or misconfigured privilege (`--privileged`, root execution, host volume mount) to break out of namespaces and gain full root control over the host OS.
+While core Git itself does not include these features natively, both are standard security capabilities built into Git hosting platforms like GitHub and GitLab.
 
-### **20. What is Secret Masking and Secret Scanning in Git?**
-**Answer:**
-- **Secret Scanning (Gitleaks, Trufflehog):** Scans commit diffs for patterns matching AWS keys, SSH private keys, and API tokens, blocking pushes containing exposed secrets.
-- **Secret Masking:** CI/CD feature that replaces detected sensitive variable values with `***` in build output logs.
+#### Secret Scanning
+
+Secret scanning automatically inspects your codebase and repository history to detect accidentally exposed credentials—such as API keys, passwords, database strings, and private tokens. 
+
+- **How it works.** Scanners use regular expressions (matching known formats like AWS keys), entropy checks (flagging high-randomness strings), and AI models to identify sensitive data.
+- **Where it looks.** Beyond active source code, platforms like **GitHub Secret Scanning** and **GitLab Secret Detection** inspect entire commit histories, pull/merge requests, issues, and comments. 
+- **Push protection.** Modern secret scanning often runs right as you execute `git push`, blocking the upload before the secret ever enters the remote repository. 
+
+#### Secret Masking
+
+Secret masking (or log redaction) prevents sensitive environment variables from being printed in plain text inside CI/CD pipeline logs during automated builds, tests, or deployments. 
+
+- **How it works.** When a pipeline runs a script that accidentally outputs a stored secret (e.g., via an `echo` command or a verbose error trace), the runner intercepts the string and replaces it with asterisks (`***`) or `[MASKED]`. 
+- **Platform implementation.** Both GitHub Actions (which masks repository secrets automatically and supports the `::add-mask::` workflow command) and **GitLab CI/CD** (via masked variables) enforce log hygiene so anyone viewing build logs cannot read the raw credentials. 
+- **Limitations.** Masking generally requires secrets to be single-line strings without spaces. If a script encodes or alters the secret (such as Base64 encoding it before printing), the masking filter may fail to recognize and hide it.
+
+#### Key Differences
+
+| **Feature** | **Secret Scanning** | **Secret Masking** |
+|---|---|---|
+| **Primary Goal** | Stop secrets from living in Git code/history | Stop secrets from appearing in CI/CD logs |
+| **When it Runs** | During `git push`, commits, or background scans | During automated pipeline/runner execution |
+| **Action Taken** | Blocks the push or triggers a security alert | Replaces the string with `***` or `[MASKED]` |
+| **Remediation if Exposed** | Revoke/rotate key and scrub Git history | Revoke/rotate key and delete the job log |
 
 ### **21. Write a complete Kubernetes Default-Deny NetworkPolicy and explain how whitelisting works.**
 **Answer:**
