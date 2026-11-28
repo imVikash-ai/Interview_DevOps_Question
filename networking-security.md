@@ -574,12 +574,33 @@ A default gateway is the IP address of the router (such as `192.168.1.1`) that c
 | **Subnet Mask** | Your neighborhood boundary | Tells the mail carrier which houses are in the same neighborhood. |
 | **Default Gateway** | The local post office | Handles any mail going outside your neighborhood to other cities. |
 
-### **49. What is DNS CNAME vs A vs AAAA vs ALIAS Record?**
+### **21. What is DNS CNAME vs A vs AAAA vs ALIAS Record?**
 **Answer:**
-- **`A`:** Maps a hostname to an IPv4 address.
-- **`AAAA`:** Maps a hostname to an IPv6 address.
-- **`CNAME`:** Maps a hostname to another canonical hostname (cannot be placed at root apex domain).
-- **`ALIAS` (Route 53):** AWS-specific record mapping root apex domains (`example.com`) directly to AWS resources (CloudFront, ALB).
+
+**A and AAAA records map a domain name directly to an IPv4 or IPv6 address, while CNAME and ALIAS records point one domain name to another domain name**. **CNAME** is a standard DNS alias that cannot sit at a root domain, whereas **ALIAS** is a provider-specific record that acts like a CNAME while allowing root-domain use and coexisting with other records. 
+
+#### Key Differences
+
+- **A Record (Address Record):** Maps a domain or subdomain directly to a 32-bit **IPv4** address (for example, `192.0.2.1`).
+- **AAAA Record (Quad-A Record):** Maps a domain or subdomain directly to a 128-bit **IPv6** address (for example, `2001:db8::1`). 
+- **CNAME Record (Canonical Name):** Points an alias hostname to another canonical domain name rather than an IP address. It cannot coexist with other records (such as `MX` or `TXT`) on the same name and generally cannot be placed on a root/apex domain (`example.com`). 
+- **ALIAS Record (also called ANAME):** Maps a hostname—including a root/apex domain—to another domain name. It is not a standard RFC record type; DNS providers resolve it dynamically into `A` or `AAAA` answers so it can coexist with other records like `MX`.
+
+## Quick Comparison
+
+| **Record** | **Target** | **Root / Apex (`example.com`)** | **Coexists with Other Records** | **Standard RFC Type** |
+|---|---|---|---|---|
+| **A** | IPv4 address | Yes | Yes | Yes |
+| **AAAA** | IPv6 address | Yes | Yes | Yes |
+| **CNAME** | Another domain name | Usually no | No | Yes |
+| **ALIAS** | Another domain name | Yes | Yes | No (provider-specific) |
+
+#### Usage Examples & Related Terms
+
+- **A / AAAA:** Pointing `example.com` or `api.example.com` to a dedicated server with a static IPv4 or IPv6 address.
+- **CNAME:** Pointing `www.example.com` or `blog.example.com` to a third-party service or `example.com` so IP changes only need one update.
+- **ALIAS:** Pointing the bare domain `example.com` to a load balancer, CDN, or cloud app host (such as AWS or Heroku) while keeping `MX` email records on `example.com`.
+- **Related terms / synonyms:** `ALIAS` is often called an **ANAME** record or uses **CNAME flattening**; the root domain is also called the **apex** or **naked** domain.
 
 ### **50. What is DNS TTL (Time to Live)?**
 **Answer:** The duration in seconds that DNS resolvers and client caches are allowed to cache a DNS record before querying authoritative name servers again.
