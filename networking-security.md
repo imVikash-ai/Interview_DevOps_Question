@@ -978,12 +978,52 @@ Teleport automatically records the full interactive terminal session as a replay
 | **Just-In-Time (JIT) Workflow** | Requires external tooling (e.g., AWS Access Handler / custom Lambda) | Built-in Slack/PagerDuty approval workflows |
 | **Cost** | Free (pay only for S3/CloudWatch logs) | Open-source Community Edition or paid Enterprise/Cloud |
 
-### **67. What is Secrets Sprawl and how do you design an enterprise remediation pipeline?**
+### **30. What is Secrets Sprawl and how do you design an enterprise remediation pipeline?**
 **Answer:**
-1. **Pre-Commit:** Developers install `pre-commit` running `gitleaks protect` locally.
-2. **Push Protection:** GitHub blocks commits containing detected high-entropy keys.
-3. **Scheduled Scanning:** Nightly org-wide Trufflehog scans across all repositories.
-4. **Automated Key Revocation:** Trigger automated Lambda functions via webhook to deactivate exposed keys within 60 seconds of commit detection.
+
+**Secrets sprawl** is **the uncontrolled distribution and duplication of sensitive credentials—such as API keys, passwords, tokens, SSH/SSL certificates, and service account keys—across an organization's systems**. Rather than living in a single, audited vault, copies end up scattered across source code, Git commit history, `.env` files, CI/CD pipelines and build logs, configuration files, wikis, and chat or ticketing tools. 
+
+#### Why Secrets Sprawl Happens
+
+- **Non-human identity growth:** Microservices, automated scripts, and CI/CD runners frequently rely on static credentials to authenticate.
+- **Speed over governance:** Developers paste credentials into local files, pipelines, or chat messages to unblock deployments quickly.
+- **Duplication and missing ownership:** The same credential gets copied across environments or tools with no single owner or inventory tracking where every copy lives.
+
+#### Key Risks
+
+- **Wider blast radius:** One exposed token or leaked repository can grant unauthorized access to production systems or cloud accounts.
+- **Incomplete incident response:** Teams struggle to revoke or rotate every active copy during a breach because they cannot see all locations where a secret was used. 
+- **Compliance and audit gaps:** Lack of visibility and access control makes enforcing least privilege and auditing credential usage difficult.
+
+#### Designing an Enterprise Remediation Pipeline
+
+An effective enterprise remediation pipeline combines continuous discovery, automated triage, guided fixes, and prevention so teams resolve exposures quickly without breaking production. Platforms like **Akeyless** and **Checkmarx** emphasize pairing centralized secrets management with continuous detection.
+
+#### 1. Continuous Discovery and Inventory
+
+- Scan repositories (current code and Git history), CI/CD configs and build logs, Infrastructure-as-Code (IaC) state files, cloud environments, and collaboration tools (such as Slack, Jira, and wikis). 
+- Maintain a central inventory that maps each finding to its location, non-human identity or service owner, validity status, and permission scope. 
+
+#### 2. Triage, Risk Scoring, and Routing
+
+- Score findings by severity using signals such as whether the secret is active/valid, production vs. non-production scope, privilege level, and public or broad visibility.
+- Route tickets automatically to the owning engineering or platform team based on repository, service, or resource ownership metadata.
+
+#### 3. Automated or Guided Containment and Rotation
+
+- **Revoke and rotate first:** For active or high-risk credentials, revoke or rotate the secret at the provider/identity level and issue a replacement rather than relying solely on deleting text.
+- **Assess impact safely:** Check dependent services and environments before rotating shared or critical credentials to minimize downtime. 
+- **Move to a central vault:** Store the new secret in a centralized secrets manager (or shift to short-lived credentials and machine identities) and inject it at runtime. 
+
+#### 4. Scrubbing and Verification
+
+- Remove plaintext secrets from code, config files, logs, and messages, and address Git history or purge/invalidate exposed credentials where appropriate.
+- Re-run scans and verify that old credentials are inactive and new ones work in target workloads, closing the loop with audit logs. 
+
+#### 5. Shift-Left Prevention and Feedback Loops
+
+- Enforce pre-commit hooks, pull-request checks, and CI/CD pipeline gates to block new secrets before merge or deployment.
+- Track metrics—such as mean time to remediate (MTTR), recurring leak sources, and unowned secrets—to refine rules and developer workflows.
 
 ### **68. What is DNS Tunneling / DNS Exfiltration and how is it blocked?**
 **Answer:**
