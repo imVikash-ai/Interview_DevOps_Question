@@ -705,25 +705,35 @@ Containment also depends on shrinking the time window between breakout and remed
 - **eBPF Behavioral Monitoring:** Tools like Falco or Tetragon detect escape indicators in real time—such as unexpected namespace changes (`setns`, `unshare`), host filesystem writes, or processes spawning outside a container's cgroup.
 - **Automated Node Quarantine:** Triggering automated workflows to cordon, drain, isolate security groups, and terminate the compromised node evicts the attacker before they can establish persistence.
 
-### **62. Scenario: Design an automated End-to-End Supply Chain Security Pipeline conforming to SLSA Level 3.**
+### **26. Scenario: Design an automated End-to-End Supply Chain Security Pipeline conforming to SLSA Level 3.**
 **Answer:**
-```
-[ Developer Commit ] ➔ [ GitHub PR (2-Person Review) ]
-                             │
-                             ▼
-[ Ephemeral GitHub Actions Build Runner (Isolated) ]
-  ├── 1. Generate CycloneDX SBOM (Syft)
-  ├── 2. Build Container Image (Hermetic Dockerfile)
-  ├── 3. Sign Image & SBOM with Cosign (Fulcio OIDC Keyless)
-  └── 4. Push In-Toto Provenance to Rekor Transparency Log
-                             │
-                             ▼
-[ OCI Registry (Amazon ECR / GHCR) ]
-                             │
-                             ▼
-[ Kubernetes Admission Controller (Kyverno) ]
-  └── Policy: Verify Cosign Signature & Provenance before admitting Pod
-```
+
+An **SLSA Level 3** supply chain pipeline **runs builds in ephemeral, isolated environments and generates non-falsifiable, cryptographically signed provenance from a trusted build platform**. Signing keys and attestation logic stay strictly separated from user-defined build steps so build scripts cannot tamper with or forge metadata.
+
+#### 1. Source & Version Control
+
+- **Protected repositories:** Require signed commits, branch protection rules, and peer reviews (such as two-person review for critical changes).
+- **Immutable history:** Retain full Git history and audit logs indefinitely to prevent tampering or silent rewrites.
+- **Pre-commit & CI checks:** Run automated secret scanning, linting, and dependency policy checks before merging.
+
+#### 2. Hardened, Ephemeral Build Platform
+
+- **Isolated execution:** Provision a fresh container or VM per build run and destroy it immediately after completion to prevent cross-build contamination or persistent malware.
+- **Restricted network & access:** Limit outbound network access (ideally using an internal artifact proxy or mirror) and enforce least-privilege IAM roles.
+- **Centralized build workflows:** Use platform-enforced or centralized reusable workflows rather than ad-hoc local or self-hosted scripts.
+
+#### 3. SBOM, Scanning & Isolated Provenance Signing
+
+- **Artifact & SBOM generation:** Build the artifact deterministically where possible, compute its cryptographic digest, and generate a Software Bill of Materials (SBOM) in CycloneDX or SPDX format.
+- **Vulnerability & policy checks:** Scan dependencies and built artifacts for known vulnerabilities and policy violations.
+- **Out-of-band attestation:** Have an external or isolated attester service—not user-controlled build steps—record trusted build parameters, source revision, and artifact digests.
+- **Keyless or hardware-backed signing:** Sign provenance (for example, in-toto statements) using short-lived OIDC-issued certificates or isolated KMS/HSM keys so build steps cannot access signing material.
+
+#### 4. Registry & Deployment Verification
+
+- **Immutable storage:** Push signed artifacts, SBOMs, and provenance attestations to a tamper-evident registry (such as an OCI registry with immutability enabled).
+- **Admission & deployment gates:** Enforce verification policies at release and runtime—such as a Kubernetes admission controller or deployment gate—that check signature validity, trusted builder identity, source repository, and vulnerability thresholds before allowing deployment.
+- **Continuous auditing:** Log all build runs, attestations, and policy denials for ongoing security auditing.
 
 ### **63. Scenario: Migrate a legacy application with hardcoded database passwords to HashiCorp Vault Dynamic Secrets with zero downtime.**
 **Answer:**
