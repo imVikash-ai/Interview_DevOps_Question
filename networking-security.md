@@ -586,7 +586,7 @@ A default gateway is the IP address of the router (such as `192.168.1.1`) that c
 - **CNAME Record (Canonical Name):** Points an alias hostname to another canonical domain name rather than an IP address. It cannot coexist with other records (such as `MX` or `TXT`) on the same name and generally cannot be placed on a root/apex domain (`example.com`). 
 - **ALIAS Record (also called ANAME):** Maps a hostname—including a root/apex domain—to another domain name. It is not a standard RFC record type; DNS providers resolve it dynamically into `A` or `AAAA` answers so it can coexist with other records like `MX`.
 
-## Quick Comparison
+#### Quick Comparison
 
 | **Record** | **Target** | **Root / Apex (`example.com`)** | **Coexists with Other Records** | **Standard RFC Type** |
 |---|---|---|---|---|
@@ -602,8 +602,22 @@ A default gateway is the IP address of the router (such as `192.168.1.1`) that c
 - **ALIAS:** Pointing the bare domain `example.com` to a load balancer, CDN, or cloud app host (such as AWS or Heroku) while keeping `MX` email records on `example.com`.
 - **Related terms / synonyms:** `ALIAS` is often called an **ANAME** record or uses **CNAME flattening**; the root domain is also called the **apex** or **naked** domain.
 
-### **50. What is DNS TTL (Time to Live)?**
-**Answer:** The duration in seconds that DNS resolvers and client caches are allowed to cache a DNS record before querying authoritative name servers again.
+### **22. What is DNS TTL (Time to Live)?**
+**Answer:** 
+
+**DNS TTL (Time to Live)** is **a setting on a DNS record (measured in seconds) that tells resolvers and caches how long to store the record before asking the authoritative DNS server for a fresh copy**. 
+
+#### How It Works
+
+- **Caching & Speed:** While the TTL timer is active, local or recursive DNS resolvers serve cached answers instead of re-querying authoritative servers, reducing lookup latency and server load. 
+- **Updates & Propagation:** When you edit a DNS record, users may still see the old value until existing cached copies expire. 
+- **Practical Caveat:** Resolvers and local caches treat TTL as guidance rather than a strict guarantee, and some providers or applications may cache slightly longer or shorter. 
+
+#### Common Usage Examples
+
+- **High TTL (e.g., 3,600–86,400 seconds / 1–24 hours):** Used for stable records like `MX` or `TXT` records that rarely change, maximizing cache hits and reducing DNS traffic.
+- **Low TTL (e.g., 30–300 seconds):** Used before server migrations, during failover/disaster recovery, or for frequently changing records so updates take effect quickly. 
+- **Migration Workflow:** Administrators often lower a record's TTL hours or days ahead of a change so old caches expire faster, make the DNS update, and raise the TTL back afterward.
 
 ### **51. What is OpenID Connect (OIDC) vs OAuth 2.0?**
 **Answer:**
