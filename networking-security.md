@@ -646,10 +646,22 @@ Once a secret is committed to Git, simply deleting it in a later commit does not
 - **Using the `pre-commit` framework (Recommended):** Teams typically manage this by adding the official **Gitleaks GitHub repository** to a `.pre-commit-config.yaml` file at the root of their project. This ensures every developer on the team runs the exact same version of Gitleaks. 
 - **Native Git Hook:** You can place a custom shell or Python script directly inside your local `.git/hooks/pre-commit` directory to invoke the Gitleaks CLI.
 
-### **60. What is Trufflehog?**
-**Answer:** An open-source secret scanning tool that searches Git repositories, S3 buckets, and filesystems for exposed secrets and actively verifies if discovered keys are live against cloud APIs.
+### **24. What is Trufflehog?**
+**Answer:**
 
----
+**TruffleHog** is **a security tool developed by Truffle Security Co.** that scans code, commit history, and cloud resources to find and verify leaked secrets like API keys, passwords, and access tokens.
+
+#### Key Features
+
+- **Deep Scanning:** Searches Git repositories (including commit history and deleted code), GitHub, GitLab, Docker images, S3 buckets, Slack, local filesystems, and CI/CD pipelines across 800+ secret types. 
+- **Live Verification:** Tests discovered credentials against the relevant provider's API to check if they are active, helping teams reduce false positives and prioritize live risks.
+- **Open-Source and Enterprise:** Available as an open-source command-line tool on **GitHub** alongside enterprise monitoring and analysis features.
+
+#### Common Usage
+
+- **Scan a Git repository:** Run `trufflehog git https://github.com` from the terminal.
+- **Scan local files:** Use `trufflehog filesystem /path/to/folder`.
+- **Prevent leaks early:** Integrate it into CI/CD pipelines or Git pre-commit hooks to catch secrets before they are pushed.
 
 ## 🟡 **Part 2: Kubernetes Security, Zero Trust & PKI (Questions 61–130)**
 
