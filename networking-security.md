@@ -848,17 +848,135 @@ If you aren't using XDP, use the kernel's `SYNPROXY` target to keep malicious co
 | **`SYNPROXY` (`nftables`/`iptables`)** | Linux Netfilter | Low | Moderate floods without custom eBPF code |
 | **`tcp_syncookies = 1`** | Linux TCP Stack | Zero (stateless) | Baseline fallback protection on every Linux host |
 
-### **65. How do you implement Zero-Trust Microsegmentation in Kubernetes using Cilium and WireGuard Transparent Encryption?**
+### **29. Scenario: An audit discovers that engineers have direct SSH access to production EC2 instances. Implement a Zero-Trust Access Gateway with Teleport or AWS SSM.**
 **Answer:**
-- **Cilium eBPF:** Enforces Layer 3 to Layer 7 NetworkPolicies without modifying application pods.
-- **WireGuard Encryption:** Set `encryption.type: wireguard` in Cilium Helm values to automatically encrypt all node-to-node and pod-to-pod network traffic in kernel-space with zero proxy sidecar overhead.
 
-### **66. Scenario: An audit discovers that engineers have direct SSH access to production EC2 instances. Implement a Zero-Trust Access Gateway with Teleport or AWS SSM.**
-**Answer:**
-1. Delete security group rules allowing inbound port 22; disable public IPs.
-2. Deploy AWS SSM Managed Instance Core or Teleport Auth/Proxy service.
-3. Integrate with corporate Okta / Entra ID SSO with mandatory MFA.
-4. Engineers authenticate via SSO to receive short-lived SSH certificates (valid for 8 hours); all interactive sessions are recorded for compliance auditing.
+I recommend implementing **AWS Systems Manager (SSM) Session Manager** if your infrastructure is strictly AWS-native, as it eliminates bastion hosts and open inbound ports with zero licensing costs. If you manage hybrid infrastructure, multi-cloud environments, or need unified access for Kubernetes, databases, and internal web apps alongside SSH, choose **Teleport**.
+
+Here is how to implement a Zero-Trust Access Gateway using AWS SSM Session Manager (the fastest path to audit compliance) and Teleport (the multi-platform alternative).
+
+#### Option 1: AWS SSM Session Manager (Recommended for AWS-Only)
+
+SSM replaces SSH keys and bastion hosts with IAM-authenticated, TLS-encrypted tunnels routed through the AWS control plane.
+
+#### 1. Eliminate Inbound SSH & Public IPs
+
+- Remove all inbound rules allowing port 22 from your EC2 Security Groups.
+- Ensure outbound HTTPS (443) is allowed so the SSM Agent can communicate with AWS endpoints (or configure VPC Endpoints for `ssm`, `ssmmessages`, and `ec2messages` in private subnets).
+
+#### 2. Attach the Required IAM Instance Profile
+
+Create an IAM Role for your EC2 instances and attach the AWS-managed policy `AmazonSSMManagedInstanceCore`.
+
+#### 3. Enforce Zero-Trust IAM Policies & Session Logging
+
+Restrict who can connect and mandate audit logging via CloudTrail and S3/CloudWatch:
+
+- **Configure Session Manager Preferences:** In the AWS Systems Manager console, enable S3 logging and/or CloudWatch Logs (with KMS encryption) to capture every command and terminal output.
+- **Apply Least-Privilege IAM:** Grant engineers access only to specific tagged instances (e.g., `Environment: Production` only when an incident ticket is active, or via AWS IAM Identity Center temporary permission sets).
+
+**IAM Policy Example**
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ssm:StartSession",
+      "Resource": "arn:aws:ec2:*:*:instance/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/AccessTier": "prod-approved"
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["ssm:TerminateSession", "ssm:ResumeSession"],
+      "Resource": "arn:aws:ssm:*:*:session/${aws:username}-*"
+    }
+  ]
+}
+```
+
+#### 4. Connect Without SSH Keys
+
+Engineers authenticate via SSO (`aws sso login`) and initiate sessions using the AWS CLI:
+
+```bash
+aws ssm start-session --target i-0123456789abcdef0
+```
+
+(Optional) Users can still use standard `ssh` or `scp` over the SSM tunnel by configuring `ProxyCommand` in their `~/.ssh/config`.
+
+#### Option 2: Teleport (Recommended for Multi-Cloud, K8s & Just-In-Time Access)
+
+Teleport acts as an Identity-Aware Proxy that issues short-lived SSH certificates tied to your Identity Provider (Okta, Google Workspace, GitHub, Azure AD).
+
+#### 1. Deploy the Teleport Cluster
+
+- Deploy the Teleport Auth and Proxy services (either via Teleport Cloud or self-hosted on an isolated EKS/ECS cluster behind an AWS NLB).
+- Configure your OIDC/SAML connector so engineers log in using corporate SSO + MFA.
+
+#### 2. Enroll EC2 Nodes via Reverse Tunnels
+
+Install the Teleport daemon on your EC2 instances (baked into your AMI via Packer). Configure `/etc/teleport.yaml` to dial outbound to the Teleport Proxy—requiring zero open inbound ports on the EC2 instances:
+
+**YAML**
+
+```yaml
+version: v3
+teleport:
+  auth_token: "/etc/teleport-join-token"
+  proxy_server: "://yourcompany.com"
+ssh_service:
+  enabled: true
+  labels:
+    env: prod
+```
+
+(Tip: Use Teleport's IAM Join method so EC2 instances authenticate automatically using their AWS instance identity without static join tokens).
+
+#### 3. Enforce RBAC & Access Requests (Just-In-Time)
+
+Define a Teleport Role that denies standing access to production and forces engineers to request temporary elevation (approvable via Slack or PagerDuty):
+
+**YAML**
+
+```yaml
+kind: role
+version: v7
+metadata:
+  name: prod-jit-requester
+spec:
+  allow:
+    request:
+      roles: ['prod-ssh-access']
+      max_duration: 2h
+```
+
+#### 4. Connect with Short-Lived Certificates
+
+Engineers log in via CLI, receive an auto-expiring certificate, and connect:
+
+```bash
+tsh login --proxy=://yourcompany.com
+tsh request create --roles=prod-ssh-access --reason="INC-402 DB failover"
+tsh ssh ec2-user@prod-app-01
+```
+
+Teleport automatically records the full interactive terminal session as a replayable video/audit log.
+
+#### Comparison Summary
+
+| Feature | AWS SSM Session Manager | Teleport |
+|---|---|---|
+| **Infrastructure Scope** | AWS EC2 / Hybrid via SSM Agent | Multi-cloud, On-prem, K8s, DBs, Web Apps |
+| **Inbound Firewall Ports** | None (Outbound 443 only) | None on target nodes (Outbound 443 tunnel) |
+| **Authentication** | AWS IAM / IAM Identity Center | OIDC/SAML SSO + Short-lived X.509/SSH certs |
+| **Just-In-Time (JIT) Workflow** | Requires external tooling (e.g., AWS Access Handler / custom Lambda) | Built-in Slack/PagerDuty approval workflows |
+| **Cost** | Free (pay only for S3/CloudWatch logs) | Open-source Community Edition or paid Enterprise/Cloud |
 
 ### **67. What is Secrets Sprawl and how do you design an enterprise remediation pipeline?**
 **Answer:**
