@@ -619,34 +619,32 @@ A default gateway is the IP address of the router (such as `192.168.1.1`) that c
 - **Low TTL (e.g., 30–300 seconds):** Used before server migrations, during failover/disaster recovery, or for frequently changing records so updates take effect quickly. 
 - **Migration Workflow:** Administrators often lower a record's TTL hours or days ahead of a change so old caches expire faster, make the DNS update, and raise the TTL back afterward.
 
-### **51. What is OpenID Connect (OIDC) vs OAuth 2.0?**
-**Answer:**
-- **OAuth 2.0:** Framework for authorization (issuing Access Tokens for API access).
-- **OIDC:** Identity layer built on top of OAuth 2.0 (issuing ID Tokens for user authentication).
+### **23. What is Gitleaks Pre-Commit Hook?**
+**Answer:** 
 
-### **52. What is SAML 2.0 (Security Assertion Markup Language)?**
-**Answer:** An XML-based open standard for exchanging authentication and authorization data between an Identity Provider (IdP) and a Service Provider (SP), heavily used in enterprise SSO.
+A **Gitleaks pre-commit hook** is **an automated security script that scans your staged code for sensitive information—such as API keys, passwords, and private tokens—and blocks a Git commit before it enters your repository's history**. 
 
-### **53. What is JSON Web Token (JWT) Structure?**
-**Answer:** Base64URL encoded string with three parts separated by dots: **Header** (algorithm), **Payload** (claims: `sub`, `exp`, `iss`), and **Signature** (HMAC/RSA hash).
+It combines two tools:
 
-### **54. What is HashiCorp Vault Transit Secrets Engine?**
-**Answer:** Provides "Cryptography as a Service"—encrypts and decrypts application data in-transit via API calls without storing the encryption keys on application servers.
+- **Gitleaks:** An open-source secret scanner that uses regular expressions and entropy checks to detect hardcoded credentials. 
+- **Git Pre-Commit Hook:** A local script that triggers automatically right after you run `git commit`, inspecting your changes before the commit is finalized. 
 
-### **55. What is HashiCorp Vault PKI Secrets Engine?**
-**Answer:** Dynamically generates X.509 TLS certificates on-demand with short lifespans (e.g., 24 hours), automating internal certificate authority operations.
+#### Why It Matters
 
-### **56. What is Kyverno Mutation Rule?**
-**Answer:** Automatically modifies or injects default fields into Kubernetes manifests upon creation (e.g., auto-injecting resource requests, labels, or security contexts).
+Once a secret is committed to Git, simply deleting it in a later commit does not remove it; the credential remains recoverable in the Git history unless you perform a disruptive history rewrite. Catching secrets locally stops leaks before they ever reach a remote server like GitHub or GitLab, saving you the cost and emergency effort of revoking and rotating exposed keys.
 
-### **57. What is Open Policy Agent (OPA) Rego Language?**
-**Answer:** A declarative query language designed for expressing complex structural and semantic compliance policies over JSON/YAML data.
+#### How It Works
 
-### **58. What is Trivy Secret Scanning?**
-**Answer:** Scans container image layers and Git filesystems for exposed private keys, AWS tokens, and Slack API tokens during CI.
+1. **Trigger.** You stage your files (`git add`) and run `git commit`. 
+2. **Scan.** Before asking for a commit message or saving the snapshot, the hook runs Gitleaks specifically against your staged changes (`gitleaks git --pre-commit --staged`). 
+3. **Action.**
+   - **If clean:** The commit proceeds normally.
+   - **If a secret is found:** Gitleaks halts the commit and outputs the exact file path, line number, and type of secret detected so you can remove it. 
 
-### **59. What is Gitleaks Pre-Commit Hook?**
-**Answer:** Blocks developers from executing `git commit` if high-entropy secrets or private tokens are detected in staged files locally.
+#### Common Ways to Set It Up
+
+- **Using the `pre-commit` framework (Recommended):** Teams typically manage this by adding the official **Gitleaks GitHub repository** to a `.pre-commit-config.yaml` file at the root of their project. This ensures every developer on the team runs the exact same version of Gitleaks. 
+- **Native Git Hook:** You can place a custom shell or Python script directly inside your local `.git/hooks/pre-commit` directory to invoke the Gitleaks CLI.
 
 ### **60. What is Trufflehog?**
 **Answer:** An open-source secret scanning tool that searches Git repositories, S3 buckets, and filesystems for exposed secrets and actively verifies if discovered keys are live against cloud APIs.
