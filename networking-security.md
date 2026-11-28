@@ -663,15 +663,47 @@ Once a secret is committed to Git, simply deleting it in a later commit does not
 - **Scan local files:** Use `trufflehog filesystem /path/to/folder`.
 - **Prevent leaks early:** Integrate it into CI/CD pipelines or Git pre-commit hooks to catch secrets before they are pushed.
 
-## 🟡 **Part 2: Kubernetes Security, Zero Trust & PKI (Questions 61–130)**
-
-### **61. Scenario: Your Kubernetes cluster is hit with a container escape attack. How does Defense-in-Depth contain the blast radius?**
+### **25. Scenario: Your Kubernetes cluster is hit with a container escape attack. How does Defense-in-Depth contain the blast radius?**
 **Answer:**
-1. **Rootless Execution (`runAsNonRoot: true`):** Attacker lands on host OS as an unprivileged user (UID 10001).
-2. **Read-Only Root Filesystem (`readOnlyRootFilesystem: true`):** Attacker cannot download or execute malicious scripts in `/tmp`.
-3. **Dropped Capabilities (`capabilities.drop: ["ALL"]`):** Stripping `CAP_SYS_ADMIN` disables kernel exploitation vectors.
-4. **Sandboxed Runtime (gVisor):** Intercepts system calls in userspace sandbox.
-5. **Egress NetworkPolicy:** Blocks outbound internet access, preventing reverse shell C2 connections.
+
+When a container escape happens in Kubernetes, an attacker breaks out of the container boundary onto the underlying host node. **Defense-in-Depth contains the blast radius by placing independent security barriers between the container, the host node, the Kubernetes control plane, and the underlying cloud infrastructure**, ensuring that compromising one layer does not grant cluster-wide or cloud-wide control.
+
+**1. Runtime & Host Isolation (Stopping or Slowing the Breakout)**
+
+Even if an application is exploited, hardened runtime boundaries prevent the attacker from freely controlling the host kernel or filesystem: 
+
+- **Sandboxed Container Runtimes:** Using microVMs or user-space kernels like Kata Containers or gVisor adds a hypervisor or syscall-interception layer so a kernel exploit inside the container cannot directly reach the host OS kernel. 
+- **Linux Kernel Hardening:** Enforcing **seccomp**, **AppArmor**, or **SELinux** profiles restricts the system calls and file paths a compromised process can access on the host. 
+- **Immutable & Minimal Host OS:** Running stripped-down node operating systems (such as Bottlerocket or Flatcar) with read-only root filesystems removes local compilers, shells, and package managers that attackers rely on post-escape.
+
+**2. Workload & Node Containment (Limiting Lateral Movement on the Node)**
+
+Once an attacker lands on the node, they typically look for secrets, kubelet credentials, or high-privilege "trampoline" pods running on the same machine: 
+
+- **Node & Workload Isolation:** Using node taints, tolerations, and dedicated node pools isolates untrusted or internet-facing workloads from sensitive internal workloads, preventing an attacker from harvesting co-located secrets. 
+- **Short-Lived, Scoped Secrets:** Avoiding static secrets mounted on disk and using external secret managers with short TTLs minimizes what an attacker can steal from `/var/lib/kubelet/pods` on the compromised node. 
+- **Pod Security Standards (PSS):** Enforcing the `Restricted` profile via Admission Controllers blocks `privileged` pods, `hostPath` mounts, and dangerous Linux capabilities (`SYS_ADMIN`, `SYS_PTRACE`), removing easy escalation paths. 
+
+**3. Cluster Control Plane & Identity Boundaries (Protecting the API Server)**
+
+A compromised node gives the attacker access to the node's **kubelet** identity. Strict identity and RBAC controls stop them from taking over the rest of the cluster:
+
+- **NodeRestriction Admission Controller:** Kubernetes' built-in `NodeRestriction` plugin ensures a compromised kubelet can only modify Pod and Node objects bound specifically to its own node, preventing it from altering workloads elsewhere in the cluster.
+- **Least-Privilege Service Accounts:** Disabling default service account token automounting and binding granular RBAC roles to individual workloads prevents an attacker from pivoting using stolen pod tokens.
+- **Network Segmentation:** Default-deny **NetworkPolicies** (and CNI-level microsegmentation) block the compromised node or pod from scanning internal cluster services, databases, or administrative dashboards. 
+
+**4. Cloud Infrastructure Boundaries (Preventing Cloud Account Takeover)**
+
+In cloud-hosted clusters, attackers immediately target the cloud provider's control plane to escalate beyond Kubernetes: 
+
+- **Blocking Instance Metadata Service (IMDS) Access:** Enforcing **IMDSv2** (requiring session tokens and a hop limit of 1) or blocking pod access to `169.254.169.254` stops escaped containers from stealing the node's underlying cloud IAM role.
+- **Workload Identity Federation:** Mapping granular cloud IAM roles directly to specific Kubernetes Service Accounts (such as AWS IRSA or GCP Workload Identity) ensures that a node compromise does not grant broad permissions to S3 buckets, databases, or cloud APIs. 
+
+**5. Runtime Detection & Automated Response (Cutting the Attack Short)**
+Containment also depends on shrinking the time window between breakout and remediation: 
+
+- **eBPF Behavioral Monitoring:** Tools like Falco or Tetragon detect escape indicators in real time—such as unexpected namespace changes (`setns`, `unshare`), host filesystem writes, or processes spawning outside a container's cgroup.
+- **Automated Node Quarantine:** Triggering automated workflows to cordon, drain, isolate security groups, and terminate the compromised node evicts the attacker before they can establish persistence.
 
 ### **62. Scenario: Design an automated End-to-End Supply Chain Security Pipeline conforming to SLSA Level 3.**
 **Answer:**
